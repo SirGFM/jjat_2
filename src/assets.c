@@ -7,6 +7,9 @@
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gframe.h>
 
+#include <base/game_const.h>
+#include <base/game_ctx.h>
+
 /**
  * Load all assets
  *
@@ -16,23 +19,29 @@ gfmRV assets_load() {
     /** Return value */
     gfmRV rv;
 
-    /* Snippets/macros for loading stuff... */
-#if 0
-    rv = gfm_loadTextureStatic(&(pAssets->texHandle), pGame->pCtx, TEXATLAS,
-            COLORKEY);
+    /* Load the texture atlas */
+    rv = gfm_loadTextureStatic(&(pGfx->texHandle), pGame->pCtx,
+            "gfx/atlas.bmp", BG_COLOR);
     ASSERT(rv == GFMRV_OK, rv);
+
+    /* Generate all spritesets used by the game */
 #define GEN_SPRITESET(W, H, TEX) \
     rv = gfm_createSpritesetCached(&(pGfx->pSset##W##x##H), pGame->pCtx, TEX, \
             W, H); \
-    ASSERT(rv == GFMRV_OK, rv);
+    ASSERT(rv == GFMRV_OK, rv)
+
+    GEN_SPRITESET(8, 8, pGfx->texHandle);
+    GEN_SPRITESET(16, 16, pGfx->texHandle);
+
+#undef GEN_SPRITESET
+
+    /* Load all sounds */
 #define LOAD_SFX(var, name) \
     rv = gfm_loadAudio(&(pAudio->sfx##var), pGame->pCtx, name, \
             sizeof(name) - 1); \
     ASSERT(rv == GFMRV_OK, rv)
-#else
-    /* TODO Remove this line! It's only here to avoid a warning. */
-    ASSERT(0, GFMRV_OK);
-#endif /* 0 */
+
+#undef LOAD_SFX
 
     rv = GFMRV_OK;
 __ret:

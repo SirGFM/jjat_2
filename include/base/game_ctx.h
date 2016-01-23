@@ -12,6 +12,8 @@
 #include <GFraMe/gfmSpriteset.h>
 #include <GFraMe/core/gfmAudio_bkend.h>
 
+#include <jjat_2/state.h>
+
 /* == Types declaration ===================================================== */
 
 typedef struct stGameCtx gameCtx;
@@ -99,17 +101,21 @@ typedef enum enGameFlags gameFlags;
 struct stGameCtx {
     /** The framework's context */
     gfmCtx *pCtx;
+    /** Pointer to the current state, if any */
+    void *pState;
     /** Currently running state (e.g., ST_PLAYSTATE) */
-    int curState;
+    state curState;
     /** If different from 'ST_NONE', the state to which the game must switch on
      * the end of this frame */
-    int nextState;
+    state nextState;
 };
 
 /** Store all handles to texture and spritesets' pointers */
 struct stGfxCtx {
     /** 8x8 spriteset of the main texture */
     gfmSpriteset *pSset8x8;
+    /** 16x16 spriteset of the main texture */
+    gfmSpriteset *pSset16x16;
     /** Handle of the main texture atlas */
     int texHandle;
 };

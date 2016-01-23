@@ -6,16 +6,12 @@
 #ifndef __GAME_CONST_H__
 #define __GAME_CONST_H__
 
-#include <GFraMe/core/gfmAudio_bkend.h>
-
-/* TODO Set attributes for the game */
-
 /* == Game's basic configurations =========================================== */
 
 /** Game's "organization" */
-#define ORG         "organization"
+#define ORG         "com.gfmgamecorner"
 /** Game's title */
-#define TITLE       "base"
+#define TITLE       "JJAT_2"
 /** Config file name */
 #define CONF        "config.sav"
 /** Virtual window's width */
@@ -25,7 +21,7 @@
 /** Whether the user can resize the game window */
 #define CAN_RESIZE  1
 /** Initial background color in 0xAARRGGBB format */
-#define BG_COLOR    0xFF000000
+#define BG_COLOR    0xFF222034
 /** Spriteset used by the FPS counter. It's ignored, if NULL */
 #define FPS_SSET    pGfx->pSset8x8
 /** First ASCII tile in FPS_SSET */
@@ -34,6 +30,12 @@
  * which is called by default on debug mode */
 #define FPS_X       0
 #define FPS_Y       0
+/** Set the first state to be executed */
+#if defined(DEBUG)
+#  define INIT_STATE  ST_TEST
+#else
+#  define INIT_STATE  ST_MENU
+#endif
 
 /* == Config file IDs ======================================================= */
 
