@@ -7,6 +7,7 @@
 #define __GAME_CTX_H__
 
 #include <GFraMe/gframe.h>
+#include <GFraMe/gfmGroup.h>
 #include <GFraMe/gfmInput.h>
 #include <GFraMe/gfmQuadtree.h>
 #include <GFraMe/gfmSpriteset.h>
@@ -191,6 +192,8 @@ struct stConfigCtx {
 struct stGlobalCtx {
     /** The quadtree for collision */
     gfmQuadtreeRoot *pQt;
+    /** Container for bullets, slashs, etc */
+    gfmGroup *pHitbox;
     /* TODO Add any other globally accessible variable (e.g., a tilemap) */
 };
 

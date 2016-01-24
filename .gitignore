@@ -34,6 +34,7 @@ bin/*
 
 # Asset files
 *.xcf
+*.ase
 *.wav
 *.gif
 

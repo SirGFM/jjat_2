@@ -6,6 +6,9 @@
 #include <base/game_ctx.h>
 #include <base/global.h>
 
+#include <GFraMe/gfmQuadtree.h>
+#include <GFraMe/gfmGroup.h>
+
 /** Store data related to game */
 gameCtx *pGame = 0;
 
@@ -57,5 +60,11 @@ gfmRV global_initUserVar() {
  * Release all variables in pGlobal
  */
 void global_freeUserVar() {
+    if (pGlobal->pQt) {
+        gfmQuadtree_free(&(pGlobal->pQt));
+    }
+    if (pGlobal->pHitbox) {
+        gfmGroup_free(&(pGlobal->pHitbox));
+    }
 }
 
