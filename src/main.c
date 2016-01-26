@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
     if (pConfig->flags & CFG_FULLSCREEN) {
         /* Initialize the game window in fullscreen mode */
         rv = gfm_initGameFullScreen(pGame->pCtx, V_WIDTH, V_HEIGHT,
-                pConfig->curResolution, CAN_RESIZE, pConfig->flags & CFG_VSYNC);
+                pConfig->resolution, CAN_RESIZE, pConfig->flags & CFG_VSYNC);
     }
     else {
         /* Initialize the game window in windowed mode */

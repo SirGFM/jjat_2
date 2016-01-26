@@ -43,17 +43,28 @@ gfmRV input_updateButtons() {
         if (pConfig->flags & CFG_FULLSCREEN) {
             rv = gfm_setWindowed(pGame->pCtx);
             ASSERT(rv == GFMRV_OK, rv);
-            pConfig->flags ^= CFG_FULLSCREEN;
         }
         else {
             rv = gfm_setFullscreen(pGame->pCtx);
             ASSERT(rv == GFMRV_OK, rv);
-            pConfig->flags |= CFG_FULLSCREEN;
         }
+        pConfig->flags ^= CFG_FULLSCREEN;
         /* TODO Save the new state of the game's window */
     }
 
-    /* TODO Add actions that should be triggered as soon as key are pressed */
+    /* Bring up the pause menu, if the game is running */
+    if ((pGame->curState == ST_PLAY || pGame->curState == ST_TEST) &&
+            (pButton->pause.state & gfmInput_justPressed) ==
+            gfmInput_justPressed) {
+        pGame->flags ^= GAME_PAUSE;
+    }
+
+#if defined(DEBUG)
+    /* Switch quadtree visibility */
+    if ((pButton->qt.state & gfmInput_justReleased) == gfmInput_justReleased) {
+        pGame->flags ^= DBG_RENDERQT;
+    }
+#endif /* DEBUG */
 
     rv = GFMRV_OK;
 __ret:
@@ -75,7 +86,10 @@ gfmRV input_init() {
     ASSERT(rv == GFMRV_OK, rv)
 
     ADD_KEY(fullscreen);
-    /* TODO Add other keys */
+    ADD_KEY(pause);
+#if defined(DEBUG)
+    ADD_KEY(qt);
+#endif /* DEBUG */
 
 #undef ADD_KEY
 
@@ -88,6 +102,12 @@ gfmRV input_init() {
     ASSERT(rv == GFMRV_OK, rv)
 
     BIND_KEY(fullscreen, gfmKey_f12);
+    BIND_KEY(pause, gfmKey_esc);
+    BIND_GAMEPAD_BT(pause, gfmController_start, 0/*port*/);
+#if defined(DEBUG)
+    BIND_KEY(qt, gfmKey_f11);
+#endif /* DEBUG */
+
     /* TODO Bind other keys */
 
 #undef BIND_KEY

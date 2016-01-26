@@ -75,9 +75,10 @@ gfmRV test_draw() {
     rv = gfmTilemap_draw(pGlobal->pTMap, pGame->pCtx);
     ASSERT(rv == GFMRV_OK, rv);
 
-    /* TODO Selectively enable this */
-    rv = gfmQuadtree_drawBounds(pGlobal->pQt, pGame->pCtx, 0);
-    ASSERT(rv == GFMRV_OK, rv);
+    if (pGame->flags & DBG_RENDERQT) {
+        rv = gfmQuadtree_drawBounds(pGlobal->pQt, pGame->pCtx, 0);
+        ASSERT(rv == GFMRV_OK, rv);
+    }
 
     rv = GFMRV_OK;
 __ret:

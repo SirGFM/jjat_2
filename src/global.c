@@ -48,7 +48,7 @@ void global_init(void *pMem) {
     pGlobal = (globalCtx*)OFFSET_MEM(pMem, GLOBAL_OFFSET);
 
     /* Set any pointers within those structs that were already alloc'ed */
-    pConfig->pLast = (lastConfigCtx*)OFFSET_MEM(pMem, LASTCONFIG_OFFSET);
+    pConfig->pLast = (configCtx*)OFFSET_MEM(pMem, LASTCONFIG_OFFSET);
 }
 
 /**

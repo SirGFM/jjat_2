@@ -41,15 +41,13 @@ typedef struct stGlobalCtx globalCtx;
 #define SIZEOF_GFXCTX ALIGNED_SIZEOF(gfxCtx)
 #define SIZEOF_AUDIOCTX ALIGNED_SIZEOF(audioCtx)
 #define SIZEOF_BUTTONCTX ALIGNED_SIZEOF(buttonCtx)
-#define SIZEOF_LASTCONFIGCTX ALIGNED_SIZEOF(lastConfigCtx)
 #define SIZEOF_CONFIGCTX ALIGNED_SIZEOF(configCtx)
 #define SIZEOF_GLOBALCTX ALIGNED_SIZEOF(globalCtx)
 
 /** Calculate the size of the complete game buffer (so everything is
  * contiguously alloc'ed) */
 #define SIZEOF_GAME_MEM (SIZEOF_GAMECTX + SIZEOF_GFXCTX + SIZEOF_AUDIOCTX + \
-        SIZEOF_BUTTONCTX + SIZEOF_LASTCONFIGCTX + SIZEOF_CONFIGCTX + \
-        SIZEOF_GLOBALCTX)
+        SIZEOF_BUTTONCTX + 2 * SIZEOF_CONFIGCTX + SIZEOF_GLOBALCTX)
 
 /** Define the offsets to each of the structs */
 #define GAME_OFFSET         0
@@ -58,7 +56,7 @@ typedef struct stGlobalCtx globalCtx;
 #define BUTTON_OFFSET       (AUDIO_OFFSET        + SIZEOF_AUDIOCTX)
 #define CONFIG_OFFSET       (BUTTON_OFFSET       + SIZEOF_BUTTONCTX)
 #define LASTCONFIG_OFFSET   (CONFIG_OFFSET       + SIZEOF_CONFIGCTX)
-#define GLOBAL_OFFSET       (LASTCONFIG_OFFSET   + SIZEOF_LASTCONFIGCTX)
+#define GLOBAL_OFFSET       (LASTCONFIG_OFFSET   + SIZEOF_CONFIGCTX)
 
 /* == Global context declaration ============================================ */
 
@@ -95,7 +93,11 @@ enum enGameFlags {
      * rendering) */
     GAME_SKIP_2    = 0x00002000,
     /** Overrides 'GAME_STEP' and force the game loop to run normally */
-    GAME_RUN       = 0x00020000
+    GAME_RUN       = 0x00020000,
+    /** Pauses the game and bring up the pause menu */
+    GAME_PAUSE     = 0x00200000,
+    /** Renders the quadtree */
+    DBG_RENDERQT   = 0x00000004
 };
 typedef enum enGameFlags gameFlags;
 
@@ -103,6 +105,9 @@ typedef enum enGameFlags gameFlags;
 struct stGameCtx {
     /** The framework's context */
     gfmCtx *pCtx;
+    /** Binary flags for the game (e.g., whether it's in fullscreen mode); Check
+     * 'enum enGameFlags' documentation */
+    gameFlags flags;
     /** Currently running state (e.g., ST_PLAYSTATE) */
     state curState;
     /** If different from 'ST_NONE', the state to which the game must switch on
@@ -141,39 +146,24 @@ struct stButton {
 struct stButtonCtx {
     /** Button to switch between fullscreen and windowed mode */
     button fullscreen;
+    /** Button to bring up/close the pause menu. Works only when in game */
+    button pause;
+#if defined(DEBUG)
+    button qt;
+#endif /* DEBUG */
     /* TODO Add buttons */
-};
-
-/** Store the configurations on the last successfull launch of the game */
-struct stLastConfigCtx {
-    /** Binary flags for the game (e.g., whether it's in fullscreen mode); Check
-     * 'enum enGameFlags' documentation */
-    gameFlags flags;
-    /** Current resolution, if in fullscreen mode */
-    int resolution;
-    /** Window's width (inside which the virtual buffer is resized and
-     * letter-boxed) */
-    int width;
-    /** Window's height (inside which the virtual buffer is resized and
-     * letter-boxed) */
-    int height;
-    /** How many frames should be updated and rendered per second */
-    int fps;
-    /** Audio quality (frequency, bits per samples and number of channels) */
-    gfmAudioQuality audioQuality;
-    /* TODO Add button mapping */
 };
 
 /** Store all data modifiably on the option menu, as well as anything that may
  * be saved on the config file */
 struct stConfigCtx {
     /** Store the previous configurations so it can be restored on error */
-    lastConfigCtx *pLast;
+    configCtx *pLast;
     /** Binary flags for the game (e.g., whether it's in fullscreen mode); Check
      * 'enum enGameFlags' documentation */
     gameFlags flags;
     /** Current resolution, if in fullscreen mode */
-    int curResolution;
+    int resolution;
     /** Window's width (inside which the virtual buffer is resized and
      * letter-boxed) */
     int width;
