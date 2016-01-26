@@ -3,6 +3,7 @@
  *
  * Simple state to test stuff
  */
+#include <base/game_const.h>
 #include <base/game_ctx.h>
 
 #include <GFraMe/gfmAssert.h>
@@ -37,13 +38,24 @@ gfmRV test_init() {
 gfmRV test_update() {
     /** Return value */
     gfmRV rv;
+    /** The world dimensions in pixels */
+    int w, h;
 
-    /* TODO Initialize the quadtree */
+    /* Initialize the quadtree */
+    rv = gfmTilemap_getDimension(&w, &h, pGlobal->pTMap);
+    ASSERT(rv == GFMRV_OK, rv);
+    w = (w + 4) * 8;
+    h = (h + 4) * 8;
+    rv = gfmQuadtree_initRoot(pGlobal->pQt, -16, -16, w, h, QT_MAX_DEPTH,
+            QT_MAX_NODES);
+    ASSERT(rv == GFMRV_OK, rv);
 
     rv = gfmTilemap_update(pGlobal->pTMap, pGame->pCtx);
     ASSERT(rv == GFMRV_OK, rv);
 
-    /* TODO Add the tilemap to the quadtree */
+    /* Add the tilemap to the quadtree */
+    rv = gfmQuadtree_populateTilemap(pGlobal->pQt, pGlobal->pTMap);
+    ASSERT(rv == GFMRV_OK, rv);
 
     rv = GFMRV_OK;
 __ret:
@@ -61,6 +73,10 @@ gfmRV test_draw() {
     gfmRV rv;
 
     rv = gfmTilemap_draw(pGlobal->pTMap, pGame->pCtx);
+    ASSERT(rv == GFMRV_OK, rv);
+
+    /* TODO Selectively enable this */
+    rv = gfmQuadtree_drawBounds(pGlobal->pQt, pGame->pCtx, 0);
     ASSERT(rv == GFMRV_OK, rv);
 
     rv = GFMRV_OK;

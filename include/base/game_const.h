@@ -69,6 +69,10 @@
 #define MAP_MAX_HEIGHT  256
 /** Texture's transparent color */
 #define KEY_COLOR       0x222034
+/** Maximum number of subdivision */
+#define QT_MAX_DEPTH    6
+/** Number of nodes required for the quadtree to subdivide */
+#define QT_MAX_NODES    10
 
 #endif /* __GAME_CONST_H__ */
 
