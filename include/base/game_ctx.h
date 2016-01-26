@@ -11,6 +11,7 @@
 #include <GFraMe/gfmInput.h>
 #include <GFraMe/gfmQuadtree.h>
 #include <GFraMe/gfmSpriteset.h>
+#include <GFraMe/gfmTilemap.h>
 #include <GFraMe/core/gfmAudio_bkend.h>
 
 #include <jjat_2/state.h>
@@ -102,8 +103,6 @@ typedef enum enGameFlags gameFlags;
 struct stGameCtx {
     /** The framework's context */
     gfmCtx *pCtx;
-    /** Pointer to the current state, if any */
-    void *pState;
     /** Currently running state (e.g., ST_PLAYSTATE) */
     state curState;
     /** If different from 'ST_NONE', the state to which the game must switch on
@@ -190,11 +189,12 @@ struct stConfigCtx {
 
 /** Store game-related variables that should be globally accessible */
 struct stGlobalCtx {
-    /** The quadtree for collision */
-    gfmQuadtreeRoot *pQt;
     /** Container for bullets, slashs, etc */
     gfmGroup *pHitbox;
-    /* TODO Add any other globally accessible variable (e.g., a tilemap) */
+    /** The quadtree for collision */
+    gfmQuadtreeRoot *pQt;
+    /** The game's terrain */
+    gfmTilemap *pTMap;
 };
 
 #endif /* __GAME_CTX_H__ */

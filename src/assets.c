@@ -21,7 +21,7 @@ gfmRV assets_load() {
 
     /* Load the texture atlas */
     rv = gfm_loadTextureStatic(&(pGfx->texHandle), pGame->pCtx,
-            "gfx/atlas.bmp", BG_COLOR);
+            "gfx/atlas.bmp", KEY_COLOR);
     ASSERT(rv == GFMRV_OK, rv);
 
     /* Generate all spritesets used by the game */

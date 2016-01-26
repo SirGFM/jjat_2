@@ -8,14 +8,11 @@
 #include <GFraMe/gfmAssert.h>
 #include <GFraMe/gfmError.h>
 
+#include <jjat_2/level.h>
 #include <jjat_2/teststate.h>
 
 #include <stdlib.h>
 #include <string.h>
-
-struct stTeststate {
-};
-typedef struct stTeststate teststate;
 
 /**
  * Alloc the test state and initialize all of its components
@@ -23,22 +20,11 @@ typedef struct stTeststate teststate;
  * @return GFraMe return value
  */
 gfmRV test_init() {
-    /** The alloc'ed state */
-    teststate *pState;
     /** Return value */
     gfmRV rv;
 
-    pState = 0;
-
-    /* Store the alloc'ed state */
-    pGame->pState = pState;
-    rv = GFMRV_OK;
-__ret:
-    if (rv != GFMRV_OK && pState) {
-        /* On error, free the state */
-        pGame->pState = pState;
-        test_free();
-    }
+    /* Load the teststate */
+    rv = level_loadTest();
 
     return rv;
 }
@@ -49,13 +35,15 @@ __ret:
  * @return GFraMe return value
  */
 gfmRV test_update() {
-    /** The alloc'ed state */
-    teststate *pState;
     /** Return value */
     gfmRV rv;
 
-    /* Retrieve the state as a test state */
-    pState = (teststate*)pGame->pState;
+    /* TODO Initialize the quadtree */
+
+    rv = gfmTilemap_update(pGlobal->pTMap, pGame->pCtx);
+    ASSERT(rv == GFMRV_OK, rv);
+
+    /* TODO Add the tilemap to the quadtree */
 
     rv = GFMRV_OK;
 __ret:
@@ -69,13 +57,11 @@ __ret:
  * @return GFraMe return value
  */
 gfmRV test_draw() {
-    /** The alloc'ed state */
-    teststate *pState;
     /** Return value */
     gfmRV rv;
 
-    /* Retrieve the state as a test state */
-    pState = (teststate*)pGame->pState;
+    rv = gfmTilemap_draw(pGlobal->pTMap, pGame->pCtx);
+    ASSERT(rv == GFMRV_OK, rv);
 
     rv = GFMRV_OK;
 __ret:
@@ -89,15 +75,5 @@ __ret:
  * @return GFraMe return value
  */
 void test_free() {
-    /** The alloc'ed state */
-    teststate *pState;
-
-    /* Retrieve the state as a test state */
-    pState = (teststate*)pGame->pState;
-
-    if (pState) {
-        free(pState);
-    }
-    pGame->pState = 0;
 }
 

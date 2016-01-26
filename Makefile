@@ -7,6 +7,7 @@
           $(OBJDIR)/config.o    \
           $(OBJDIR)/global.o    \
           $(OBJDIR)/input.o     \
+          $(OBJDIR)/level.o     \
           $(OBJDIR)/main.o      \
           $(OBJDIR)/teststate.o
 #=======================================================================

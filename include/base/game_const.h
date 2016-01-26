@@ -62,5 +62,13 @@
 #define CONF_FPS    60
 #define CONF_AUDIOQ gfmAudio_defQuality
 
+/* == ... =================================================================== */
+
+/** Max dimensions for the map's tilemap */
+#define MAP_MAX_WIDTH   512
+#define MAP_MAX_HEIGHT  256
+/** Texture's transparent color */
+#define KEY_COLOR       0x222034
+
 #endif /* __GAME_CONST_H__ */
 

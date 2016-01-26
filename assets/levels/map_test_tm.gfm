@@ -1,0 +1,99 @@
+type terrain 640
+type terrain 641
+type terrain 642
+type terrain 643
+type terrain 644
+type terrain 645
+type terrain 646
+type terrain 647
+type terrain 648
+type terrain 649
+type terrain 650
+type terrain 651
+type terrain 652
+type terrain 653
+type terrain 654
+type terrain 704
+type terrain 705
+type terrain 706
+type terrain 707
+type terrain 708
+type terrain 709
+type terrain 710
+type terrain 711
+type terrain 712
+type terrain 713
+type terrain 714
+type terrain 715
+type terrain 716
+type terrain 717
+type terrain 718
+type terrain 768
+type terrain 769
+type terrain 770
+type terrain 771
+type terrain 772
+type terrain 773
+type terrain 774
+type terrain 775
+type terrain 776
+type terrain 777
+type terrain 778
+type terrain 779
+type terrain 780
+type terrain 781
+type terrain 782
+type terrain 832
+type terrain 833
+type terrain 834
+type terrain 835
+type terrain 836
+type terrain 837
+type terrain 838
+type terrain 839
+type terrain 840
+type terrain 841
+type terrain 842
+type terrain 843
+type terrain 844
+type terrain 845
+type terrain 846
+type terrain 896
+type terrain 897
+type terrain 898
+type terrain 899
+type terrain 900
+type terrain 901
+type terrain 902
+type terrain 903
+type terrain 904
+type terrain 905
+type terrain 906
+type terrain 907
+type terrain 908
+type terrain 909
+type terrain 910
+map 26 23
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 900 896 896 896 896 896 896 900 -1 -1 -1 -1 
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 848 785 -1 -1 -1 -1 -1 -1 -1 
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 848 785 -1 -1 -1 -1 -1 -1 -1 
+  770 770 707 896 896 896 896 900 -1 -1 -1 -1 -1 -1 -1 -1 847 848 849 850 -1 -1 -1 -1 -1 -1 
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 783 783 783 783 -1 -1 -1 -1 -1 -1 
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 911 848 913 914 -1 -1 -1 -1 -1 -1 
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 848 785 -1 -1 -1 -1 -1 -1 -1 
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 848 785 -1 -1 -1 -1 -1 -1 -1 
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 900 641 642 642 642 642 642 642 642 642 642 
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 655 656 704 770 770 770 770 770 770 770 770 770 770 
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 720 -1 768 770 770 770 770 770 770 770 770 770 770 
+  770 770 772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 720 -1 768 770 770 770 770 770 770 770 770 770 770 
+  770 770 836 -1 -1 -1 655 656 656 657 658 656 656 784 656 832 770 770 770 770 770 770 770 770 770 770 
+  770 771 900 641 642 642 642 642 642 642 642 642 642 642 643 900 769 770 770 770 770 770 770 770 770 770 
+  770 770 706 770 770 770 770 770 770 770 770 770 770 770 770 706 770 770 770 770 770 770 770 770 770 770 
+  770 770 770 770 770 770 770 770 770 770 770 770 770 770 770 770 770 770 770 770 770 770 770 770 770 770 
