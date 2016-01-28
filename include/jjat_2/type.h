@@ -18,7 +18,7 @@
  */
 
 /* Mask that returns only the entity, ignoring its base type */
-#define T_MASK 0xffffffe0
+#define T_MASK 0x0000ffe0
 /* Number of bits for the types */
 #define T_NBITS 5
 

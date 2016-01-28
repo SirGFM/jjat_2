@@ -12,6 +12,7 @@
  *  - How do I properly handle animations through various different sprites?
  *  - ...
  */
+#include <base/collision.h>
 #include <base/game_const.h>
 #include <base/game_ctx.h>
 
@@ -205,8 +206,13 @@ gfmRV grlPl_update() {
     rv = gfmSprite_update(_pGirl->pSprite, pGame->pCtx);
     ASSERT(rv == GFMRV_OK, rv);
 
-    rv = gfmQuadtree_populateSprite(pGlobal->pQt, _pGirl->pSprite);
-    ASSERT(rv == GFMRV_OK, rv);
+    /** Check if any collisions happened and handle it */
+    rv = gfmQuadtree_collideSprite(pGlobal->pQt, _pGirl->pSprite);
+    ASSERT(rv == GFMRV_QUADTREE_OVERLAPED || rv == GFMRV_QUADTREE_DONE, rv);
+    if (rv == GFMRV_QUADTREE_OVERLAPED) {
+        rv = collision_run();
+        ASSERT(rv == GFMRV_OK, rv);
+    }
 
     rv = GFMRV_OK;
 __ret:
