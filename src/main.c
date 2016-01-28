@@ -55,6 +55,9 @@ gfmRV main_loop() {
             rv = input_updateButtons();
             ASSERT(rv == GFMRV_OK, rv);
 
+            rv = gfm_getElapsedTime(&(pGame->elapsed), pGame->pCtx);
+            ASSERT(rv == GFMRV_OK, rv);
+
             /* Update the current state */
             switch (pGame->curState) {
                 case ST_TEST: rv = test_update(); break;

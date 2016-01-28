@@ -113,6 +113,8 @@ struct stGameCtx {
     /** If different from 'ST_NONE', the state to which the game must switch on
      * the end of this frame */
     state nextState;
+    /** Time elapsed since the previous frame */
+    int elapsed;
 };
 
 /** Store all handles to texture and spritesets' pointers */

@@ -12,6 +12,7 @@
 #include <GFraMe/gfmQuadtree.h>
 #include <GFraMe/gfmGroup.h>
 
+#include <jjat_2/girl_player.h>
 #include <jjat_2/type.h>
 
 /** Store data related to game */
@@ -109,5 +110,6 @@ void global_freeUserVar() {
     if (pGlobal->pTMap) {
         gfmTilemap_free(&(pGlobal->pTMap));
     }
+    grlPl_free();
 }
 

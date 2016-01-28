@@ -25,7 +25,7 @@
  *
  * @return GFraMe return value
  */
-gfmRV grlPl_free();
+void grlPl_free();
 
 /**
  * Initialize (and alloc, if needed) the girl from the parser

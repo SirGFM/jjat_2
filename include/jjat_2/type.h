@@ -1,6 +1,5 @@
 /**
- * @file include/jjat_2/type.h
- *
+ * @file include/jjat_2/type.h *
  * Define all in-game types
  */
 #ifndef __TYPE_H__
@@ -30,6 +29,9 @@ enum enType {
     T_HITBOX = gfmType_reserved_7,
     T_SLASH  = (1 << T_NBITS) | T_HITBOX,
     T_BULLET = (2 << T_NBITS) | T_HITBOX,
+    /* Base type for both players */
+    T_PLAYER = gfmType_reserved_3,
+    T_GIRL   = (1 << T_NBITS) | T_PLAYER,
 };
 typedef enum enType type;
 

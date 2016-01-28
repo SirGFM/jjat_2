@@ -2,13 +2,14 @@
 #=======================================================================
 # Define every object required by compilation
 #=======================================================================
-  OBJS =                        \
-          $(OBJDIR)/assets.o    \
-          $(OBJDIR)/config.o    \
-          $(OBJDIR)/global.o    \
-          $(OBJDIR)/input.o     \
-          $(OBJDIR)/level.o     \
-          $(OBJDIR)/main.o      \
+  OBJS =                          \
+          $(OBJDIR)/assets.o      \
+          $(OBJDIR)/config.o      \
+          $(OBJDIR)/girl_player.o \
+          $(OBJDIR)/global.o      \
+          $(OBJDIR)/input.o       \
+          $(OBJDIR)/level.o       \
+          $(OBJDIR)/main.o        \
           $(OBJDIR)/teststate.o
 #=======================================================================
 

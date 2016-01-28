@@ -9,8 +9,11 @@
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gfmParser.h>
 
+#include <jjat_2/girl_player.h>
 #include <jjat_2/level.h>
 #include <jjat_2/type.h>
+
+#include <string.h>
 
 char *pStrDict[] = {
     "terrain"
@@ -43,7 +46,47 @@ static gfmRV level_doLoad(char *pTilemap, int mapLen, char *pObjects,
             pStrDict, pTypeDict, dictLen);
     ASSERT(rv == GFMRV_OK, rv);
 
-    /* TODO Parse & load the objects */
+    /* Parse & load the objects */
+    rv = gfmParser_getNew(&pParser);
+    ASSERT(rv == GFMRV_OK, rv);
+    rv = gfmParser_init(pParser, pGame->pCtx, pObjects, objLen);
+    ASSERT(rv == GFMRV_OK, rv);
+    while (1) {
+        /** Type of what's currently being parsed */
+        gfmParserType type;
+
+        rv = gfmParser_parseNext(pParser);
+        ASSERT(rv == GFMRV_OK || rv == GFMRV_PARSER_FINISHED, rv);
+
+        if (rv == GFMRV_PARSER_FINISHED) {
+            break;
+        }
+
+        rv = gfmParser_getType(&type, pParser);
+        ASSERT(rv == GFMRV_OK, rv);
+
+        if (type == gfmParserType_object) {
+            /** "Name" of the current object (e.g., girl, boy, enemy_a, ...) */
+            char *pStrType;
+
+            rv = gfmParser_getIngameType(&pStrType, pParser);
+            ASSERT(rv == GFMRV_OK, rv);
+
+            if (strcmp(pStrType, "girl") == 0) {
+                rv = grlPl_init(pParser);
+                ASSERT(rv == GFMRV_OK, rv);
+            }
+            else {
+                /* Unknown type */
+            }
+        }
+        else if (type == gfmParserType_area) {
+            /* TODO Parser areas */
+        }
+        else {
+            /* Unknown type */
+        }
+    }
 
     rv = GFMRV_OK;
 __ret:

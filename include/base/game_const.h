@@ -74,5 +74,14 @@
 /** Number of nodes required for the quadtree to subdivide */
 #define QT_MAX_NODES    10
 
+#define GRAV            500
+
+/** Player's hitbox dimensions */
+#define PL_WIDTH        6
+#define PL_HEIGHT       12
+/** Player's sprite offset */
+#define PL_OFFX         5
+#define PL_OFFY         4
+
 #endif /* __GAME_CONST_H__ */
 

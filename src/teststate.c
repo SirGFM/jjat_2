@@ -9,6 +9,7 @@
 #include <GFraMe/gfmAssert.h>
 #include <GFraMe/gfmError.h>
 
+#include <jjat_2/girl_player.h>
 #include <jjat_2/level.h>
 #include <jjat_2/teststate.h>
 
@@ -50,11 +51,20 @@ gfmRV test_update() {
             QT_MAX_NODES);
     ASSERT(rv == GFMRV_OK, rv);
 
+    /* Update and collide the terrain */
     rv = gfmTilemap_update(pGlobal->pTMap, pGame->pCtx);
     ASSERT(rv == GFMRV_OK, rv);
-
-    /* Add the tilemap to the quadtree */
     rv = gfmQuadtree_populateTilemap(pGlobal->pQt, pGlobal->pTMap);
+    ASSERT(rv == GFMRV_OK, rv);
+
+    /* Update and collide the girl */
+    rv = grlPl_update();
+    ASSERT(rv == GFMRV_OK, rv);
+
+    /* TODO Update everything else */
+
+    /* Finally, run the post-update on anything that needs it */
+    rv = grlPl_postUpdate();
     ASSERT(rv == GFMRV_OK, rv);
 
     rv = GFMRV_OK;
@@ -73,6 +83,9 @@ gfmRV test_draw() {
     gfmRV rv;
 
     rv = gfmTilemap_draw(pGlobal->pTMap, pGame->pCtx);
+    ASSERT(rv == GFMRV_OK, rv);
+
+    rv = grlPl_draw();
     ASSERT(rv == GFMRV_OK, rv);
 
     if (pGame->flags & DBG_RENDERQT) {
