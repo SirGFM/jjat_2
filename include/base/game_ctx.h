@@ -23,7 +23,6 @@ typedef struct stGfxCtx gfxCtx;
 typedef struct stAudioCtx audioCtx;
 typedef struct stButton button;
 typedef struct stButtonCtx buttonCtx;
-typedef struct stLastConfigCtx lastConfigCtx;
 typedef struct stConfigCtx configCtx;
 typedef struct stGlobalCtx globalCtx;
 

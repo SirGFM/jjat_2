@@ -13,8 +13,10 @@
 #include <GFraMe/gfmSprite.h>
 #include <GFraMe/gfmTypes.h>
 
+#include <jjat_2/type.h>
+
 #if defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__))
-#include <stdlib.h>
+#  include <stdlib.h>
 #  include <signal.h>
 #endif
 
@@ -68,16 +70,16 @@ gfmRV collision_run() {
         gfmObject *pObj1, *pObj2;
         /** gfmObjects children (if any) */
         void *pChild1, *pChild2;
-        int type1, type2;
+        jjType type1, type2;
         /** Objects' types OR'd together */
         int orType;
 
         /* Retrieve the two overlaping objects and their types */
         rv = gfmQuadtree_getOverlaping(&pObj1, &pObj2, pGlobal->pQt);
         ASSERT(rv == GFMRV_OK, rv);
-        rv = collision_getSubtype(&pChild1, &type1, pObj1);
+        rv = collision_getSubtype(&pChild1, (int*)&type1, pObj1);
         ASSERT(rv == GFMRV_OK, rv);
-        rv = collision_getSubtype(&pChild2, &type2, pObj2);
+        rv = collision_getSubtype(&pChild2, (int*)&type2, pObj2);
         ASSERT(rv == GFMRV_OK, rv);
 
         /* If types have at most 16 bits, one could easily OR them together to
@@ -108,9 +110,9 @@ gfmRV collision_run() {
                 raise(SIGINT);
                 rv = GFMRV_INTERNAL_ERROR;
 #  endif
-            }
+            } /* default */
 #endif
-        }
+        } /* switch (orType) */
         ASSERT(rv == GFMRV_OK, rv);
 
         /** Update the quadtree (so any other collision is detected) */

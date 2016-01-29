@@ -29,11 +29,14 @@ enum enType {
     T_HITBOX = gfmType_reserved_7,
     T_SLASH  = (1 << T_NBITS) | T_HITBOX,
     T_BULLET = (2 << T_NBITS) | T_HITBOX,
+    /* Base type for players and enemies, used in collision to go a level of
+     * indirection deeper */
+    T_MOB    = (1 << 15),
     /* Base type for both players */
-    T_PLAYER = gfmType_reserved_3,
+    T_PLAYER = gfmType_reserved_3 | T_MOB,
     T_GIRL   = (1 << T_NBITS) | T_PLAYER,
 };
-typedef enum enType type;
+typedef enum enType jjType;
 
 #endif /* __TYPE_H__ */
 

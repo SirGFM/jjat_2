@@ -11,6 +11,7 @@
           $(OBJDIR)/input.o       \
           $(OBJDIR)/level.o       \
           $(OBJDIR)/main.o        \
+          $(OBJDIR)/mob.o         \
           $(OBJDIR)/teststate.o
 #=======================================================================
 
