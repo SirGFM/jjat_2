@@ -91,6 +91,12 @@ gfmRV input_init() {
     ADD_KEY(qt);
 #endif /* DEBUG */
 
+    /* TODO Add other keys */
+    ADD_KEY(grlLeft);
+    ADD_KEY(grlRight);
+    ADD_KEY(grlJump);
+    ADD_KEY(grlAtk);
+
 #undef ADD_KEY
 
     /* Bind all keys */
@@ -109,6 +115,10 @@ gfmRV input_init() {
 #endif /* DEBUG */
 
     /* TODO Bind other keys */
+    BIND_KEY(grlLeft, gfmKey_h);
+    BIND_KEY(grlRight, gfmKey_k);
+    BIND_KEY(grlJump, gfmKey_x);
+    BIND_KEY(grlAtk, gfmKey_c);
 
 #undef BIND_KEY
 

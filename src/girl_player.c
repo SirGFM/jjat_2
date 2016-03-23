@@ -32,32 +32,32 @@
 
 /** List of animations */
 enum enGirlAnim {
-    STAND_0 = 0, /* Simply stand */
-    STAND_1,     /* Balance slightly */
-    STAND_2,     /* Tap feet */
-    STAND_3,     /* Phew */
+    STAND = 0,
     RUN,
-    HURT,
-    FALL,
+    PREJUMP,
     JUMP,
+    FLOAT,
+    FALL,
+    SECJUMP,
     ATK_0,
-    ATK_1
+    ATK_1,
+    HURT
 };
 typedef enum enGirlAnim girlAnim;
 
 /** Girl animation data */
 static int pGirlAnimData[] = {
 /*           len|fps|loop|data... */
-/* STAND_0 */ 1 , 8 ,  0 , 32,
-/* STAND_1 */ 3 , 8 ,  0 , 33,32,34,
-/* STAND_2 */ 3 , 8 ,  0 , 35,36,35,
-/* STAND_3 */ 6 , 8 ,  0 , 37,37,38,39,39,39,
-/*   RUN   */ 8 , 8 ,  1 , 40,41,42,43,44,45,46,47,
-/*  HURT   */ 2 , 8 ,  1 , 48,49,
-/*  FALL   */ 4 , 8 ,  1 , 50,51,52,53,
-/*  JUMP   */ 4 , 8 ,  1 , 54,55,56,57,
-/*  ATK_0  */ 5 , 8 ,  0 , 58,58,59,59,59,
-/*  ATK_1  */ 4 , 8 ,  0 , 60,61,61,61
+/*  STAND  */ 2 , 8 ,  1 , 32,33,
+/*  RUN    */ 4 , 8 ,  1 , 34,35,36,37,
+/* PREJUMP */ 1 , 8 ,  0 , 38,
+/*  JUMP   */ 2 , 8 ,  1 , 39,40,
+/*  FLOAT  */ 1 , 8 ,  0 , 41,
+/*  FALL   */ 2 , 8 ,  1 , 42,43,
+/* SECJUMP */ 4 , 8 ,  1 , 44,45,46,47,
+/*  ATK_0  */ 5 , 8 ,  0 , 48,49,50,51,55,
+/*  ATK_1  */ 4 , 8 ,  0 , 52,53,54,55,
+/*   HURT  */ 2 , 8 ,  1 , 48,49
 };
 
 struct stGirlPlayer {
@@ -69,10 +69,8 @@ struct stGirlPlayer {
     gfmSprite *pAtk;
     /** Current animation (each type will have its own 'list of types'?) */
     int curAnim;
-    /** How long since the last animation started */
-    int lastAnimElapsed;
-    /** How long until the next idle animation */
-    int nextIdle;
+    /** Whether we've just double jumped (and haven't touched the floor yet) */
+    int didDoubleJump;
     /** Enemies should also have a counter of some sort... probably */
     /** Also a current state (or I'll simply use the animation... don't know */
 };
@@ -99,11 +97,6 @@ static gfmRV grlPl_playAnim(girlAnim anim) {
     rv = gfmSprite_playAnimation(_pGirl->pSprite, anim);
     ASSERT(rv == GFMRV_OK, rv);
     _pGirl->curAnim = anim;
-    _pGirl->lastAnimElapsed = 0;
-
-    if (anim == STAND_0) {
-        _pGirl->nextIdle = (rand() % 25 + 1) * 80 + 500;
-    }
 
     rv = GFMRV_OK;
 __ret:
@@ -159,12 +152,12 @@ gfmRV grlPl_init(gfmParser *pParser) {
     ASSERT(rv == GFMRV_OK, rv);
 
     _pGirl->curAnim = -1;
-    rv = grlPl_playAnim(STAND_0);
+    rv = grlPl_playAnim(STAND);
     ASSERT(rv == GFMRV_OK, rv);
 
     /** Set gravity */
-    //rv = gfmSprite_setVerticalAcceleration(_pGirl->pSprite, GRAV);
-    //ASSERT(rv == GFMRV_OK, rv);
+    rv = gfmSprite_setVerticalAcceleration(_pGirl->pSprite, GRAV);
+    ASSERT(rv == GFMRV_OK, rv);
 
     rv = GFMRV_OK;
 __ret:
@@ -178,29 +171,36 @@ __ret:
  * @return GFraMe return value
  */
 gfmRV grlPl_update() {
+    /** Current collision direction */
+    gfmCollision dir;
     /** GFraMe return value */
     gfmRV rv;
 
-    /* Check if the idle animation should be updated */
-    _pGirl->lastAnimElapsed += pGame->elapsed;
-    if (_pGirl->curAnim <= STAND_0) {
-        if (_pGirl->lastAnimElapsed >= _pGirl->nextIdle) {
-            /* Pseudo-random next animation */
-            int nextIdleAnim;
+    rv = gfmSprite_getCollision(&dir, _pGirl->pSprite);
+    ASSERT(rv == GFMRV_OK, rv);
 
-            nextIdleAnim = rand() % 3 + 1;
-            rv = grlPl_playAnim(nextIdleAnim);
-            ASSERT(rv == GFMRV_OK, rv);
+    if (pButton->grlJump.state & gfmInput_justPressed) {
+        if (dir & gfmCollision_down) {
+            /* Change to jump state */
+        }
+        else if (!_pGirl->didDoubleJump) {
+            /* Change to doublejump state */
         }
     }
-    else if (_pGirl->curAnim <= STAND_3) {
-        rv = gfmSprite_didAnimationFinish(_pGirl->pSprite);
-        ASSERT(rv == GFMRV_TRUE || rv == GFMRV_FALSE, rv);
-
-        if (rv == GFMRV_TRUE) {
-            rv = grlPl_playAnim(STAND_0);
-            ASSERT(rv == GFMRV_OK, rv);
-        }
+    else if (pButton->grlAtk.state & gfmInput_justPressed) {
+        /* Change to atk state */
+    }
+    else if (pButton->grlRight.state & gfmInput_pressed) {
+        rv = gfmSprite_setHorizontalVelocity(_pGirl->pSprite, 100);
+        ASSERT(rv == GFMRV_OK, rv);
+    }
+    else if (pButton->grlLeft.state & gfmInput_pressed) {
+        rv = gfmSprite_setHorizontalVelocity(_pGirl->pSprite, -100);
+        ASSERT(rv == GFMRV_OK, rv);
+    }
+    else {
+        rv = gfmSprite_setHorizontalVelocity(_pGirl->pSprite, 0);
+        ASSERT(rv == GFMRV_OK, rv);
     }
 
     rv = gfmSprite_update(_pGirl->pSprite, pGame->pCtx);
@@ -228,7 +228,45 @@ __ret:
  * @return GFraMe return value
  */
 gfmRV grlPl_postUpdate() {
-    return GFMRV_OK;
+    double vx, vy;
+    gfmRV rv;
+
+    rv = gfmSprite_getVelocity(&vx, &vy, _pGirl->pSprite);
+    ASSERT(rv == GFMRV_OK, rv);
+
+    if (_pGirl->didDoubleJump) {
+        /* Double jump */
+    }
+    else if (vy < -30) {
+        /* NOTE: ABS!! INT JUMP */
+    }
+    else if (vy < 0) {
+        /* either START_JUMP or JUMP */
+    }
+    else if (vy > 0) {
+        /* FALL */
+    }
+    /* TODO else if atk */
+    else if (vx > 0) {
+        rv = grlPl_playAnim(RUN);
+        ASSERT(rv == GFMRV_OK, rv);
+        rv = gfmSprite_setDirection(_pGirl->pSprite,  0);
+        ASSERT(rv == GFMRV_OK, rv);
+    }
+    else if (vx < 0) {
+        rv = grlPl_playAnim(RUN);
+        ASSERT(rv == GFMRV_OK, rv);
+        rv = gfmSprite_setDirection(_pGirl->pSprite,  1);
+        ASSERT(rv == GFMRV_OK, rv);
+    }
+    else {
+        rv = grlPl_playAnim(STAND);
+        ASSERT(rv == GFMRV_OK, rv);
+    }
+
+    rv = GFMRV_OK;
+__ret:
+    return rv;
 }
 
 /**

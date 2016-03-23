@@ -89,6 +89,14 @@ gfmRV collision_run() {
         /* Handle the collision */
         rv = GFMRV_OK;
         switch (orType) {
+            /* Collide the girl against the floor */
+            case T_TERRAIN | (T_GIRL << 16):
+            case T_GIRL | (T_TERRAIN << 16): {
+                //rv = handleFunction((typeA*)pChild1, pObj2);
+                gfmObject_collide(pObj1, pObj2);
+                gfmObject_setVerticalVelocity(pObj1, 0);
+                gfmObject_setVerticalVelocity(pObj2, 0);
+            } break;
 #if 0
             /* e.g.: Handle collision between A and B the same as A and C */
             case TYPE_A | (TYPE_B << 16):

@@ -153,6 +153,10 @@ struct stButtonCtx {
     button qt;
 #endif /* DEBUG */
     /* TODO Add buttons */
+    button grlLeft;
+    button grlRight;
+    button grlJump;
+    button grlAtk;
 };
 
 /** Store all data modifiably on the option menu, as well as anything that may
