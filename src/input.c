@@ -64,6 +64,13 @@ gfmRV input_updateButtons() {
     if ((pButton->qt.state & gfmInput_justReleased) == gfmInput_justReleased) {
         pGame->flags ^= DBG_RENDERQT;
     }
+    if ((pButton->gif.state & gfmInput_justReleased) == gfmInput_justReleased) {
+        rv = gfm_didExportGif(pGame->pCtx);
+        if (rv == GFMRV_TRUE || rv == GFMRV_GIF_OPERATION_NOT_ACTIVE) {
+            rv = gfm_recordGif(pGame->pCtx, 10000 /* ms */, "anim.gif", 8, 0);
+            ASSERT(rv == GFMRV_OK, rv);
+        }
+    }
 #endif /* DEBUG */
 
     rv = GFMRV_OK;
@@ -89,6 +96,7 @@ gfmRV input_init() {
     ADD_KEY(pause);
 #if defined(DEBUG)
     ADD_KEY(qt);
+    ADD_KEY(gif);
 #endif /* DEBUG */
 
     /* TODO Add other keys */
@@ -112,6 +120,7 @@ gfmRV input_init() {
     BIND_GAMEPAD_BT(pause, gfmController_start, 0/*port*/);
 #if defined(DEBUG)
     BIND_KEY(qt, gfmKey_f11);
+    BIND_KEY(gif, gfmKey_f10);
 #endif /* DEBUG */
 
     /* TODO Bind other keys */
