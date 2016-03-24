@@ -34,7 +34,6 @@
 enum enGirlAnim {
     STAND = 0,
     RUN,
-    PREJUMP,
     JUMP,
     FLOAT,
     FALL,
@@ -50,13 +49,12 @@ static int pGirlAnimData[] = {
 /*           len|fps|loop|data... */
 /*  STAND  */ 2 , 8 ,  1 , 32,33,
 /*  RUN    */ 4 , 8 ,  1 , 34,35,36,37,
-/* PREJUMP */ 1 , 8 ,  0 , 38,
-/*  JUMP   */ 2 , 8 ,  1 , 39,40,
-/*  FLOAT  */ 1 , 8 ,  0 , 41,
-/*  FALL   */ 2 , 8 ,  1 , 42,43,
-/* SECJUMP */ 4 , 8 ,  1 , 44,45,46,47,
-/*  ATK_0  */ 5 , 8 ,  0 , 48,49,50,51,55,
-/*  ATK_1  */ 4 , 8 ,  0 , 52,53,54,55,
+/*  JUMP   */ 2 , 8 ,  1 , 38,39,
+/*  FLOAT  */ 1 , 8 ,  0 , 40,
+/*  FALL   */ 2 , 8 ,  1 , 41,42,
+/* SECJUMP */ 4 , 8 ,  1 , 43,44,45,46,
+/*  ATK_0  */ 5 , 12,  0 , 47,48,49,50,54,
+/*  ATK_1  */ 4 , 12,  0 , 51,52,53,54,
 /*   HURT  */ 2 , 8 ,  1 , 48,49
 };
 
@@ -71,6 +69,8 @@ struct stGirlPlayer {
     int curAnim;
     /** Whether we've just double jumped (and haven't touched the floor yet) */
     int didDoubleJump;
+    /** Whether an attack was issued and should be done as soon as possible */
+    int isAtkBuffered;
     /** Enemies should also have a counter of some sort... probably */
     /** Also a current state (or I'll simply use the animation... don't know */
 };
@@ -179,17 +179,34 @@ gfmRV grlPl_update() {
     rv = gfmSprite_getCollision(&dir, _pGirl->pSprite);
     ASSERT(rv == GFMRV_OK, rv);
 
-    if (pButton->grlJump.state & gfmInput_justPressed) {
+    /* Reset double jump on touch floor */
+    _pGirl->didDoubleJump &= ((dir & gfmCollision_down) == 0);
+
+    if (_pGirl->curAnim == ATK_1) { }
+    else if ((pButton->grlJump.state & gfmInput_justPressed) == gfmInput_justPressed) {
         if (dir & gfmCollision_down) {
             /* Change to jump state */
+            rv = gfmSprite_setVerticalVelocity(_pGirl->pSprite, -175);
+            ASSERT(rv == GFMRV_OK, rv);
         }
         else if (!_pGirl->didDoubleJump) {
             /* Change to doublejump state */
+            rv = gfmSprite_setVerticalVelocity(_pGirl->pSprite, -175);
+            ASSERT(rv == GFMRV_OK, rv);
+            _pGirl->didDoubleJump = 1;
         }
     }
-    else if (pButton->grlAtk.state & gfmInput_justPressed) {
+    else if ((pButton->grlAtk.state & gfmInput_justPressed) == gfmInput_justPressed) {
         /* Change to atk state */
+        if (_pGirl->curAnim != ATK_0 && _pGirl->curAnim != ATK_1) {
+            rv = grlPl_playAnim(ATK_0);
+            ASSERT(rv == GFMRV_OK, rv);
+        }
+        else if ((dir & gfmCollision_down) && _pGirl->curAnim == ATK_0) {
+            _pGirl->isAtkBuffered = 1;
+        }
     }
+    else if (_pGirl->curAnim == ATK_0) { }
     else if (pButton->grlRight.state & gfmInput_pressed) {
         rv = gfmSprite_setHorizontalVelocity(_pGirl->pSprite, 100);
         ASSERT(rv == GFMRV_OK, rv);
@@ -203,8 +220,52 @@ gfmRV grlPl_update() {
         ASSERT(rv == GFMRV_OK, rv);
     }
 
+    /* Short hop */
+    if ((pButton->grlJump.state & gfmInput_justReleased) == gfmInput_justReleased) {
+        double vy;
+
+        rv = gfmSprite_getVerticalVelocity(&vy, _pGirl->pSprite);
+        ASSERT(rv == GFMRV_OK, rv);
+
+        if (vy < -60) {
+            vy *= 0.5;
+        }
+        else if (vy < -30) {
+            vy = -30;
+        }
+
+        rv = gfmSprite_setVerticalVelocity(_pGirl->pSprite, vy);
+        ASSERT(rv == GFMRV_OK, rv);
+    }
+
     rv = gfmSprite_update(_pGirl->pSprite, pGame->pCtx);
     ASSERT(rv == GFMRV_OK, rv);
+
+    rv = gfmSprite_didAnimationJustChangeFrame(_pGirl->pSprite);
+    ASSERT(rv == GFMRV_TRUE || rv == GFMRV_FALSE, rv);
+    if (rv == GFMRV_TRUE) {
+        int frame;
+
+        rv = gfmSprite_getFrame(&frame, _pGirl->pSprite);
+        ASSERT(rv == GFMRV_OK, rv);
+
+        /* TODO Do stuff */
+        if (frame == 48) {
+            /* Spawn hitbox */
+        }
+        else if (frame == 51) {
+            /* Spawn hitbox */
+        }
+        else if (frame == 54 && _pGirl->isAtkBuffered) {
+            rv = grlPl_playAnim(ATK_1);
+            ASSERT(rv == GFMRV_OK, rv);
+            _pGirl->isAtkBuffered = 0;
+        }
+
+        if ((_pGirl->curAnim == ATK_0 || _pGirl->curAnim == ATK_1) && gfmSprite_didAnimationFinish(_pGirl->pSprite) == GFMRV_TRUE) {
+            _pGirl->curAnim = -1;
+        }
+    }
 
     /** Check if any collisions happened and handle it */
     rv = gfmQuadtree_collideSprite(pGlobal->pQt, _pGirl->pSprite);
@@ -234,33 +295,43 @@ gfmRV grlPl_postUpdate() {
     rv = gfmSprite_getVelocity(&vx, &vy, _pGirl->pSprite);
     ASSERT(rv == GFMRV_OK, rv);
 
-    if (_pGirl->didDoubleJump) {
-        /* Double jump */
+    if (_pGirl->curAnim == ATK_0 || _pGirl->curAnim == ATK_1) {
     }
-    else if (vy < -30) {
+    else if (_pGirl->didDoubleJump) {
+        /* Double jump */
+        rv = grlPl_playAnim(SECJUMP);
+        ASSERT(rv == GFMRV_OK, rv);
+    }
+    else if (vy != 0 && abs((int)vy) < 30) {
         /* NOTE: ABS!! INT JUMP */
+        rv = grlPl_playAnim(FLOAT);
+        ASSERT(rv == GFMRV_OK, rv);
     }
     else if (vy < 0) {
         /* either START_JUMP or JUMP */
+        rv = grlPl_playAnim(JUMP);
+        ASSERT(rv == GFMRV_OK, rv);
     }
     else if (vy > 0) {
         /* FALL */
+        rv = grlPl_playAnim(FALL);
+        ASSERT(rv == GFMRV_OK, rv);
     }
-    /* TODO else if atk */
     else if (vx > 0) {
         rv = grlPl_playAnim(RUN);
-        ASSERT(rv == GFMRV_OK, rv);
-        rv = gfmSprite_setDirection(_pGirl->pSprite,  0);
         ASSERT(rv == GFMRV_OK, rv);
     }
     else if (vx < 0) {
         rv = grlPl_playAnim(RUN);
         ASSERT(rv == GFMRV_OK, rv);
-        rv = gfmSprite_setDirection(_pGirl->pSprite,  1);
-        ASSERT(rv == GFMRV_OK, rv);
     }
     else {
         rv = grlPl_playAnim(STAND);
+        ASSERT(rv == GFMRV_OK, rv);
+    }
+
+    if (vx != 0) {
+        rv = gfmSprite_setDirection(_pGirl->pSprite,  vx < 0);
         ASSERT(rv == GFMRV_OK, rv);
     }
 
@@ -275,6 +346,55 @@ __ret:
  * @return GFraMe return value
  */
 gfmRV grlPl_draw() {
-    return gfmSprite_draw(_pGirl->pSprite, pGame->pCtx);
+    gfmRV rv;
+    int tile, x, y, frame, flipped;
+
+    rv = gfmSprite_getPosition(&x, &y, _pGirl->pSprite);
+    ASSERT(rv == GFMRV_OK, rv);
+    rv = gfmSprite_getFrame(&frame, _pGirl->pSprite);
+    ASSERT(rv == GFMRV_OK, rv);
+    rv = gfmSprite_getDirection(&flipped, _pGirl->pSprite);
+    ASSERT(rv == GFMRV_OK, rv);
+
+    if (frame == 48) {
+        tile = 183;
+        rv = gfm_drawTile(pGame->pCtx, pGfx->pSset8x8, x-7, y-4, tile++,
+                flipped);
+        ASSERT(rv == GFMRV_OK, rv);
+        rv = gfm_drawTile(pGame->pCtx, pGfx->pSset8x8, x+2, y-4, tile++,
+                flipped);
+        ASSERT(rv == GFMRV_OK, rv);
+        rv = gfm_drawTile(pGame->pCtx, pGfx->pSset8x8, x+2, y+4, tile++,
+                flipped);
+        ASSERT(rv == GFMRV_OK, rv);
+    }
+    else if (frame == 49) {
+        tile = 186;
+        rv = gfm_drawTile(pGame->pCtx, pGfx->pSset8x8, x+3, y-4, tile++,
+                flipped);
+        ASSERT(rv == GFMRV_OK, rv);
+        rv = gfm_drawTile(pGame->pCtx, pGfx->pSset8x8, x+3, y+4, tile++,
+                flipped);
+        ASSERT(rv == GFMRV_OK, rv);
+    }
+    else if (frame == 51) {
+        tile = 188;
+        rv = gfm_drawTile(pGame->pCtx, pGfx->pSset8x8, x+6, y-5, tile++,
+                flipped);
+        ASSERT(rv == GFMRV_OK, rv);
+        rv = gfm_drawTile(pGame->pCtx, pGfx->pSset8x8, x+3, y+3, tile++,
+                flipped);
+        ASSERT(rv == GFMRV_OK, rv);
+    }
+    else if (frame == 52) {
+        tile = 190;
+        rv = gfm_drawTile(pGame->pCtx, pGfx->pSset8x8, x+6, y-5, tile++,
+                flipped);
+        ASSERT(rv == GFMRV_OK, rv);
+    }
+
+    gfmSprite_draw(_pGirl->pSprite, pGame->pCtx);
+__ret:
+    return rv;
 }
 
