@@ -69,6 +69,45 @@ gfmRV input_updateButtons() {
             pGame->flags |= DBG_RENDERQT;
         }
     }
+    /* Start recording a GIF */
+    if ((pButton->gif.state & gfmInput_justReleased) == gfmInput_justReleased) {
+        rv = gfm_didExportGif(pGame->pCtx);
+        if (rv == GFMRV_TRUE || rv == GFMRV_GIF_OPERATION_NOT_ACTIVE) {
+            rv = gfm_recordGif(pGame->pCtx, 10000 /* ms */, "anim.gif", 8, 0);
+            ASSERT(rv == GFMRV_OK, rv);
+        }
+    }
+    /* Update the 'manual stepper' */
+    rv = input_updateDebugButtons();
+    ASSERT(rv == GFMRV_OK, rv);
+#endif /* DEBUG */
+
+    rv = GFMRV_OK;
+__ret:
+    return rv;
+}
+
+#if defined(DEBUG)
+/**
+ * Update only the debug buttons
+ *
+ * @return GFraMe return value
+ */
+gfmRV input_updateDebugButtons() {
+    /** Return value */
+    gfmRV rv;
+
+    /* Retrieve the keys state */
+    rv = gfm_getKeyState(&(pButton->dbgPause.state),
+            &(pButton->dbgPause.numPressed), pGame->pCtx,
+            pButton->dbgPause.handle);
+    ASSERT(rv == GFMRV_OK, rv);
+    rv = gfm_getKeyState(&(pButton->dbgStep.state),
+            &(pButton->dbgStep.numPressed), pGame->pCtx,
+            pButton->dbgStep.handle);
+    ASSERT(rv == GFMRV_OK, rv);
+
+    /* Check if the game was (un)paused */
     if ((pButton->dbgPause.state & gfmInput_justReleased) == gfmInput_justReleased) {
         if (pGame->flags & GAME_RUN) {
             pGame->flags &= ~GAME_RUN;
@@ -77,23 +116,17 @@ gfmRV input_updateButtons() {
             pGame->flags |= GAME_RUN;
         }
     }
+    /* Check if a new frame should be issued */
     if ((pButton->dbgStep.state & gfmInput_justReleased) == gfmInput_justReleased) {
         pGame->flags |= GAME_STEP;
         pGame->flags &= ~GAME_RUN;
     }
-    if ((pButton->gif.state & gfmInput_justReleased) == gfmInput_justReleased) {
-        rv = gfm_didExportGif(pGame->pCtx);
-        if (rv == GFMRV_TRUE || rv == GFMRV_GIF_OPERATION_NOT_ACTIVE) {
-            rv = gfm_recordGif(pGame->pCtx, 10000 /* ms */, "anim.gif", 8, 0);
-            ASSERT(rv == GFMRV_OK, rv);
-        }
-    }
-#endif /* DEBUG */
 
     rv = GFMRV_OK;
 __ret:
     return rv;
 }
+#endif
 
 /**
  * Initialize and bind all buttons

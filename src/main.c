@@ -48,27 +48,47 @@ gfmRV main_loop() {
         rv = gfm_handleEvents(pGame->pCtx);
         ASSERT(rv == GFMRV_OK, rv);
 
+#if defined(DEBUG)
+        if (!(pGame->flags & GAME_RUN)) {
+            gfmInput *pInput;
+
+            pInput = 0;
+            rv = gfm_getInput(&pInput, pGame->pCtx);
+            ASSERT(rv == GFMRV_OK, rv);
+            rv = gfmInput_updateVKey(pInput, pButton->dbgStep.handle);
+            ASSERT(rv == GFMRV_OK, rv);
+            rv = gfmInput_updateVKey(pInput, pButton->dbgPause.handle);
+            ASSERT(rv == GFMRV_OK, rv);
+
+            rv = input_updateDebugButtons();
+            ASSERT(rv == GFMRV_OK, rv);
+        }
+#endif
+
+#if !defined(DEBUG)
         while (gfm_isUpdating(pGame->pCtx) == GFMRV_TRUE) {
+#else
+        while (((pGame->flags & GAME_RUN) || (pGame->flags & GAME_STEP)) &&
+                gfm_isUpdating(pGame->pCtx) == GFMRV_TRUE) {
+#endif
             rv = input_updateButtons();
             ASSERT(rv == GFMRV_OK, rv);
 
-            if ((pGame->flags & GAME_RUN) || (pGame->flags & GAME_STEP)) {
-                rv = gfm_fpsCounterUpdateBegin(pGame->pCtx);
-                ASSERT(rv == GFMRV_OK, rv);
+            rv = gfm_fpsCounterUpdateBegin(pGame->pCtx);
+            ASSERT(rv == GFMRV_OK, rv);
 
-                rv = gfm_getElapsedTime(&(pGame->elapsed), pGame->pCtx);
-                ASSERT(rv == GFMRV_OK, rv);
+            rv = gfm_getElapsedTime(&(pGame->elapsed), pGame->pCtx);
+            ASSERT(rv == GFMRV_OK, rv);
 
-                /* Update the current state */
-                switch (pGame->curState) {
-                    case ST_TEST: rv = test_update(); break;
-                    default: ASSERT(0, GFMRV_INTERNAL_ERROR);
-                }
-                ASSERT(rv == GFMRV_OK, rv);
-
-                rv = gfm_fpsCounterUpdateEnd(pGame->pCtx);
-                ASSERT(rv == GFMRV_OK, rv);
+            /* Update the current state */
+            switch (pGame->curState) {
+                case ST_TEST: rv = test_update(); break;
+                default: ASSERT(0, GFMRV_INTERNAL_ERROR);
             }
+            ASSERT(rv == GFMRV_OK, rv);
+
+            rv = gfm_fpsCounterUpdateEnd(pGame->pCtx);
+            ASSERT(rv == GFMRV_OK, rv);
 
             pGame->flags &= ~GAME_STEP;
         }
