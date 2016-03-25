@@ -49,24 +49,28 @@ gfmRV main_loop() {
         ASSERT(rv == GFMRV_OK, rv);
 
         while (gfm_isUpdating(pGame->pCtx) == GFMRV_TRUE) {
-            rv = gfm_fpsCounterUpdateBegin(pGame->pCtx);
-            ASSERT(rv == GFMRV_OK, rv);
-
             rv = input_updateButtons();
             ASSERT(rv == GFMRV_OK, rv);
 
-            rv = gfm_getElapsedTime(&(pGame->elapsed), pGame->pCtx);
-            ASSERT(rv == GFMRV_OK, rv);
+            if ((pGame->flags & GAME_RUN) || (pGame->flags & GAME_STEP)) {
+                rv = gfm_fpsCounterUpdateBegin(pGame->pCtx);
+                ASSERT(rv == GFMRV_OK, rv);
 
-            /* Update the current state */
-            switch (pGame->curState) {
-                case ST_TEST: rv = test_update(); break;
-                default: ASSERT(0, GFMRV_INTERNAL_ERROR);
+                rv = gfm_getElapsedTime(&(pGame->elapsed), pGame->pCtx);
+                ASSERT(rv == GFMRV_OK, rv);
+
+                /* Update the current state */
+                switch (pGame->curState) {
+                    case ST_TEST: rv = test_update(); break;
+                    default: ASSERT(0, GFMRV_INTERNAL_ERROR);
+                }
+                ASSERT(rv == GFMRV_OK, rv);
+
+                rv = gfm_fpsCounterUpdateEnd(pGame->pCtx);
+                ASSERT(rv == GFMRV_OK, rv);
             }
-            ASSERT(rv == GFMRV_OK, rv);
 
-            rv = gfm_fpsCounterUpdateEnd(pGame->pCtx);
-            ASSERT(rv == GFMRV_OK, rv);
+            pGame->flags &= ~GAME_STEP;
         }
 
         while (gfm_isDrawing(pGame->pCtx) == GFMRV_TRUE) {
@@ -195,6 +199,7 @@ int main(int argc, char *argv[]) {
 
     /* Set the initial state */
     pGame->nextState = INIT_STATE;
+    pGame->flags |= GAME_RUN;
 
     /* Initialize the main loop */
     rv = main_loop();

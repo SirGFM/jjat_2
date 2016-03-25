@@ -152,6 +152,8 @@ struct stButtonCtx {
 #if defined(DEBUG)
     button qt;
     button gif;
+    button dbgPause;
+    button dbgStep;
 #endif /* DEBUG */
     /* TODO Add buttons */
     button grlLeft;

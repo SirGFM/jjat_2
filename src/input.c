@@ -62,7 +62,24 @@ gfmRV input_updateButtons() {
 #if defined(DEBUG)
     /* Switch quadtree visibility */
     if ((pButton->qt.state & gfmInput_justReleased) == gfmInput_justReleased) {
-        pGame->flags ^= DBG_RENDERQT;
+        if (pGame->flags & DBG_RENDERQT) {
+            pGame->flags &= ~DBG_RENDERQT;
+        }
+        else {
+            pGame->flags |= DBG_RENDERQT;
+        }
+    }
+    if ((pButton->dbgPause.state & gfmInput_justReleased) == gfmInput_justReleased) {
+        if (pGame->flags & GAME_RUN) {
+            pGame->flags &= ~GAME_RUN;
+        }
+        else {
+            pGame->flags |= GAME_RUN;
+        }
+    }
+    if ((pButton->dbgStep.state & gfmInput_justReleased) == gfmInput_justReleased) {
+        pGame->flags |= GAME_STEP;
+        pGame->flags &= ~GAME_RUN;
     }
     if ((pButton->gif.state & gfmInput_justReleased) == gfmInput_justReleased) {
         rv = gfm_didExportGif(pGame->pCtx);
@@ -97,6 +114,8 @@ gfmRV input_init() {
 #if defined(DEBUG)
     ADD_KEY(qt);
     ADD_KEY(gif);
+    ADD_KEY(dbgPause);
+    ADD_KEY(dbgStep);
 #endif /* DEBUG */
 
     /* TODO Add other keys */
@@ -121,6 +140,8 @@ gfmRV input_init() {
 #if defined(DEBUG)
     BIND_KEY(qt, gfmKey_f11);
     BIND_KEY(gif, gfmKey_f10);
+    BIND_KEY(dbgPause, gfmKey_f5);
+    BIND_KEY(dbgStep, gfmKey_f6);
 #endif /* DEBUG */
 
     /* TODO Bind other keys */
