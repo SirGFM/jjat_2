@@ -77,11 +77,19 @@
 #define GRAV            500
 
 /** Player's hitbox dimensions */
-#define PL_WIDTH        6
-#define PL_HEIGHT       12
+#define GIRL_WIDTH      6
+#define GIRL_HEIGHT     12
+#define BOY_WIDTH       6
+#define BOY_HEIGHT      10
 /** Player's sprite offset */
-#define PL_OFFX         5
-#define PL_OFFY         4
+#define GIRL_OFFX        5
+#define GIRL_OFFY        4
+#define BOY_OFFX        5
+#define BOY_OFFY        6
+
+#define GIRL_VX         100
+#define GIRL_JUMP_VY    -175
+#define GIRL_MIN_SH_VY  -30
 
 #endif /* __GAME_CONST_H__ */
 

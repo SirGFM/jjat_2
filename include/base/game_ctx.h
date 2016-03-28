@@ -14,6 +14,7 @@
 #include <GFraMe/gfmTilemap.h>
 #include <GFraMe/core/gfmAudio_bkend.h>
 
+#include <jjat_2/entity.h>
 #include <jjat_2/state.h>
 
 /* == Types declaration ===================================================== */
@@ -193,6 +194,10 @@ struct stGlobalCtx {
     gfmQuadtreeRoot *pQt;
     /** The game's terrain */
     gfmTilemap *pTMap;
+    /** The girl (i.e., 'red' player) */
+    entity *pGirl;
+    /** The boy (i.e., 'blue' player) */
+    entity *pBoy;
 };
 
 #endif /* __GAME_CTX_H__ */

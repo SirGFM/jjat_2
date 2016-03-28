@@ -12,7 +12,7 @@
 #include <GFraMe/gfmQuadtree.h>
 #include <GFraMe/gfmGroup.h>
 
-#include <jjat_2/girl_player.h>
+#include <jjat_2/entity.h>
 #include <jjat_2/type.h>
 
 /** Store data related to game */
@@ -101,15 +101,10 @@ __ret:
  * Release all variables in pGlobal
  */
 void global_freeUserVar() {
-    if (pGlobal->pQt) {
-        gfmQuadtree_free(&(pGlobal->pQt));
-    }
-    if (pGlobal->pHitbox) {
-        gfmGroup_free(&(pGlobal->pHitbox));
-    }
-    if (pGlobal->pTMap) {
-        gfmTilemap_free(&(pGlobal->pTMap));
-    }
-    grlPl_free();
+    gfmQuadtree_free(&(pGlobal->pQt));
+    gfmGroup_free(&(pGlobal->pHitbox));
+    gfmTilemap_free(&(pGlobal->pTMap));
+    entity_free(&(pGlobal->pGirl));
+    entity_free(&(pGlobal->pBoy));
 }
 

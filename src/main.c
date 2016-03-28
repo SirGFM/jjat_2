@@ -71,10 +71,10 @@ gfmRV main_loop() {
         while (((pGame->flags & GAME_RUN) || (pGame->flags & GAME_STEP)) &&
                 gfm_isUpdating(pGame->pCtx) == GFMRV_TRUE) {
 #endif
-            rv = input_updateButtons();
+            rv = gfm_fpsCounterUpdateBegin(pGame->pCtx);
             ASSERT(rv == GFMRV_OK, rv);
 
-            rv = gfm_fpsCounterUpdateBegin(pGame->pCtx);
+            rv = input_updateButtons();
             ASSERT(rv == GFMRV_OK, rv);
 
             rv = gfm_getElapsedTime(&(pGame->elapsed), pGame->pCtx);
