@@ -4,6 +4,7 @@
 #=======================================================================
   OBJS =                          \
           $(OBJDIR)/assets.o      \
+          $(OBJDIR)/boy_player.o \
           $(OBJDIR)/collision.o   \
           $(OBJDIR)/config.o      \
           $(OBJDIR)/entity.o      \

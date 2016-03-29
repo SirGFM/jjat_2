@@ -1,27 +1,27 @@
 /**
- * @file src/girl_player.c
+ * @file src/boy_player.c
  *
  */
-#ifndef __GIRL_PLAYER_H__
-#define __GIRL_PLAYER_H__
+#ifndef __BOY_PLAYER_H__
+#define __BOY_PLAYER_H__
 
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gfmParser.h>
 
 /**
- * Free all resources used by the girl sprite
+ * Free all resources used by the boy sprite
  *
  * @return GFraMe return value
  */
-void grlPl_free();
+void boyPl_free();
 
 /**
- * Initialize (and alloc, if needed) the girl from the parser
+ * Initialize (and alloc, if needed) the boy from the parser
  *
- * @param [ in]pParser The parser (already pointing to a 'girl' object)
+ * @param [ in]pParser The parser (already pointing to a 'boy' object)
  * @return             GFraMe return value
  */
-gfmRV grlPl_init(gfmParser *pParser);
+gfmRV boyPl_init(gfmParser *pParser);
 
 /**
  * Handle inputs from the user, updates the gfmSprite, collides againt the
@@ -29,7 +29,7 @@ gfmRV grlPl_init(gfmParser *pParser);
  *
  * @return GFraMe return value
  */
-gfmRV grlPl_update();
+gfmRV boyPl_update();
 
 /**
  * Handles special collision cases (e.g.: carrying/being carried by another
@@ -39,14 +39,14 @@ gfmRV grlPl_update();
  *
  * @return GFraMe return value
  */
-gfmRV grlPl_postUpdate();
+gfmRV boyPl_postUpdate();
 
 /**
  * Draw the sprite
  *
  * @return GFraMe return value
  */
-gfmRV grlPl_draw();
+gfmRV boyPl_draw();
 
-#endif /* __GIRL_PLAYER_H__ */
+#endif /* __BOY_PLAYER_H__ */
 

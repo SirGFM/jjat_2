@@ -9,6 +9,7 @@
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gfmParser.h>
 
+#include <jjat_2/boy_player.h>
 #include <jjat_2/girl_player.h>
 #include <jjat_2/level.h>
 #include <jjat_2/type.h>
@@ -74,6 +75,10 @@ static gfmRV level_doLoad(char *pTilemap, int mapLen, char *pObjects,
 
             if (strcmp(pStrType, "girl") == 0) {
                 rv = grlPl_init(pParser);
+                ASSERT(rv == GFMRV_OK, rv);
+            }
+            else if (strcmp(pStrType, "boy") == 0) {
+                rv = boyPl_init(pParser);
                 ASSERT(rv == GFMRV_OK, rv);
             }
             else {

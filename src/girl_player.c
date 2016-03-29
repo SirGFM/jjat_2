@@ -43,8 +43,8 @@ static int pGirlAnimData[] = {
 /*  FLOAT  */ 1 , 8 ,  0 , 40,
 /*  FALL   */ 2 , 8 ,  1 , 41,42,
 /* SECJUMP */ 4 , 8 ,  1 , 43,44,45,46,
-/*  ATK_0  */ 5 , 10,  0 , 47,48,49,50,54,
-/*  ATK_1  */ 4 , 10,  0 , 51,52,53,54,
+/*  ATK_0  */ 5 , 12,  0 , 47,48,49,50,54,
+/*  ATK_1  */ 4 , 12,  0 , 51,52,53,54,
 /*   HURT  */ 2 , 8 ,  1 , 48,49
 };
 
@@ -52,6 +52,7 @@ enum enGirlFlags {
     DOUBLEJUMP    = 0x00000001,
     ATK1_BUFFERED = 0x00000002,
     ATK2_BUFFERED = 0x00000004,
+    VX_HALVED     = 0x00000008,
 
     ATKBUFFERED   = ATK1_BUFFERED | ATK2_BUFFERED,
 };
@@ -147,6 +148,8 @@ gfmRV grlPl_update() {
         if (pGlobal->pGirl->curAnim != ATK_0 && pGlobal->pGirl->curAnim != ATK_1) {
             rv = entity_playAnimation(pGlobal->pGirl, ATK_0);
             ASSERT(rv == GFMRV_OK, rv);
+
+            pGlobal->pGirl->entityData &= ~VX_HALVED;
         }
         else if ((dir & gfmCollision_down)) {
             if (pGlobal->pGirl->curAnim == ATK_0) {
@@ -158,8 +161,20 @@ gfmRV grlPl_update() {
         }
     }
     else if (pGlobal->pGirl->curAnim == ATK_0 || pGlobal->pGirl->curAnim == ATK_1) {
-        rv = gfmSprite_setHorizontalVelocity(pGlobal->pGirl->pSprite, 0);
-        ASSERT(rv == GFMRV_OK, rv);
+        if (dir & gfmCollision_down) {
+            rv = gfmSprite_setHorizontalVelocity(pGlobal->pGirl->pSprite, 0);
+            ASSERT(rv == GFMRV_OK, rv);
+        }
+        else if (!(pGlobal->pGirl->entityData & VX_HALVED)) {
+            double vx;
+
+            rv = gfmSprite_getHorizontalVelocity(&vx, pGlobal->pGirl->pSprite);
+            ASSERT(rv == GFMRV_OK, rv);
+            vx *= 0.5;
+            rv = gfmSprite_setHorizontalVelocity(pGlobal->pGirl->pSprite, vx);
+            ASSERT(rv == GFMRV_OK, rv);
+            pGlobal->pGirl->entityData |= VX_HALVED;
+        }
     }
     else if (pButton->grlRight.state & gfmInput_pressed) {
         rv = gfmSprite_setHorizontalVelocity(pGlobal->pGirl->pSprite, GIRL_VX);
@@ -198,8 +213,10 @@ gfmRV grlPl_update() {
     rv = gfmSprite_didAnimationJustChangeFrame(pGlobal->pGirl->pSprite);
     ASSERT(rv == GFMRV_TRUE || rv == GFMRV_FALSE, rv);
     if (rv == GFMRV_TRUE) {
-        int frame, x, y;
+        int flipped, frame, x, y;
 
+        rv = gfmSprite_getDirection(&flipped, pGlobal->pGirl->pSprite);
+        ASSERT(rv == GFMRV_OK, rv);
         rv = gfmSprite_getPosition(&x, &y, pGlobal->pGirl->pSprite);
         ASSERT(rv == GFMRV_OK, rv);
         rv = gfmSprite_getFrame(&frame, pGlobal->pGirl->pSprite);
@@ -207,18 +224,33 @@ gfmRV grlPl_update() {
 
         /* TODO Do stuff */
         if (frame == 48) {
-            rv = gfmSprite_setPosition(pGlobal->pGirl->pSprite, x + 3, y);
+            if (flipped) {
+                rv = gfmSprite_setPosition(pGlobal->pGirl->pSprite, x - 3, y);
+            }
+            else {
+                rv = gfmSprite_setPosition(pGlobal->pGirl->pSprite, x + 3, y);
+            }
             ASSERT(rv == GFMRV_OK, rv);
             /* Spawn hitbox */
         }
         if (frame == 50) {
-            rv = gfmSprite_setPosition(pGlobal->pGirl->pSprite, x + 1, y);
+            if (flipped) {
+                rv = gfmSprite_setPosition(pGlobal->pGirl->pSprite, x - 1, y);
+            }
+            else {
+                rv = gfmSprite_setPosition(pGlobal->pGirl->pSprite, x + 1, y);
+            }
             ASSERT(rv == GFMRV_OK, rv);
         }
         else if (frame == 54 && (pGlobal->pGirl->entityData & ATKBUFFERED)) {
             if (pGlobal->pGirl->entityData & ATK1_BUFFERED) {
                 rv = entity_playAnimation(pGlobal->pGirl, ATK_1);
-                rv = gfmSprite_setPosition(pGlobal->pGirl->pSprite, x + 2, y);
+                if (flipped) {
+                    rv = gfmSprite_setPosition(pGlobal->pGirl->pSprite, x - 2, y);
+                }
+                else {
+                    rv = gfmSprite_setPosition(pGlobal->pGirl->pSprite, x + 2, y);
+                }
                 ASSERT(rv == GFMRV_OK, rv);
                 /* Spawn hitbox */
             }
@@ -227,6 +259,7 @@ gfmRV grlPl_update() {
             }
             ASSERT(rv == GFMRV_OK, rv);
             pGlobal->pGirl->entityData &= ~ATKBUFFERED;
+            pGlobal->pGirl->entityData &= ~VX_HALVED;
         }
 
         if ((pGlobal->pGirl->curAnim == ATK_0 ||
@@ -268,7 +301,7 @@ gfmRV grlPl_postUpdate() {
         rv = entity_playAnimation(pGlobal->pGirl, SECJUMP);
         ASSERT(rv == GFMRV_OK, rv);
     }
-    else if (vy != 0 && abs((int)vy) < 30) {
+    else if (vy != 0 && abs((int)vy) < -(GIRL_MIN_SH_VY)) {
         rv = entity_playAnimation(pGlobal->pGirl, FLOAT);
         ASSERT(rv == GFMRV_OK, rv);
     }
@@ -323,36 +356,57 @@ gfmRV grlPl_draw() {
     ASSERT(rv == GFMRV_OK, rv);
 
     if (frame == 47) {
+        if (flipped) {
+            x++;
+        }
         rv = gfm_drawTile(pGame->pCtx, pGfx->pSset16x16, x - GIRL_OFFX,
             y - GIRL_OFFY - 3, 57, flipped);
         ASSERT(rv == GFMRV_OK, rv);
     }
     else if (frame == 48) {
+        if (flipped) {
+            x++;
+        }
         rv = gfm_drawTile(pGame->pCtx, pGfx->pSset16x16, x - GIRL_OFFX,
             y - GIRL_OFFY - 2, 58, flipped);
         ASSERT(rv == GFMRV_OK, rv);
     }
     else if (frame == 49) {
+        if (flipped) {
+            x -= 2;
+        }
         rv = gfm_drawTile(pGame->pCtx, pGfx->pSset16x16, x - GIRL_OFFX + 1,
             y - GIRL_OFFY, 59, flipped);
         ASSERT(rv == GFMRV_OK, rv);
     }
     else if (frame == 50) {
+        if (flipped) {
+            x -= 2;
+        }
         rv = gfm_drawTile(pGame->pCtx, pGfx->pSset16x16, x - GIRL_OFFX + 1,
             y - GIRL_OFFY, 60, flipped);
         ASSERT(rv == GFMRV_OK, rv);
     }
     else if (frame == 51) {
+        if (flipped) {
+            x -= 8;
+        }
         rv = gfm_drawTile(pGame->pCtx, pGfx->pSset16x16, x - GIRL_OFFX + 4,
             y - GIRL_OFFY - 3, 61, flipped);
         ASSERT(rv == GFMRV_OK, rv);
     }
     else if (frame == 52) {
+        if (flipped) {
+            x -= 8;
+        }
         rv = gfm_drawTile(pGame->pCtx, pGfx->pSset16x16, x - GIRL_OFFX + 4,
             y - GIRL_OFFY - 4, 62, flipped);
         ASSERT(rv == GFMRV_OK, rv);
     }
     else if (frame == 53) {
+        if (flipped) {
+            x -= 8;
+        }
         rv = gfm_drawTile(pGame->pCtx, pGfx->pSset16x16, x - GIRL_OFFX + 4,
             y - GIRL_OFFY - 3, 63, flipped);
         ASSERT(rv == GFMRV_OK, rv);

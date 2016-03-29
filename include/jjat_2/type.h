@@ -35,6 +35,7 @@ enum enType {
     /* Base type for both players */
     T_PLAYER = gfmType_reserved_3 | T_MOB,
     T_GIRL   = (1 << T_NBITS) | T_PLAYER,
+    T_BOY    = (1 << T_NBITS) | T_PLAYER,
 };
 typedef enum enType jjType;
 

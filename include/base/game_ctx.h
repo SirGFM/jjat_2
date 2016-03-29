@@ -156,11 +156,16 @@ struct stButtonCtx {
     button dbgPause;
     button dbgStep;
 #endif /* DEBUG */
-    /* TODO Add buttons */
+    /* Girl controls */
     button grlLeft;
     button grlRight;
     button grlJump;
     button grlAtk;
+    /* Boy controls */
+    button boyLeft;
+    button boyRight;
+    button boyJump;
+    button boyAtk;
 };
 
 /** Store all data modifiably on the option menu, as well as anything that may

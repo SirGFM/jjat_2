@@ -156,6 +156,10 @@ gfmRV input_init() {
     ADD_KEY(grlRight);
     ADD_KEY(grlJump);
     ADD_KEY(grlAtk);
+    ADD_KEY(boyLeft);
+    ADD_KEY(boyRight);
+    ADD_KEY(boyJump);
+    ADD_KEY(boyAtk);
 
 #undef ADD_KEY
 
@@ -179,9 +183,32 @@ gfmRV input_init() {
 
     /* TODO Bind other keys */
     BIND_KEY(grlLeft, gfmKey_h);
-    BIND_KEY(grlRight, gfmKey_k);
-    BIND_KEY(grlJump, gfmKey_x);
-    BIND_KEY(grlAtk, gfmKey_c);
+    BIND_KEY(grlRight, gfmKey_j);
+    BIND_KEY(grlJump, gfmKey_s);
+    BIND_KEY(grlAtk, gfmKey_d);
+    BIND_KEY(boyLeft, gfmKey_k);
+    BIND_KEY(boyRight, gfmKey_l);
+    BIND_KEY(boyJump, gfmKey_f);
+    BIND_KEY(boyAtk, gfmKey_g);
+
+    BIND_GAMEPAD_BT(grlLeft, gfmController_laxis_left, 0/*port*/);
+    BIND_GAMEPAD_BT(grlRight, gfmController_laxis_right, 0/*port*/);
+    BIND_GAMEPAD_BT(grlJump, gfmController_l1, 0/*port*/);
+    BIND_GAMEPAD_BT(grlAtk, gfmController_l2, 0/*port*/);
+    BIND_GAMEPAD_BT(boyLeft, gfmController_raxis_left, 0/*port*/);
+    BIND_GAMEPAD_BT(boyRight, gfmController_raxis_right, 0/*port*/);
+    BIND_GAMEPAD_BT(boyJump, gfmController_r1, 0/*port*/);
+    BIND_GAMEPAD_BT(boyAtk, gfmController_r2, 0/*port*/);
+
+    BIND_GAMEPAD_BT(grlLeft, gfmController_left, 0/*port*/);
+    BIND_GAMEPAD_BT(grlRight, gfmController_right, 0/*port*/);
+    BIND_GAMEPAD_BT(grlJump, gfmController_a, 0/*port*/);
+    BIND_GAMEPAD_BT(grlAtk, gfmController_b, 0/*port*/);
+
+    BIND_GAMEPAD_BT(boyLeft, gfmController_left, 1/*port*/);
+    BIND_GAMEPAD_BT(boyRight, gfmController_right, 1/*port*/);
+    BIND_GAMEPAD_BT(boyJump, gfmController_a, 1/*port*/);
+    BIND_GAMEPAD_BT(boyAtk, gfmController_b, 1/*port*/);
 
 #undef BIND_KEY
 

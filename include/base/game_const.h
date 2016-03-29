@@ -90,6 +90,9 @@
 #define GIRL_VX         100
 #define GIRL_JUMP_VY    -175
 #define GIRL_MIN_SH_VY  -30
+#define BOY_VX          75
+#define BOY_JUMP_VY     -150
+#define BOY_MIN_SH_VY   -30
 
 #endif /* __GAME_CONST_H__ */
 

@@ -9,6 +9,7 @@
 #include <GFraMe/gfmAssert.h>
 #include <GFraMe/gfmError.h>
 
+#include <jjat_2/boy_player.h>
 #include <jjat_2/girl_player.h>
 #include <jjat_2/level.h>
 #include <jjat_2/teststate.h>
@@ -58,6 +59,8 @@ gfmRV test_update() {
     ASSERT(rv == GFMRV_OK, rv);
 
     /* Update and collide the girl */
+    rv = boyPl_update();
+    ASSERT(rv == GFMRV_OK, rv);
     rv = grlPl_update();
     ASSERT(rv == GFMRV_OK, rv);
 
@@ -65,6 +68,8 @@ gfmRV test_update() {
 
     /* Finally, run the post-update on anything that needs it */
     rv = grlPl_postUpdate();
+    ASSERT(rv == GFMRV_OK, rv);
+    rv = boyPl_postUpdate();
     ASSERT(rv == GFMRV_OK, rv);
 
     rv = GFMRV_OK;
@@ -85,6 +90,8 @@ gfmRV test_draw() {
     rv = gfmTilemap_draw(pGlobal->pTMap, pGame->pCtx);
     ASSERT(rv == GFMRV_OK, rv);
 
+    rv = boyPl_draw();
+    ASSERT(rv == GFMRV_OK, rv);
     rv = grlPl_draw();
     ASSERT(rv == GFMRV_OK, rv);
 
