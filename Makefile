@@ -1,175 +1,135 @@
+#  Configurable environment variables:
+#    - OS: Inferred from `uname` (supported: Linux, Win)
+#    - ARCH: Inferred from `uname -m` (supported: x86_64, i386)
+#  OS specific configurable environment variables:
+#    - MINGW_INCLUDES
+#    - MINGW_LIBS
+#    - GFRAME_INCLUDES
+#    - GFRAME_LIBS
+#    - CC
 
 #=======================================================================
+# CONFIGURABLE VARIABLES
+#=======================================================================
+# Define the list of subdirectories (which exist within src/)
+  SUBDIRLIST := base
+
 # Define every object required by compilation
-#=======================================================================
-  OBJS =                          \
-          $(OBJDIR)/assets.o      \
-          $(OBJDIR)/boy_player.o \
-          $(OBJDIR)/collision.o   \
-          $(OBJDIR)/config.o      \
-          $(OBJDIR)/entity.o      \
-          $(OBJDIR)/girl_player.o \
-          $(OBJDIR)/global.o      \
-          $(OBJDIR)/input.o       \
-          $(OBJDIR)/level.o       \
-          $(OBJDIR)/main.o        \
-          $(OBJDIR)/mob.o         \
-          $(OBJDIR)/teststate.o
-#=======================================================================
+  OBJS := \
+         main.o
 
-#=======================================================================
+# Define the target name
+  TARGET := game
+
 # Define the generated icon
-# TODO Uncomment this to add an icon to the game
 #      Required files:
 #        - assets/icon.ico
 #        - assets/icon.rc
-#=======================================================================
+# TODO Uncomment this to add an icon to the game
 #  WINICON := assets/icon.o
 #=======================================================================
 
-#=======================================================================
-# Select which compiler to use (gcc)
-#=======================================================================
-  CC = gcc
-#=======================================================================
 
 #=======================================================================
-# Clear the suffixes' default rule, since there's an explicit one
+# COMPILATION FLAGS/SETTINGS
 #=======================================================================
-.SUFFIXES:
-#=======================================================================
-
-#=======================================================================
-# Define all targets that doesn't match its generated file
-#=======================================================================
-.PHONY: all clean
-#=======================================================================
-
-#=======================================================================
-# Define compilation target
-#=======================================================================
-  TARGET := game
-#=======================================================================
-
-#=======================================================================
-# Set OS flag
-#=======================================================================
-  OS := $(shell uname)
-  ifeq ($(OS), MINGW32_NT-6.1)
+  # Set OS
+  OS ?= $(shell uname)
+  # TODO Check proper/valid Window's flags
+  ifneq (, $(findstring $(OS), MINGW))
+    # Since Window's build might differ from the system's arch, set it
+    # manually here
+    ifneq (, $(findstring $(OS), MINGW64))
+      ARCH ?= x86_64
+    else
+      ARCH ?= i386
+    endif
     OS := Win
-#   Also, set the icon
-    ICON = $(WINICON)
   endif
-#=======================================================================
 
-#=======================================================================
-# Define CFLAGS (compiler flags)
-#=======================================================================
-# Add all warnings and default include path
-  CFLAGS := -Wall -I"./include/"
-# Add architecture flag
-  ARCH := $(shell uname -m)
+  # Set the architecture
+  ARCH ?= $(shell uname -m)
+
+  # Set OS specific setting
+  DIRLIST :=
+  include conf/Makefile.*
+
+  # Define CFLAGS
+  ifneq (, $(GFRAME_INCLUDES))
+    CFLAGS := $(CFLAGS) -I$(GFRAME_INCLUDES)
+  endif
+  CFLAGS := $(CFLAGS) -I"./include-new/" -Wall
+
   ifeq ($(ARCH), x86_64)
     CFLAGS := $(CFLAGS) -m64 -DALIGN=8
   else
     CFLAGS := $(CFLAGS) -m32 -DALIGN=4
   endif
-# Add debug flags
-  ifneq ($(RELEASE), yes)
-    CFLAGS := $(CFLAGS) -g -O0 -DDEBUG
-  else
-    CFLAGS := $(CFLAGS) -O3
-  endif
-# Set flags required by OS
-  ifeq ($(OS), Win)
-    CFLAGS := $(CFLAGS) -I"/d/windows/mingw/include" -I/c/GFraMe/include
-  else
-    CFLAGS := $(CFLAGS) -fPIC
-  endif
-#=======================================================================
 
-#=======================================================================
-# Define LFLAGS (linker flags)
-#=======================================================================
-# Add the framework
+  # Define LDFLAGS
+  LDFLAGS := $(LDFLAGS) -L$(GFRAME_LIBS)
   ifeq ($(RELEASE), yes)
-    LFLAGS := -lGFraMe
+    LDFLAGS := $(LDFLAGS) -lGFraMe
   else
-    LFLAGS := -lGFraMe_dbg
-  endif
-# Add libs and paths required by an especific OS
-  ifeq ($(OS), Win)
-    LFLAGS := -mwindows -lmingw32 $(LFLAGS) -lSDL2main
-    LFLAGS := -L/d/windows/mingw/mingw32/lib $(LFLAGS)
-# Prepend the framework search path
-    LFLAGS := -L/c/GFraMe/lib/ $(LFLAGS)
-  else
-# Prepend the framework search path
-    LFLAGS := -L/usr/lib/GFraMe/ $(LFLAGS)
+    LDFLAGS := $(LDFLAGS) -lGFraMe_dbg
   endif
 #=======================================================================
 
-#=======================================================================
-# Define where source files can be found and where objects & binary are output
-#=======================================================================
- VPATH := src
- OBJDIR := obj/$(OS)
- BINDIR := bin/$(OS)
-#=======================================================================
 
 #=======================================================================
-# Make the objects list constant (and the icon, if any)
+# (OTHER) VARIABLE EXPASION AND DEFITION
 #=======================================================================
- OBJS := $(OBJS)
+  ifeq ($(RELEASE), yes)
+    MODE := release
+  else
+    MODE := debug
+  endif
+  OBJLIST := $(OBJS:%=obj/$(OS)_$(MODE)/%)
+
+  VPATH := src-new
 #=======================================================================
 
-#=======================================================================
-# Define default compilation rule
-#=======================================================================
-all: MAKEDIRS $(BINDIR)/$(TARGET)
-	date
-#=======================================================================
 
 #=======================================================================
-# Define a rule to generated the icon
+# CONFIGURATION RULES
 #=======================================================================
+# Clear the suffixes' default rule, since there's an explicit one
+.SUFFIXES:
+
+# Define all targets that doesn't match its generated file
+.PHONY: all clean mkdirs __clean
+#=======================================================================
+
+
+#=======================================================================
+# RULES
+#=======================================================================
+all: bin/$(OS)_$(MODE)/$(TARGET)
+
+# Rule for building/linking the game
+bin/$(OS)_release/$(TARGET): $(OBJLIST) $(ICON)
+	$(CC) $(CFLAGS)    -O3 -o $@ $(OBJLIST) $(ICON) $(LDFLAGS)
+
+bin/$(OS)_debug/$(TARGET): $(OBJLIST) $(ICON)
+	$(CC) $(CFLAGS) -g -O0 -o $@ $(OBJLIST) $(ICON) $(LDFLAGS)
+
+# Rule for compiling any .c into its object
+obj/$(OS)_release/%.o: %.c
+	$(CC) $(CFLAGS)    -O3 -o $@ -c $<
+
+obj/$(OS)_debug/%.o: %.c
+	$(CC) $(CFLAGS) -g -O0 -o $@ -c $<
+
+# Rule for generating the icon
 $(WINICON):
 	windres assets/icon.rc $(WINICON)
-#=======================================================================
 
-#=======================================================================
-# Rule for actually building the game
-#=======================================================================
-$(BINDIR)/$(TARGET): MAKEDIRS $(OBJS)  $(ICON)
-	$(CC) $(CFLAGS) -o $@ $(OBJS) $(ICON) $(LFLAGS)
-#=======================================================================
+clean: __clean mkdirs
 
-#=======================================================================
-# Rule for compiling any .c in its object
-#=======================================================================
-$(OBJDIR)/%.o: %.c
-	$(CC) $(CFLAGS) -o $@ -c $<
-#=======================================================================
+mkdirs:
+	mkdir -p $(DIRLIST)
 
-#=======================================================================
-# Rule for creating every directory
-#=======================================================================
-MAKEDIRS: | $(OBJDIR)
-#=======================================================================
-
-#=======================================================================
-# Rule for actually creating every directory
-#=======================================================================
-$(OBJDIR):
-	mkdir -p $(OBJDIR)
-	mkdir -p $(BINDIR)
-#=======================================================================
-
-#=======================================================================
-# Removes all built objects
-#=======================================================================
-clean:
-	rm -f $(OBJS)
-	rm -f $(BINDIR)/$(TARGET)
+__clean:
+	rm -rf $(DIRLIST) bin/ obj/
 #=======================================================================
 
