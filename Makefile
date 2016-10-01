@@ -16,7 +16,8 @@
 
 # Define every object required by compilation
   OBJS := \
-         main.o
+         main.o \
+         base/cmdParse.o
 
 # Define the target name
   TARGET := game
