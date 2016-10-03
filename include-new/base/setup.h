@@ -1,15 +1,20 @@
 /**
  * @file include/base/setup.h
+ *
+ * Implement all initial setup
  */
 #ifndef __SETUP_H__
 #define __SETUP_H__
+
+#include <base/error.h>
 
 #include <GFraMe/gframe.h>
 
 #define V_WIDTH     320
 #define V_HEIGHT    240
 
-struct stConfig {
+/** Structure filled with all parsed configurations */
+struct stConfigCtx {
     /** Whether vsync is enabled */
     int vsync;
     /** Whether the game should start in fullscreen */
@@ -20,17 +25,20 @@ struct stConfig {
     int wndHeight;
     /** Initial FPS (base FPS and update/draw rate) */
     int fpsQuality;
+    /** Index of fullscreen resolution (if on fullscreen mode) */
+    int fullscreenResolution;
     /** Video backend */
     gfmVideoBackend videoBackend;
     /** Audio quality */
     gfmAudioQuality audioSettings;
 };
-typedef struct stConfig config;
+typedef struct stConfigCtx configCtx;
 
 /** Initialize the configuration struct with the default values */
 #define CONFIG_INIT(c) \
   do { \
     (c).vsync = 0;\
+    (c).fullscreenResolution = 0; \
     (c).fullscreen = 0;\
     (c).wndWidth = 640;\
     (c).wndHeight = 480;\

@@ -4,24 +4,42 @@
  * Module to parse command line options.
  *
  * Supported options:
- *  * --help | -h: Print usage
- *  * --backend | -b: Set the video backend {OpenGL, SDL, Software}
- *  * --pixel-resolution | -x: Set the initial upcaling factor
- *  * --FPS | -F: Set the game's initial (and maximum) FPS
- *  * --audio | -a: *TODO* Set the audio quality
- *  * --vsync | -v: Enable VSync
- *  * --fullscreen | -f: Init game in fullscreen mode
- *  * --save | -s: *TODO* Save the current configuration
+ *  --help | -h: Print usage
+ *  --backend | -b: Set the video backend {OpenGL, SDL, Software}
+ *  --pixel-resolution | -x: Set the initial upcaling factor
+ *  --resolution | -r: Set the fullscreen resolution
+ *  --FPS | -F: Set the game's initial (and maximum) FPS
+ *  --audio | -a: *TODO* Set the audio quality
+ *  --vsync | -v: Enable VSync
+ *  --fullscreen | -f: Init game in fullscreen mode
+ *  --list | -l: List all available resolution
+ *  --save | -s: *TODO* Save the current configuration
  */
 #include <base/error.h>
+#include <base/game.h>
 #include <base/setup.h>
 
 #include <GFraMe/gframe.h>
 
+#include <stdio.h>
 #include <string.h>
 
-/* TODO Define LOG */
-#define LOG(...)
+#define LOG(...) printf(__VA_ARGS__)
+
+static void usage() {
+    LOG("Options\n\n");
+    LOG("  --backend | -b: Set the video backend {OpenGL, SDL, Software}\n");
+    LOG("  --pixel-resolution | -x: Set the initial upcaling factor\n");
+    LOG("  --FPS | -F: Set the game's initial (and maximum) FPS\n");
+    LOG("  --resolution | -r: Set which resolution is to be used on fullscreen "
+            "mode\n");
+    LOG("  --audio | -a: *TODO* Set the audio quality\n");
+    LOG("  --vsync | -v: Enable VSync\n");
+    LOG("  --fullscreen | -f: Init game in fullscreen mode\n");
+    LOG("  --list | -l: List all available resolution\n");
+    LOG("  --save | -s: *TODO* Save the current configuration\n");
+    LOG("  --help | -h: Print usage\n");
+}
 
 /** Initialize the parsing context */
 #define DO_PARSE() \
@@ -51,7 +69,7 @@
   } while (0)
 
 /** Retrieve the current parameter as a volatile string */
-#define GET_PARAM() argv[i + 1]
+#define GET_PARAM() argv[i]
 
 /** Retrieve the current parameter as a number and store it on the variable
  * passed as parameter */
@@ -59,7 +77,7 @@
   do { \
     char *pNum; \
     int tmp; \
-    pNum = argv[i + 1]; \
+    pNum = argv[i]; \
     tmp = 0; \
     while (*pNum != '\0') { \
         tmp = tmp * 10 + (*pNum) - '0'; \
@@ -76,7 +94,7 @@
  * @param  [ in]argv    List of arguments received
  * @return           
  */
-err cmpParse(config *pConfig, int argc, char *argv[]) {
+err cmdParse(configCtx *pConfig, int argc, char *argv[]) {
     int doSave = 0;
 
     CONFIG_INIT(*pConfig);
@@ -85,17 +103,14 @@ err cmpParse(config *pConfig, int argc, char *argv[]) {
 
     DO_PARSE() {
         if (0) {}
-        IS_FLAG("--help", "-h") {
-            /* TODO Print usage */
-        }
         IS_FLAG("--backend", "-b") {
             CHECK_PARAM();
 
             if (strcmp(GET_PARAM(), "OpenGL") == 0) {
-                pConfig->videoBackend = GFM_VIDEO_SDL2;
+                pConfig->videoBackend = GFM_VIDEO_GL3;
             }
             else if (strcmp(GET_PARAM(), "SDL") == 0) {
-                pConfig->videoBackend = GFM_VIDEO_GL3;
+                pConfig->videoBackend = GFM_VIDEO_SDL2;
             }
             else if (strcmp(GET_PARAM(), "Software") == 0) {
                 pConfig->videoBackend = GFM_VIDEO_SWSDL2;
@@ -118,6 +133,11 @@ err cmpParse(config *pConfig, int argc, char *argv[]) {
 
             GET_NUM(pConfig->fpsQuality);
         }
+        IS_FLAG("--resolution", "-r") {
+            CHECK_PARAM();
+
+            GET_NUM(pConfig->fullscreenResolution);
+        }
         IS_FLAG("--audio", "-a") {
             CHECK_PARAM();
 
@@ -131,6 +151,32 @@ err cmpParse(config *pConfig, int argc, char *argv[]) {
         }
         IS_FLAG("--save", "-s") {
             doSave = 1;
+        }
+        IS_FLAG("--list", "-l") {
+            gfmRV rv;
+            int len, i = 0;
+
+            LOG("Available resolutions:\n");
+
+            rv = gfm_queryResolutions(&len, game.pCtx);
+            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+            while (i < len) {
+                int width, height, fps;
+
+                rv = gfm_getResolution(&width, &height, &fps, game.pCtx, i);
+                ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+                LOG("  %i: %ix%i@%iHz\n", i, width, height, fps);
+
+                i++;
+            }
+
+            return ERR_FORCEEXIT;
+        }
+        IS_FLAG("--help", "-h") {
+            usage();
+
+            return ERR_FORCEEXIT;
         }
 
         NEXT_TOKEN();
