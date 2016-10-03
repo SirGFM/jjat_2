@@ -6,5 +6,5 @@
 #include <base/game.h>
 
 /** Game context */
-gameCtx game;
+gameCtx game = {.pCtx = 0, .elapsed = 0};
 

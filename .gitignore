@@ -37,6 +37,7 @@ bin/*
 *.ase
 *.wav
 *.gif
+promo/*
 
 # Log files
 *.log
