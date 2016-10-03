@@ -17,7 +17,9 @@
 # Define every object required by compilation
   OBJS := \
          main.o \
-         base/cmdParse.o
+         base/cmdParse.o \
+         base/static.o \
+         base/setup.o
 
 # Define the target name
   TARGET := game
@@ -28,6 +30,9 @@
 #        - assets/icon.rc
 # TODO Uncomment this to add an icon to the game
 #  WINICON := assets/icon.o
+
+# List every header file
+  HEADERS := $(shell find include-new/ -name *.h)
 #=======================================================================
 
 
@@ -119,6 +124,12 @@ obj/$(OS)_release/%.o: %.c
 	$(CC) $(CFLAGS)    -O3 -o $@ -c $<
 
 obj/$(OS)_debug/%.o: %.c
+	$(CC) $(CFLAGS) -g -O0 -o $@ -c $<
+
+# Specific rule to re-compile static.o whenever any header is updated
+obj/$(OS)_release/base/static.o: base/static.c $(HEADERS)
+	$(CC) $(CFLAGS)    -O3 -o $@ -c $<
+obj/$(OS)_debug/base/static.o: base/static.c $(HEADERS)
 	$(CC) $(CFLAGS) -g -O0 -o $@ -c $<
 
 # Rule for generating the icon
