@@ -112,33 +112,36 @@
 #
 # Note that basic compilation goes like:
 #  - Target depends on some %.o
-#  - Rules for building %.o comes from a file %.d
+#  - Rules specifing dependencies for building %.o comes from a file %.d
 #  - Files %.d are generated from their %.c, by checking its includes
+#  - %.o are generated from a generic %.o: %.c rule
 #=======================================================================
 all: bin/$(OS)_$(MODE)/$(TARGET)
 
 # Rule for building/linking the game
 bin/$(OS)_release/$(TARGET): $(OBJLIST) $(ICON)
-	$(CC) $(CFLAGS)    -O3 -o $@ $(OBJLIST) $(ICON) $(LDFLAGS)
+	@ echo '[ CC] Release target: $@'
+	@ $(CC) $(CFLAGS)    -O3 -o $@ $(OBJLIST) $(ICON) $(LDFLAGS)
 
 bin/$(OS)_debug/$(TARGET): $(OBJLIST) $(ICON)
-	$(CC) $(CFLAGS) -g -O0 -o $@ $(OBJLIST) $(ICON) $(LDFLAGS)
+	@ echo '[ CC] Debug target: $@'
+	@ $(CC) $(CFLAGS) -g -O0 -o $@ $(OBJLIST) $(ICON) $(LDFLAGS)
+
+# Actual rule for building a %.o from a %.c
+obj/$(OS)_release/%.o: %.c
+	@ echo '[ CC] $< -> $@ (RELEASE)'
+	@ $(CC) $(CFLAGS)    -O3 -o $@ -c $<
+obj/$(OS)_debug/%.o: %.c
+	@ echo '[ CC] $< -> $@ (DEBUG)'
+	@ $(CC) $(CFLAGS) -g -O0 -o $@ -c $<
 
 # Include every rule from a depency (properly tracks header dependency)
 -include $(OBJLIST:%.o=%.d)
 
 # Create the dependency files from their source
-obj/$(OS)_release/%.d: %.c
-	gcc $(CFLAGS) -MM -MG -MT $(@:%.d=%.o) $< > $@
-	echo '\t$$(CC) $$(CFLAGS)    -O3 -o $(@:%.d=%.o) -c $<' >> $@
-	echo '' >> $@
-	gcc $(CFLAGS) -MM -MG -MT $@ $< >> $@
-
-obj/$(OS)_debug/%.d: %.c
-	gcc $(CFLAGS) -MM -MG -MT $(@:%.d=%.o) $< > $@
-	echo '\t$$(CC) $$(CFLAGS) -g -O0 -o $(@:%.d=%.o) -c $<' >> $@
-	echo '' >> $@
-	gcc $(CFLAGS) -MM -MG -MT $@ $< >> $@
+obj/$(OS)_$(MODE)/%.d: %.c
+	@ echo '[DEP] $< -> $@'
+	@ gcc $(CFLAGS) -MM -MG -MT "$@ $(@:%.d=%.o)" $< > $@
 
 # Rule for generating the icon
 $(WINICON):
@@ -150,6 +153,7 @@ mkdirs:
 	mkdir -p $(DIRLIST)
 
 __clean:
-	rm -rf $(DIRLIST) bin/ obj/
+	@ echo "Cleaning..."
+	@ rm -rf $(DIRLIST) bin/ obj/
 #=======================================================================
 
