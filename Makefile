@@ -18,6 +18,7 @@
   OBJS := \
          main.o \
          base/cmdParse.o \
+         base/input.o \
          base/static.o \
          base/setup.o
 
