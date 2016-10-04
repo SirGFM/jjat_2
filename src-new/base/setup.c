@@ -6,6 +6,8 @@
 #include <base/cmdParse.h>
 #include <base/game.h>
 #include <base/setup.h>
+#include <conf/config.h>
+#include <conf/game.h>
 
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gframe.h>

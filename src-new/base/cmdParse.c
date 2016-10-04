@@ -15,9 +15,11 @@
  *  --list | -l: List all available resolution
  *  --save | -s: *TODO* Save the current configuration
  */
+#include <base/cmdParse.h>
 #include <base/error.h>
 #include <base/game.h>
-#include <base/setup.h>
+#include <conf/config.h>
+#include <conf/game.h>
 
 #include <GFraMe/gframe.h>
 

@@ -19,7 +19,7 @@
 #define __CMD_PARSE_H__
 
 #include <base/error.h>
-#include <base/setup.h>
+#include <conf/config.h>
 
 /**
  * Parse every command

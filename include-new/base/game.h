@@ -1,10 +1,10 @@
 /**
  * @file include/base/game.h
  *
- *
+ * Define the game structure
  */
-#ifndef __GAME_H__
-#define __GAME_H__
+#ifndef __BASE_GAME_H__
+#define __BASE_GAME_H__
 
 #include <GFraMe/gframe.h>
 
