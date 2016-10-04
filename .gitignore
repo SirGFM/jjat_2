@@ -4,6 +4,9 @@
 *.obj
 *.elf
 
+# Dependency rules
+*.d
+
 # Precompiled Headers
 *.gch
 *.pch

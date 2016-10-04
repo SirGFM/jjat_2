@@ -109,6 +109,11 @@
 
 #=======================================================================
 # RULES
+#
+# Note that basic compilation goes like:
+#  - Target depends on some %.o
+#  - Rules for building %.o comes from a file %.d
+#  - Files %.d are generated from their %.c, by checking its includes
 #=======================================================================
 all: bin/$(OS)_$(MODE)/$(TARGET)
 
@@ -119,18 +124,21 @@ bin/$(OS)_release/$(TARGET): $(OBJLIST) $(ICON)
 bin/$(OS)_debug/$(TARGET): $(OBJLIST) $(ICON)
 	$(CC) $(CFLAGS) -g -O0 -o $@ $(OBJLIST) $(ICON) $(LDFLAGS)
 
-# Rule for compiling any .c into its object
-obj/$(OS)_release/%.o: %.c
-	$(CC) $(CFLAGS)    -O3 -o $@ -c $<
+# Include every rule from a depency (properly tracks header dependency)
+-include $(OBJLIST:%.o=%.d)
 
-obj/$(OS)_debug/%.o: %.c
-	$(CC) $(CFLAGS) -g -O0 -o $@ -c $<
+# Create the dependency files from their source
+obj/$(OS)_release/%.d: %.c
+	gcc $(CFLAGS) -MM -MG -MT $(@:%.d=%.o) $< > $@
+	echo '\t$$(CC) $$(CFLAGS)    -O3 -o $(@:%.d=%.o) -c $<' >> $@
+	echo '' >> $@
+	gcc $(CFLAGS) -MM -MG -MT $@ $< >> $@
 
-# Specific rule to re-compile static.o whenever any header is updated
-obj/$(OS)_release/base/static.o: base/static.c $(HEADERS)
-	$(CC) $(CFLAGS)    -O3 -o $@ -c $<
-obj/$(OS)_debug/base/static.o: base/static.c $(HEADERS)
-	$(CC) $(CFLAGS) -g -O0 -o $@ -c $<
+obj/$(OS)_debug/%.d: %.c
+	gcc $(CFLAGS) -MM -MG -MT $(@:%.d=%.o) $< > $@
+	echo '\t$$(CC) $$(CFLAGS) -g -O0 -o $(@:%.d=%.o) -c $<' >> $@
+	echo '' >> $@
+	gcc $(CFLAGS) -MM -MG -MT $@ $< >> $@
 
 # Rule for generating the icon
 $(WINICON):
