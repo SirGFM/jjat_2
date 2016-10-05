@@ -8,6 +8,100 @@
 
 #include <GFraMe/gfmError.h>
 
+/**
+ * Handle every input that require an immediate action (i.e, those that are more
+ * like flags, instead of being interpreted during the game loop).
+ */
+void handleInput() {
+    if (DID_JUST_PRESS(pause)) {
+        /* TODO Pause the game */
+    }
+
+    if (DID_JUST_RELEASE(fullscreen)) {
+        gfmRV rv;
+
+        /* TODO Refactor this keeping the current state */
+        rv = gfm_setWindowed(game.pCtx);
+        if (rv == GFMRV_WINDOW_MODE_UNCHANGED) {
+            gfm_setFullscreen(game.pCtx);
+        }
+    }
+
+#if defined(DEBUG)
+    if (DID_JUST_RELEASE(qt)) {
+        /* TODO Toggle quadtree visibility */
+    }
+
+    if (DID_JUST_RELEASE(gif)) {
+        gfmRV rv;
+
+        rv = gfm_didExportGif(game.pCtx);
+        if (rv == GFMRV_TRUE || rv == GFMRV_GIF_OPERATION_NOT_ACTIVE) {
+            rv = gfm_recordGif(pGame->pCtx, 10000 /* ms */, "anim.gif", 8, 0);
+        }
+    }
+#endif
+}
+
+#if defined(DEBUG)
+/**
+ * Handle the debug controls of the game's simulation. These allow the update
+ * loop to be paused/resumed or even stepped.
+ */
+void handleDebugInput() {
+    if (DID_JUST_RELEASE(dbgPause)) {
+        /* TODO Toggle pause/resume update loop */
+    }
+
+    if (DID_JUST_RELEASE(dbgStep)) {
+        /* TODO Single step & pause update loop */
+    }
+}
+#endif
+
+/** Retrieve the state of every button */
+err updateInput() {
+    /** List of buttons, used to easily iterate through all virtual buttons */
+    button *pButtons;
+    int i = 0;
+
+    i = 0;
+    pButtons = (button*)(&input);
+    /* Iterate through all buttons and update their state */
+    while (i < (sizeof(input) / sizeof(button))) {
+        gfmRV rv;
+
+        rv = gfm_getKeyState(&pButtons[i].state, &pButtons[i].numPressed
+                , game.pCtx, pButtons[i].handle);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+        i++;
+    }
+
+    return ERR_OK;
+}
+
+/** Forcefully update every debug button */
+err updateDebugInput() {
+    gfmInput *pInput;
+    gfmRV rv;
+
+    rv = gfm_getInput(&pInput, game.pCtx);
+    ASSERT(rv == GFMRV_OK, rv);
+
+#define X(name, ...) \
+    rv = gfmInput_updateVKey(pInput, input.name.handle); \
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR); \
+    rv = gfm_getKeyState(&input.name.state, &input.name.numPressed, game.pCtx \
+                , input.name.handle); \
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    X_DEBUG_BUTTON_LIST
+#undef X
+
+    return ERR_OK;
+}
+
+/** Initialize every button with their default mapping */
 err initInput() {
     gfmRV rv;
 
