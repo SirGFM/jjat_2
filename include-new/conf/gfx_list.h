@@ -8,10 +8,11 @@
 
 /**
  * List of textures. When defining the 'X macro' for use, the first parameter is
- * the name of the attribute and the second is the file.
+ * the name of the attribute, the second is the file and the last is the alpha
+ * color key (in RRGGBB format).
  */
 #define TEXTURE_LIST \
-  X(atlas, "assets/gfx/atlas.bmp")
+  X(atlas, "assets/gfx/atlas.bmp", 0x222034)
 
 /**
  * List of spritesets. When defining the 'X macro' for use, the first parameter

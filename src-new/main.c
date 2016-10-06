@@ -2,6 +2,7 @@
  * @file src/main.c
  */
 #include <base/game.h>
+#include <base/gfx.h>
 #include <base/setup.h>
 #include <base/static.h>
 
@@ -18,6 +19,9 @@ int main(int argc, char *argv[]) {
 
     erv = setupGame(argc, argv);
     ASSERT_TO(erv == ERR_FORCEEXIT, erv = ERR_OK, __ret);
+    ASSERT_TO(erv != ERR_OK, erv = erv, __ret);
+
+    erv = initGfx();
     ASSERT_TO(erv != ERR_OK, erv = erv, __ret);
 
     erv = ERR_OK;
