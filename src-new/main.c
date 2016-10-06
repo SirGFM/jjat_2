@@ -3,6 +3,7 @@
  */
 #include <base/game.h>
 #include <base/setup.h>
+#include <base/static.h>
 
 /**
  * Entry point. Setup everything and handle cleaning up the game, when it exits
@@ -12,6 +13,8 @@
  */
 int main(int argc, char *argv[]) {
     err erv;
+
+    zeroizeGlobalCtx();
 
     erv = setupGame(argc, argv);
     ASSERT_TO(erv == ERR_FORCEEXIT, erv = ERR_OK, __ret);
