@@ -16,8 +16,10 @@
 
 # Define every object required by compilation
   OBJS := \
+         collision.o \
          main.o \
          base/cmdParse.o \
+         base/collision.o \
          base/gfx.o \
          base/input.o \
          base/static.o \

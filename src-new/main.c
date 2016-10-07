@@ -1,6 +1,7 @@
 /**
  * @file src/main.c
  */
+#include <base/collision.h>
 #include <base/game.h>
 #include <base/gfx.h>
 #include <base/setup.h>
@@ -24,9 +25,14 @@ int main(int argc, char *argv[]) {
     erv = initGfx();
     ASSERT_TO(erv != ERR_OK, erv = erv, __ret);
 
+    erv = setupCollision();
+    ASSERT_TO(erv != ERR_OK, erv = erv, __ret);
+
     erv = ERR_OK;
 __ret:
+    cleanCollision();
     cleanGame();
+
     return erv;
 }
 
