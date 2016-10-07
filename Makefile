@@ -17,11 +17,11 @@
 # Define every object required by compilation
   OBJS := \
          collision.o \
-         main.o \
          base/cmdParse.o \
          base/collision.o \
          base/gfx.o \
          base/input.o \
+         base/main.o \
          base/static.o \
          base/setup.o
 
@@ -82,6 +82,13 @@
     LDFLAGS := $(LDFLAGS) -lGFraMe
   else
     LDFLAGS := $(LDFLAGS) -lGFraMe_dbg
+  endif
+
+  ifneq (, $(filter clean, $(MAKECMDGOALS)))
+    IGNORE_DEP := true
+  endif
+  ifneq (, $(filter mkdirs, $(MAKECMDGOALS)))
+    IGNORE_DEP := true
   endif
 #=======================================================================
 
@@ -144,6 +151,8 @@ obj/$(OS)_debug/%.o: %.c
 
 # Create the dependency files from their source
 obj/$(OS)_$(MODE)/%.d: %.c
+	@ # Hack required so this won't run when clean or mkdirs is run
+	@ if [ ! -z "$(IGNORE_DEP)" ]; then exit 1; fi
 	@ echo '[DEP] $< -> $@'
 	@ gcc $(CFLAGS) -MM -MG -MT "$@ $(@:%.d=%.o)" $< > $@
 
@@ -154,7 +163,8 @@ $(WINICON):
 clean: __clean mkdirs
 
 mkdirs:
-	mkdir -p $(DIRLIST)
+	@ echo "Creating output directories..."
+	@ mkdir -p $(DIRLIST)
 
 __clean:
 	@ echo "Cleaning..."
