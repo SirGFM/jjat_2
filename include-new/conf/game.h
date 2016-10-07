@@ -10,6 +10,7 @@
 #define V_HEIGHT    240
 #define ORG         "com.gfmgamecorner"
 #define TITLE       "JJAT+"
+#define BG_COLOR    0xFF222034
 
 #endif /* __CONF_GAME_H__ */
 

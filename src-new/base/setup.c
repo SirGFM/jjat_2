@@ -63,6 +63,9 @@ err setupGame(int argc, char *argv[]) {
     }
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+    rv = gfm_setBackground(game.pCtx, BG_COLOR);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
     rv = gfm_initAudio(game.pCtx, config.audioSettings);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
