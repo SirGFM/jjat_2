@@ -12,7 +12,7 @@
  * color key (in RRGGBB format).
  */
 #define TEXTURE_LIST \
-  X(atlas, "assets/gfx/atlas.bmp", 0x222034)
+  X(atlas, "gfx/atlas.bmp", 0x222034)
 
 /**
  * List of spritesets. When defining the 'X macro' for use, the first parameter
