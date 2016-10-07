@@ -5,6 +5,7 @@
 #include <base/game.h>
 #include <base/gfx.h>
 #include <base/input.h>
+#include <base/mainloop.h>
 #include <base/setup.h>
 #include <base/static.h>
 
@@ -35,7 +36,7 @@ int main(int argc, char *argv[]) {
     erv = setupCollision();
     ASSERT_TO(erv == ERR_OK, erv = erv, __ret);
 
-    erv = ERR_OK;
+    erv = mainloop();
 __ret:
     cleanCollision();
     cleanGame();

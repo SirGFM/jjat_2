@@ -7,6 +7,7 @@
 #    - GFRAME_INCLUDES
 #    - GFRAME_LIBS
 #    - CC
+#    - ASSETS_SYMLINK
 
 #=======================================================================
 # CONFIGURABLE VARIABLES
@@ -17,6 +18,7 @@
 # Define every object required by compilation
   OBJS := \
          collision.o \
+         mainloop.o \
          base/cmdParse.o \
          base/collision.o \
          base/gfx.o \
@@ -134,9 +136,13 @@ bin/$(OS)_release/$(TARGET): $(OBJLIST) $(ICON)
 	@ echo '[ CC] Release target: $@'
 	@ $(CC) $(CFLAGS)    -O3 -o $@ $(OBJLIST) $(ICON) $(LDFLAGS)
 
-bin/$(OS)_debug/$(TARGET): $(OBJLIST) $(ICON)
+bin/$(OS)_debug/$(TARGET): $(OBJLIST) $(ICON) $(ASSETS_SYMLINK)
 	@ echo '[ CC] Debug target: $@'
 	@ $(CC) $(CFLAGS) -g -O0 -o $@ $(OBJLIST) $(ICON) $(LDFLAGS)
+
+bin/Linux_debug/assets:
+	@ echo '[LNK] Creating symbolic link for assets...'
+	@ cd bin/Linux_debug/; ln -s ../../assets/ .
 
 # Actual rule for building a %.o from a %.c
 obj/$(OS)_release/%.o: %.c
