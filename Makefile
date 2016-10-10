@@ -147,10 +147,10 @@ bin/Linux_debug/assets:
 # Actual rule for building a %.o from a %.c
 obj/$(OS)_release/%.o: %.c
 	@ echo '[ CC] $< -> $@ (RELEASE)'
-	@ $(CC) $(CFLAGS)    -O3 -o $@ -c $<
+	@ $(CC) $(CFLAGS)            -O3 -o $@ -c $<
 obj/$(OS)_debug/%.o: %.c
 	@ echo '[ CC] $< -> $@ (DEBUG)'
-	@ $(CC) $(CFLAGS) -g -O0 -o $@ -c $<
+	@ $(CC) $(CFLAGS) -DDEBUG -g -O0 -o $@ -c $<
 
 # Include every rule from a depency (properly tracks header dependency)
 -include $(OBJLIST:%.o=%.d)

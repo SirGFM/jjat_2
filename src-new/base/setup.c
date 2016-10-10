@@ -79,6 +79,10 @@ err setupGame(int argc, char *argv[]) {
             config.fpsQuality);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+#if defined(DEBUG)
+    game.debugRunState = DBG_RUNNING;
+#endif
+
     return ERR_OK;
 }
 

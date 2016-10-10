@@ -1,6 +1,7 @@
 /**
  * @file src/base/input.c
  */
+#include <base/collision.h>
 #include <base/error.h>
 #include <base/game.h>
 #include <base/input.h>
@@ -29,7 +30,8 @@ void handleInput() {
 
 #if defined(DEBUG)
     if (DID_JUST_RELEASE(qt)) {
-        /* TODO Toggle quadtree visibility */
+        /* Toggle quadtree visibility */
+        collision.visibility = !collision.visibility;
     }
 
     if (DID_JUST_RELEASE(gif)) {
@@ -37,7 +39,7 @@ void handleInput() {
 
         rv = gfm_didExportGif(game.pCtx);
         if (rv == GFMRV_TRUE || rv == GFMRV_GIF_OPERATION_NOT_ACTIVE) {
-            rv = gfm_recordGif(pGame->pCtx, 10000 /* ms */, "anim.gif", 8, 0);
+            rv = gfm_recordGif(game.pCtx, 10000 /* ms */, "anim.gif", 8, 0);
         }
     }
 #endif
@@ -50,11 +52,18 @@ void handleInput() {
  */
 void handleDebugInput() {
     if (DID_JUST_RELEASE(dbgPause)) {
-        /* TODO Toggle pause/resume update loop */
+        /* Toggle pause/resume update loop */
+        if (game.debugRunState == DBG_PAUSED) {
+            game.debugRunState = DBG_RUNNING;
+        }
+        else {
+            game.debugRunState = DBG_PAUSED;
+        }
     }
 
     if (DID_JUST_RELEASE(dbgStep)) {
-        /* TODO Single step & pause update loop */
+        /* Single step & pause update loop */
+        game.debugRunState = DBG_STEP;
     }
 }
 #endif

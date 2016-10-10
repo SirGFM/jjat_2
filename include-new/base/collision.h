@@ -13,6 +13,10 @@ struct stCollisionCtx {
     gfmQuadtreeRoot *pQt;
     /** Whether pending collisions (for the current object) should be skipped */
     int skip;
+#if defined(DEBUG)
+    /** Quadtree's visibility */
+    int visibility;
+#endif
 };
 typedef struct stCollisionCtx collisionCtx;
 
@@ -36,6 +40,13 @@ err doCollide();
 
 /** Skip any pending collision for the current object */
 #define skipCollision() do { collision.skip = 1; } while (0)
+
+/** Checks whether the quadtree should be rendered */
+#if defined(DEBUG)
+#  define IS_QUADTREE_VISIBLE() (collision.visibility)
+#else
+#  define IS_QUADTREE_VISIBLE() (0)
+#endif
 
 #endif /* __BASE_COLLISION_H__ */
 
