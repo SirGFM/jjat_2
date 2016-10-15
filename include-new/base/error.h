@@ -4,6 +4,8 @@
 #ifndef __ERROR_H__
 #define __ERROR_H__
 
+#include <conf/error_list.h>
+
 /**
  * Check if a condition failed, execute a statement (to set the error value) and
  * jump to a label (where clean up should be done).
@@ -34,12 +36,9 @@
   } while (0)
 
 enum enErr {
-    ERR_OK,
-    ERR_FORCEEXIT,
-    ERR_ARGUMENTBAD,
-    ERR_MISSINGPARAM,
-    ERR_GFMERR,
-    ERR_MAX
+#define X(val) val,
+    ERROR_LIST
+#undef X
 };
 typedef enum enErr err;
 
