@@ -6,6 +6,11 @@
 
 #include <conf/error_list.h>
 
+/** Simple 'no-op'. Useful in ASSERT_TO, when the return value has already been
+ * set */
+#define NOOP() \
+  do { } while (0)
+
 /**
  * Check if a condition failed, execute a statement (to set the error value) and
  * jump to a label (where clean up should be done).

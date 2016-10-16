@@ -6,6 +6,8 @@
 #ifndef __BASE_GAME_H__
 #define __BASE_GAME_H__
 
+#include <conf/state.h>
+
 #include <GFraMe/gframe.h>
 
 enum enDebugRunState {
@@ -23,6 +25,10 @@ struct stGameCtx {
      * and fixed pattern (e.g., 17ms, 17ms, 16ms, ..., for 60 FPS), in order
      * match the desired FPS without rounding */
     int elapsed;
+    /** Current state being played (i.e., updated & drawn) */
+    state currentState;
+    /** State that will start being played on the next frame */
+    state nextState;
 #if defined(DEBUG)
     /** Running state for the debug build. Allows the game to be executed
      * step-by-step. */
