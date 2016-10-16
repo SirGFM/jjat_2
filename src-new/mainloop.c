@@ -48,6 +48,7 @@ err mainloop() {
 
             erv = updateInput();
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
+            handleInput();
 
             rv = gfm_getElapsedTime(&(game.elapsed), game.pCtx);
             ASSERT_TO(rv == GFMRV_OK, erv = ERR_GFMERR, __ret);

@@ -27,22 +27,6 @@ void handleInput() {
             gfm_setFullscreen(game.pCtx);
         }
     }
-
-#if defined(DEBUG)
-    if (DID_JUST_RELEASE(qt)) {
-        /* Toggle quadtree visibility */
-        collision.visibility = !collision.visibility;
-    }
-
-    if (DID_JUST_RELEASE(gif)) {
-        gfmRV rv;
-
-        rv = gfm_didExportGif(game.pCtx);
-        if (rv == GFMRV_TRUE || rv == GFMRV_GIF_OPERATION_NOT_ACTIVE) {
-            rv = gfm_recordGif(game.pCtx, 10000 /* ms */, "anim.gif", 8, 0);
-        }
-    }
-#endif
 }
 
 #if defined(DEBUG)
@@ -64,6 +48,20 @@ void handleDebugInput() {
     if (DID_JUST_RELEASE(dbgStep)) {
         /* Single step & pause update loop */
         game.debugRunState = DBG_STEP;
+    }
+
+    if (DID_JUST_RELEASE(qt)) {
+        /* Toggle quadtree visibility */
+        collision.visibility = !collision.visibility;
+    }
+
+    if (DID_JUST_RELEASE(gif)) {
+        gfmRV rv;
+
+        rv = gfm_didExportGif(game.pCtx);
+        if (rv == GFMRV_TRUE || rv == GFMRV_GIF_OPERATION_NOT_ACTIVE) {
+            rv = gfm_recordGif(game.pCtx, 10000 /* ms */, "anim.gif", 8, 0);
+        }
     }
 }
 #endif
