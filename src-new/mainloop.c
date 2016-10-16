@@ -13,20 +13,29 @@
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gfmQuadtree.h>
 
+#include <jjat2/playstate.h>
+#include <jjat2/static.h>
+
 /** Run the main loop until the game is closed */
 err mainloop() {
     err erv;
     gfmRV rv;
 
-    /* TODO Set initial state */
+    zeroizeGameGlobalCtx();
+    erv = initPlaystate();
+    ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
+
+    /* Set initial state */
+    game.nextState = ST_PLAYSTATE;
 
     while (gfm_didGetQuitFlag(game.pCtx) != GFMRV_TRUE) {
         /* Switch state */
         if (game.nextState != ST_NONE) {
             switch (game.nextState) {
-                /* TODO Load/Setup the state */
+                case ST_PLAYSTATE: erv = loadPlaystate(); break;
                 default: {}
             }
+            ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
 
             game.currentState = game.nextState;
             game.nextState = ST_NONE;
@@ -55,9 +64,10 @@ err mainloop() {
 
             /* Update the current state */
             switch (game.currentState) {
-                /* TODO Call the state's update */
+                case ST_PLAYSTATE: erv = updatePlaystate(); break;
                 default: {}
             }
+            ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
 
             rv = gfm_fpsCounterUpdateEnd(game.pCtx);
             ASSERT_TO(rv == GFMRV_OK, erv = ERR_GFMERR, __ret);
@@ -71,9 +81,10 @@ err mainloop() {
 
             /* Render the current state */
             switch (game.currentState) {
-                /* TODO Call the state's draw */
+                case ST_PLAYSTATE: erv = drawPlaystate(); break;
                 default: {}
             }
+            ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
 
             if (IS_QUADTREE_VISIBLE()) {
                 /* NOTE: This will break if the quadtree isn't set up */
@@ -88,6 +99,7 @@ err mainloop() {
 
     erv = ERR_OK;
 __ret:
+    freePlaystate();
 
     return erv;
 }

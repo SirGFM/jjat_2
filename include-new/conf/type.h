@@ -22,5 +22,10 @@
 #define TYPE(type) \
     (type & T_MASK)
 
+enum enType {
+    T_FLOOR = gfmType_reserved_5, /* purple */
+};
+typedef enum enType type;
+
 #endif /* __CONF_TYPE_H__ */
 
