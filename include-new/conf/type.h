@@ -23,7 +23,10 @@
     (type & T_MASK)
 
 enum enType {
-    T_FLOOR = gfmType_reserved_5, /* purple */
+    T_FLOOR  = gfmType_reserved_5, /* purple */
+    T_PLAYER = gfmType_reserved_7, /* light red */
+
+    T_SWORDY = (1 << T_BASE_NBITS) | T_PLAYER,
 };
 typedef enum enType type;
 

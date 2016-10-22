@@ -27,8 +27,10 @@
          base/static.o \
          base/setup.o \
          jjat2/dictionary.o \
+         jjat2/entity.o \
          jjat2/playstate.o \
-         jjat2/static.o
+         jjat2/static.o \
+         jjat2/swordy.o
 
 # Define the target name
   TARGET := game

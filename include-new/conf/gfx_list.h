@@ -21,7 +21,8 @@
  * this spriteset.
  */
 #define SPRITESET_LIST \
-  X(pSset8x8, 8/*width*/, 8/*height*/, atlas)
+  X(pSset8x8, 8/*width*/, 8/*height*/, atlas) \
+  X(pSset16x16, 16/*width*/, 16/*height*/, atlas)
 
 #endif /* __CONF_GFX_LIST_H__ */
 
