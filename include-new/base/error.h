@@ -6,6 +6,20 @@
 
 #include <conf/error_list.h>
 
+/** Add signal handling so GDB freezes on failed asserts */
+#if defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__))
+#  include <stdlib.h>
+#  include <signal.h>
+#endif
+
+/** Make GDB stop (only on DEBUG mode) */
+#if defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__))
+#  define STOP_GDB() \
+     do { raise(SIGINT); } while(0)
+#else
+#  define STOP_GDB()
+#endif
+
 /** Simple 'no-op'. Useful in ASSERT_TO, when the return value has already been
  * set */
 #define NOOP() \
@@ -22,6 +36,7 @@
 #define ASSERT_TO(stmt, ret_stmt, label) \
   do { \
     if (!(stmt)) { \
+      STOP_GDB(); \
       ret_stmt; \
       goto label; \
     } \
@@ -36,6 +51,7 @@
 #define ASSERT(stmt, ret) \
   do { \
     if (!(stmt)) { \
+      STOP_GDB(); \
       return ret; \
     } \
   } while (0)
