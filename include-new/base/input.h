@@ -66,13 +66,21 @@ err initInput();
 #define IS_PRESSED(bt) \
     (input.bt.state & gfmInput_pressed)
 
+/** Whether a state is just pressed */
+#define IS_STATE_JUSTPRESSED(st) \
+    ((st & gfmInput_justPressed) == gfmInput_justPressed)
+
+/** Whether a state is just released */
+#define IS_STATE_JUSTRELEASED(st) \
+    ((st & gfmInput_justReleased) == gfmInput_justReleased)
+
 /** Whether a given button was just pressed */
 #define DID_JUST_PRESS(bt) \
-    ((input.bt.state & gfmInput_justPressed) == gfmInput_justPressed)
+    (IS_STATE_JUSTPRESSED(input.bt.state))
 
 /** Whether a given button was just released */
 #define DID_JUST_RELEASE(bt) \
-    ((input.bt.state & gfmInput_justReleased) == gfmInput_justReleased)
+    (IS_STATE_JUSTRELEASED(input.bt.state))
 
 
 #endif /* __BASE_INPUT_H__ */

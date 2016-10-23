@@ -80,5 +80,13 @@ typedef struct stEntityCtx entityCtx;
  */
 err setEntityAnimation(entityCtx *entity, int animation, int force);
 
+/**
+ * Update the entity's jump, based on the last frame and the jump button.
+ *
+ * @param  [ in]entity The entity
+ * @param  [ in]jumpBt State of the jump button
+ */
+err updateEntityJump(entityCtx *entity, gfmInputState jumpBt);
+
 #endif /* __JJAT2_ENTITY_H__ */
 

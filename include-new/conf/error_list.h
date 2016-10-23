@@ -14,6 +14,7 @@
     X(ERR_MISSINGPARAM) \
     X(ERR_GFMERR) \
     X(ERR_INDEXOOB) \
+    X(ERR_DIDJUMP) \
     X(ERR_MAX)
 
 #endif /* __CONF_ERROR_LIST_H__ */
