@@ -1,10 +1,12 @@
 /**
- * @file include/jjat/playstate.h */
+ * @file include/jjat/playstate.h
+ */
 #ifndef __JJAT2_PLAYSTATE_H__
 #define __JJAT2_PLAYSTATE_H__
 
 #include <base/error.h>
 
+#include <GFraMe/gfmParser.h>
 #include <GFraMe/gfmTilemap.h>
 
 #include <jjat2/gunny.h>
@@ -16,12 +18,16 @@
 #define TM_DEFAULT_TILE -1
 
 struct stPlaystateCtx {
+    /** The level parser */
+    gfmParser *pParser;
     /** The game's map */
     gfmTilemap *pMap;
     /** Map's height, in pixels */
     int height;
     /** Map's width, in pixels */
     int width;
+    /** Swordy character */
+    swordyCtx swordy;
 };
 typedef struct stPlaystateCtx playstateCtx;
 

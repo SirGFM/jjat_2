@@ -6,14 +6,24 @@
 #include <base/game.h>
 #include <base/gfx.h>
 
+#include <GFraMe/gfmParser.h>
 #include <GFraMe/gfmTilemap.h>
 
 #include <jjat2/dictionary.h>
 #include <jjat2/playstate.h>
 
+#include <string.h>
+
 /** Initialize the playstate so a level may be later loaded and played */
 err initPlaystate() {
     gfmRV rv;
+    err erv;
+
+    erv = initSwordy(&playstate.swordy);
+    ASSERT(erv == ERR_OK, erv);
+
+    rv = gfmParser_getNew(&playstate.pParser);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     rv = gfmTilemap_getNew(&playstate.pMap);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
@@ -29,6 +39,10 @@ void freePlaystate() {
     if (playstate.pMap != 0) {
         gfmTilemap_free(&playstate.pMap);
     }
+    if (playstate.pParser != 0) {
+        gfmParser_free(&playstate.pParser);
+    }
+    freeSwordy(&playstate.swordy);
 }
 
 /** Updates the quadtree's bounds according to the currently loaded map */
@@ -58,6 +72,34 @@ err loadPlaystate() {
     erv = _updateQuadtreeSize();
     ASSERT(erv == ERR_OK, erv);
 
+    rv = gfmParser_initStatic(playstate.pParser, game.pCtx,
+            "levels/map_test_obj.gfm");
+    ASSERT(erv == ERR_OK, erv);
+
+    while (1) {
+        char *type;
+        err erv;
+
+        rv = gfmParser_parseNext(playstate.pParser);
+        if (rv == GFMRV_PARSER_FINISHED) {
+            break;
+        }
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+        rv = gfmParser_getIngameType(&type, playstate.pParser);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+        if (strcmp(type, "swordy_pos") == 0) {
+            erv = parseSwordy(&playstate.swordy, playstate.pParser);
+            ASSERT(erv == ERR_OK, erv);
+        }
+        else if (strcmp(type, "gunny_pos") == 0) {
+        }
+    }
+
+    rv = gfmParser_reset(playstate.pParser);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
     return ERR_OK;
 }
 
@@ -80,9 +122,13 @@ err updatePlaystate() {
 /** Draw the playstate */
 err drawPlaystate() {
     gfmRV rv;
+    err erv;
 
     rv = gfmTilemap_draw(playstate.pMap, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    erv = drawSwordy(&playstate.swordy);
+    ASSERT(erv == ERR_OK, erv);
 
     return ERR_OK;
 }

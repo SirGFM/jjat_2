@@ -10,6 +10,7 @@
 #include <conf/type.h>
 
 #include <GFraMe/gfmError.h>
+#include <GFraMe/gfmParser.h>
 #include <GFraMe/gfmSprite.h>
 
 #include <jjat2/swordy.h>
@@ -99,6 +100,42 @@ void freeSwordy(swordyCtx *swordy) {
         gfmSprite_free(&swordy->entity.pSelf);
     }
 }
+
+/**
+ * Parse swordy into its position
+ *
+ * @param  [ in]swordy  The player
+ * @param  [ in]pParser Parser that has just parsed a "swordy_pos"
+ */
+err parseSwordy(swordyCtx *swordy, gfmParser *pParser) {
+    gfmRV rv;
+    err erv;
+    int x, y;
+
+    rv = gfmParser_getPos(&x, &y, pParser);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmSprite_setPosition(swordy->entity.pSelf, x + swordy_width
+            , y - swordy_height);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    erv = setEntityAnimation(&swordy->entity, STAND, 1/*force*/);
+    ASSERT(erv == ERR_OK, erv);
+
+    return ERR_OK;
+}
+
+/**
+ * Render a swordy
+ *
+ * @param  [ in]swordy The player
+ */
+err drawSwordy(swordyCtx *swordy) {
+    gfmRV rv;
+    rv = gfmSprite_draw(swordy->entity.pSelf, game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    return ERR_OK;
+}
+
 
 /**
  * Update the object's physics.
