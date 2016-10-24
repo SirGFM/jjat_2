@@ -17,8 +17,8 @@
 
 /** Define Swordy's physics constants. The first parameter is the time in
  * 60FPS-frames and the second is the jump height in 8px-tiles. */
-#define SWORDY_FALL_TIME 14
-#define SWORDY_JUMP_TIME 18
+#define SWORDY_FALL_TIME 15
+#define SWORDY_JUMP_TIME 20
 #define SWORDY_JUMP_HEIGHT 4.5
 #define SWORDY_HOP_TIME 18
 #define SWORDY_HOP_HEIGHT 1.5
