@@ -14,14 +14,14 @@
 
 /** Create a list of buttons and their default mapping. */
 #define X_RELEASE_BUTTON_LIST \
-  X(grlLeft    , gfmKey_h  , gfmController_laxis_left) \
-  X(grlRight   , gfmKey_j  , gfmController_laxis_right) \
-  X(grlJump    , gfmKey_s  , gfmController_l1) \
-  X(grlAtk     , gfmKey_d  , gfmController_l2) \
-  X(boyLeft    , gfmKey_k  , gfmController_raxis_left) \
-  X(boyRight   , gfmKey_l  , gfmController_raxis_right) \
-  X(boyJump    , gfmKey_f  , gfmController_r1) \
-  X(boyAtk     , gfmKey_g  , gfmController_r2) \
+  X(swordyLeft    , gfmKey_h  , gfmController_laxis_left) \
+  X(swordyRight   , gfmKey_j  , gfmController_laxis_right) \
+  X(swordyJump    , gfmKey_s  , gfmController_l1) \
+  X(swordyAtk     , gfmKey_d  , gfmController_l2) \
+  X(gunnyLeft    , gfmKey_k  , gfmController_raxis_left) \
+  X(gunnyRight   , gfmKey_l  , gfmController_raxis_right) \
+  X(gunnyJump    , gfmKey_f  , gfmController_r1) \
+  X(gunnyAtk     , gfmKey_g  , gfmController_r2) \
   X(pause      , gfmKey_esc, gfmController_start) \
   X(fullscreen , gfmKey_f12) \
 

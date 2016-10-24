@@ -3,6 +3,7 @@
  *
  * Base structure for physical entity (player & mobs)
  */
+#include <base/collision.h>
 #include <base/error.h>
 #include <base/game.h>
 #include <base/input.h>
@@ -50,8 +51,19 @@ err setEntityAnimation(entityCtx *entity, int animation, int force) {
  */
 err updateEntityJump(entityCtx *entity, gfmInputState jumpBt) {
     double vy;
+    gfmCollision dir;
     gfmRV rv;
+    /* This function either exit on a failed assert (therefore, with a custom
+     * error code) or with whatever erv is set to. By default, it exits with
+     * ERR_OK, however, on jump, erv is set to ERR_DIDJUMP. */
     err erv = ERR_OK;
+
+    /* Reset the jump grace time whenerver the entity is grounded */
+    rv = gfmSprite_getCollision(&dir, entity->pSelf);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    if (dir & gfmCollision_down) {
+        entity->jumpGrace = DEF_JUMP_GRACE;
+    }
 
     if (entity->jumpGrace > 0 && IS_STATE_JUSTPRESSED(jumpBt)) {
         /* Convetional jump */
@@ -102,5 +114,20 @@ err updateEntityJump(entityCtx *entity, gfmInputState jumpBt) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     return erv;
+}
+
+/**
+ * Collide the entity's sprite against the world
+ *
+ * @param  [ in]entity The entity
+ */
+err collideEntity(entityCtx *entity) {
+    gfmRV rv;
+    rv = gfmQuadtree_collideSprite(collision.pQt, entity->pSelf);
+    if (rv == GFMRV_QUADTREE_OVERLAPED) {
+        return doCollide();
+    }
+    ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
+    return ERR_OK;
 }
 

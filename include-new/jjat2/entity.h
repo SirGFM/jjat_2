@@ -20,7 +20,7 @@
  * @param  [ in]jumpHeight  Jump height in 8px-tiles
  */
 #define JUMP_SPEED(timeToAppex, jumpHeight) \
-  (-2.0 * TILES_TO_PX(jumpHeight) / FRAMES_TO_MS(timeToAppex))
+  (-2.0 * TILES_TO_PX(jumpHeight) / FRAMES_TO_S(timeToAppex))
 
 /**
  * Calculate the gravity acceleration.
@@ -29,12 +29,15 @@
  * @param  [ in]jumpHeight  Jump height in 8px-tiles
  */
 #define JUMP_ACCELERATION(timeToAppex, jumpHeight) \
-  (2.0 * TILES_TO_PX(jumpHeight) / (FRAMES_TO_MS(timeToAppex) * \
-    FRAMES_TO_MS(timeToAppex)))
+  (2.0 * TILES_TO_PX(jumpHeight) / (FRAMES_TO_S(timeToAppex) * \
+    FRAMES_TO_S(timeToAppex)))
 
 /** Convert from tiles to pixels. Each tile is considered to be 8x8 pixels. */
 #define TILES_TO_PX(n) (n * 8)
 
+/** Convert from frames to seconds. To make it framerate independent, this
+ * considers the game to be running at 60 FPS. */
+#define FRAMES_TO_S(n) (n / 60.0)
 /** Convert from frames to milliseconds. To make it framerate independent, this
  * considers the game to be running at 60 FPS. */
 #define FRAMES_TO_MS(n) (n * 16)
@@ -81,12 +84,24 @@ typedef struct stEntityCtx entityCtx;
 err setEntityAnimation(entityCtx *entity, int animation, int force);
 
 /**
- * Update the entity's jump, based on the last frame and the jump button.
+ * Update the entity's jump, based on the last frame and the jump button. This
+ * function also updates the gravity (if fall gravity is different from jump).
+ *
+ * Changing to a jump state/animation is delegated to the caller. If jump gets
+ * issued, the sprite's vertical velocity is set accordingly and ERR_DIDJUMP is
+ * returned.
  *
  * @param  [ in]entity The entity
  * @param  [ in]jumpBt State of the jump button
  */
 err updateEntityJump(entityCtx *entity, gfmInputState jumpBt);
+
+/**
+ * Collide the entity's sprite against the world
+ *
+ * @param  [ in]entity The entity
+ */
+err collideEntity(entityCtx *entity);
 
 #endif /* __JJAT2_ENTITY_H__ */
 

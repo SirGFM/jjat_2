@@ -9,8 +9,8 @@
 struct stSwordyCtx {
     /** Base object */
     entityCtx entity;
-    /** Whether swordy has already double jumped */
-    int didDoubleJump;
+    /** Number of times swordy has already jumped */
+    int jumpCount;
 };
 typedef struct stSwordyCtx swordyCtx;
 

@@ -105,6 +105,15 @@ err doCollide() {
              *
              * Don't forget to 'break' after each CASE! Also, don't forget to
              * IGNORE any collision that isn't triggered! */
+             CASE(T_FLOOR, T_SWORDY) {
+                 gfmObject_collide(node1.pObject, node2.pObject);
+                 if (isFirstCase) {
+                     gfmObject_setVerticalVelocity(node2.pObject, 0);
+                 }
+                 else {
+                     gfmObject_setVerticalVelocity(node1.pObject, 0);
+                 }
+             } break;
 
             /* On Linux, a SIGINT is raised any time a unhandled collision
              * happens. When debugging, GDB will stop here and allow the user to

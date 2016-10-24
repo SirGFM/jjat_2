@@ -1,7 +1,6 @@
 /**
  * @file src/swordy.c
  */
-#include <base/collision.h>
 #include <base/error.h>
 #include <base/game.h>
 #include <base/gfx.h>
@@ -11,6 +10,7 @@
 
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gfmParser.h>
+#include <GFraMe/gfmQuadtree.h>
 #include <GFraMe/gfmSprite.h>
 
 #include <jjat2/swordy.h>
@@ -143,6 +143,34 @@ err drawSwordy(swordyCtx *swordy) {
  * @param  [ in]swordy The player to be updated
  */
 err preUpdateSwordy(swordyCtx *swordy) {
+    gfmCollision dir;
+    gfmRV rv;
+    err erv;
+
+    /* Reset the jump count whenerver swordy is grounded */
+    rv = gfmSprite_getCollision(&dir, swordy->entity.pSelf);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    if (dir & gfmCollision_down) {
+        swordy->jumpCount = 0;
+    }
+
+    erv = updateEntityJump(&swordy->entity, input.swordyJump.state);
+    if (erv == ERR_DIDJUMP) {
+        if (swordy->jumpCount < 2) {
+            swordy->entity.jumpGrace = SWORDY_JUMP_TIME;
+        }
+        swordy->jumpCount++;
+
+        /* Set the error so the assert isn't triggered */
+        erv = ERR_OK;
+    }
+    ASSERT(erv == ERR_OK, erv);
+
+    rv = gfmSprite_update(swordy->entity.pSelf, game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    erv = collideEntity(&swordy->entity);
+    ASSERT(erv == ERR_OK, erv);
+
     return ERR_OK;
 }
 

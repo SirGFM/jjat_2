@@ -106,6 +106,7 @@ err loadPlaystate() {
 /** Update the playstate */
 err updatePlaystate() {
     gfmRV rv;
+    err erv;
 
     rv = gfmQuadtree_initRoot(collision.pQt, -8/*x*/, -8/*y*/, playstate.width
             , playstate.height, 8/*depth*/, 16/*nodes*/);
@@ -115,6 +116,9 @@ err updatePlaystate() {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     rv = gfmQuadtree_populateTilemap(collision.pQt, playstate.pMap);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    erv = preUpdateSwordy(&playstate.swordy);
+    ASSERT(erv == ERR_OK, erv);
 
     return ERR_OK;
 }
