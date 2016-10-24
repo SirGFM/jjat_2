@@ -17,10 +17,15 @@
 
 /** Define Swordy's physics constants. The first parameter is the time in
  * 60FPS-frames and the second is the jump height in 8px-tiles. */
-#define SWORDY_JUMP_SPEED JUMP_SPEED(18, 4)
-#define SWORDY_HOP_SPEED JUMP_SPEED(8, 1.75)
-#define SWORDY_JUMP_GRAV JUMP_ACCELERATION(18, 4)
-#define SWORDY_FALL_GRAV JUMP_ACCELERATION(10, 4)
+#define SWORDY_FALL_TIME 14
+#define SWORDY_JUMP_TIME 18
+#define SWORDY_JUMP_HEIGHT 4.5
+#define SWORDY_HOP_TIME 18
+#define SWORDY_HOP_HEIGHT 1.5
+#define SWORDY_JUMP_SPEED JUMP_SPEED(SWORDY_JUMP_TIME, SWORDY_JUMP_HEIGHT)
+#define SWORDY_HOP_SPEED JUMP_SPEED(SWORDY_HOP_TIME, SWORDY_HOP_HEIGHT)
+#define SWORDY_JUMP_GRAV JUMP_ACCELERATION(SWORDY_JUMP_TIME, SWORDY_JUMP_HEIGHT)
+#define SWORDY_FALL_GRAV JUMP_ACCELERATION(SWORDY_FALL_TIME, SWORDY_JUMP_HEIGHT)
 
 #define swordy_width 6
 #define swordy_height 12
@@ -157,7 +162,7 @@ err preUpdateSwordy(swordyCtx *swordy) {
     erv = updateEntityJump(&swordy->entity, input.swordyJump.state);
     if (erv == ERR_DIDJUMP) {
         if (swordy->jumpCount < 2) {
-            swordy->entity.jumpGrace = SWORDY_JUMP_TIME;
+            swordy->entity.jumpGrace = FRAMES_TO_MS(SWORDY_JUMP_TIME * 2);
         }
         swordy->jumpCount++;
 
