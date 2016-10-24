@@ -38,12 +38,16 @@ struct stGameCtx {
 typedef struct stGameCtx gameCtx;
 
 /** DO_UPDATE wraps the conditional that decides if the update loop should run,
- * allowing for stepping frames/pause the update loop when in debug mode */
+ * allowing for stepping frames/pause the update loop when in debug mode.
+ *
+ * Note that order is extremely important in this conditional. Since buttons'
+ * 'just' flag is set on gfm_isUpdating call, it must only be called before an
+ * actual frame. Therefore, it must come after the short-circuit conditional */
 #if defined(DEBUG)
 #  define DO_UPDATE() \
-     (gfm_isUpdating(game.pCtx) == GFMRV_TRUE \
-         && (game.debugRunState == DBG_RUNNING \
-         || game.debugRunState == DBG_STEP))
+     ((game.debugRunState == DBG_RUNNING \
+         || game.debugRunState == DBG_STEP) \
+         && gfm_isUpdating(game.pCtx) == GFMRV_TRUE)
 #else
 #  define DO_UPDATE() \
      (gfm_isUpdating(game.pCtx) == GFMRV_TRUE)
