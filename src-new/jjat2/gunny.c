@@ -26,6 +26,7 @@
 #define GUNNY_HOP_SPEED JUMP_SPEED(GUNNY_HOP_TIME, GUNNY_HOP_HEIGHT)
 #define GUNNY_JUMP_GRAV JUMP_ACCELERATION(GUNNY_JUMP_TIME, GUNNY_JUMP_HEIGHT)
 #define GUNNY_FALL_GRAV JUMP_ACCELERATION(GUNNY_FALL_TIME, GUNNY_JUMP_HEIGHT)
+#define GUNNY_SPEED TILES_TO_PX(9.5)
 
 #define gunny_width 6
 #define gunny_height 10
@@ -151,6 +152,21 @@ err preUpdateGunny(gunnyCtx *gunny) {
     gfmRV rv;
     err erv;
 
+    /* Update horizontal movement */
+    do {
+        if (IS_PRESSED(gunnyLeft)) {
+            rv = gfmSprite_setHorizontalVelocity(gunny->entity.pSelf
+                    , -GUNNY_SPEED);
+        }
+        else if (IS_PRESSED(gunnyRight)) {
+            rv = gfmSprite_setHorizontalVelocity(gunny->entity.pSelf
+                    , GUNNY_SPEED);
+        }
+        else {
+            rv = gfmSprite_setHorizontalVelocity(gunny->entity.pSelf, 0);
+        }
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    } while (0); /* Update horizontal movement */
 
     erv = updateEntityJump(&gunny->entity, input.gunnyJump.state);
     if (erv == ERR_DIDJUMP) {

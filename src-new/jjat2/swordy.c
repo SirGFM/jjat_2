@@ -26,6 +26,7 @@
 #define SWORDY_HOP_SPEED JUMP_SPEED(SWORDY_HOP_TIME, SWORDY_HOP_HEIGHT)
 #define SWORDY_JUMP_GRAV JUMP_ACCELERATION(SWORDY_JUMP_TIME, SWORDY_JUMP_HEIGHT)
 #define SWORDY_FALL_GRAV JUMP_ACCELERATION(SWORDY_FALL_TIME, SWORDY_JUMP_HEIGHT)
+#define SWORDY_SPEED TILES_TO_PX(12.5)
 
 #define swordy_width 6
 #define swordy_height 12
@@ -152,24 +153,44 @@ err preUpdateSwordy(swordyCtx *swordy) {
     gfmRV rv;
     err erv;
 
-    /* Reset the jump count whenerver swordy is grounded */
-    rv = gfmSprite_getCollision(&dir, swordy->entity.pSelf);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    if (dir & gfmCollision_down) {
-        swordy->jumpCount = 0;
-    }
-
-    erv = updateEntityJump(&swordy->entity, input.swordyJump.state);
-    if (erv == ERR_DIDJUMP) {
-        if (swordy->jumpCount < 2) {
-            swordy->entity.jumpGrace = FRAMES_TO_MS(SWORDY_JUMP_TIME * 2);
+    /* Update horizontal movement */
+    do {
+        if (IS_PRESSED(swordyLeft)) {
+            rv = gfmSprite_setHorizontalVelocity(swordy->entity.pSelf
+                    , -SWORDY_SPEED);
         }
-        swordy->jumpCount++;
+        else if (IS_PRESSED(swordyRight)) {
+            rv = gfmSprite_setHorizontalVelocity(swordy->entity.pSelf
+                    , SWORDY_SPEED);
+        }
+        else {
+            rv = gfmSprite_setHorizontalVelocity(swordy->entity.pSelf, 0);
+        }
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    } while (0); /* Update horizontal movement */
 
-        /* Set the error so the assert isn't triggered */
-        erv = ERR_OK;
-    }
-    ASSERT(erv == ERR_OK, erv);
+    /* Update jump */
+    do {
+        /* Reset the jump count whenerver swordy is grounded */
+        rv = gfmSprite_getCollision(&dir, swordy->entity.pSelf);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        if (dir & gfmCollision_down) {
+            swordy->jumpCount = 0;
+        }
+
+        erv = updateEntityJump(&swordy->entity, input.swordyJump.state);
+        if (erv == ERR_DIDJUMP) {
+            if (swordy->jumpCount < 2) {
+                /* Set jumpGrace to a full jump time */
+                swordy->entity.jumpGrace = FRAMES_TO_MS(SWORDY_JUMP_TIME * 2);
+            }
+            swordy->jumpCount++;
+
+            /* Set the error so the assert isn't triggered */
+            erv = ERR_OK;
+        }
+        ASSERT(erv == ERR_OK, erv);
+    } while (0); /* Update jump */
 
     rv = gfmSprite_update(swordy->entity.pSelf, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
