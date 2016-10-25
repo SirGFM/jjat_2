@@ -27,6 +27,7 @@ enum enType {
     T_PLAYER = gfmType_reserved_7, /* light red */
 
     T_SWORDY = (1 << T_BASE_NBITS) | T_PLAYER,
+    T_GUNNY  = (2 << T_BASE_NBITS) | T_PLAYER,
 };
 typedef enum enType type;
 

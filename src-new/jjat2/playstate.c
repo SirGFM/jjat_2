@@ -10,7 +10,9 @@
 #include <GFraMe/gfmTilemap.h>
 
 #include <jjat2/dictionary.h>
+#include <jjat2/gunny.h>
 #include <jjat2/playstate.h>
+#include <jjat2/swordy.h>
 
 #include <string.h>
 
@@ -20,6 +22,8 @@ err initPlaystate() {
     err erv;
 
     erv = initSwordy(&playstate.swordy);
+    ASSERT(erv == ERR_OK, erv);
+    erv = initGunny(&playstate.gunny);
     ASSERT(erv == ERR_OK, erv);
 
     rv = gfmParser_getNew(&playstate.pParser);
@@ -43,6 +47,7 @@ void freePlaystate() {
         gfmParser_free(&playstate.pParser);
     }
     freeSwordy(&playstate.swordy);
+    freeGunny(&playstate.gunny);
 }
 
 /** Updates the quadtree's bounds according to the currently loaded map */
@@ -94,6 +99,8 @@ err loadPlaystate() {
             ASSERT(erv == ERR_OK, erv);
         }
         else if (strcmp(type, "gunny_pos") == 0) {
+            erv = parseGunny(&playstate.gunny, playstate.pParser);
+            ASSERT(erv == ERR_OK, erv);
         }
     }
 
@@ -119,6 +126,8 @@ err updatePlaystate() {
 
     erv = preUpdateSwordy(&playstate.swordy);
     ASSERT(erv == ERR_OK, erv);
+    erv = preUpdateGunny(&playstate.gunny);
+    ASSERT(erv == ERR_OK, erv);
 
     return ERR_OK;
 }
@@ -131,6 +140,8 @@ err drawPlaystate() {
     rv = gfmTilemap_draw(playstate.pMap, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+    erv = drawGunny(&playstate.gunny);
+    ASSERT(erv == ERR_OK, erv);
     erv = drawSwordy(&playstate.swordy);
     ASSERT(erv == ERR_OK, erv);
 

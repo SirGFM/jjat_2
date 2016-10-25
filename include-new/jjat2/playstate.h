@@ -28,6 +28,8 @@ struct stPlaystateCtx {
     int width;
     /** Swordy character */
     swordyCtx swordy;
+    /** Gunny character */
+    gunnyCtx gunny;
 };
 typedef struct stPlaystateCtx playstateCtx;
 

@@ -105,6 +105,7 @@ err doCollide() {
              *
              * Don't forget to 'break' after each CASE! Also, don't forget to
              * IGNORE any collision that isn't triggered! */
+             CASE(T_FLOOR, T_GUNNY)
              CASE(T_FLOOR, T_SWORDY) {
                  gfmObject_collide(node1.pObject, node2.pObject);
                  if (isFirstCase) {
