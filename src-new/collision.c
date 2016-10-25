@@ -118,10 +118,22 @@ err doCollide() {
                 if (rv == GFMRV_TRUE) {
                     gfmCollision dir;
                     gfmObject_getCurrentCollision(&dir, player->pObject);
+                    gfmObject_collide(node1.pObject, node2.pObject);
                     if (dir & gfmCollision_down) {
                         gfmObject_setVerticalVelocity(player->pObject, 0);
+                        /* Corner case!! If the player would get stuck on a
+                         * corner, push 'em toward the platform */
+                        if (dir & gfmCollision_left) {
+                            int x, y;
+                            gfmObject_getPosition(&x, &y, player->pObject);
+                            gfmObject_setPosition(player->pObject, x - 1, y - 1);
+                        }
+                        else if (dir & gfmCollision_right) {
+                            int x, y;
+                            gfmObject_getPosition(&x, &y, player->pObject);
+                            gfmObject_setPosition(player->pObject, x + 1, y - 1);
+                        }
                     }
-                    gfmObject_collide(node1.pObject, node2.pObject);
                 }
                 rv = GFMRV_OK;
             } break;
