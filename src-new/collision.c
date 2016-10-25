@@ -138,7 +138,36 @@ err doCollide() {
                 rv = GFMRV_OK;
             } break;
             CASE(T_SWORDY, T_GUNNY) {
-                /* TODO Implement this collision */
+                collisionNode *swordy, *gunny;
+                if (isFirstCase) {
+                    swordy = &node1;
+                    gunny = &node2;
+                }
+                else {
+                    gunny = &node1;
+                    swordy = &node2;
+                }
+                rv = gfmObject_justOverlaped(node1.pObject, node2.pObject);
+                if (rv == GFMRV_TRUE) {
+                    gfmCollision dir;
+                    gfmObject_getCurrentCollision(&dir, swordy->pObject);
+                    if (dir & gfmCollision_down) {
+                        /* TODO Swordy is above gunny */
+                        gfmObject_setFixed(gunny->pObject);
+                        gfmObject_separateVertical(node1.pObject, node2.pObject);
+                        gfmObject_setVerticalVelocity(swordy->pObject, 0);
+                        gfmObject_setMovable(gunny->pObject);
+                    }
+                    gfmObject_getCurrentCollision(&dir, gunny->pObject);
+                    if (dir & gfmCollision_down) {
+                        /* TODO Gunny is above swordy */
+                        gfmObject_setFixed(swordy->pObject);
+                        gfmObject_separateVertical(node1.pObject, node2.pObject);
+                        gfmObject_setVerticalVelocity(gunny->pObject, 0);
+                        gfmObject_setMovable(swordy->pObject);
+                    }
+                }
+                rv = GFMRV_OK;
             } break;
             /* On Linux, a SIGINT is raised any time a unhandled collision
              * happens. When debugging, GDB will stop here and allow the user to
