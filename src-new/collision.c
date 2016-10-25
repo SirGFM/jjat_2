@@ -105,17 +105,29 @@ err doCollide() {
              *
              * Don't forget to 'break' after each CASE! Also, don't forget to
              * IGNORE any collision that isn't triggered! */
-             CASE(T_FLOOR, T_GUNNY)
-             CASE(T_FLOOR, T_SWORDY) {
-                 gfmObject_collide(node1.pObject, node2.pObject);
-                 if (isFirstCase) {
-                     gfmObject_setVerticalVelocity(node2.pObject, 0);
-                 }
-                 else {
-                     gfmObject_setVerticalVelocity(node1.pObject, 0);
-                 }
-             } break;
-
+            CASE(T_FLOOR, T_GUNNY)
+            CASE(T_FLOOR, T_SWORDY) {
+                collisionNode *player;
+                if (isFirstCase) {
+                    player = &node2;
+                }
+                else {
+                    player = &node1;
+                }
+                rv = gfmObject_isOverlaping(node1.pObject, node2.pObject);
+                if (rv == GFMRV_TRUE) {
+                    gfmCollision dir;
+                    gfmObject_getCurrentCollision(&dir, player->pObject);
+                    if (dir & gfmCollision_down) {
+                        gfmObject_setVerticalVelocity(player->pObject, 0);
+                    }
+                    gfmObject_collide(node1.pObject, node2.pObject);
+                }
+                rv = GFMRV_OK;
+            } break;
+            CASE(T_SWORDY, T_GUNNY) {
+                /* TODO Implement this collision */
+            } break;
             /* On Linux, a SIGINT is raised any time a unhandled collision
              * happens. When debugging, GDB will stop here and allow the user to
              * check which types weren't handled */
