@@ -114,7 +114,7 @@ err doCollide() {
                 else {
                     player = &node1;
                 }
-                rv = gfmObject_isOverlaping(node1.pObject, node2.pObject);
+                rv = gfmObject_justOverlaped(node1.pObject, node2.pObject);
                 if (rv == GFMRV_TRUE) {
                     gfmCollision dir;
                     gfmObject_getCurrentCollision(&dir, player->pObject);
