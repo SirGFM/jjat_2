@@ -6,6 +6,8 @@
 
 #include <jjat2/entity.h>
 
+#include <GFraMe/gfmParser.h>
+
 struct stSwordyCtx {
     /** Base object */
     entityCtx entity;

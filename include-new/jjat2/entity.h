@@ -10,6 +10,8 @@
 
 #include <GFraMe/gfmSprite.h>
 
+#include <stdint.h>
+
 /** Default grace time to while jumping is possible after leaving the ground */
 #define DEF_JUMP_GRACE  FRAMES_TO_MS(5)
 
@@ -47,13 +49,9 @@ struct stEntityCtx {
     gfmSprite *pSelf;
     /** Time, in milliseconds, while jump may be pressed after leaving the
      * ground */
-    int jumpGrace;
-    /** Currently playing animation */
-    int currentAnimation;
-    /** Number of animations */
-    int maxAnimation;
+    int16_t jumpGrace;
     /** Initial jump velocity */
-    int jumpVelocity;
+    int16_t jumpVelocity;
     /**
      * Velocity set when short-hopping.
      *
@@ -61,12 +59,16 @@ struct stEntityCtx {
      *   if (vy < shorthopVelocity * 2) vy *= 0.5;
      *   else if (vy < shorthopVelocity) vy = shorthopVelocity
      */
-    int shorthopVelocity;
+    int16_t shorthopVelocity;
     /** Default gravity when standing or jumping */
-    int standGravity;
+    int16_t standGravity;
     /** Gravity set whenever the entity is falling. May be useful to make the
      * control feel better. */
-    int fallGravity;
+    int16_t fallGravity;
+    /** Currently playing animation */
+    uint8_t currentAnimation;
+    /** Number of animations */
+    uint8_t maxAnimation;
 };
 typedef struct stEntityCtx entityCtx;
 
@@ -102,6 +104,18 @@ err updateEntityJump(entityCtx *entity, gfmInputState jumpBt);
  * @param  [ in]entity The entity
  */
 err collideEntity(entityCtx *entity);
+
+/**
+ * Make an entity be carried by another,
+ *
+ * NOTE: To avoid collision issues with the environment, any entity that is
+ * being carried should run a second collision against all static objects. This
+ * solves potential zipping through platforms.
+ *
+ * @param  [ in]entity   The entity
+ * @param  [ in]carrying The sprite carrying the entity
+ */
+void carryEntity(entityCtx *entity, gfmSprite *carrying);
 
 #endif /* __JJAT2_ENTITY_H__ */
 

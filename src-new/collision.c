@@ -7,6 +7,10 @@
 #include <base/error.h>
 #include <conf/type.h>
 
+#include <jjat2/entity.h>
+#include <jjat2/gunny.h>
+#include <jjat2/swordy.h>
+
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gfmObject.h>
 #include <GFraMe/gfmQuadtree.h>
@@ -101,7 +105,7 @@ err doCollide() {
         /* Merge both types into a single one, so it's easier to compare */
         isFirstCase = 0;
         switch (MERGE_TYPES(node1.type, node2.type)) {
-            /* TODO Handle collisions.
+            /* Handle collisions.
              *
              * Don't forget to 'break' after each CASE! Also, don't forget to
              * IGNORE any collision that isn't triggered! */
@@ -126,45 +130,49 @@ err doCollide() {
                         if (dir & gfmCollision_left) {
                             int x, y;
                             gfmObject_getPosition(&x, &y, player->pObject);
-                            gfmObject_setPosition(player->pObject, x - 1, y - 1);
+                            gfmObject_setPosition(player->pObject, x - 1
+                                    , y - 1);
                         }
                         else if (dir & gfmCollision_right) {
                             int x, y;
                             gfmObject_getPosition(&x, &y, player->pObject);
-                            gfmObject_setPosition(player->pObject, x + 1, y - 1);
+                            gfmObject_setPosition(player->pObject, x + 1
+                                    , y - 1);
                         }
+                    }
+                    else if (dir & gfmCollision_up) {
+                        int y;
+                        gfmObject_setVerticalVelocity(player->pObject, 0);
+                        gfmObject_getVerticalPosition(&y, player->pObject);
+                        gfmObject_setVerticalPosition(player->pObject, y + 1);
                     }
                 }
                 rv = GFMRV_OK;
             } break;
             CASE(T_SWORDY, T_GUNNY) {
-                collisionNode *swordy, *gunny;
+                swordyCtx *swordy;
+                gunnyCtx *gunny;
                 if (isFirstCase) {
-                    swordy = &node1;
-                    gunny = &node2;
+                    swordy = (swordyCtx*)node1.pChild;
+                    gunny = (gunnyCtx*)node2.pChild;
                 }
                 else {
-                    gunny = &node1;
-                    swordy = &node2;
+                    gunny = (gunnyCtx*)node1.pChild;
+                    swordy = (swordyCtx*)node2.pChild;
                 }
+
                 rv = gfmObject_justOverlaped(node1.pObject, node2.pObject);
                 if (rv == GFMRV_TRUE) {
                     gfmCollision dir;
-                    gfmObject_getCurrentCollision(&dir, swordy->pObject);
+                    gfmSprite_getCurrentCollision(&dir, swordy->entity.pSelf);
                     if (dir & gfmCollision_down) {
-                        /* TODO Swordy is above gunny */
-                        gfmObject_setFixed(gunny->pObject);
-                        gfmObject_separateVertical(node1.pObject, node2.pObject);
-                        gfmObject_setVerticalVelocity(swordy->pObject, 0);
-                        gfmObject_setMovable(gunny->pObject);
+                        /* Swordy is above gunny */
+                        carryEntity(&swordy->entity, gunny->entity.pSelf);
                     }
-                    gfmObject_getCurrentCollision(&dir, gunny->pObject);
+                    gfmSprite_getCurrentCollision(&dir, gunny->entity.pSelf);
                     if (dir & gfmCollision_down) {
-                        /* TODO Gunny is above swordy */
-                        gfmObject_setFixed(swordy->pObject);
-                        gfmObject_separateVertical(node1.pObject, node2.pObject);
-                        gfmObject_setVerticalVelocity(gunny->pObject, 0);
-                        gfmObject_setMovable(swordy->pObject);
+                        /* Gunny is above swordy */
+                        carryEntity(&gunny->entity, swordy->entity.pSelf);
                     }
                 }
                 rv = GFMRV_OK;
