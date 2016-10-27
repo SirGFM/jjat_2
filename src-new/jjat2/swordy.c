@@ -156,17 +156,15 @@ err preUpdateSwordy(swordyCtx *swordy) {
     /* Update horizontal movement */
     do {
         if (IS_PRESSED(swordyLeft)) {
-            rv = gfmSprite_setHorizontalVelocity(swordy->entity.pSelf
-                    , -SWORDY_SPEED);
+            swordy->entity.carryVx -= SWORDY_SPEED;
         }
         else if (IS_PRESSED(swordyRight)) {
-            rv = gfmSprite_setHorizontalVelocity(swordy->entity.pSelf
-                    , SWORDY_SPEED);
+            swordy->entity.carryVx += SWORDY_SPEED;
         }
-        else {
-            rv = gfmSprite_setHorizontalVelocity(swordy->entity.pSelf, 0);
-        }
+        rv = gfmSprite_setHorizontalVelocity(swordy->entity.pSelf
+                , swordy->entity.carryVx);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        swordy->entity.carryVx = 0;
     } while (0); /* Update horizontal movement */
 
     /* Update jump */

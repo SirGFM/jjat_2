@@ -155,17 +155,15 @@ err preUpdateGunny(gunnyCtx *gunny) {
     /* Update horizontal movement */
     do {
         if (IS_PRESSED(gunnyLeft)) {
-            rv = gfmSprite_setHorizontalVelocity(gunny->entity.pSelf
-                    , -GUNNY_SPEED);
+            gunny->entity.carryVx -= GUNNY_SPEED;
         }
         else if (IS_PRESSED(gunnyRight)) {
-            rv = gfmSprite_setHorizontalVelocity(gunny->entity.pSelf
-                    , GUNNY_SPEED);
+            gunny->entity.carryVx += GUNNY_SPEED;
         }
-        else {
-            rv = gfmSprite_setHorizontalVelocity(gunny->entity.pSelf, 0);
-        }
+        rv = gfmSprite_setHorizontalVelocity(gunny->entity.pSelf
+                , gunny->entity.carryVx);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        gunny->entity.carryVx = 0;
     } while (0); /* Update horizontal movement */
 
     erv = updateEntityJump(&gunny->entity, input.gunnyJump.state);

@@ -142,33 +142,31 @@ err collideEntity(entityCtx *entity) {
  * @param  [ in]carrying The sprite carrying the entity
  */
 void carryEntity(entityCtx *entity, gfmSprite *carrying) {
-    double vy;
-    int h, selfX, lastX, x, y;
+    gfmCollision dir;
 
-    /* Retrieve all required attributes from the carrying object */
-    gfmSprite_getLastCenter(&lastX, &y, carrying);
-    gfmSprite_getCenter(&x, &y, carrying);
-    gfmSprite_getVerticalPosition(&y, carrying);
-    gfmSprite_getVerticalVelocity(&vy, carrying);
+    /* Copy carryin's velocity, so it may be applyed on the entity (however,
+     * only on the following frame!) */
+    gfmSprite_getVelocity(&entity->carryVx, &entity->carryVy, carrying);
 
-    gfmSprite_getHorizontalPosition(&selfX, entity->pSelf);
-    gfmSprite_getHeight(&h, entity->pSelf);
+    /* Collide sprite, to position the entity above the carrying */
+    gfmSprite_setFixed(carrying);
+    gfmSprite_collide(entity->pSelf, carrying);
+    gfmSprite_setMovable(carrying);
 
-    /* TODO Copy the carrying's velocity, so the entity may walk away from the
-     * carrying (manually setting the position zeros the decimal part and makes
-     * the entity locked to the carrying, unless it jumps or the carrying stop moving) */
-    /* Set the entity's position */
-    gfmSprite_setPosition(entity->pSelf, selfX + (x - lastX), y - h);
+    /* TODO On the first frame that carrying starts to move, offset the entity's
+     * position by how much it moved. Afterward, simply use its velocity to
+     * move */
+
 
     /* Update the entity position and velocity (make it fall slightly faster to
      * avoid getting separated from the object) */
-    if (vy < 0) {
-        vy *= 0.25;
+    if (entity->carryVy < 0) {
+        entity->carryVy *= 0.25;
     }
-    else if (vy > 0) {
-        vy *= 1.75;
+    else if (entity->carryVy > 0) {
+        entity->carryVy *= 1.75;
     }
-    gfmSprite_setVerticalVelocity(entity->pSelf, 0);
+    gfmSprite_setVerticalVelocity(entity->pSelf, entity->carryVy);
 
     /* TODO Set flag so the entity may collide again against every static
      * object (which will fix collision against the map) */

@@ -47,6 +47,9 @@
 struct stEntityCtx {
     /** The internal sprite */
     gfmSprite *pSelf;
+    /** Velocity of the object carrying this entity, if any */
+    double carryVx;
+    double carryVy;
     /** Time, in milliseconds, while jump may be pressed after leaving the
      * ground */
     int16_t jumpGrace;
