@@ -186,7 +186,11 @@ err preUpdateGunny(gunnyCtx *gunny) {
  * @param  [ in]gunny The player to be updated
  */
 err postUpdateGunny(gunnyCtx *gunny) {
-    postUpdateEntity(&gunny->entity);
+    err erv;
+
+    erv = postUpdateEntity(&gunny->entity);
+    ASSERT(erv == ERR_OK, erv);
+
     /* TODO Set animation */
     return ERR_OK;
 }

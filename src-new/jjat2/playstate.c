@@ -65,6 +65,23 @@ static err _updateQuadtreeSize() {
     return ERR_OK;
 }
 
+/** Load the static quadtree */
+static err _loadStaticQuadtree() {
+    gfmRV rv;
+
+    rv = gfmQuadtree_initRoot(collision.pStaticQt, -8/*x*/, -8/*y*/
+            , playstate.width, playstate.height, 8/*depth*/, 16/*nodes*/);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    rv = gfmQuadtree_setStatic(collision.pStaticQt);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    rv = gfmQuadtree_populateTilemap(collision.pStaticQt, playstate.pMap);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    return ERR_OK;
+}
+
 /** Setup the playstate so it may start to be executed */
 err loadPlaystate() {
     gfmRV rv;
@@ -107,6 +124,9 @@ err loadPlaystate() {
     rv = gfmParser_reset(playstate.pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+    erv = _loadStaticQuadtree();
+    ASSERT(erv == ERR_OK, erv);
+
     return ERR_OK;
 }
 
@@ -120,8 +140,6 @@ err updatePlaystate() {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     rv = gfmTilemap_update(playstate.pMap, game.pCtx);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    rv = gfmQuadtree_populateTilemap(collision.pQt, playstate.pMap);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     erv = preUpdateSwordy(&playstate.swordy);

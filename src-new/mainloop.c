@@ -87,9 +87,12 @@ err mainloop() {
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
 
             if (IS_QUADTREE_VISIBLE()) {
-                /* NOTE: This will break if the quadtree isn't set up */
+                rv = gfmQuadtree_drawBounds(collision.pStaticQt, game.pCtx, 0);
+                ASSERT_TO(rv == GFMRV_QUADTREE_NOT_INITIALIZED || rv == GFMRV_OK
+                        , erv = ERR_GFMERR, __ret);
                 rv = gfmQuadtree_drawBounds(collision.pQt, game.pCtx, 0);
-                ASSERT_TO(rv == GFMRV_OK, erv = ERR_GFMERR, __ret);
+                ASSERT_TO(rv == GFMRV_QUADTREE_NOT_INITIALIZED || rv == GFMRV_OK
+                        , erv = ERR_GFMERR, __ret);
             }
 
             rv = gfm_drawEnd(game.pCtx);

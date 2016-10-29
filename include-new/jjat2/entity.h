@@ -130,7 +130,7 @@ void carryEntity(entityCtx *entity, gfmSprite *carrying);
  *
  * @param  [ in]entity   The entity
  */
-void postUpdateEntity(entityCtx *entity);
+err postUpdateEntity(entityCtx *entity);
 
 #endif /* __JJAT2_ENTITY_H__ */
 

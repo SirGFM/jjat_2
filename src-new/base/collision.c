@@ -16,6 +16,10 @@ err setupCollision() {
     if (rv != GFMRV_OK) {
         return ERR_GFMERR;
     }
+    rv = gfmQuadtree_getNew(&collision.pStaticQt);
+    if (rv != GFMRV_OK) {
+        return ERR_GFMERR;
+    }
 
     return ERR_OK;
 }
@@ -24,6 +28,9 @@ err setupCollision() {
 void cleanCollision() {
     if (collision.pQt != 0) {
         gfmQuadtree_free(&collision.pQt);
+    }
+    if (collision.pStaticQt != 0) {
+        gfmQuadtree_free(&collision.pStaticQt);
     }
 }
 

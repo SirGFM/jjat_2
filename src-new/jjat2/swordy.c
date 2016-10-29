@@ -204,7 +204,11 @@ err preUpdateSwordy(swordyCtx *swordy) {
  * @param  [ in]swordy The player to be updated
  */
 err postUpdateSwordy(swordyCtx *swordy) {
-    postUpdateEntity(&swordy->entity);
+    err erv;
+
+    erv = postUpdateEntity(&swordy->entity);
+    ASSERT(erv == ERR_OK, erv);
+
     /* TODO Set animation */
     return ERR_OK;
 }

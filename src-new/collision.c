@@ -81,8 +81,10 @@ static void _getSubtype(collisionNode *pNode) {
  * Different from the other functions on this module, this one is declared on
  * src/collision.c (instead of src/base/collision.c). This decision was made
  * because this function shall be modified for each game.
+ *
+ * @param  [ in]pQt The current quadtree
  */
-err doCollide() {
+err doCollide(gfmQuadtreeRoot *pQt) {
     /** GFraMe return value */
     gfmRV rv;
 
@@ -97,7 +99,7 @@ err doCollide() {
 
         /* Retrieve the two overlaping objects and their types */
         rv = gfmQuadtree_getOverlaping(&node1.pObject, &node2.pObject
-                , collision.pQt);
+                , pQt);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
         _getSubtype(&node1);
         _getSubtype(&node2);
@@ -191,7 +193,7 @@ err doCollide() {
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
         /** Update the quadtree (so any other collision is detected) */
-        rv = gfmQuadtree_continue(collision.pQt);
+        rv = gfmQuadtree_continue(pQt);
         ASSERT(rv == GFMRV_QUADTREE_OVERLAPED || rv == GFMRV_QUADTREE_DONE,
                 ERR_GFMERR);
     }

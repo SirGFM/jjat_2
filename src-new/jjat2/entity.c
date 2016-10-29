@@ -122,10 +122,20 @@ err updateEntityJump(entityCtx *entity, gfmInputState jumpBt) {
  * @param  [ in]entity The entity
  */
 err collideEntity(entityCtx *entity) {
+    err erv;
     gfmRV rv;
+    rv = gfmQuadtree_collideSprite(collision.pStaticQt, entity->pSelf);
+    if (rv == GFMRV_QUADTREE_OVERLAPED) {
+        erv = doCollide(collision.pStaticQt);
+        ASSERT(erv == ERR_OK, erv);
+        rv = GFMRV_QUADTREE_DONE;
+    }
+    ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
     rv = gfmQuadtree_collideSprite(collision.pQt, entity->pSelf);
     if (rv == GFMRV_QUADTREE_OVERLAPED) {
-        return doCollide();
+        erv = doCollide(collision.pQt);
+        ASSERT(erv == ERR_OK, erv);
+        rv = GFMRV_QUADTREE_DONE;
     }
     ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
     return ERR_OK;
@@ -184,11 +194,12 @@ void carryEntity(entityCtx *entity, gfmSprite *carrying) {
  *
  * @param  [ in]entity   The entity
  */
-void postUpdateEntity(entityCtx *entity) {
+err postUpdateEntity(entityCtx *entity) {
     /* If the entity is being carried, collide against every static object and
      * then adjust its velocity */
     if (entity->pCarrying) {
         double vy;
+        gfmRV rv;
 
         /* Get carrying's VY (into vy) */
         gfmSprite_getVerticalVelocity(&vy, entity->pCarrying);
@@ -219,9 +230,16 @@ void postUpdateEntity(entityCtx *entity) {
         }
         gfmSprite_setVerticalVelocity(entity->pSelf, vy);
 
-        /* TODO Collide against static objects */
+        /* Collide against static objects */
+        rv = gfmQuadtree_collideSprite(collision.pStaticQt, entity->pSelf);
+        if (rv == GFMRV_QUADTREE_OVERLAPED) {
+            return doCollide(collision.pStaticQt);
+        }
+        ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
 
         entity->pCarrying = 0;
     }
+
+    return ERR_OK;
 }
 
