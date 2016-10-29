@@ -12,11 +12,6 @@
 
 #include <stdint.h>
 
-enum enEntityFlag {
-    ENT_NONE    = 0x0,
-    ENT_CARRIED = 0x1,
-};
-
 /** Default grace time to while jumping is possible after leaving the ground */
 #define DEF_JUMP_GRACE  FRAMES_TO_MS(5)
 
@@ -52,6 +47,8 @@ enum enEntityFlag {
 struct stEntityCtx {
     /** The internal sprite */
     gfmSprite *pSelf;
+    /** Sprite (if any) that is carrying this entity */
+    gfmSprite *pCarrying;
     /** Velocity of the object carrying this entity, if any */
     double carryVx;
     double carryVy;
@@ -77,8 +74,6 @@ struct stEntityCtx {
     uint8_t currentAnimation;
     /** Number of animations */
     uint8_t maxAnimation;
-    /** Some flags */
-    uint8_t flags;
 };
 typedef struct stEntityCtx entityCtx;
 
@@ -126,6 +121,16 @@ err collideEntity(entityCtx *entity);
  * @param  [ in]carrying The sprite carrying the entity
  */
 void carryEntity(entityCtx *entity, gfmSprite *carrying);
+
+/**
+ * Post update an entity
+ *
+ * During this stage, the entity fixes its collision against the world and any
+ * carrying sprite.
+ *
+ * @param  [ in]entity   The entity
+ */
+void postUpdateEntity(entityCtx *entity);
 
 #endif /* __JJAT2_ENTITY_H__ */
 

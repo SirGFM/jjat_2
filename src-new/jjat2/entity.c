@@ -142,7 +142,6 @@ err collideEntity(entityCtx *entity) {
  * @param  [ in]carrying The sprite carrying the entity
  */
 void carryEntity(entityCtx *entity, gfmSprite *carrying) {
-    double vy;
     int dx, x, tmp;
     gfmCollision beforeDir, afterDir;
 
@@ -150,10 +149,8 @@ void carryEntity(entityCtx *entity, gfmSprite *carrying) {
     gfmSprite_getCenter(&dx, &tmp, carrying);
     gfmSprite_getLastCenter(&x, &tmp, carrying);
     dx -= x;
-
-    /* Get carrying's VY (into vy) and entity's horizontal position (into x) */
+    /* Get entity's horizontal position (into x) */
     gfmSprite_getHorizontalPosition(&x, entity->pSelf);
-    gfmSprite_getVerticalVelocity(&vy, carrying);
 
     /* Get the collision flags as this started, update the entity's position and
      * check the collision flags again to check for position adjustments */
@@ -174,30 +171,57 @@ void carryEntity(entityCtx *entity, gfmSprite *carrying) {
     else {
         /* Set flag so the entity may collide again against every static
          * object (which will fix collision against the map) */
-        entity->flags |= ENT_CARRIED;
+        entity->pCarrying = carrying;
+    }
+
+}
+
+/**
+ * Post update an entity
+ *
+ * During this stage, the entity fixes its collision against the world and any
+ * carrying sprite.
+ *
+ * @param  [ in]entity   The entity
+ */
+void postUpdateEntity(entityCtx *entity) {
+    /* If the entity is being carried, collide against every static object and
+     * then adjust its velocity */
+    if (entity->pCarrying) {
+        double vy;
+
+        /* Get carrying's VY (into vy) */
+        gfmSprite_getVerticalVelocity(&vy, entity->pCarrying);
+
+        /* TODO Potential bug: If the carrying sprite is also being carried, its
+         * collision must be resolved before this entity's collision */
 
         /* Collide to actually set the vertical position */
-        gfmSprite_setFixed(carrying);
-        gfmSprite_separateVertical(entity->pSelf, carrying);
-        gfmSprite_setMovable(carrying);
-    }
+        gfmSprite_setFixed(entity->pCarrying);
+        gfmSprite_separateVertical(entity->pSelf, entity->pCarrying);
+        gfmSprite_setMovable(entity->pCarrying);
 
-    /* Update the entity vertical velocity (make it fall slightly faster and
-     * avoid getting separated from the object) */
-    if (vy >= TILES_TO_PX(2)) {
-        double ay;
-        gfmSprite_getVerticalAcceleration(&ay, carrying);
-        vy = 1.06125 * (vy + ay * (game.elapsed * 0.001));
-    }
-    else if (vy >= -TILES_TO_PX(5)) {
-        vy = TILES_TO_PX(5);
-    }
-    else if (vy < 0) {
-        vy *= 0.125;
-        if (vy >= -TILES_TO_PX(2)) {
-            vy = TILES_TO_PX(1);
+        /* Update the entity vertical velocity (make it fall slightly faster and
+         * avoid getting separated from the object) */
+        if (vy >= TILES_TO_PX(2)) {
+            double ay;
+            gfmSprite_getVerticalAcceleration(&ay, entity->pCarrying);
+            vy = 1.06125 * (vy + ay * (game.elapsed * 0.001));
         }
+        else if (vy >= -TILES_TO_PX(5)) {
+            vy = TILES_TO_PX(5);
+        }
+        else if (vy < 0) {
+            vy *= 0.125;
+            if (vy >= -TILES_TO_PX(2)) {
+                vy = TILES_TO_PX(1);
+            }
+        }
+        gfmSprite_setVerticalVelocity(entity->pSelf, vy);
+
+        /* TODO Collide against static objects */
+
+        entity->pCarrying = 0;
     }
-    gfmSprite_setVerticalVelocity(entity->pSelf, vy);
 }
 

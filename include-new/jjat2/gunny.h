@@ -50,5 +50,12 @@ err drawGunny(gunnyCtx *gunny);
  */
 err preUpdateGunny(gunnyCtx *gunny);
 
+/**
+ * Set gunny's animation and fix its entity's collision.
+ *
+ * @param  [ in]gunny The player to be updated
+ */
+err postUpdateGunny(gunnyCtx *gunny);
+
 #endif /* __JJAT2_GUNNY_H__ */
 

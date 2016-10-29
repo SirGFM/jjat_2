@@ -190,13 +190,22 @@ err preUpdateSwordy(swordyCtx *swordy) {
         ASSERT(erv == ERR_OK, erv);
     } while (0); /* Update jump */
 
-    swordy->entity.flags = ENT_NONE;
-
     rv = gfmSprite_update(swordy->entity.pSelf, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     erv = collideEntity(&swordy->entity);
     ASSERT(erv == ERR_OK, erv);
 
+    return ERR_OK;
+}
+
+/**
+ * Set swordy's animation and fix its entity's collision.
+ *
+ * @param  [ in]swordy The player to be updated
+ */
+err postUpdateSwordy(swordyCtx *swordy) {
+    postUpdateEntity(&swordy->entity);
+    /* TODO Set animation */
     return ERR_OK;
 }
 

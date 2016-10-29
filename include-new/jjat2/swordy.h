@@ -52,5 +52,12 @@ err drawSwordy(swordyCtx *swordy);
  */
 err preUpdateSwordy(swordyCtx *swordy);
 
+/**
+ * Set swordy's animation and fix its entity's collision.
+ *
+ * @param  [ in]swordy The player to be updated
+ */
+err postUpdateSwordy(swordyCtx *swordy);
+
 #endif /* __JJAT2_SWORDY_H__ */
 

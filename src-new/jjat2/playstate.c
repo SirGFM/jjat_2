@@ -129,6 +129,11 @@ err updatePlaystate() {
     erv = preUpdateGunny(&playstate.gunny);
     ASSERT(erv == ERR_OK, erv);
 
+    erv = postUpdateSwordy(&playstate.swordy);
+    ASSERT(erv == ERR_OK, erv);
+    erv = postUpdateGunny(&playstate.gunny);
+    ASSERT(erv == ERR_OK, erv);
+
     return ERR_OK;
 }
 

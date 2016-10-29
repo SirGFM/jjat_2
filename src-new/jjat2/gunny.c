@@ -142,7 +142,6 @@ err drawGunny(gunnyCtx *gunny) {
     return ERR_OK;
 }
 
-
 /**
  * Update the object's physics.
  *
@@ -173,13 +172,22 @@ err preUpdateGunny(gunnyCtx *gunny) {
     }
     ASSERT(erv == ERR_OK, erv);
 
-    gunny->entity.flags = ENT_NONE;
-
     rv = gfmSprite_update(gunny->entity.pSelf, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     erv = collideEntity(&gunny->entity);
     ASSERT(erv == ERR_OK, erv);
 
+    return ERR_OK;
+}
+
+/**
+ * Set gunny's animation and fix its entity's collision.
+ *
+ * @param  [ in]gunny The player to be updated
+ */
+err postUpdateGunny(gunnyCtx *gunny) {
+    postUpdateEntity(&gunny->entity);
+    /* TODO Set animation */
     return ERR_OK;
 }
 
