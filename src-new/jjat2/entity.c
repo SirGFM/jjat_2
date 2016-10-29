@@ -101,15 +101,15 @@ err updateEntityJump(entityCtx *entity, gfmInputState jumpBt) {
 
     entity->jumpGrace -= game.elapsed;
 
-    if (vy < 0) {
-        /* Set jump gravity */
-        rv = gfmSprite_setVerticalAcceleration(entity->pSelf,
-                entity->standGravity);
-    }
-    else {
+    if (vy > 0) {
         /* Set fall gravity */
         rv = gfmSprite_setVerticalAcceleration(entity->pSelf,
                 entity->fallGravity);
+    }
+    else if (vy < 0) {
+        /* Set jump gravity */
+        rv = gfmSprite_setVerticalAcceleration(entity->pSelf,
+                entity->standGravity);
     }
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
@@ -143,18 +143,13 @@ err collideEntity(entityCtx *entity) {
  */
 void carryEntity(entityCtx *entity, gfmSprite *carrying) {
     double vy;
-    int dx, x, y, h;
+    int dx, x, tmp;
     gfmCollision beforeDir, afterDir;
 
     /* Retrieve the movement from carrying since the previous frame (into dx) */
-    gfmSprite_getCenter(&dx, &y, carrying);
-    gfmSprite_getLastCenter(&x, &y, carrying);
+    gfmSprite_getCenter(&dx, &tmp, carrying);
+    gfmSprite_getLastCenter(&x, &tmp, carrying);
     dx -= x;
-
-    /* Calculate the entity's new vertical position (into y) */
-    gfmSprite_getVerticalPosition(&y, carrying);
-    gfmSprite_getHeight(&h, entity->pSelf);
-    y -= h;
 
     /* Get carrying's VY (into vy) and entity's horizontal position (into x) */
     gfmSprite_getHorizontalPosition(&x, entity->pSelf);
@@ -163,32 +158,46 @@ void carryEntity(entityCtx *entity, gfmSprite *carrying) {
     /* Get the collision flags as this started, update the entity's position and
      * check the collision flags again to check for position adjustments */
     gfmSprite_getCurrentCollision(&beforeDir, entity->pSelf);
-    gfmSprite_setPosition(entity->pSelf, x + dx, y);
+    gfmSprite_setHorizontalPosition(entity->pSelf, x + dx);
     gfmSprite_justOverlaped(entity->pSelf, carrying);
     gfmSprite_getCurrentCollision(&afterDir, entity->pSelf);
 
     /* Adjustments happens on both corners, to ensure the entity doesn't get
      * stuck on carrying's edge */
     if ((beforeDir & gfmCollision_left) && !(afterDir & gfmCollision_left)) {
-        gfmSprite_setPosition(entity->pSelf, x + dx + 1, y);
+        gfmSprite_setHorizontalPosition(entity->pSelf, x + dx + 1);
     }
     else if ((beforeDir & gfmCollision_right)
             && !(afterDir & gfmCollision_right)) {
-        gfmSprite_setPosition(entity->pSelf, x + dx - 1, y);
+        gfmSprite_setHorizontalPosition(entity->pSelf, x + dx - 1);
+    }
+    else {
+        /* Set flag so the entity may collide again against every static
+         * object (which will fix collision against the map) */
+        entity->flags |= ENT_CARRIED;
+
+        /* Collide to actually set the vertical position */
+        gfmSprite_setFixed(carrying);
+        gfmSprite_separateVertical(entity->pSelf, carrying);
+        gfmSprite_setMovable(carrying);
     }
 
-    /* TODO Review vertical adjustments when vy is approximately 0 */
-    /* Update the entity position and velocity (make it fall slightly faster to
+    /* Update the entity vertical velocity (make it fall slightly faster and
      * avoid getting separated from the object) */
-    if (vy < 0) {
-        vy *= 0.25;
+    if (vy >= TILES_TO_PX(2)) {
+        double ay;
+        gfmSprite_getVerticalAcceleration(&ay, carrying);
+        vy = 1.06125 * (vy + ay * (game.elapsed * 0.001));
     }
-    else if (vy > 0) {
-        vy *= 1.75;
+    else if (vy >= -TILES_TO_PX(5)) {
+        vy = TILES_TO_PX(5);
     }
-    gfmSprite_setVerticalVelocity(entity->pSelf, 0);
-
-    /* TODO Set flag so the entity may collide again against every static
-     * object (which will fix collision against the map) */
+    else if (vy < 0) {
+        vy *= 0.125;
+        if (vy >= -TILES_TO_PX(2)) {
+            vy = TILES_TO_PX(1);
+        }
+    }
+    gfmSprite_setVerticalVelocity(entity->pSelf, vy);
 }
 

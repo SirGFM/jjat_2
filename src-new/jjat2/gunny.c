@@ -173,6 +173,8 @@ err preUpdateGunny(gunnyCtx *gunny) {
     }
     ASSERT(erv == ERR_OK, erv);
 
+    gunny->entity.flags = ENT_NONE;
+
     rv = gfmSprite_update(gunny->entity.pSelf, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     erv = collideEntity(&gunny->entity);

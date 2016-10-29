@@ -12,6 +12,11 @@
 
 #include <stdint.h>
 
+enum enEntityFlag {
+    ENT_NONE    = 0x0,
+    ENT_CARRIED = 0x1,
+};
+
 /** Default grace time to while jumping is possible after leaving the ground */
 #define DEF_JUMP_GRACE  FRAMES_TO_MS(5)
 
@@ -72,6 +77,8 @@ struct stEntityCtx {
     uint8_t currentAnimation;
     /** Number of animations */
     uint8_t maxAnimation;
+    /** Some flags */
+    uint8_t flags;
 };
 typedef struct stEntityCtx entityCtx;
 

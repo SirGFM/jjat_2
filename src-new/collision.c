@@ -163,14 +163,14 @@ err doCollide() {
 
                 rv = gfmObject_justOverlaped(node1.pObject, node2.pObject);
                 if (rv == GFMRV_TRUE) {
-                    gfmCollision dir;
-                    gfmSprite_getCurrentCollision(&dir, swordy->entity.pSelf);
-                    if (dir & gfmCollision_down) {
+                    gfmCollision sdir, gdir;
+                    gfmSprite_getCurrentCollision(&sdir, swordy->entity.pSelf);
+                    gfmSprite_getCurrentCollision(&gdir, gunny->entity.pSelf);
+                    if (sdir & gfmCollision_down) {
                         /* Swordy is above gunny */
                         carryEntity(&swordy->entity, gunny->entity.pSelf);
                     }
-                    gfmSprite_getCurrentCollision(&dir, gunny->entity.pSelf);
-                    if (dir & gfmCollision_down) {
+                    else if (gdir & gfmCollision_down) {
                         /* Gunny is above swordy */
                         carryEntity(&gunny->entity, swordy->entity.pSelf);
                     }
