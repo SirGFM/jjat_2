@@ -175,13 +175,17 @@ err preUpdateSwordy(swordyCtx *swordy) {
         if (dir & gfmCollision_down) {
             swordy->jumpCount = 0;
         }
+        else if (swordy->jumpCount == 0 && swordy->entity.jumpGrace <= 0) {
+            /* If the first jump wasn't used, skip to the second one */
+            swordy->jumpCount = 1;
+        }
+        else if (swordy->jumpCount == 1) {
+            /* Every frame, set a short time for the second jump (until used) */
+            swordy->entity.jumpGrace = FRAMES_TO_MS(2);
+        }
 
         erv = updateEntityJump(&swordy->entity, input.swordyJump.state);
         if (erv == ERR_DIDJUMP) {
-            if (swordy->jumpCount < 2) {
-                /* Set jumpGrace to a full jump time */
-                swordy->entity.jumpGrace = FRAMES_TO_MS(SWORDY_JUMP_TIME * 2);
-            }
             swordy->jumpCount++;
 
             /* Set the error so the assert isn't triggered */
