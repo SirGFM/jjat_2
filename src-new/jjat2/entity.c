@@ -66,7 +66,7 @@ err updateEntityJump(entityCtx *entity, gfmInputState jumpBt) {
     }
 
     if (entity->jumpGrace > 0 && IS_STATE_JUSTPRESSED(jumpBt)) {
-        /* Convetional jump */
+        /* Conventional jump */
         vy = entity->jumpVelocity;
         rv = gfmSprite_setVerticalVelocity(entity->pSelf, vy);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
@@ -92,7 +92,6 @@ err updateEntityJump(entityCtx *entity, gfmInputState jumpBt) {
 
         rv = gfmSprite_setVerticalVelocity(entity->pSelf, vy);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-        erv = ERR_DIDJUMP;
     }
     else {
         rv = gfmSprite_getVerticalVelocity(&vy, entity->pSelf);

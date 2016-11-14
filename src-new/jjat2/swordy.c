@@ -142,7 +142,6 @@ err drawSwordy(swordyCtx *swordy) {
     return ERR_OK;
 }
 
-
 /**
  * Update the object's physics.
  *
@@ -169,7 +168,7 @@ err preUpdateSwordy(swordyCtx *swordy) {
 
     /* Update jump */
     do {
-        /* Reset the jump count whenerver swordy is grounded */
+        /* Reset the jump count whenever swordy is grounded */
         rv = gfmSprite_getCollision(&dir, swordy->entity.pSelf);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
         if (dir & gfmCollision_down) {
@@ -179,7 +178,8 @@ err preUpdateSwordy(swordyCtx *swordy) {
             /* If the first jump wasn't used, skip to the second one */
             swordy->jumpCount = 1;
         }
-        else if (swordy->jumpCount == 1) {
+
+        if (swordy->jumpCount == 1) {
             /* Every frame, set a short time for the second jump (until used) */
             swordy->entity.jumpGrace = FRAMES_TO_MS(2);
         }
