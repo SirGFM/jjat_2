@@ -9,6 +9,15 @@
 
 #include <GFraMe/gfmError.h>
 
+enum enInputNames {
+#define X(name, ...) enInput_##name,
+    X_RELEASE_BUTTON_LIST
+    enInput_count,
+    X_DEBUG_BUTTON_LIST
+#undef X
+};
+typedef enum enInputNames inputNames;
+
 /**
  * Handle every input that require an immediate action (i.e, those that are more
  * like flags, instead of being interpreted during the game loop).
@@ -70,12 +79,12 @@ void handleDebugInput() {
 err updateInput() {
     /** List of buttons, used to easily iterate through all virtual buttons */
     button *pButtons;
-    int i = 0;
+    inputNames i;
 
     i = 0;
     pButtons = (button*)(&input);
     /* Iterate through all buttons and update their state */
-    while (i < (sizeof(input) / sizeof(button))) {
+    while (i < enInput_count) {
         gfmRV rv;
 
         rv = gfm_getKeyState(&pButtons[i].state, &pButtons[i].numPressed
