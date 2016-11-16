@@ -242,3 +242,22 @@ err postUpdateEntity(entityCtx *entity) {
     return ERR_OK;
 }
 
+/**
+ * Updates an entity's direction according to its velocity.
+ *
+ * By default, the sprite is considered to be facing right.
+ *
+ * @param  [ in]entity   The entity
+ */
+void setEntityDirection(entityCtx *entity) {
+    double vx;
+
+    gfmSprite_getHorizontalVelocity(&vx, entity->pSelf);
+    if (vx > 0) {
+        gfmSprite_setDirection(entity->pSelf, 0);
+    }
+    else if (vx < 0) {
+        gfmSprite_setDirection(entity->pSelf, 1);
+    }
+}
+

@@ -58,8 +58,7 @@ static int pSwordyAnimData[] = {
 /*  FLOAT  */ 1 , 8 ,  0 , 40,
 /*  FALL   */ 2 , 8 ,  1 , 41,42,
 /* SECJUMP */ 4 , 8 ,  1 , 43,44,45,46,
-/*  ATK_0  */ 5 , 12,  0 , 47,48,49,50,54,
-/*  ATK_1  */ 4 , 12,  0 , 51,52,53,54,
+/*   ATK   */ 5 , 12,  0 , 47,48,49,50,54,
 /*   HURT  */ 2 , 8 ,  1 , 48,49
 };
 
@@ -212,6 +211,7 @@ err postUpdateSwordy(swordyCtx *swordy) {
 
     erv = postUpdateEntity(&swordy->entity);
     ASSERT(erv == ERR_OK, erv);
+    setEntityDirection(&swordy->entity);
 
     /* TODO Set animation */
     return ERR_OK;

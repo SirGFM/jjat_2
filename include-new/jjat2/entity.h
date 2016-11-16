@@ -132,5 +132,12 @@ void carryEntity(entityCtx *entity, gfmSprite *carrying);
  */
 err postUpdateEntity(entityCtx *entity);
 
+/**
+ * Updates an entity's direction according to its velocity.
+ *
+ * @param  [ in]entity   The entity
+ */
+void setEntityDirection(entityCtx *entity);
+
 #endif /* __JJAT2_ENTITY_H__ */
 

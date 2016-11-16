@@ -190,6 +190,7 @@ err postUpdateGunny(gunnyCtx *gunny) {
 
     erv = postUpdateEntity(&gunny->entity);
     ASSERT(erv == ERR_OK, erv);
+    setEntityDirection(&gunny->entity);
 
     /* TODO Set animation */
     return ERR_OK;
