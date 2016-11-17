@@ -42,8 +42,7 @@ enum enSwordyAnim {
     FLOAT,
     FALL,
     SECJUMP,
-    ATK_0,
-    ATK_1,
+    ATK,
     HURT,
     SWORDY_ANIM_COUNT
 };
@@ -207,13 +206,46 @@ err preUpdateSwordy(swordyCtx *swordy) {
  * @param  [ in]swordy The player to be updated
  */
 err postUpdateSwordy(swordyCtx *swordy) {
+    double vx, vy;
     err erv;
+    gfmCollision dir;
+    int hasCarrier;
+
+    hasCarrier = (swordy->entity.pCarrying != 0);
 
     erv = postUpdateEntity(&swordy->entity);
     ASSERT(erv == ERR_OK, erv);
     setEntityDirection(&swordy->entity);
 
-    /* TODO Set animation */
+    gfmSprite_getVelocity(&vx, &vy, swordy->entity.pSelf);
+    gfmSprite_getCollision(&dir, swordy->entity.pSelf);
+
+    /* Set animation */
+    if (0 /*atk*/ ) {
+        setEntityAnimation(&swordy->entity, ATK, 0/*force*/);
+    }
+    else if (hasCarrier) {
+        setEntityAnimation(&swordy->entity, STAND, 0/*force*/);
+    }
+    else if (swordy->jumpCount == 2) {
+        setEntityAnimation(&swordy->entity, SECJUMP, 0/*force*/);
+    }
+    else if (vy > 0) {
+        setEntityAnimation(&swordy->entity, FALL, 0/*force*/);
+    }
+    else if (vy < 0) {
+        setEntityAnimation(&swordy->entity, JUMP, 0/*force*/);
+    }
+    else if ((dir & gfmCollision_down) == 0 && vy >= -1.0f && vy <= 1.0) {
+        setEntityAnimation(&swordy->entity, FLOAT, 0/*force*/);
+    }
+    else if (vx != 0) {
+        setEntityAnimation(&swordy->entity, RUN, 0/*force*/);
+    }
+    else {
+        setEntityAnimation(&swordy->entity, STAND, 0/*force*/);
+    }
+
     return ERR_OK;
 }
 

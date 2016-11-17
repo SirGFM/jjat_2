@@ -34,6 +34,7 @@ err setEntityAnimation(entityCtx *entity, int animation, int force) {
         rv = gfmSprite_resetAnimation(entity->pSelf);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     }
+    entity->currentAnimation = animation;
 
     return ERR_OK;
 }
