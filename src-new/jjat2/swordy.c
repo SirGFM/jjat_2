@@ -192,6 +192,15 @@ err preUpdateSwordy(swordyCtx *swordy) {
         ASSERT(erv == ERR_OK, erv);
     } while (0); /* Update jump */
 
+    /* Handle attack */
+    // do {
+    //     int x, y, dir, frame;
+
+    //     gfmSprite_getPosition(&x, &y, swordy->entity.pSelf);
+    //     gfmSprite_getDirection(&dir, swordy->entity.pSelf);
+    //     gfmSprite_getFrame(&frame, swordy->entity.pSelf);
+    // } while (0); /* Handle attack */
+
     rv = gfmSprite_update(swordy->entity.pSelf, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     erv = collideEntity(&swordy->entity);
@@ -230,13 +239,13 @@ err postUpdateSwordy(swordyCtx *swordy) {
     else if (swordy->jumpCount == 2) {
         setEntityAnimation(&swordy->entity, SECJUMP, 0/*force*/);
     }
-    else if (vy > 0) {
+    else if (vy > FLOAT_SPEED) {
         setEntityAnimation(&swordy->entity, FALL, 0/*force*/);
     }
-    else if (vy < 0) {
+    else if (vy < -FLOAT_SPEED) {
         setEntityAnimation(&swordy->entity, JUMP, 0/*force*/);
     }
-    else if ((dir & gfmCollision_down) == 0 && vy >= -1.0f && vy <= 1.0) {
+    else if ((dir & gfmCollision_down) == 0 && vy >= -FLOAT_SPEED && vy <= FLOAT_SPEED) {
         setEntityAnimation(&swordy->entity, FLOAT, 0/*force*/);
     }
     else if (vx != 0) {

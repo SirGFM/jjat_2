@@ -12,6 +12,9 @@
 
 #include <stdint.h>
 
+/** Absolute speed when airborne sprites are set as 'floating' */
+#define FLOAT_SPEED     32
+
 /** Default grace time to while jumping is possible after leaving the ground */
 #define DEF_JUMP_GRACE  FRAMES_TO_MS(5)
 

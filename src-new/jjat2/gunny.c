@@ -41,9 +41,7 @@ enum enGunnyAnim {
     JUMP,
     FLOAT,
     FALL,
-    SECJUMP,
-    ATK_0,
-    ATK_1,
+    ATK,
     HURT,
     GUNNY_ANIM_COUNT
 };
@@ -57,10 +55,8 @@ static int pGunnyAnimData[] = {
 /*  JUMP   */ 2 , 8 ,  1 , 70,71,
 /*  FLOAT  */ 1 , 8 ,  0 , 72,
 /*  FALL   */ 2 , 8 ,  1 , 73,74,
-/* SECJUMP */ 4 , 8 ,  1 , 75,76,77,78,
-/*  ATK_0  */ 5 , 10,  0 , 79,80,81,82,86,
-/*  ATK_1  */ 4 , 10,  0 , 83,84,85,86,
-/*   HURT  */ 2 , 8 ,  1 , 80,81
+/*   ATK   */ 4 , 10,  0 , 75,76,77,78,
+/*   HURT  */ 2 , 8 ,  1 , 78,79
 };
 
 /**
@@ -186,13 +182,43 @@ err preUpdateGunny(gunnyCtx *gunny) {
  * @param  [ in]gunny The player to be updated
  */
 err postUpdateGunny(gunnyCtx *gunny) {
+    double vx, vy;
     err erv;
+    gfmCollision dir;
+    int hasCarrier;
+
+    hasCarrier = (gunny->entity.pCarrying != 0);
 
     erv = postUpdateEntity(&gunny->entity);
     ASSERT(erv == ERR_OK, erv);
     setEntityDirection(&gunny->entity);
 
-    /* TODO Set animation */
+    gfmSprite_getVelocity(&vx, &vy, gunny->entity.pSelf);
+    gfmSprite_getCollision(&dir, gunny->entity.pSelf);
+
+    /* Set animation */
+    if (0 /*atk*/ ) {
+        setEntityAnimation(&gunny->entity, ATK, 0/*force*/);
+    }
+    else if (hasCarrier) {
+        setEntityAnimation(&gunny->entity, STAND, 0/*force*/);
+    }
+    else if (vy > FLOAT_SPEED) {
+        setEntityAnimation(&gunny->entity, FALL, 0/*force*/);
+    }
+    else if (vy < -FLOAT_SPEED) {
+        setEntityAnimation(&gunny->entity, JUMP, 0/*force*/);
+    }
+    else if ((dir & gfmCollision_down) == 0 && vy >= -FLOAT_SPEED && vy <= FLOAT_SPEED) {
+        setEntityAnimation(&gunny->entity, FLOAT, 0/*force*/);
+    }
+    else if (vx != 0) {
+        setEntityAnimation(&gunny->entity, RUN, 0/*force*/);
+    }
+    else {
+        setEntityAnimation(&gunny->entity, STAND, 0/*force*/);
+    }
+
     return ERR_OK;
 }
 
