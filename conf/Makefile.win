@@ -15,6 +15,8 @@ DIRLIST := $(DIRLIST) obj/Win_debug
 DIRLIST := $(DIRLIST) $(SUBDIRLIST:%=obj/Win_release/%)
 DIRLIST := $(DIRLIST) $(SUBDIRLIST:%=obj/Win_debug/%)
 
+# TODO Replace aliases with 'Win' (e.g., MSYS_*, MINGW_* etc)
+
 ifeq ($(OS), Win)
   MINGW_INCLUDES ?= /d/windows/mingw/include
   MINGW_LIBS ?= /d/windows/mingw/mingw32/lib
@@ -26,6 +28,6 @@ ifeq ($(OS), Win)
 
   ICON := $(WINICON)
   CFLAGS := $(CFLAGS) -I$(MINGW_INCLUDES)
-  LDFLAGS := $(LDFLAGS) -L$(MINGW_LIBS) -mwindows -mingw32 -lSDL2main
+  LDFLAGS := $(LDFLAGS) -L$(MINGW_LIBS) -mwindows -lmingw32 -lSDL2main
 endif
 
