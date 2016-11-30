@@ -95,6 +95,9 @@ err mainloop() {
                         , erv = ERR_GFMERR, __ret);
             }
 
+            rv = gfm_drawRenderInfo(game.pCtx, 0, 0/*x*/, 24/*y*/, 0);
+            ASSERT_TO(rv == GFMRV_OK, erv = ERR_GFMERR, __ret);
+
             rv = gfm_drawEnd(game.pCtx);
             ASSERT_TO(rv == GFMRV_OK, erv = ERR_GFMERR, __ret);
         }

@@ -79,6 +79,12 @@ err setupGame(int argc, char *argv[]) {
             config.fpsQuality);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+    /* By default, render the FPS counter on debug mode */
+    rv = gfm_showFPSCounter(game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfm_setFPSCounterPos(game.pCtx, 4/*x*/, 4/*y*/);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
 #if defined(DEBUG)
     game.debugRunState = DBG_RUNNING;
 #endif
