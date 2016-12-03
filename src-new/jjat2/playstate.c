@@ -10,6 +10,7 @@
 #include <GFraMe/gfmTilemap.h>
 
 #include <jjat2/dictionary.h>
+#include <jjat2/fx_group.h>
 #include <jjat2/gunny.h>
 #include <jjat2/playstate.h>
 #include <jjat2/swordy.h>
@@ -147,6 +148,11 @@ err updatePlaystate() {
     erv = preUpdateGunny(&playstate.gunny);
     ASSERT(erv == ERR_OK, erv);
 
+    /* FX-group should be the last step of pre-update (so it runs after
+     * everyting was spawned this frame) */
+    erv = updateFxGroup();
+    ASSERT(erv == ERR_OK, erv);
+
     erv = postUpdateSwordy(&playstate.swordy);
     ASSERT(erv == ERR_OK, erv);
     erv = postUpdateGunny(&playstate.gunny);
@@ -167,6 +173,9 @@ err drawPlaystate() {
     ASSERT(erv == ERR_OK, erv);
     erv = drawSwordy(&playstate.swordy);
     ASSERT(erv == ERR_OK, erv);
+
+    rv = gfmGroup_draw(fx, game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     return ERR_OK;
 }

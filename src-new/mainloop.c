@@ -13,6 +13,7 @@
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gfmQuadtree.h>
 
+#include <jjat2/fx_group.h>
 #include <jjat2/playstate.h>
 #include <jjat2/static.h>
 
@@ -23,6 +24,8 @@ err mainloop() {
 
     zeroizeGameGlobalCtx();
     erv = initPlaystate();
+    ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
+    erv = initFxGroup();
     ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
 
     /* Set initial state */
@@ -105,6 +108,7 @@ err mainloop() {
 
     erv = ERR_OK;
 __ret:
+    freeFxGroup();
     freePlaystate();
 
     return erv;
