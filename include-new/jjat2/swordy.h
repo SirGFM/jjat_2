@@ -13,6 +13,8 @@ struct stSwordyCtx {
     entityCtx entity;
     /** Number of times swordy has already jumped */
     int jumpCount;
+    /** Flags used to control the attack animation/state */
+    int attackFlags;
 };
 typedef struct stSwordyCtx swordyCtx;
 

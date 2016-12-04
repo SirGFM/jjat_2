@@ -179,6 +179,11 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 }
                 rv = GFMRV_OK;
             } break;
+            IGNORE(T_ATK_SWORD, T_SWORDY)
+            IGNORE(T_ATK_SWORD, T_GUNNY)
+            IGNORE(T_ATK_SWORD, T_FLOOR)
+            IGNORE(T_ATK_SWORD, T_FX)
+            break;
             /* On Linux, a SIGINT is raised any time a unhandled collision
              * happens. When debugging, GDB will stop here and allow the user to
              * check which types weren't handled */

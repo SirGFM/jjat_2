@@ -64,6 +64,8 @@ gfmSprite* spawnFx(int x, int y, int w, int h, int flipped, int ttl,
     ASSERT(rv == GFMRV_OK, 0);
     rv = gfmSprite_playAnimation(pSpr, anim);
     ASSERT(rv == GFMRV_OK, 0);
+    rv = gfmSprite_resetAnimation(pSpr);
+    ASSERT(rv == GFMRV_OK, 0);
 
     return pSpr;
 }
