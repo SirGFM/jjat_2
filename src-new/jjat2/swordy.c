@@ -36,8 +36,11 @@
 #define swordy_offy -4
 
 enum {
-      flag_attacking   = 0x01
-    , flag_atkMoveLeft = 0x02
+      flag_attacking      = 0x01
+    , flag_atkMoveLeft    = 0x02
+    , flag_atkSecondSlash = 0x04
+    , flag_atkCombo       = 0x08
+    , flag_atkResetAnim   = 0x10
 };
 
 /** List of animations */
@@ -173,9 +176,74 @@ err preUpdateSwordy(swordyCtx *swordy) {
     rv = gfmSprite_getCollision(&col, swordy->entity.pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+    /* Handle attack */
+    do {
+        int canAtk;
+
+        /* Queue an attack as soon as possible */
+        if (DID_JUST_PRESS(swordyAtk) && (col & gfmCollision_down)) {
+            swordy->attackFlags |= flag_atkCombo;
+        }
+
+        /* Cancel attacks on the last frame */
+        if (swordy->entity.currentAnimation == ATK) {
+            int frame;
+
+            gfmSprite_getFrame(&frame, swordy->entity.pSelf);
+            canAtk = (frame == 51);
+        }
+        else {
+            canAtk = 1;
+        }
+
+        /* TODO Handle aerial attack */
+        if (canAtk && (swordy->attackFlags & flag_atkCombo)) {
+            int anim, dir, x, y;
+
+            gfmSprite_getPosition(&x, &y, swordy->entity.pSelf);
+            gfmSprite_getDirection(&dir, swordy->entity.pSelf);
+            y -= 2;
+            if (dir == 0) {
+                x += 3;
+                swordy->attackFlags &= ~flag_atkMoveLeft;
+            }
+            else {
+                x -= 13;
+                swordy->attackFlags |= flag_atkMoveLeft;
+            }
+
+            if (swordy->attackFlags & flag_atkSecondSlash) {
+                anim = FX_SWORDY_SLASH_UP;
+                swordy->attackFlags &= ~flag_atkSecondSlash;
+            }
+            else {
+                anim = FX_SWORDY_SLASH_DOWN;
+                swordy->attackFlags |= flag_atkSecondSlash;
+            }
+
+            spawnFx(x, y, 16/*w*/, 16/*h*/, dir, 333/*ttl*/, anim, T_ATK_SWORD);
+
+            swordy->attackFlags |= flag_attacking;
+            swordy->attackFlags |= flag_atkResetAnim;
+            swordy->attackFlags &= ~flag_atkCombo;
+        }
+
+        /* Enable moving backward when attacking */
+        if (swordy->entity.currentAnimation == ATK) {
+            int dir;
+            gfmSprite_getDirection(&dir, swordy->entity.pSelf);
+            if (dir == 0 && IS_PRESSED(swordyLeft)) {
+                swordy->attackFlags |= flag_atkMoveLeft;
+            }
+            else if (dir == 1 && IS_PRESSED(swordyRight)) {
+                swordy->attackFlags &= ~flag_atkMoveLeft;
+            }
+        }
+    } while (0);
+
     /* Update horizontal movement */
     do {
-        if (swordy->entity.currentAnimation == ATK) {
+        if (swordy->attackFlags & flag_attacking) {
             rv = gfmSprite_setHorizontalVelocity(swordy->entity.pSelf, 0);
         }
         else if (IS_PRESSED(swordyLeft)) {
@@ -220,43 +288,6 @@ err preUpdateSwordy(swordyCtx *swordy) {
         ASSERT(erv == ERR_OK, erv);
     } while (0); /* Update jump */
 
-    /* Handle attack */
-    do {
-        /* TODO Handle aerial attack */
-        if (swordy->entity.currentAnimation != ATK
-                && DID_JUST_PRESS(swordyAtk) && (col & gfmCollision_down)) {
-            int dir, x, y;
-
-            gfmSprite_getPosition(&x, &y, swordy->entity.pSelf);
-            gfmSprite_getDirection(&dir, swordy->entity.pSelf);
-            y -= 2;
-            if (dir == 0) {
-                x += 3;
-                swordy->attackFlags &= ~flag_atkMoveLeft;
-            }
-            else {
-                x -= 13;
-                swordy->attackFlags |= flag_atkMoveLeft;
-            }
-
-            spawnFx(x, y, 16/*w*/, 16/*h*/, dir, 333/*ttl*/
-                    , FX_SWORDY_SLASH_DOWN, T_ATK_SWORD);
-
-            swordy->attackFlags |= flag_attacking;
-        }
-        if (swordy->entity.currentAnimation == ATK) {
-            int dir;
-            gfmSprite_getDirection(&dir, swordy->entity.pSelf);
-            if (dir == 0 && IS_PRESSED(swordyLeft)) {
-                swordy->attackFlags |= flag_atkMoveLeft;
-            }
-            else if (dir == 1 && IS_PRESSED(swordyRight)) {
-                swordy->attackFlags &= ~flag_atkMoveLeft;
-            }
-        }
-
-    } while (0); /* Handle attack */
-
     rv = gfmSprite_update(swordy->entity.pSelf, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
@@ -265,10 +296,10 @@ err preUpdateSwordy(swordyCtx *swordy) {
         int frame, didChange;
 
         gfmSprite_getFrame(&frame, swordy->entity.pSelf);
-        didChange = (gfmSprite_didAnimationJustChangeFrame(swordy->entity.pSelf)
-                == GFMRV_TRUE);
+        /* Reflect sprite's movement into its world position */
         if (swordy->entity.currentAnimation == ATK && (frame == 50 || frame == 51)
-                && didChange) {
+                && (gfmSprite_didAnimationJustChangeFrame(swordy->entity.pSelf)
+                == GFMRV_TRUE)) {
             int x;
 
             gfmSprite_getHorizontalPosition(&x, swordy->entity.pSelf);
@@ -280,6 +311,7 @@ err preUpdateSwordy(swordyCtx *swordy) {
             }
         }
 
+        /* Clean flag as soon as animation stops */
         if (swordy->entity.currentAnimation == ATK
                 && gfmSprite_didAnimationFinish(swordy->entity.pSelf)
                 == GFMRV_TRUE) {
@@ -315,7 +347,9 @@ err postUpdateSwordy(swordyCtx *swordy) {
 
     /* Set animation */
     if (swordy->attackFlags & flag_attacking) {
-        setEntityAnimation(&swordy->entity, ATK, 0/*force*/);
+        setEntityAnimation(&swordy->entity, ATK
+                , swordy->attackFlags & flag_atkResetAnim);
+        swordy->attackFlags &= ~flag_atkResetAnim;
     }
     else if (hasCarrier) {
         setEntityAnimation(&swordy->entity, STAND, 0/*force*/);

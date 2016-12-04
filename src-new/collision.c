@@ -183,6 +183,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_ATK_SWORD, T_GUNNY)
             IGNORE(T_ATK_SWORD, T_FLOOR)
             IGNORE(T_ATK_SWORD, T_FX)
+            IGNORESELF(T_ATK_SWORD)
             break;
             /* On Linux, a SIGINT is raised any time a unhandled collision
              * happens. When debugging, GDB will stop here and allow the user to
