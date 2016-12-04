@@ -11,6 +11,7 @@
 struct stGunnyCtx {
     /** Base object */
     entityCtx entity;
+    int flags;
 };
 typedef struct stGunnyCtx gunnyCtx;
 

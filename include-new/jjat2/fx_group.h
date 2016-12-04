@@ -22,6 +22,7 @@
 enum enFxAnim {
       FX_SWORDY_SLASH_DOWN
     , FX_SWORDY_SLASH_UP
+    , FX_GUNNY_BULLET
     , FX_MAX
 };
 typedef enum enFxAnim fxAnim;

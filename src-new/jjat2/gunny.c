@@ -13,6 +13,7 @@
 #include <GFraMe/gfmQuadtree.h>
 #include <GFraMe/gfmSprite.h>
 
+#include <jjat2/fx_group.h>
 #include <jjat2/gunny.h>
 
 /** Define Gunny's physics constants. The first parameter is the time in
@@ -28,11 +29,16 @@
 #define GUNNY_FALL_GRAV JUMP_ACCELERATION(GUNNY_FALL_TIME, GUNNY_JUMP_HEIGHT)
 #define GUNNY_SPEED TILES_TO_PX(9.5)
 
+#define BULLET_SPEED TILES_TO_PX(25)
+
 #define gunny_width 6
 #define gunny_height 10
 #define gunny_offx -5
 #define gunny_offy -6
 
+enum {
+    gunny_attack = 0x01,
+};
 
 /** List of animations */
 enum enGunnyAnim {
@@ -55,7 +61,7 @@ static int pGunnyAnimData[] = {
 /*  JUMP   */ 2 , 8 ,  1 , 70,71,
 /*  FLOAT  */ 1 , 8 ,  0 , 72,
 /*  FALL   */ 2 , 8 ,  1 , 73,74,
-/*   ATK   */ 4 , 10,  0 , 75,76,77,78,
+/*   ATK   */ 4 , 12,  0 , 75,76,77,78,
 /*   HURT  */ 2 , 8 ,  1 , 78,79
 };
 
@@ -170,10 +176,50 @@ err preUpdateGunny(gunnyCtx *gunny) {
     }
     ASSERT(erv == ERR_OK, erv);
 
+    /* Handle attack */
+    do {
+        if (DID_JUST_PRESS(gunnyAtk)
+                && gunny->entity.currentAnimation != ATK) {
+            gfmSprite *pBullet;
+            double vx;
+            int dir, x, y;
+
+            gfmSprite_getPosition(&x, &y, gunny->entity.pSelf);
+            gfmSprite_getDirection(&dir, gunny->entity.pSelf);
+            y += 2;
+            if (dir == 0) {
+                x += 3;
+                vx = BULLET_SPEED;
+            }
+            else {
+                x -= 13;
+                vx = -BULLET_SPEED;
+            }
+
+            /* TODO Add a maximum TTL */
+            pBullet = spawnFx(x, y, 16/*w*/, 8/*h*/, dir, 0/*ttl*/
+                    , FX_GUNNY_BULLET , T_TEL_BULLET);
+            ASSERT(pBullet != 0, ERR_GFMERR);
+            gfmSprite_setHorizontalVelocity(pBullet, vx);
+
+            gunny->flags |= gunny_attack;
+        }
+    } while (0); /* Handle attack */
+
     rv = gfmSprite_update(gunny->entity.pSelf, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     erv = collideEntity(&gunny->entity);
     ASSERT(erv == ERR_OK, erv);
+
+    /* End attack animation */
+    do {
+        /* Clean flag as soon as animation stops */
+        if (gunny->entity.currentAnimation == ATK
+                && gfmSprite_didAnimationFinish(gunny->entity.pSelf)
+                == GFMRV_TRUE) {
+            gunny->flags &= ~gunny_attack;
+        }
+    } while (0); /* End attack animation */
 
     return ERR_OK;
 }
@@ -199,7 +245,7 @@ err postUpdateGunny(gunnyCtx *gunny) {
     gfmSprite_getCollision(&dir, gunny->entity.pSelf);
 
     /* Set animation */
-    if (0 /*atk*/ ) {
+    if (gunny->flags & gunny_attack) {
         setEntityAnimation(&gunny->entity, ATK, 0/*force*/);
     }
     else if (hasCarrier) {

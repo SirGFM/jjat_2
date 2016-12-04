@@ -27,9 +27,11 @@ enum enType {
     , T_PLAYER    = gfmType_reserved_7  /* light red */
     , T_FX        = gfmType_reserved_10 /* dirty yellow/green */
 
-    , T_SWORDY    = (1 << T_BASE_NBITS) | T_PLAYER
-    , T_GUNNY     = (2 << T_BASE_NBITS) | T_PLAYER
-    , T_ATK_SWORD = (3 << T_BASE_NBITS) | T_PLAYER
+    , T_SWORDY     = (1 << T_BASE_NBITS) | T_PLAYER
+    , T_GUNNY      = (2 << T_BASE_NBITS) | T_PLAYER
+    , T_ATK_SWORD  = (3 << T_BASE_NBITS) | T_PLAYER
+    , T_SWORD_FX   = (3 << T_BASE_NBITS) | T_FX
+    , T_TEL_BULLET = (4 << T_BASE_NBITS) | T_PLAYER
 };
 typedef enum enType type;
 

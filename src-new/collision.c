@@ -107,10 +107,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
         /* Merge both types into a single one, so it's easier to compare */
         isFirstCase = 0;
         switch (MERGE_TYPES(node1.type, node2.type)) {
-            /* Handle collisions.
-             *
-             * Don't forget to 'break' after each CASE! Also, don't forget to
-             * IGNORE any collision that isn't triggered! */
+/*== PLAYER'S COLLISION ======================================================*/
             CASE(T_FLOOR, T_GUNNY)
             CASE(T_FLOOR, T_SWORDY) {
                 collisionNode *player;
@@ -179,11 +176,52 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 }
                 rv = GFMRV_OK;
             } break;
+/*== SWORDY'S ATTACK =========================================================*/
+            CASE(T_TEL_BULLET, T_ATK_SWORD) {
+                /* Reflect the bullet */
+                gfmSprite *pBullet;
+                double vx;
+                int dir;
+
+                if (isFirstCase) {
+                    pBullet = node1.pSprite;
+                    gfmSprite_setType(node2.pSprite, T_SWORD_FX);
+                }
+                else {
+                    pBullet = node2.pSprite;
+                    gfmSprite_setType(node1.pSprite, T_SWORD_FX);
+                }
+                gfmSprite_getHorizontalVelocity(&vx, pBullet);
+                gfmSprite_getDirection(&dir, pBullet);
+                gfmSprite_setHorizontalVelocity(pBullet, -vx);
+                gfmSprite_setDirection(pBullet, !dir);
+
+                collision.skip = 1;
+            } break;
             IGNORE(T_ATK_SWORD, T_SWORDY)
             IGNORE(T_ATK_SWORD, T_GUNNY)
             IGNORE(T_ATK_SWORD, T_FLOOR)
             IGNORE(T_ATK_SWORD, T_FX)
             IGNORESELF(T_ATK_SWORD)
+            break;
+/*== GUNNY'S BULLET ==========================================================*/
+            CASE(T_TEL_BULLET, T_SWORDY) {
+                collision.skip = 1;
+            } break;
+            CASE(T_TEL_BULLET, T_FLOOR) {
+                collision.skip = 1;
+            } break;
+            IGNORE(T_TEL_BULLET, T_GUNNY)
+            IGNORE(T_TEL_BULLET, T_FX)
+            IGNORESELF(T_TEL_BULLET)
+            break;
+/*== SWORDY'S ATTACK TRAIL (AFTER HITTING ANYTHING) ==========================*/
+            IGNORE(T_SWORD_FX, T_SWORDY)
+            IGNORE(T_SWORD_FX, T_GUNNY)
+            IGNORE(T_SWORD_FX, T_FLOOR)
+            IGNORE(T_SWORD_FX, T_FX)
+            IGNORE(T_SWORD_FX, T_TEL_BULLET)
+            IGNORESELF(T_SWORD_FX)
             break;
             /* On Linux, a SIGINT is raised any time a unhandled collision
              * happens. When debugging, GDB will stop here and allow the user to

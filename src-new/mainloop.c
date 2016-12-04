@@ -91,11 +91,13 @@ err mainloop() {
 
             if (IS_QUADTREE_VISIBLE()) {
                 rv = gfmQuadtree_drawBounds(collision.pStaticQt, game.pCtx, 0);
-                ASSERT_TO(rv == GFMRV_QUADTREE_NOT_INITIALIZED || rv == GFMRV_OK
-                        , erv = ERR_GFMERR, __ret);
+                ASSERT_TO(rv == GFMRV_QUADTREE_EMPTY
+                        || rv == GFMRV_QUADTREE_NOT_INITIALIZED
+                        || rv == GFMRV_OK, erv = ERR_GFMERR, __ret);
                 rv = gfmQuadtree_drawBounds(collision.pQt, game.pCtx, 0);
-                ASSERT_TO(rv == GFMRV_QUADTREE_NOT_INITIALIZED || rv == GFMRV_OK
-                        , erv = ERR_GFMERR, __ret);
+                ASSERT_TO(rv == GFMRV_QUADTREE_EMPTY
+                        || rv == GFMRV_QUADTREE_NOT_INITIALIZED
+                        || rv == GFMRV_OK, erv = ERR_GFMERR, __ret);
             }
 
             rv = gfm_drawRenderInfo(game.pCtx, 0, 0/*x*/, 24/*y*/, 0);

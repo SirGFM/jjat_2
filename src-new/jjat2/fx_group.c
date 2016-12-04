@@ -21,6 +21,7 @@ static int pFxAnimData[] = {
 /*                         len|fps|loop|data... */
 /* FX_SWORDY_SLASH_DOWN */  4 , 12,  0 , 56,57,58,59
 /*  FX_SWORDY_SLASH_UP  */, 4 , 12,  0 , 60,61,62,63
+/*    FX_GUNNY_BULLET   */, 4 , 12,  1 , 92,93,94,95
 };
 static int fxAnimDataLen = sizeof(pFxAnimData) / sizeof(int);
 
