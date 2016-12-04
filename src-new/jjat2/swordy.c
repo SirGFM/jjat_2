@@ -262,8 +262,6 @@ err preUpdateSwordy(swordyCtx *swordy) {
 
     /* Update jump */
     do {
-        /* TODO Disable grounded attack to be jump-cancel-able? */
-
         /* Reset the jump count whenever swordy is grounded */
         if (col & gfmCollision_down) {
             swordy->jumpCount = 0;
@@ -282,6 +280,9 @@ err preUpdateSwordy(swordyCtx *swordy) {
         if (erv == ERR_DIDJUMP) {
             swordy->jumpCount++;
 
+            /* Jump-cancel grounded attacks */
+            swordy->attackFlags &= ~flag_attacking;
+
             /* Set the error so the assert isn't triggered */
             erv = ERR_OK;
         }
@@ -293,11 +294,13 @@ err preUpdateSwordy(swordyCtx *swordy) {
 
     /* Adjust attack animation */
     do {
-        int frame, didChange;
+        int frame;
 
         gfmSprite_getFrame(&frame, swordy->entity.pSelf);
         /* Reflect sprite's movement into its world position */
-        if (swordy->entity.currentAnimation == ATK && (frame == 50 || frame == 51)
+        if ((col & gfmCollision_down)
+                && swordy->entity.currentAnimation == ATK
+                && (frame == 50 || frame == 51)
                 && (gfmSprite_didAnimationJustChangeFrame(swordy->entity.pSelf)
                 == GFMRV_TRUE)) {
             int x;
