@@ -14,6 +14,7 @@
 #include <jjat2/gunny.h>
 #include <jjat2/playstate.h>
 #include <jjat2/swordy.h>
+#include <jjat2/teleport.h>
 
 #include <string.h>
 
@@ -127,6 +128,10 @@ err loadPlaystate() {
 
     erv = _loadStaticQuadtree();
     ASSERT(erv == ERR_OK, erv);
+
+    rv = gfmGroup_killAll(fx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    resetTeleporterTarget();
 
     return ERR_OK;
 }

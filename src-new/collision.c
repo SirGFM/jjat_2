@@ -10,6 +10,7 @@
 #include <jjat2/entity.h>
 #include <jjat2/gunny.h>
 #include <jjat2/swordy.h>
+#include <jjat2/teleport.h>
 
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gfmObject.h>
@@ -47,10 +48,12 @@ typedef struct stCollisionNode collisionNode;
  */
 #define CASE(type1, type2) \
     case (MERGE_TYPES(type1, type2)): \
-        if (!fallthrough) isFirstCase = 1; \
-            fallthrough = 1; \
+        if (!fallthrough) { \
+            isFirstCase = 1; \
+        } \
+        fallthrough = 1; \
     case (MERGE_TYPES(type2, type1)): \
-            fallthrough = 1;
+        fallthrough = 1;
 
 /** Ignore collision with entities of the same type */
 #define IGNORESELF(type) \
@@ -106,6 +109,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 
         /* Merge both types into a single one, so it's easier to compare */
         isFirstCase = 0;
+        fallthrough = 0;
         switch (MERGE_TYPES(node1.type, node2.type)) {
 /*== PLAYER'S COLLISION ======================================================*/
             CASE(T_FLOOR, T_GUNNY)
@@ -177,19 +181,19 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 rv = GFMRV_OK;
             } break;
 /*== SWORDY'S ATTACK =========================================================*/
-            CASE(T_TEL_BULLET, T_ATK_SWORD) {
+            CASE(T_ATK_SWORD, T_TEL_BULLET) {
                 /* Reflect the bullet */
                 gfmSprite *pBullet;
                 double vx;
                 int dir;
 
                 if (isFirstCase) {
-                    pBullet = node1.pSprite;
-                    gfmSprite_setType(node2.pSprite, T_SWORD_FX);
-                }
-                else {
                     pBullet = node2.pSprite;
                     gfmSprite_setType(node1.pSprite, T_SWORD_FX);
+                }
+                else {
+                    pBullet = node1.pSprite;
+                    gfmSprite_setType(node2.pSprite, T_SWORD_FX);
                 }
                 gfmSprite_getHorizontalVelocity(&vx, pBullet);
                 gfmSprite_getDirection(&dir, pBullet);
@@ -209,6 +213,29 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 collision.skip = 1;
             } break;
             CASE(T_TEL_BULLET, T_FLOOR) {
+                gfmGroupNode *pNode;
+                gfmObject *pObject;
+                err erv;
+                int x, y;
+
+                if (isFirstCase) {
+                    pObject = node1.pObject;
+                    pNode = (gfmGroupNode*)node1.pChild;
+                }
+                else {
+                    pObject = node1.pObject;
+                    pNode = (gfmGroupNode*)node1.pChild;
+                }
+
+                /* TODO Check if visible */
+                /* TODO Adjust position based on direction */
+                rv = gfmObject_getCenter(&x, &y, pObject);
+                ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+                rv = gfmGroup_removeNode(pNode);
+                ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+                erv = teleporterTargetPosition(x, y);
+                ASSERT(erv == ERR_OK, erv);
                 collision.skip = 1;
             } break;
             IGNORE(T_TEL_BULLET, T_GUNNY)
@@ -220,8 +247,14 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_SWORD_FX, T_GUNNY)
             IGNORE(T_SWORD_FX, T_FLOOR)
             IGNORE(T_SWORD_FX, T_FX)
+            IGNORE(T_SWORD_FX, T_ATK_SWORD)
             IGNORE(T_SWORD_FX, T_TEL_BULLET)
             IGNORESELF(T_SWORD_FX)
+/*== COLLISION-LESS EFFECTS ==================================================*/
+            IGNORE(T_FX, T_SWORDY)
+            IGNORE(T_FX, T_GUNNY)
+            IGNORE(T_FX, T_FLOOR)
+            IGNORESELF(T_FX)
             break;
             /* On Linux, a SIGINT is raised any time a unhandled collision
              * happens. When debugging, GDB will stop here and allow the user to

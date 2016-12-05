@@ -186,7 +186,7 @@ err preUpdateGunny(gunnyCtx *gunny) {
 
             gfmSprite_getPosition(&x, &y, gunny->entity.pSelf);
             gfmSprite_getDirection(&dir, gunny->entity.pSelf);
-            y += 2;
+            y += 3;
             if (dir == 0) {
                 x += 3;
                 vx = BULLET_SPEED;
@@ -197,8 +197,9 @@ err preUpdateGunny(gunnyCtx *gunny) {
             }
 
             /* TODO Add a maximum TTL */
-            pBullet = spawnFx(x, y, 16/*w*/, 8/*h*/, dir, 0/*ttl*/
-                    , FX_GUNNY_BULLET , T_TEL_BULLET);
+            /* TODO Center spawn */
+            pBullet = spawnFx(x, y, 16/*w*/, 6/*h*/, dir, 0/*ttl*/
+                    , FX_GUNNY_BULLET, T_TEL_BULLET);
             ASSERT(pBullet != 0, ERR_GFMERR);
             gfmSprite_setHorizontalVelocity(pBullet, vx);
 

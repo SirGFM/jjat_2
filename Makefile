@@ -32,7 +32,8 @@
          jjat2/gunny.o \
          jjat2/playstate.o \
          jjat2/static.o \
-         jjat2/swordy.o
+         jjat2/swordy.o \
+         jjat2/teleport.o
 
 # Define the target name
   TARGET := game
