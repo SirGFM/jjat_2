@@ -210,6 +210,25 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             break;
 /*== GUNNY'S BULLET ==========================================================*/
             CASE(T_TEL_BULLET, T_SWORDY) {
+                gfmGroupNode *pNode;
+                entityCtx *pEntity;
+                err erv;
+
+                if (isFirstCase) {
+                    pNode = (gfmGroupNode*)node1.pChild;
+                    pEntity = (entityCtx*)node2.pChild;
+                }
+                else {
+                    pNode = (gfmGroupNode*)node2.pChild;
+                    pEntity = (entityCtx*)node1.pChild;
+                }
+
+                /* TODO Check if visible */
+                rv = gfmGroup_removeNode(pNode);
+                ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+                erv = teleporterTargetEntity(pEntity);
+                ASSERT(erv == ERR_OK, erv);
                 collision.skip = 1;
             } break;
             CASE(T_TEL_BULLET, T_FLOOR) {
@@ -223,8 +242,8 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                     pNode = (gfmGroupNode*)node1.pChild;
                 }
                 else {
-                    pObject = node1.pObject;
-                    pNode = (gfmGroupNode*)node1.pChild;
+                    pObject = node2.pObject;
+                    pNode = (gfmGroupNode*)node2.pChild;
                 }
 
                 /* TODO Check if visible */

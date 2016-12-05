@@ -44,5 +44,8 @@ err teleporterTargetPosition(int x, int y);
  */
 err teleporterTargetEntity(entityCtx *pTarget);
 
+/** Update the teleporter's position */
+err updateTeleporterTarget();
+
 #endif /* __JJAT2_TELEPORT_H__ */
 

@@ -64,9 +64,32 @@ err teleporterTargetPosition(int x, int y) {
  * @param  [ in]pTarget The entity
  */
 err teleporterTargetEntity(entityCtx *pTarget) {
+    err erv;
     /* No need to set the position right now since it will be updated shortly
      * afterward */
+    erv = teleporterTargetPosition(0, 0);
+    ASSERT(erv == ERR_OK, erv);
+
     teleport.pTarget = pTarget;
-    return teleporterTargetPosition(0, 0);
+    return ERR_OK;
+}
+
+/** Update the teleporter's position */
+err updateTeleporterTarget() {
+    gfmSprite *pEffect;
+    gfmRV rv;
+    int cx, cy;
+
+    if (teleport.pTarget == 0 || teleport.pCurEffect == 0) {
+        return ERR_OK;
+    }
+
+    rv = gfmSprite_getCenter(&cx, &cy, teleport.pTarget->pSelf);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmGroup_getNodeSprite(&pEffect, teleport.pCurEffect);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmSprite_setPosition(pEffect, cx - 4, cy - 4);
+
+    return ERR_OK;
 }
 
