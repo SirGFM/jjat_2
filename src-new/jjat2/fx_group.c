@@ -60,6 +60,8 @@ gfmSprite* spawnFx(int x, int y, int w, int h, int flipped, int ttl,
     ASSERT(rv == GFMRV_OK, 0);
     rv = gfmSprite_setDimensions(pSpr, w, h);
     ASSERT(rv == GFMRV_OK, 0);
+    rv = gfmSprite_setOffset(pSpr, 0/*offx*/, 0/*offy*/);
+    ASSERT(rv == GFMRV_OK, 0);
     rv = gfmSprite_setDirection(pSpr, flipped);
     ASSERT(rv == GFMRV_OK, 0);
     rv = gfmSprite_setType(pSpr, t);

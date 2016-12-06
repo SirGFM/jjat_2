@@ -196,12 +196,11 @@ err preUpdateGunny(gunnyCtx *gunny) {
                 vx = -BULLET_SPEED;
             }
 
-            /* TODO Add a maximum TTL */
-            /* TODO Center spawn */
-            pBullet = spawnFx(x, y, 16/*w*/, 6/*h*/, dir, 0/*ttl*/
+            pBullet = spawnFx(x, y, 16/*w*/, 5/*h*/, dir, 6000/*ttl*/
                     , FX_GUNNY_BULLET, T_TEL_BULLET);
             ASSERT(pBullet != 0, ERR_GFMERR);
             gfmSprite_setHorizontalVelocity(pBullet, vx);
+            gfmSprite_setOffset(pBullet, 0/*offx*/, -2/*offy*/);
 
             gunny->flags |= gunny_attack;
         }
