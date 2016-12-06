@@ -5,6 +5,7 @@
  */
 #include <base/collision.h>
 #include <base/error.h>
+#include <base/game.h>
 #include <conf/type.h>
 
 #include <jjat2/entity.h>
@@ -223,38 +224,59 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                     pEntity = (entityCtx*)node1.pChild;
                 }
 
-                /* TODO Check if visible */
+                /* Check if visible */
+                if (GFMRV_TRUE == gfm_isSpriteInsideCamera(game.pCtx, pEntity->pSelf)) {
+                    erv = teleporterTargetEntity(pEntity);
+                    ASSERT(erv == ERR_OK, erv);
+                }
                 rv = gfmGroup_removeNode(pNode);
                 ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-                erv = teleporterTargetEntity(pEntity);
-                ASSERT(erv == ERR_OK, erv);
                 collision.skip = 1;
             } break;
             CASE(T_TEL_BULLET, T_FLOOR) {
                 gfmGroupNode *pNode;
-                gfmObject *pObject;
+                gfmObject *pBullet, *pFloor;
                 err erv;
-                int x, y;
 
                 if (isFirstCase) {
-                    pObject = node1.pObject;
+                    pBullet = node1.pObject;
                     pNode = (gfmGroupNode*)node1.pChild;
+                    pFloor = node2.pObject;
                 }
                 else {
-                    pObject = node2.pObject;
+                    pBullet = node2.pObject;
                     pNode = (gfmGroupNode*)node2.pChild;
+                    pFloor = node1.pObject;
                 }
 
-                /* TODO Check if visible */
-                /* TODO Adjust position based on direction */
-                rv = gfmObject_getCenter(&x, &y, pObject);
-                ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+                /* Check if visible */
+                if (GFMRV_TRUE == gfm_isObjectInsideCamera(game.pCtx, pFloor)) {
+                    int cx, x, y;
+
+                    /* Since the bullet only moves horizontally, use the floor's
+                     * horizontal position and the bullet's vertical */
+                    rv = gfmObject_getLastCenter(&cx, &y, pBullet);
+                    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+                    rv = gfmObject_getHorizontalPosition(&x, pFloor);
+                    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+                    /* Ugly, hacky assumption: if the center - half the width is
+                     * to the right of the floor's left side, then it's to the
+                     * floor's right */
+                    if (cx - 8 >= x) {
+                        int w;
+                        /* The bullet collided to the left, so adjust its position */
+                        rv = gfmObject_getWidth(&w, pFloor);
+                        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+                        x += w;
+                    }
+
+                    erv = teleporterTargetPosition(x, y);
+                    ASSERT(erv == ERR_OK, erv);
+                }
                 rv = gfmGroup_removeNode(pNode);
                 ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-
-                erv = teleporterTargetPosition(x, y);
-                ASSERT(erv == ERR_OK, erv);
                 collision.skip = 1;
             } break;
             IGNORE(T_TEL_BULLET, T_GUNNY)
@@ -269,6 +291,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_SWORD_FX, T_ATK_SWORD)
             IGNORE(T_SWORD_FX, T_TEL_BULLET)
             IGNORESELF(T_SWORD_FX)
+            break;
 /*== COLLISION-LESS EFFECTS ==================================================*/
             IGNORE(T_FX, T_SWORDY)
             IGNORE(T_FX, T_GUNNY)
