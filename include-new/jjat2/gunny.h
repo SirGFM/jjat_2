@@ -60,5 +60,12 @@ err preUpdateGunny(gunnyCtx *gunny);
  */
 err postUpdateGunny(gunnyCtx *gunny);
 
+/**
+ * Check if gunny should be teleported and do so.
+ *
+ * @param  [ in]gunny The player to be teleported
+ */
+err updateGunnyTeleport(gunnyCtx *gunny);
+
 #endif /* __JJAT2_GUNNY_H__ */
 

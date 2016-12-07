@@ -166,6 +166,8 @@ err updatePlaystate() {
     /* This may result in a few 1-frame display bugs for the target... */
     erv = updateTeleporterTarget();
     ASSERT(erv == ERR_OK, erv);
+    erv = updateGunnyTeleport(&playstate.gunny);
+    ASSERT(erv == ERR_OK, erv);
 
     return ERR_OK;
 }
