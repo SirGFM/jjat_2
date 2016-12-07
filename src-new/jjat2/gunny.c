@@ -8,6 +8,7 @@
 
 #include <conf/type.h>
 
+#include <GFraMe/gfmDebug.h>
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gfmParser.h>
 #include <GFraMe/gfmQuadtree.h>
@@ -15,6 +16,7 @@
 
 #include <jjat2/fx_group.h>
 #include <jjat2/gunny.h>
+#include <jjat2/teleport.h>
 
 /** Define Gunny's physics constants. The first parameter is the time in
  * 60FPS-frames and the second is the jump height in 8px-tiles. */
@@ -139,8 +141,25 @@ err parseGunny(gunnyCtx *gunny, gfmParser *pParser) {
  */
 err drawGunny(gunnyCtx *gunny) {
     gfmRV rv;
+
     rv = gfmSprite_draw(gunny->entity.pSelf, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+#if defined(DEBUG)
+    do {
+        static int counter = 0;
+        int x, y;
+        if (DID_JUST_PRESS(gunnyAtk)) {
+            counter = 0;
+        }
+        else if (IS_PRESSED(gunnyAtk)) {
+            counter += game.elapsed;
+        }
+        gfmSprite_getPosition(&x, &y, gunny->entity.pSelf);
+        gfmDebug_printf(game.pCtx, x, y - 12, "TIME: %03i", counter);
+    } while (0);
+#endif
+
     return ERR_OK;
 }
 
@@ -178,8 +197,48 @@ err preUpdateGunny(gunnyCtx *gunny) {
 
     /* Handle attack */
     do {
-        if (DID_JUST_PRESS(gunnyAtk)
-                && gunny->entity.currentAnimation != ATK) {
+        uint32_t time;
+        int doShoot;
+
+        doShoot = 0;
+        time = (gunny->flags >> 8) & 0xff;
+
+        /* If there's a valid target, accumulated for how long the action button
+         * has been pressed on bits 8~15 of flags (NOTE: accumulated time must
+         * be doubled before evaluating) */
+        if (teleport.pCurEffect != 0 && IS_PRESSED(gunnyAtk)) {
+            /* This will only be an issue if the game is running at more than
+             * 500 FPS... pfff */
+            time += game.elapsed >> 1;
+            if (time > 0xff) {
+                time = 0xff;
+            }
+            gunny->flags &= ~(0xff << 8);
+            gunny->flags |= time << 8;
+        }
+
+        if (DID_JUST_PRESS(gunnyAtk)) {
+            doShoot = !(gunny->flags & gunny_attack)
+                    && teleport.pCurEffect == 0;
+            /* Clean the time bits */
+            gunny->flags &= ~(0xff << 8);
+        }
+
+        if (DID_JUST_RELEASE(gunnyAtk) && teleport.pCurEffect != 0) {
+            /* If the button has been pressed for around 1/3 seconds, shoot
+             * again as soon as the button is released */
+            /* TODO Playtest this a lot! It already seems terrible! */
+            if (time >= 167) {
+                doShoot = !(gunny->flags & gunny_attack);
+            }
+            else if (!(gunny->flags & gunny_attack)) {
+                /* Teleport */
+                erv = teleportEntity(&gunny->entity);
+                ASSERT(erv == ERR_OK, erv);
+            }
+        }
+
+        if (doShoot) {
             gfmSprite *pBullet;
             double vx;
             int dir, x, y;
@@ -203,6 +262,8 @@ err preUpdateGunny(gunnyCtx *gunny) {
             gfmSprite_setOffset(pBullet, 0/*offx*/, -2/*offy*/);
 
             gunny->flags |= gunny_attack;
+            /* Clean the time bits */
+            gunny->flags &= ~(0xff << 8);
         }
     } while (0); /* Handle attack */
 

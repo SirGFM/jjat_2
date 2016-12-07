@@ -8,10 +8,12 @@
 
 #include <GFraMe/gfmParser.h>
 
+#include <stdint.h>
+
 struct stGunnyCtx {
     /** Base object */
     entityCtx entity;
-    int flags;
+    uint32_t flags;
 };
 typedef struct stGunnyCtx gunnyCtx;
 

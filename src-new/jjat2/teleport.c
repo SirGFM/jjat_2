@@ -93,3 +93,43 @@ err updateTeleporterTarget() {
     return ERR_OK;
 }
 
+/**
+ * Teleport an entity to the current target
+ *
+ * @param  [ in]pEnt The entity
+ */
+err teleportEntity(entityCtx *pEnt) {
+    gfmSprite *pEffect;
+    int cx, cy;
+    err erv;
+    gfmRV rv;
+
+    if (teleport.pCurEffect == 0) {
+        return ERR_OK;
+    }
+
+    /* Swap the target, if any */
+    if (teleport.pTarget != 0) {
+        rv = gfmSprite_getCenter(&cx, &cy, pEnt->pSelf);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        rv = gfmSprite_setCenter(teleport.pTarget->pSelf, cx, cy);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        erv = collideEntityStatic(teleport.pTarget);
+        ASSERT(erv == ERR_OK, erv);
+    }
+
+    /* Swap the entity */
+    rv = gfmGroup_getNodeSprite(&pEffect, teleport.pCurEffect);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmSprite_getCenter(&cx, &cy, pEffect);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmSprite_setCenter(pEnt->pSelf, cx, cy);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    erv = collideEntityStatic(pEnt);
+    ASSERT(erv == ERR_OK, erv);
+
+    cleanPreviousTarget();
+
+    return ERR_OK;
+}
+

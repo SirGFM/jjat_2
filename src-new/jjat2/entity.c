@@ -117,6 +117,24 @@ err updateEntityJump(entityCtx *entity, gfmInputState jumpBt) {
 }
 
 /**
+ * Collide the entity's sprite only against the static world
+ *
+ * @param  [ in]entity The entity
+ */
+err collideEntityStatic(entityCtx *entity) {
+    err erv;
+    gfmRV rv;
+    rv = gfmQuadtree_collideSprite(collision.pStaticQt, entity->pSelf);
+    if (rv == GFMRV_QUADTREE_OVERLAPED) {
+        erv = doCollide(collision.pStaticQt);
+        ASSERT(erv == ERR_OK, erv);
+        rv = GFMRV_QUADTREE_DONE;
+    }
+    ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
+    return ERR_OK;
+}
+
+/**
  * Collide the entity's sprite against the world
  *
  * @param  [ in]entity The entity

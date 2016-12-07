@@ -104,6 +104,13 @@ err setEntityAnimation(entityCtx *entity, int animation, int force);
 err updateEntityJump(entityCtx *entity, gfmInputState jumpBt);
 
 /**
+ * Collide the entity's sprite only against the static world
+ *
+ * @param  [ in]entity The entity
+ */
+err collideEntityStatic(entityCtx *entity);
+
+/**
  * Collide the entity's sprite against the world
  *
  * @param  [ in]entity The entity

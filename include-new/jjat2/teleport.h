@@ -47,5 +47,12 @@ err teleporterTargetEntity(entityCtx *pTarget);
 /** Update the teleporter's position */
 err updateTeleporterTarget();
 
+/**
+ * Teleport an entity to the current target
+ *
+ * @param  [ in]pEnt The entity
+ */
+err teleportEntity(entityCtx *pEnt);
+
 #endif /* __JJAT2_TELEPORT_H__ */
 
