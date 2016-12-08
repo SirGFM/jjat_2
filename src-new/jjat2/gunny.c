@@ -305,7 +305,7 @@ err postUpdateGunny(gunnyCtx *gunny) {
 err updateGunnyTeleport(gunnyCtx *gunny) {
     err erv;
 
-    if (!(gunny->flags & gunny_justAttacked) && DID_JUST_RELEASE(gunnyAtk)
+    if (!(gunny->flags & gunny_justAttacked) && DID_JUST_PRESS(gunnyAtk)
             && teleport.pCurEffect != 0) {
         /* Teleport */
         erv = teleportEntity(&gunny->entity);
