@@ -100,6 +100,7 @@ err updateTeleporterTarget() {
  */
 err teleportEntity(entityCtx *pEnt) {
     gfmSprite *pEffect;
+    double vy;
     int cx, cy;
     err erv;
     gfmRV rv;
@@ -121,9 +122,13 @@ err teleportEntity(entityCtx *pEnt) {
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
         erv = collideEntityStatic(teleport.pTarget);
         ASSERT(erv == ERR_OK, erv);
-        rv = gfmSprite_setVerticalAcceleration(teleport.pTarget->pSelf
-                , teleport.pTarget->fallGravity);
+        rv = gfmSprite_getVerticalVelocity(&vy, teleport.pTarget->pSelf);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        if (vy == 0) {
+            rv = gfmSprite_setVerticalAcceleration(teleport.pTarget->pSelf
+                    , teleport.pTarget->fallGravity);
+            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        }
     }
 
     /* Swap the entity */
@@ -135,8 +140,12 @@ err teleportEntity(entityCtx *pEnt) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     erv = collideEntityStatic(pEnt);
     ASSERT(erv == ERR_OK, erv);
-    rv = gfmSprite_setVerticalAcceleration(pEnt->pSelf, pEnt->fallGravity);
+    rv = gfmSprite_getVerticalVelocity(&vy, pEnt->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    if (vy == 0) {
+        rv = gfmSprite_setVerticalAcceleration(pEnt->pSelf, pEnt->fallGravity);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    }
 
     cleanPreviousTarget();
 
