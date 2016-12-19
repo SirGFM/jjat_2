@@ -104,6 +104,11 @@ err teleportEntity(entityCtx *pEnt) {
     err erv;
     gfmRV rv;
 
+    /**
+     * NOTE: Both entities should be put on a falling state (i.e., have a
+     * positive gravity). Otherwise, they may end up stuck floating in the air.
+     */
+
     if (teleport.pCurEffect == 0) {
         return ERR_OK;
     }
@@ -116,6 +121,9 @@ err teleportEntity(entityCtx *pEnt) {
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
         erv = collideEntityStatic(teleport.pTarget);
         ASSERT(erv == ERR_OK, erv);
+        rv = gfmSprite_setVerticalAcceleration(teleport.pTarget->pSelf
+                , teleport.pTarget->fallGravity);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     }
 
     /* Swap the entity */
@@ -127,6 +135,8 @@ err teleportEntity(entityCtx *pEnt) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     erv = collideEntityStatic(pEnt);
     ASSERT(erv == ERR_OK, erv);
+    rv = gfmSprite_setVerticalAcceleration(pEnt->pSelf, pEnt->fallGravity);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     cleanPreviousTarget();
 
