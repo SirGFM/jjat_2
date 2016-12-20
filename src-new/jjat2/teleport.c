@@ -94,16 +94,61 @@ err updateTeleporterTarget() {
 }
 
 /**
+ * Get the centralized horizontal position and the bottom vertical
+ *
+ * @param  [out]pX   The horizontal position
+ * @param  [out]pY   The vertical position
+ * @param  [ in]pSpr The sprite
+ */
+static void _getSpriteBottom(int *pX, int *pY, gfmSprite *pSpr) {
+    int w, h;
+
+    gfmSprite_getPosition(pX, pY, pSpr);
+    gfmSprite_getDimensions(&w, &h, pSpr);
+    *pX += w / 2;
+    *pY += h;
+}
+
+/**
+ * Set the position based on the horizontal center and bottom
+ *
+ * @param  [ in]pSpr The sprite
+ * @param  [ in]x    The horizontal position
+ * @param  [ in]y    The vertical position
+ */
+static void _setSpriteBottom(gfmSprite *pSpr, int x, int y) {
+    int w, h;
+
+    gfmSprite_getDimensions(&w, &h, pSpr);
+    x -= w / 2;
+    y -= h;
+    gfmSprite_setPosition(pSpr, x, y);
+}
+
+/**
+ * Ensure that entities that are teleport have their vertical velocity correctly
+ * set
+ *
+ * @param  [ in]pEnt The entity
+ */
+static void _fixFloatBug(entityCtx *pEnt) {
+    double vy;
+
+    gfmSprite_getVerticalVelocity(&vy, pEnt->pSelf);
+    if (vy == 0) {
+        gfmSprite_setVerticalAcceleration(pEnt->pSelf, pEnt->fallGravity);
+    }
+}
+
+/**
  * Teleport an entity to the current target
  *
  * @param  [ in]pEnt The entity
  */
 err teleportEntity(entityCtx *pEnt) {
-    gfmSprite *pEffect;
-    double vy;
-    int cx, cy;
+    /** dst-xy: the target's position */
+    int dx, dy;
     err erv;
-    gfmRV rv;
 
     /**
      * NOTE: Both entities should be put on a falling state (i.e., have a
@@ -116,36 +161,31 @@ err teleportEntity(entityCtx *pEnt) {
 
     /* Swap the target, if any */
     if (teleport.pTarget != 0) {
-        rv = gfmSprite_getCenter(&cx, &cy, pEnt->pSelf);
-        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-        rv = gfmSprite_setCenter(teleport.pTarget->pSelf, cx, cy);
-        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        /** src-xy: pEnt's position */
+        int sx, sy;
+
+        _getSpriteBottom(&sx, &sy, pEnt->pSelf);
+        _getSpriteBottom(&dx, &dy, teleport.pTarget->pSelf);
+
+        _setSpriteBottom(teleport.pTarget->pSelf, sx, sy);
         erv = collideEntityStatic(teleport.pTarget);
         ASSERT(erv == ERR_OK, erv);
-        rv = gfmSprite_getVerticalVelocity(&vy, teleport.pTarget->pSelf);
+        _fixFloatBug(teleport.pTarget);
+    }
+    else {
+        gfmSprite *pEffect;
+        gfmRV rv;
+
+        rv = gfmGroup_getNodeSprite(&pEffect, teleport.pCurEffect);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-        if (vy == 0) {
-            rv = gfmSprite_setVerticalAcceleration(teleport.pTarget->pSelf
-                    , teleport.pTarget->fallGravity);
-            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-        }
+        _getSpriteBottom(&dx, &dy, pEffect);
     }
 
     /* Swap the entity */
-    rv = gfmGroup_getNodeSprite(&pEffect, teleport.pCurEffect);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    rv = gfmSprite_getCenter(&cx, &cy, pEffect);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    rv = gfmSprite_setCenter(pEnt->pSelf, cx, cy);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    _setSpriteBottom(pEnt->pSelf, dx, dy);
     erv = collideEntityStatic(pEnt);
     ASSERT(erv == ERR_OK, erv);
-    rv = gfmSprite_getVerticalVelocity(&vy, pEnt->pSelf);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    if (vy == 0) {
-        rv = gfmSprite_setVerticalAcceleration(pEnt->pSelf, pEnt->fallGravity);
-        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    }
+    _fixFloatBug(pEnt);
 
     cleanPreviousTarget();
 
