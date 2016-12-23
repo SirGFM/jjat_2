@@ -67,7 +67,9 @@
         , gfmKey_tab) \
   X_GPAD(switchChar \
         , gfmController_x \
-        , 0/*port*/)
+        , 0/*port*/) \
+  X_KEY(dummy \
+       , gfmKey_f1)
 
 /** Add default alternate mappings for buttons */
 #define X_ALTERNATE_BUTTON_MAPPING \

@@ -38,6 +38,38 @@ void handleInput() {
             gfm_setFullscreen(game.pCtx);
         }
     }
+
+#if defined(JJATENGINE)
+    if ((game.activeCharacter & C_BOTH) != C_BOTH
+            && DID_JUST_RELEASE(switchChar)) {
+        /* Invert the currently active player */
+        game.activeCharacter ^= C_BOTH;
+
+#define SWITCH_VKEY(new, old, vkey) \
+    input.new ## vkey.handle = input.old ## vkey.handle; \
+    input.old ## vkey.handle = input.dummy.handle
+#define SWITCH_CHAR(new, old) \
+    SWITCH_VKEY(new, old, Left); \
+    SWITCH_VKEY(new, old, Right); \
+    SWITCH_VKEY(new, old, Jump); \
+    SWITCH_VKEY(new, old, Atk)
+
+        switch (game.activeCharacter & C_BOTH) {
+            case C_SWORDY: {
+                /* Swordy just became active */
+                SWITCH_CHAR(swordy, gunny);
+            } break;
+            case C_GUNNY: {
+                /* Gunny just became active */
+                SWITCH_CHAR(gunny, swordy);
+            } break;
+        }
+
+#undef SWITCH_VKEY
+#undef SWITCH_CHAR
+
+    }
+#endif /* JJATENGINE */
 }
 
 #if defined(DEBUG)
