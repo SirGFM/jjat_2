@@ -53,13 +53,14 @@ err setupGame(int argc, char *argv[]) {
 
     rv = gfm_setVideoBackend(game.pCtx, config.videoBackend);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    if (config.fullscreen == 0) {
-        rv = gfm_initGameWindow(game.pCtx, V_WIDTH, V_HEIGHT, config.wndWidth,
-                config.wndHeight, 1/*allow resize*/, config.vsync);
+    if ((config.flags & CFG_FULLSCREEN) == 0) {
+        rv = gfm_initGameWindow(game.pCtx, V_WIDTH, V_HEIGHT, config.wndWidth
+                , config.wndHeight, 1/*can resize*/, config.flags & CFG_VSYNC);
     }
     else {
-        rv = gfm_initGameFullScreen(game.pCtx, V_WIDTH, V_HEIGHT,
-                config.fullscreenResolution, 1/*allow resize*/, config.vsync);
+        rv = gfm_initGameFullScreen(game.pCtx, V_WIDTH, V_HEIGHT
+                , config.fullscreenResolution, 1/*can resize*/
+                , config.flags & CFG_VSYNC);
     }
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
@@ -84,6 +85,16 @@ err setupGame(int argc, char *argv[]) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     rv = gfm_setFPSCounterPos(game.pCtx, 4/*x*/, 4/*y*/);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+#if defined(JJATENGINE)
+    /** If playing on asynchronous mode, set only swordy as active */
+    if (config.flags & CFG_SYNCCONTROL) {
+        game.activeCharacter = C_SWORDY;
+    }
+    else {
+        game.activeCharacter = C_BOTH;
+    }
+#endif /* JJATENGINE */
 
 #if defined(DEBUG)
     game.debugRunState = DBG_RUNNING;

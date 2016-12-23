@@ -17,9 +17,23 @@ enum enDebugRunState {
 };
 typedef enum enDebugRunState debugRunState;
 
+#if defined(JJATENGINE)
+enum enActiveCharacterFlag {
+    C_SWORDY = 0x01
+  , C_GUNNY  = 0x02
+  , C_BOTH   = (C_SWORDY | C_GUNNY)
+};
+typedef enum enActiveCharacterFlag activeCharacterFlag;
+#endif /* JJATENGINE */
+
 struct stGameCtx {
     /** GFraMe context */
     gfmCtx *pCtx;
+#if defined(JJATENGINE)
+    /** Which character is currently active (useful for enabling a single
+     * character at a time) */
+    activeCharacterFlag activeCharacter;
+#endif /* JJATENGINE */
     /** Fixed time elapsed since the last frame, in milliseconds. Note that even
      * though this should store a 'fixed' value, it may vary in a pre-determined
      * and fixed pattern (e.g., 17ms, 17ms, 16ms, ..., for 60 FPS), in order

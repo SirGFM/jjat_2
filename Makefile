@@ -80,6 +80,9 @@
   endif
   CFLAGS := $(CFLAGS) -I"./include-new/" -Wall
 
+  # Ugly hack: I'll put everything specific to the JJAT engine within these #ifdefs
+  CFLAGS := $(CFLAGS) -DJJATENGINE
+
   ifeq ($(ARCH), x86_64)
     CFLAGS := $(CFLAGS) -m64 -DALIGN=8
   else

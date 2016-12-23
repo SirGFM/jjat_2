@@ -13,6 +13,9 @@
  *  --vsync | -v: Enable VSync
  *  --fullscreen | -f: Init game in fullscreen mode
  *  --list | -l: List all available resolution
+#if defined(JJATENGINE)
+ *  --syncctr | -c: Set character control as synchronous (i.e., move a single character at a time)
+#endif JJATENGINE
  *  --save | -s: *TODO* Save the current configuration
  */
 #include <base/cmdParse.h>
@@ -39,6 +42,10 @@ static void usage() {
     LOG("  --vsync | -v: Enable VSync\n");
     LOG("  --fullscreen | -f: Init game in fullscreen mode\n");
     LOG("  --list | -l: List all available resolution\n");
+#if defined(JJATENGINE)
+    LOG("  --syncctr | -c: Set character control as synchronous\n"
+            "                  (i.e., move a single character at a time)\n");
+#endif /* JJATENGINE */
     LOG("  --save | -s: *TODO* Save the current configuration\n");
     LOG("  --help | -h: Print usage\n");
 }
@@ -146,11 +153,16 @@ err cmdParse(configCtx *pConfig, int argc, char *argv[]) {
             /* TODO Load audio configurations */
         }
         IS_FLAG("--vsync", "-v") {
-            pConfig->vsync = 1;
+            pConfig->flags |= CFG_VSYNC;
         }
         IS_FLAG("--fullscreen", "-f") {
-            pConfig->fullscreen = 1;
+            pConfig->flags |= CFG_FULLSCREEN;
         }
+#if defined(JJATENGINE)
+        IS_FLAG("--syncctr", "-c") {
+            pConfig->flags |= CFG_SYNCCONTROL;
+        }
+#endif /* JJATENGINE */
         IS_FLAG("--save", "-s") {
             doSave = 1;
         }
