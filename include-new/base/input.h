@@ -26,9 +26,11 @@ typedef struct stButton button;
 
 /** Encapsulate every button */
 struct stInputCtx {
-#define X(name, ...) button name;
+#define X_GPAD(...)
+#define X_KEY(name, ...) button name;
     X_BUTTON_LIST
-#undef X
+#undef X_KEY
+#undef X_GPAD
 };
 typedef struct stInputCtx inputCtx;
 
