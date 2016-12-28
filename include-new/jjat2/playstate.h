@@ -30,6 +30,8 @@ struct stPlaystateCtx {
     swordyCtx swordy;
     /** Gunny character */
     gunnyCtx gunny;
+    /** Dummy object used to represent the inactive object */
+    entityCtx asyncDummy;
 };
 typedef struct stPlaystateCtx playstateCtx;
 

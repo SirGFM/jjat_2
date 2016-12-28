@@ -37,6 +37,13 @@ err initPlaystate() {
             , TM_MAX_HEIGHT, TM_DEFAULT_TILE);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+    rv = gfmSprite_getNew(&playstate.asyncDummy.pSelf);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmSprite_init(playstate.asyncDummy.pSelf, 0, 0, 2/*w*/, 2/*h*/
+            , gfx.pSset8x8, 0/*offx*/, 0/*offy*/, &playstate.asyncDummy
+            , T_PLAYER);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
     return ERR_OK;
 }
 
@@ -48,6 +55,7 @@ void freePlaystate() {
     if (playstate.pParser != 0) {
         gfmParser_free(&playstate.pParser);
     }
+    gfmSprite_free(&playstate.asyncDummy.pSelf);
     freeSwordy(&playstate.swordy);
     freeGunny(&playstate.gunny);
 }
@@ -136,6 +144,18 @@ err loadPlaystate() {
     return ERR_OK;
 }
 
+inline static void _handleAsyncCollision(entityCtx *pActive
+        , entityCtx *pInactive, entityCtx *pDummy) {
+    int x, y;
+    gfmSprite_getDimensions(&x, &y, pInactive->pSelf);
+    gfmSprite_setDimensions(pDummy->pSelf, x, y);
+    gfmSprite_getPosition(&x, &y, pInactive->pSelf);
+    gfmSprite_setPosition(pDummy->pSelf, x, y);
+    gfmSprite_update(pDummy->pSelf, game.pCtx);
+
+    collideTwoEntities(pActive, pDummy);
+}
+
 /** Update the playstate */
 err updatePlaystate() {
     gfmRV rv;
@@ -157,6 +177,16 @@ err updatePlaystate() {
      * everyting was spawned this frame) */
     erv = updateFxGroup();
     ASSERT(erv == ERR_OK, erv);
+
+    /* Fix the collision between both players, if only one is active */
+    if ((game.activeCharacter & C_BOTH) == C_SWORDY) {
+        _handleAsyncCollision(&playstate.swordy.entity, &playstate.gunny.entity
+                , &playstate.asyncDummy);
+    }
+    else if ((game.activeCharacter & C_BOTH) == C_GUNNY) {
+        _handleAsyncCollision(&playstate.gunny.entity, &playstate.swordy.entity
+                , &playstate.asyncDummy);
+    }
 
     erv = postUpdateSwordy(&playstate.swordy);
     ASSERT(erv == ERR_OK, erv);

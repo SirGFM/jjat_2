@@ -280,3 +280,31 @@ void setEntityDirection(entityCtx *entity) {
     }
 }
 
+/**
+ * Simple collision check between two entities
+ *
+ * If this function detects collision, it ensures one entity will be carried by
+ * the other, and only that.
+ *
+ * @param  [ in]entA One of the entities
+ * @param  [ in]entB The other entity
+ */
+void collideTwoEntities(entityCtx *entA, entityCtx *entB) {
+    gfmRV rv;
+
+    rv = gfmSprite_justOverlaped(entA->pSelf, entB->pSelf);
+    if (rv == GFMRV_TRUE) {
+        gfmCollision adir, bdir;
+        gfmSprite_getCurrentCollision(&adir, entA->pSelf);
+        gfmSprite_getCurrentCollision(&bdir, entB->pSelf);
+        if (adir & gfmCollision_down) {
+            /* entA is above entB */
+            carryEntity(entA, entB->pSelf);
+        }
+        else if (bdir & gfmCollision_down) {
+            /* entB is above entA */
+            carryEntity(entB, entA->pSelf);
+        }
+    }
+}
+

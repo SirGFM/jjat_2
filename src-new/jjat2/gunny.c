@@ -179,6 +179,10 @@ err preUpdateGunny(gunnyCtx *gunny) {
     gfmRV rv;
     err erv;
 
+    if (!(game.activeCharacter & C_GUNNY)) {
+        return ERR_OK;
+    }
+
     /* Update horizontal movement */
     do {
         if (IS_PRESSED(gunnyLeft)) {
@@ -261,6 +265,10 @@ err postUpdateGunny(gunnyCtx *gunny) {
     err erv;
     gfmCollision dir;
     int hasCarrier;
+
+    if (!(game.activeCharacter & C_GUNNY)) {
+        return ERR_OK;
+    }
 
     hasCarrier = (gunny->entity.pCarrying != 0);
 

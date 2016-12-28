@@ -165,20 +165,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                     swordy = (swordyCtx*)node2.pChild;
                 }
 
-                rv = gfmObject_justOverlaped(node1.pObject, node2.pObject);
-                if (rv == GFMRV_TRUE) {
-                    gfmCollision sdir, gdir;
-                    gfmSprite_getCurrentCollision(&sdir, swordy->entity.pSelf);
-                    gfmSprite_getCurrentCollision(&gdir, gunny->entity.pSelf);
-                    if (sdir & gfmCollision_down) {
-                        /* Swordy is above gunny */
-                        carryEntity(&swordy->entity, gunny->entity.pSelf);
-                    }
-                    else if (gdir & gfmCollision_down) {
-                        /* Gunny is above swordy */
-                        carryEntity(&gunny->entity, swordy->entity.pSelf);
-                    }
-                }
+                collideTwoEntities(&swordy->entity, &gunny->entity);
                 rv = GFMRV_OK;
             } break;
 /*== SWORDY'S ATTACK =========================================================*/

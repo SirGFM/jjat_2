@@ -173,6 +173,10 @@ err preUpdateSwordy(swordyCtx *swordy) {
     gfmRV rv;
     err erv;
 
+    if (!(game.activeCharacter & C_SWORDY)) {
+        return ERR_OK;
+    }
+
     rv = gfmSprite_getCollision(&col, swordy->entity.pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
@@ -338,6 +342,10 @@ err postUpdateSwordy(swordyCtx *swordy) {
     err erv;
     gfmCollision dir;
     int hasCarrier;
+
+    if (!(game.activeCharacter & C_SWORDY)) {
+        return ERR_OK;
+    }
 
     hasCarrier = (swordy->entity.pCarrying != 0);
 

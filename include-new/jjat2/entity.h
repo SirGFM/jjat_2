@@ -146,5 +146,16 @@ err postUpdateEntity(entityCtx *entity);
  */
 void setEntityDirection(entityCtx *entity);
 
+/**
+ * Simple collision check between two entities
+ *
+ * If this function detects collision, it ensures one entity will be carried by
+ * the other, and only that.
+ *
+ * @param  [ in]entA One of the entities
+ * @param  [ in]entB The other entity
+ */
+void collideTwoEntities(entityCtx *entA, entityCtx *entB);
+
 #endif /* __JJAT2_ENTITY_H__ */
 
