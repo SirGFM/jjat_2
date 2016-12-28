@@ -48,6 +48,10 @@ struct stGameCtx {
      * step-by-step. */
     debugRunState debugRunState;
 #endif
+#if defined(JJATENGINE)
+    /** Alternative key mapping */
+    char *pKeyMap;
+#endif /* JJATENGINE */
 };
 typedef struct stGameCtx gameCtx;
 

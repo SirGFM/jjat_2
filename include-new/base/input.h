@@ -49,7 +49,7 @@ void handleInput();
  * loop to be paused/resumed or even stepped.
  */
 void handleDebugInput();
-#endif
+#endif /* DEBUG */
 
 /** Retrieve the state of every button */
 err updateInput();
@@ -59,6 +59,33 @@ err updateDebugInput();
 
 /** Initialize every button with their default mapping */
 err initInput();
+
+#if defined(JJATENGINE)
+/**
+ * Starts remapping the inputs used by the game.
+ *
+ * Every input is reset (except by a few system inputs) and should be later
+ * rebound by calling updateKeyMapping.
+ *
+ * @param  [ in]interactive Whether the remap will be run interactivelly or not
+ */
+void beginInputRemapping(int interactive);
+
+/**
+ * Updates the mapping for a given virtual key.
+ *
+ * If running interactively, iface must be gfmIface_none.
+ *
+ * @param  [ in]handle Identifier of the current virtual key
+ * @param  [ in]iface  Physical key that will be bound to the virtual key
+ * @param  [ in]port   Port of the gamepad being bound (only required for
+ *                     gfmController_*)
+ */
+err updateKeyMapping(int handle, gfmInputIface iface, int port);
+
+/** Finishes remapping the game's inputs. */
+void endInputRemapping();
+#endif /* JJATENGINE */
 
 /** Whether a given button is currently released */
 #define IS_RELEASED(bt) \

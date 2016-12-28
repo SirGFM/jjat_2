@@ -34,6 +34,10 @@ struct stConfigCtx {
     gfmVideoBackend videoBackend;
     /** Audio quality */
     gfmAudioQuality audioSettings;
+#if defined(JJATENGINE)
+    /** Alternative key mapping */
+    char *pKeyMap;
+#endif /* JJATENGINE */
 };
 typedef struct stConfigCtx configCtx;
 

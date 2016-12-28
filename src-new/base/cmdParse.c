@@ -15,6 +15,7 @@
  *  --list | -l: List all available resolution
 #if defined(JJATENGINE)
  *  --syncctr | -c: Set character control as synchronous (i.e., move a single character at a time)
+ *  --keymap | -k : Remap all keys to the specified configuration
 #endif JJATENGINE
  *  --save | -s: *TODO* Save the current configuration
  */
@@ -45,6 +46,7 @@ static void usage() {
 #if defined(JJATENGINE)
     LOG("  --syncctr | -c: Set character control as synchronous\n"
             "                  (i.e., move a single character at a time)\n");
+    LOG("  --keymap | -k : Remap all keys to the specified configuration\n");
 #endif /* JJATENGINE */
     LOG("  --save | -s: *TODO* Save the current configuration\n");
     LOG("  --help | -h: Print usage\n");
@@ -161,6 +163,11 @@ err cmdParse(configCtx *pConfig, int argc, char *argv[]) {
 #if defined(JJATENGINE)
         IS_FLAG("--syncctr", "-c") {
             pConfig->flags |= CFG_SYNCCONTROL;
+        }
+        IS_FLAG("--keymap", "-k") {
+            CHECK_PARAM();
+
+            pConfig->pKeyMap = GET_PARAM();
         }
 #endif /* JJATENGINE */
         IS_FLAG("--save", "-s") {

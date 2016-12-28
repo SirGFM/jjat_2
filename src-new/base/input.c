@@ -188,3 +188,35 @@ err initInput() {
     return ERR_OK;
 }
 
+#if defined(JJATENGINE)
+/**
+ * Starts remapping the inputs used by the game.
+ *
+ * Every input is reset (except by a few system inputs) and should be later
+ * rebound by calling updateKeyMapping.
+ *
+ * @param  [ in]interactive Whether the remap will be run interactivelly or not
+ */
+void beginInputRemapping(int interactive) {
+}
+
+/**
+ * Updates the mapping for a given virtual key.
+ *
+ * If running interactively, iface must be gfmIface_none.
+ *
+ * @param  [ in]handle Identifier of the current virtual key
+ * @param  [ in]iface  Physical key that will be bound to the virtual key
+ * @param  [ in]port   Port of the gamepad being bound (only required for
+ *                     gfmController_*)
+ */
+err updateKeyMapping(int handle, gfmInputIface iface, int port) {
+    return ERR_OK;
+}
+
+/** Finishes remapping the game's inputs. */
+void endInputRemapping() {
+    /* TODO Create gfmInput_cancelRequestLastPressed */
+}
+#endif /* JJATENGINE */
+

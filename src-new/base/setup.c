@@ -94,6 +94,7 @@ err setupGame(int argc, char *argv[]) {
     else {
         game.activeCharacter = C_BOTH;
     }
+    game.pKeyMap = config.pKeyMap;
 #endif /* JJATENGINE */
 
 #if defined(DEBUG)
