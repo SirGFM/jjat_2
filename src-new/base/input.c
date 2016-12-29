@@ -300,6 +300,14 @@ err configureInput(char *pMap, int len) {
  * @param  [ in]interactive Whether the remap will be run interactivelly or not
  */
 void beginInputRemapping(int interactive) {
+    /* TODO Reset keys and set all basic ones */
+
+    if (interactive) {
+        int port;
+
+        gfm_cancelGetLastPressed(game.pCtx);
+        gfm_getLastPort(&port, game.pCtx);
+    }
 }
 
 /**
@@ -313,12 +321,35 @@ void beginInputRemapping(int interactive) {
  *                     gfmController_*)
  */
 err updateKeyMapping(int handle, gfmInputIface iface, int port) {
+    gfmRV rv;
+
+    if (iface == gfmIface_none) {
+        /** Running interactivelly, so get it from the framework */
+        rv = gfm_getLastPort(&port, game.pCtx);
+        if (rv == GFMRV_WAITING) {
+            return ERR_NOKEYPRESSED;
+        }
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        rv = gfm_getLastPressed(&iface, game.pCtx);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    }
+    ASSERT(iface > gfmIface_none && iface < gfmIface_max, ERR_ARGUMENTBAD);
+
+    if (iface >= gfmController_left) {
+        rv = gfm_bindGamepadInput(game.pCtx, handle, iface, port);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    }
+    else {
+        rv = gfm_bindInput(game.pCtx, handle, iface);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    }
+
     return ERR_OK;
 }
 
 /** Finishes remapping the game's inputs. */
 void endInputRemapping() {
-    /* TODO Create gfmInput_cancelRequestLastPressed */
+    gfm_cancelGetLastPressed(game.pCtx);
 }
 #endif /* JJATENGINE */
 

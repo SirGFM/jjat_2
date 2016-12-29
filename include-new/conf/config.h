@@ -20,6 +20,10 @@ typedef enum enConfigFlags configFlags;
 
 /** Structure filled with all parsed configurations */
 struct stConfigCtx {
+#if defined(JJATENGINE)
+    /** Alternative key mapping */
+    char *pKeyMap;
+#endif /* JJATENGINE */
     /** Bit-mask for flags */
     configFlags flags;
     /** Initial window width */
@@ -34,16 +38,13 @@ struct stConfigCtx {
     gfmVideoBackend videoBackend;
     /** Audio quality */
     gfmAudioQuality audioSettings;
-#if defined(JJATENGINE)
-    /** Alternative key mapping */
-    char *pKeyMap;
-#endif /* JJATENGINE */
 };
 typedef struct stConfigCtx configCtx;
 
 /** Initialize the configuration struct with the default values */
 #define CONFIG_INIT(c) \
   do { \
+    (c).pKeyMap = 0; \
     (c).flags = 0;\
     (c).fullscreenResolution = 0; \
     (c).wndWidth = 640;\
