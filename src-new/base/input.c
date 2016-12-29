@@ -40,10 +40,9 @@ void handleInput() {
     }
 
 #if defined(JJATENGINE)
-    if ((game.activeCharacter & C_BOTH) != C_BOTH
-            && DID_JUST_RELEASE(switchChar)) {
+    if ((game.flags & AC_BOTH) != AC_BOTH && DID_JUST_RELEASE(switchChar)) {
         /* Invert the currently active player */
-        game.activeCharacter ^= C_BOTH;
+        game.flags ^= AC_BOTH;
 
 #define SWITCH_VKEY(new, old, vkey) \
     input.new ## vkey.handle = input.old ## vkey.handle; \
@@ -54,12 +53,12 @@ void handleInput() {
     SWITCH_VKEY(new, old, Jump); \
     SWITCH_VKEY(new, old, Atk)
 
-        switch (game.activeCharacter & C_BOTH) {
-            case C_SWORDY: {
+        switch (game.flags & AC_BOTH) {
+            case AC_SWORDY: {
                 /* Swordy just became active */
                 SWITCH_CHAR(swordy, gunny);
             } break;
-            case C_GUNNY: {
+            case AC_GUNNY: {
                 /* Gunny just became active */
                 SWITCH_CHAR(gunny, swordy);
             } break;

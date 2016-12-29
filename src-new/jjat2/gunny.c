@@ -179,7 +179,7 @@ err preUpdateGunny(gunnyCtx *gunny) {
     gfmRV rv;
     err erv;
 
-    if (!(game.activeCharacter & C_GUNNY)) {
+    if (!(game.flags & AC_GUNNY)) {
         return ERR_OK;
     }
 
@@ -266,7 +266,7 @@ err postUpdateGunny(gunnyCtx *gunny) {
     gfmCollision dir;
     int hasCarrier;
 
-    if (!(game.activeCharacter & C_GUNNY)) {
+    if (!(game.flags & AC_GUNNY)) {
         return ERR_OK;
     }
 

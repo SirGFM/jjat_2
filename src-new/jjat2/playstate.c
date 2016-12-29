@@ -179,11 +179,11 @@ err updatePlaystate() {
     ASSERT(erv == ERR_OK, erv);
 
     /* Fix the collision between both players, if only one is active */
-    if ((game.activeCharacter & C_BOTH) == C_SWORDY) {
+    if ((game.flags & AC_BOTH) == AC_SWORDY) {
         _handleAsyncCollision(&playstate.swordy.entity, &playstate.gunny.entity
                 , &playstate.asyncDummy);
     }
-    else if ((game.activeCharacter & C_BOTH) == C_GUNNY) {
+    else if ((game.flags & AC_BOTH) == AC_GUNNY) {
         _handleAsyncCollision(&playstate.gunny.entity, &playstate.swordy.entity
                 , &playstate.asyncDummy);
     }

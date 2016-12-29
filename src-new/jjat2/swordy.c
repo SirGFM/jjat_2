@@ -173,7 +173,7 @@ err preUpdateSwordy(swordyCtx *swordy) {
     gfmRV rv;
     err erv;
 
-    if (!(game.activeCharacter & C_SWORDY)) {
+    if (!(game.flags & AC_SWORDY)) {
         return ERR_OK;
     }
 
@@ -343,7 +343,7 @@ err postUpdateSwordy(swordyCtx *swordy) {
     gfmCollision dir;
     int hasCarrier;
 
-    if (!(game.activeCharacter & C_SWORDY)) {
+    if (!(game.flags & AC_SWORDY)) {
         return ERR_OK;
     }
 

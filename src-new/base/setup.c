@@ -89,10 +89,10 @@ err setupGame(int argc, char *argv[]) {
 #if defined(JJATENGINE)
     /** If playing on asynchronous mode, set only swordy as active */
     if (config.flags & CFG_SYNCCONTROL) {
-        game.activeCharacter = C_SWORDY;
+        game.flags |= AC_SWORDY;
     }
     else {
-        game.activeCharacter = C_BOTH;
+        game.flags |= AC_BOTH;
     }
     game.pKeyMap = config.pKeyMap;
 #endif /* JJATENGINE */
