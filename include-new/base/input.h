@@ -62,6 +62,14 @@ err initInput();
 
 #if defined(JJATENGINE)
 /**
+ * Configure the (remappable) inputs.
+ *
+ * @param  [ in]pMap The key map
+ * @param  [ in]len  Length of the map
+ */
+err configureInput(char *pMap, int len);
+
+/**
  * Starts remapping the inputs used by the game.
  *
  * Every input is reset (except by a few system inputs) and should be later

@@ -9,6 +9,8 @@
 
 #include <GFraMe/gfmError.h>
 
+#include <string.h>
+
 enum enInputNames {
 #define X_GPAD(...)
 #define X_KEY(name, ...) enInput_##name,
@@ -188,6 +190,107 @@ err initInput() {
 }
 
 #if defined(JJATENGINE)
+/** Convert a single char to its hexadecimal representation */
+static inline char _convertChar2Hexa(char c) {
+    if (c >= 'a' && c <= 'f') {
+        return (char)(c - 'a' + 0xa);
+    }
+    else if (c >= 'A' && c <= 'F') {
+        return (char)(c - 'A' + 0xa);
+    }
+    else {
+        return (char)(c - '0');
+    }
+}
+
+/**
+ * Configure the (remappable) inputs.
+ *
+ * @param  [ in]pMap The key map
+ * @param  [ in]len  Length of the map
+ */
+err configureInput(char *pMap, int len) {
+    int i;
+
+    beginInputRemapping(0/*non-interactive*/);
+
+    i = 0;
+    while (i < len) {
+        int j, handle;
+
+        /* Retrieve the current key identifier */
+        j = 0;
+        while (i + j < len && pMap[i + j] != ':') {
+            j++;
+        }
+        ASSERT(i + j < len, ERR_INVALIDINPUTMAP);
+        pMap[i + j] = '\0';
+
+        if (strcmp(pMap + i, "SL") == 0) {
+            handle = input.swordyLeft.handle;
+        }
+        else if (strcmp(pMap + i, "SR") == 0) {
+            handle = input.swordyRight.handle;
+        }
+        else if (strcmp(pMap + i, "SJ") == 0) {
+            handle = input.swordyJump.handle;
+        }
+        else if (strcmp(pMap + i, "SA") == 0) {
+            handle = input.swordyAtk.handle;
+        }
+        else if (strcmp(pMap + i, "GL") == 0) {
+            handle = input.gunnyLeft.handle;
+        }
+        else if (strcmp(pMap + i, "GR") == 0) {
+            handle = input.gunnyRight.handle;
+        }
+        else if (strcmp(pMap + i, "GJ") == 0) {
+            handle = input.gunnyJump.handle;
+        }
+        else if (strcmp(pMap + i, "GA") == 0) {
+            handle = input.gunnyAtk.handle;
+        }
+        else if (strcmp(pMap + i, "P") == 0) {
+            handle = input.pause.handle;
+        }
+        else if (strcmp(pMap + i, "SW") == 0) {
+            handle = input.switchChar.handle;
+        }
+        else {
+            ASSERT(0, ERR_INVALIDKEYID);
+        }
+        i += j + 1;
+
+        /* Read each physical key (guaranteed to be 2 characters long) */
+        while (i < len && pMap[i] != ';') {
+            err erv;
+            gfmInputIface iface;
+            int port;
+
+            ASSERT(i + 2 <= len, ERR_INVALIDINPUTMAP);
+            iface = (_convertChar2Hexa(pMap[i]) & 0xf) << 8;
+            iface |= _convertChar2Hexa(pMap[i + 1]) & 0xf;
+            ASSERT(iface > gfmIface_none && iface < gfmIface_max
+                    , ERR_INVALIDKEYVALUE);
+            i += 2;
+
+            if (iface >= gfmController_left) {
+                ASSERT(i + 1 <= len, ERR_INVALIDINPUTMAP);
+                port = (int)(_convertChar2Hexa(pMap[i]) & 0xf);
+                i++;
+            }
+
+            erv = updateKeyMapping(handle, iface, port);
+            ASSERT(erv == ERR_OK, erv);
+        } /* while (i < len && pMap[i] != ';') */
+        i++;
+    } /* while (i < len) */
+
+    endInputRemapping();
+
+    return ERR_OK;
+}
+
 /**
  * Starts remapping the inputs used by the game.
  *

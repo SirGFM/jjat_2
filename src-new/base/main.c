@@ -30,8 +30,15 @@ int main(int argc, char *argv[]) {
     erv = initGfx();
     ASSERT_TO(erv == ERR_OK, erv = erv, __ret);
 
+#if defined(JJATENGINE)
+    if (!(game.flags & CMD_CUSTOMINPUT)) {
+        erv = initInput();
+        ASSERT_TO(erv == ERR_OK, erv = erv, __ret);
+    }
+#else /* !JJATENGINE */
     erv = initInput();
     ASSERT_TO(erv == ERR_OK, erv = erv, __ret);
+#endif /* JJATENGINE */
 
     erv = setupCollision();
     ASSERT_TO(erv == ERR_OK, erv = erv, __ret);

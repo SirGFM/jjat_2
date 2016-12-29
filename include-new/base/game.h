@@ -19,9 +19,10 @@ typedef enum enDebugRunState debugRunState;
 
 #if defined(JJATENGINE)
 enum enGameFlags {
-    AC_SWORDY = 0x01
-  , AC_GUNNY  = 0x02
-  , AC_BOTH   = (AC_SWORDY | AC_GUNNY)
+    AC_SWORDY       = 0x01
+  , AC_GUNNY        = 0x02
+  , AC_BOTH         = (AC_SWORDY | AC_GUNNY)
+  , CMD_CUSTOMINPUT = 0x04
 };
 typedef enum enGameFlags gameFlags;
 #endif /* JJATENGINE */
@@ -46,10 +47,6 @@ struct stGameCtx {
      * step-by-step. */
     debugRunState debugRunState;
 #endif
-#if defined(JJATENGINE)
-    /** Alternative key mapping */
-    char *pKeyMap;
-#endif /* JJATENGINE */
 };
 typedef struct stGameCtx gameCtx;
 

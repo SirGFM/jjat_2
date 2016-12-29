@@ -5,12 +5,15 @@
  */
 #include <base/cmdParse.h>
 #include <base/game.h>
+#include <base/input.h>
 #include <base/setup.h>
 #include <conf/config.h>
 #include <conf/game.h>
 
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gframe.h>
+
+#include <string.h>
 
 /**
  * Basic setup for the game.
@@ -94,7 +97,12 @@ err setupGame(int argc, char *argv[]) {
     else {
         game.flags |= AC_BOTH;
     }
-    game.pKeyMap = config.pKeyMap;
+
+    if (config.pKeyMap) {
+        erv = configureInput(config.pKeyMap, strlen(config.pKeyMap));
+        ASSERT(erv == ERR_OK, erv);
+        game.flags |= CMD_CUSTOMINPUT;
+    }
 #endif /* JJATENGINE */
 
 #if defined(DEBUG)
