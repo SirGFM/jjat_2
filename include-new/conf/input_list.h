@@ -14,6 +14,13 @@
 #ifndef __INPUT_LIST_H__
 #define __INPUT_LIST_H__
 
+/** Create a list of system buttons and their default mapping. */
+#define X_SYSTEM_BUTTON_LIST \
+  X_KEY(fullscreen \
+        , gfmKey_f12) \
+  X_KEY(dummy \
+       , gfmKey_f1)
+
 /** Create a list of buttons and their default mapping. */
 #define X_RELEASE_BUTTON_LIST \
   X_KEY(swordyLeft \
@@ -61,15 +68,11 @@
   X_GPAD(pause \
         , gfmController_start \
         , 0/*port*/) \
-  X_KEY(fullscreen \
-        , gfmKey_f12) \
   X_KEY(switchChar \
         , gfmKey_tab) \
   X_GPAD(switchChar \
         , gfmController_x \
-        , 0/*port*/) \
-  X_KEY(dummy \
-       , gfmKey_f1)
+        , 0/*port*/)
 
 /** Add default alternate mappings for buttons */
 #define X_ALTERNATE_BUTTON_MAPPING \
@@ -112,6 +115,7 @@
 /** Concatenate both lists */
 #define X_BUTTON_LIST \
   X_RELEASE_BUTTON_LIST \
+  X_SYSTEM_BUTTON_LIST \
   X_DEBUG_BUTTON_LIST
 
 #endif /* __INPUT_LIST_H__ */

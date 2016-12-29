@@ -15,6 +15,7 @@ enum enInputNames {
 #define X_GPAD(...)
 #define X_KEY(name, ...) enInput_##name,
     X_RELEASE_BUTTON_LIST
+    X_SYSTEM_BUTTON_LIST
     enInput_count,
     X_DEBUG_BUTTON_LIST
 #undef X_KEY
@@ -210,9 +211,11 @@ static inline char _convertChar2Hexa(char c) {
  * @param  [ in]len  Length of the map
  */
 err configureInput(char *pMap, int len) {
+    err erv;
     int i;
 
-    beginInputRemapping(0/*non-interactive*/);
+    erv = beginInputRemapping(0/*non-interactive*/);
+    ASSERT(erv == ERR_OK, erv);
 
     i = 0;
     while (i < len) {
@@ -263,12 +266,11 @@ err configureInput(char *pMap, int len) {
 
         /* Read each physical key (guaranteed to be 2 characters long) */
         while (i < len && pMap[i] != ';') {
-            err erv;
             gfmInputIface iface;
             int port;
 
             ASSERT(i + 2 <= len, ERR_INVALIDINPUTMAP);
-            iface = (_convertChar2Hexa(pMap[i]) & 0xf) << 8;
+            iface = (_convertChar2Hexa(pMap[i]) & 0xf) << 4;
             iface |= _convertChar2Hexa(pMap[i + 1]) & 0xf;
             ASSERT(iface > gfmIface_none && iface < gfmIface_max
                     , ERR_INVALIDKEYVALUE);
@@ -286,7 +288,8 @@ err configureInput(char *pMap, int len) {
         i++;
     } /* while (i < len) */
 
-    endInputRemapping();
+    erv = endInputRemapping();
+    ASSERT(erv == ERR_OK, erv);
 
     return ERR_OK;
 }
@@ -299,15 +302,28 @@ err configureInput(char *pMap, int len) {
  *
  * @param  [ in]interactive Whether the remap will be run interactivelly or not
  */
-void beginInputRemapping(int interactive) {
-    /* TODO Reset keys and set all basic ones */
+err beginInputRemapping(int interactive) {
+    gfmRV rv;
+
+    /* Reset and re-create every virtual key */
+    gfm_resetInput(game.pCtx);
+#define X_GPAD(...)
+#define X_KEY(name, ...) \
+    rv = gfm_addVirtualKey(&input.name.handle, game.pCtx); \
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    X_BUTTON_LIST
+#undef X_KEY
+#undef X_GPAD
 
     if (interactive) {
         int port;
 
         gfm_cancelGetLastPressed(game.pCtx);
-        gfm_getLastPort(&port, game.pCtx);
+        rv = gfm_getLastPort(&port, game.pCtx);
+        ASSERT(rv == GFMRV_WAITING, ERR_GFMERR);
     }
+
+    return ERR_OK;
 }
 
 /**
@@ -348,8 +364,24 @@ err updateKeyMapping(int handle, gfmInputIface iface, int port) {
 }
 
 /** Finishes remapping the game's inputs. */
-void endInputRemapping() {
+err endInputRemapping() {
+    gfmRV rv;
+
     gfm_cancelGetLastPressed(game.pCtx);
+
+    /* Bind every system key */
+#define X_GPAD(name, button, port, ...) \
+    rv = gfm_bindGamepadInput(game.pCtx, input.name.handle, button, port); \
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+#define X_KEY(name, key, ...) \
+    rv = gfm_bindInput(game.pCtx, input.name.handle, key); \
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    X_SYSTEM_BUTTON_LIST
+    X_DEBUG_BUTTON_LIST
+#undef X_KEY
+#undef X_GPAD
+
+    return ERR_OK;
 }
 #endif /* JJATENGINE */
 

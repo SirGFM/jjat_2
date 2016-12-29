@@ -77,7 +77,7 @@ err configureInput(char *pMap, int len);
  *
  * @param  [ in]interactive Whether the remap will be run interactivelly or not
  */
-void beginInputRemapping(int interactive);
+err beginInputRemapping(int interactive);
 
 /**
  * Updates the mapping for a given virtual key.
@@ -92,7 +92,7 @@ void beginInputRemapping(int interactive);
 err updateKeyMapping(int handle, gfmInputIface iface, int port);
 
 /** Finishes remapping the game's inputs. */
-void endInputRemapping();
+err endInputRemapping();
 #endif /* JJATENGINE */
 
 /** Whether a given button is currently released */
