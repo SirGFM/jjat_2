@@ -46,7 +46,7 @@
 #  WINICON := assets/icon.o
 
 # List every header file
-  HEADERS := $(shell find include-new/ -name *.h)
+  HEADERS := $(shell find include/ -name *.h)
 #=======================================================================
 
 
@@ -80,7 +80,7 @@
   ifneq (, $(GFRAME_INCLUDES))
     CFLAGS := $(CFLAGS) -I$(GFRAME_INCLUDES)
   endif
-  CFLAGS := $(CFLAGS) -I"./include-new/" -Wall
+  CFLAGS := $(CFLAGS) -I"./include/" -Wall
 
   # Ugly hack: I'll put everything specific to the JJAT engine within these #ifdefs
   CFLAGS := $(CFLAGS) -DJJATENGINE
@@ -118,7 +118,7 @@
   endif
   OBJLIST := $(OBJS:%=obj/$(OS)_$(MODE)/%)
 
-  VPATH := src-new
+  VPATH := src
 #=======================================================================
 
 
