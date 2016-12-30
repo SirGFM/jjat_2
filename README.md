@@ -75,7 +75,7 @@ This mapping uses either the first bound gamepad or the keyboard.
 
 ### Synchronous mode, two-players
 
-This mapping uses either the first bound gamepad for Swordy and the second bound
+This mapping uses the first bound gamepad for Swordy and the second bound
 gamepad or the keyboard for Gunny.
 
 **Launch parameters:**
@@ -129,10 +129,10 @@ This mapping uses either the first bound gamepad or the keyboard.
 
 | Action | Bound input |
 | ------ | ----------- |
-| Move Active character Left | First gamepad's left stick </br> First gamepad's d-pad </br> 'Left arrow' key |
-| Move Active character Right | First gamepad's left stick </br> First gamepad's d-pad </br> 'Right arrow' key |
-| Active character's Jump | First gamepad's 'A' button </br> 'X' key |
-| Active character's Attack | First gamepad's 'X' button </br> First gamepad's 'B' button </br> 'C' key |
+| Move Active character Left | Gamepad's left stick </br> Gamepad's d-pad </br> 'Left arrow' key |
+| Move Active character Right | Gamepad's left stick </br> Gamepad's d-pad </br> 'Right arrow' key |
+| Active character's Jump | Gamepad's 'A' button </br> 'X' key |
+| Active character's Attack | Gamepad's 'X' button </br> Gamepad's 'B' button </br> 'C' key |
 | Pause | Gamepad's start button </br> 'ESC' key |
 | Switch active character | Gamepad's 'Y' button </br> 'TAB' key </br> 'Spacebar' |
 
