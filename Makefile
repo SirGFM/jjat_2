@@ -55,11 +55,13 @@
 #=======================================================================
   # Set OS
   OS ?= $(shell uname)
-  # TODO Check proper/valid Window's flags
+  ifneq (, $(findstring $(OS), Windows_NT))
+    OS := MINGW
+  endif
   ifneq (, $(findstring $(OS), MINGW))
     # Since Window's build might differ from the system's arch, set it
     # manually here
-    ifneq (, $(findstring $(OS), MINGW64))
+    ifneq (, $(findstring $(OS), 64))
       ARCH ?= x86_64
     else
       ARCH ?= i386
