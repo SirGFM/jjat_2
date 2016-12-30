@@ -3,7 +3,7 @@
  <tileset firstgid="1" name="atlas" tilewidth="8" tileheight="8" tilecount="4096" columns="64">
   <image source="../../gfx/atlas.bmp" trans="222034" width="512" height="512"/>
   <terraintypes>
-   <terrain name="terrain" tile="900"/>
+   <terrain name="floor" tile="900"/>
   </terraintypes>
   <tile id="640" terrain="0,0,0,0"/>
   <tile id="641" terrain="0,0,0,0"/>
@@ -161,8 +161,8 @@
    <property name="x" value="0"/>
    <property name="y" value="160"/>
   </properties>
-  <object id="1" name="girl" type="girl" gid="4129" x="32" y="376" width="16" height="16"/>
-  <object id="5" name="boy" type="boy" gid="4161" x="48" y="376" width="16" height="16"/>
+  <object id="1" name="swordy" type="swordy_pos" gid="4129" x="32" y="376" width="16" height="16"/>
+  <object id="5" name="gunny" type="gunny_pos" gid="4161" x="48" y="376" width="16" height="16"/>
  </objectgroup>
  <objectgroup name="boundaries" visible="0">
   <object id="3" x="0" y="160" width="320" height="240"/>
