@@ -43,7 +43,7 @@ void handleInput() {
     }
 
 #if defined(JJATENGINE)
-    if ((game.flags & AC_BOTH) != AC_BOTH && DID_JUST_RELEASE(switchChar)) {
+    if ((game.flags & AC_BOTH) != AC_BOTH && DID_JUST_PRESS(switchChar)) {
         /* Invert the currently active player */
         game.flags ^= AC_BOTH;
 
