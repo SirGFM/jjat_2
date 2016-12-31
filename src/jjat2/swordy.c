@@ -144,22 +144,10 @@ err parseSwordy(swordyCtx *swordy, gfmParser *pParser) {
  */
 err drawSwordy(swordyCtx *swordy) {
     gfmRV rv;
+
     rv = gfmSprite_draw(swordy->entity.pSelf, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-#if defined(DEBUG)
-    do {
-        int x, y, frame;
-        gfmSprite_getFrame(&frame, swordy->entity.pSelf);
-        gfmSprite_getPosition(&x, &y, swordy->entity.pSelf);
-        gfmDebug_printf(game.pCtx, x, y - 24
-                , "   FRAME: %i\n"
-                  " ATKLEFT: %i\n"
-                  "ATKRIGHT: %i\n"
-                , frame
-                , swordy->attackFlags & flag_atkMoveLeft
-                , (swordy->attackFlags & flag_atkMoveLeft) == 0);
-    } while (0);
-#endif /* defined(DEBUG) */
+
     return ERR_OK;
 }
 

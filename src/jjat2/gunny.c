@@ -146,27 +146,6 @@ err drawGunny(gunnyCtx *gunny) {
     rv = gfmSprite_draw(gunny->entity.pSelf, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-#if defined(DEBUG)
-    do {
-        static int counter = 0;
-        int x, y;
-        if (DID_JUST_PRESS(gunnyAtk)) {
-            counter = 0;
-        }
-        else if (IS_PRESSED(gunnyAtk)) {
-            counter += game.elapsed;
-        }
-        gfmSprite_getPosition(&x, &y, gunny->entity.pSelf);
-        gfmDebug_printf(game.pCtx, x, y - 24
-                , "    TIME: %03i\n"
-                  "  ATTACK: %01i\n"
-                  "RELEASED: %01i\n"
-                , counter
-                , gunny->flags & gunny_attack
-                , !(gunny->flags & gunny_justAttacked));
-    } while (0);
-#endif
-
     return ERR_OK;
 }
 
