@@ -125,8 +125,18 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 rv = gfmObject_justOverlaped(node1.pObject, node2.pObject);
                 if (rv == GFMRV_TRUE) {
                     gfmCollision dir;
+
                     gfmObject_getCurrentCollision(&dir, player->pObject);
-                    gfmObject_collide(node1.pObject, node2.pObject);
+
+                    if (!((dir & gfmCollision_up) && (dir & gfmCollision_hor))) {
+                        gfmObject_collide(node1.pObject, node2.pObject);
+                    }
+                    else {
+                        /* Fix colliding against corners when there are two
+                         * separated objects in a wall */
+                        gfmObject_separateHorizontal(node1.pObject, node2.pObject);
+                    }
+
                     if (dir & gfmCollision_down) {
                         gfmObject_setVerticalVelocity(player->pObject, 0);
                         /* Corner case!! If the player would get stuck on a
@@ -144,11 +154,12 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                                     , y - 1);
                         }
                     }
-                    else if (dir & gfmCollision_up) {
+                    else if ((dir & gfmCollision_up) && !(dir & gfmCollision_hor)) {
                         int y;
                         gfmObject_setVerticalVelocity(player->pObject, 0);
                         gfmObject_getVerticalPosition(&y, player->pObject);
                         gfmObject_setVerticalPosition(player->pObject, y + 1);
+
                     }
                 } /* if (rv == GFMRV_TRUE) */
 #if  defined(JJATENGINE)
