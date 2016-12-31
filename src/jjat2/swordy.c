@@ -99,6 +99,7 @@ err initSwordy(swordyCtx *swordy) {
     swordy->entity.shorthopVelocity = SWORDY_HOP_SPEED;
     swordy->entity.standGravity = SWORDY_JUMP_GRAV;
     swordy->entity.fallGravity = SWORDY_FALL_GRAV;
+    initEntity(&swordy->entity);
 
     return ERR_OK;
 }

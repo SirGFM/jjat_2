@@ -77,8 +77,14 @@ struct stEntityCtx {
 };
 typedef struct stEntityCtx entityCtx;
 
-/** NOTE: There's no initEntity/freeEntity because it would simply repeat all
- * parameters of gfmSprite (therefore, becoming pretty useless) */
+/** NOTE: There's no freeEntity because it's usually static */
+
+/**
+ * Initialize the entity based on the previously set attributes
+ *
+ * @param  [ in]entity    The entity
+ */
+void initEntity(entityCtx *entity);
 
 /**
  * Set the current animation of the entity

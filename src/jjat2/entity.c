@@ -15,6 +15,15 @@
 #include <GFraMe/gfmSprite.h>
 
 /**
+ * Initialize the entity based on the previously set attributes
+ *
+ * @param  [ in]entity    The entity
+ */
+void initEntity(entityCtx *entity) {
+    gfmSprite_setVerticalAcceleration(entity->pSelf, entity->standGravity);
+}
+
+/**
  * Set the current animation of the entity
  *
  * @param  [ in]entity    The entity
