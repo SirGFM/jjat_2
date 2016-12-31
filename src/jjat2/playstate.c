@@ -144,6 +144,14 @@ err loadPlaystate() {
     return ERR_OK;
 }
 
+/**
+ * Handles colliding the active player with a invisible static dummy (placed at
+ * the inactive player's position)
+ *
+ * @param  [ in]pActive   The active player
+ * @param  [ in]pInactive The inactive player
+ * @param  [ in]pDummy    The dummy
+ */
 inline static void _handleAsyncCollision(entityCtx *pActive
         , entityCtx *pInactive, entityCtx *pDummy) {
     int x, y;
