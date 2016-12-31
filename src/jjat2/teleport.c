@@ -8,6 +8,7 @@
  * the target should be part of the tilemap and its position is only stored on
  * the effect's position.
  */
+#include <base/collision.h>
 #include <base/error.h>
 
 #include <conf/type.h>
@@ -178,7 +179,9 @@ err teleportEntity(entityCtx *pEnt) {
         _getSpriteBottom(&dx, &dy, teleport.pTarget->pSelf);
 
         _setSpriteBottom(teleport.pTarget->pSelf, sx, sy);
+        collision.flags |= CF_FIXTELEPORT;
         erv = collideEntityStatic(teleport.pTarget);
+        collision.flags &= ~CF_FIXTELEPORT;
         ASSERT(erv == ERR_OK, erv);
         _fixFloatBug(teleport.pTarget);
     }
@@ -193,7 +196,9 @@ err teleportEntity(entityCtx *pEnt) {
 
     /* Swap the entity */
     _setSpriteBottom(pEnt->pSelf, dx, dy);
+    collision.flags |= CF_FIXTELEPORT;
     erv = collideEntityStatic(pEnt);
+    collision.flags &= ~CF_FIXTELEPORT;
     ASSERT(erv == ERR_OK, erv);
     _fixFloatBug(pEnt);
 

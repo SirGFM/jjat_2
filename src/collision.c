@@ -150,7 +150,30 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                         gfmObject_getVerticalPosition(&y, player->pObject);
                         gfmObject_setVerticalPosition(player->pObject, y + 1);
                     }
+                } /* if (rv == GFMRV_TRUE) */
+#if  defined(JJATENGINE)
+                else if (collision.flags & CF_FIXTELEPORT) {
+                    collisionNode *floor;
+                    int fy, py, h;
+
+                    /* Entity was (possibly) just teleported into the ground.
+                     * Manually check and fix it */
+                    if (isFirstCase) {
+                        floor = &node1;
+                    }
+                    else {
+                        floor = &node2;
+                    }
+
+                    gfmObject_getVerticalPosition(&fy, floor->pObject);
+                    gfmObject_getVerticalPosition(&py, player->pObject);
+                    gfmObject_getHeight(&h, player->pObject);
+
+                    if (py + h >= fy) {
+                        gfmObject_setVerticalPosition(player->pObject, fy - h);
+                    }
                 }
+#endif  /* JJATENGINE */
                 rv = GFMRV_OK;
             } break;
             CASE(T_SWORDY, T_GUNNY) {
