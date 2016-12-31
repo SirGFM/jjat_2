@@ -9,6 +9,7 @@
 #include <conf/state.h>
 
 #include <GFraMe/gframe.h>
+#include <GFraMe/gfmCamera.h>
 
 enum enDebugRunState {
     DBG_PAUSED  = 0x0000,
@@ -30,6 +31,8 @@ typedef enum enGameFlags gameFlags;
 struct stGameCtx {
     /** GFraMe context */
     gfmCtx *pCtx;
+    /** The game's default camera */
+    gfmCamera *pCamera;
 #if defined(JJATENGINE)
     gameFlags flags;
 #endif /* JJATENGINE */
