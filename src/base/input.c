@@ -97,7 +97,7 @@ void handleDebugInput() {
 
     if (DID_JUST_RELEASE(qt)) {
         /* Toggle quadtree visibility */
-        collision.visibility = !collision.visibility;
+        collision.flags ^= CF_VISIBLE;
     }
 
     if (DID_JUST_RELEASE(gif)) {

@@ -8,17 +8,25 @@
 
 #include <GFraMe/gfmQuadtree.h>
 
+enum enCollisionFlags {
+    /** Whether pending collisions (for the current object) should be skipped */
+    CF_SKIP        = 0x01
+    /** Quadtree's visibility (only available on debug mode) */
+  , CF_VISIBLE     = 0x02
+#if  defined(JJATENGINE)
+    /** Fix passing through platforms when teleporting */
+  , CF_FIXTELEPORT = 0x04
+#endif  /* JJATENGINE */
+};
+typedef enum enCollisionFlags collisionFlags;
+
 struct stCollisionCtx {
     /** Quadtree's root */
     gfmQuadtreeRoot *pQt;
     /** Static quadtree's root */
     gfmQuadtreeRoot *pStaticQt;
-    /** Whether pending collisions (for the current object) should be skipped */
-    int skip;
-#if defined(DEBUG)
-    /** Quadtree's visibility */
-    int visibility;
-#endif
+    /** Controls the collision */
+    collisionFlags flags;
 };
 typedef struct stCollisionCtx collisionCtx;
 
@@ -47,7 +55,7 @@ err doCollide(gfmQuadtreeRoot *pQt);
 
 /** Checks whether the quadtree should be rendered */
 #if defined(DEBUG)
-#  define IS_QUADTREE_VISIBLE() (collision.visibility)
+#  define IS_QUADTREE_VISIBLE() (collision.flags & CF_VISIBLE)
 #else
 #  define IS_QUADTREE_VISIBLE() (0)
 #endif

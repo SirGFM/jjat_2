@@ -95,8 +95,8 @@ err doCollide(gfmQuadtreeRoot *pQt) {
     /* Continue colliding until the quadtree finishes (or collision is
      * skipped) */
     rv = GFMRV_QUADTREE_OVERLAPED;
-    collision.skip = 0;
-    while (rv != GFMRV_QUADTREE_DONE && !collision.skip) {
+    collision.flags  &= ~CF_SKIP;
+    while (rv != GFMRV_QUADTREE_DONE && !(collision.flags & CF_SKIP)) {
         collisionNode node1, node2;
         int isFirstCase;
         int fallthrough;
@@ -188,7 +188,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 gfmSprite_setHorizontalVelocity(pBullet, -vx);
                 gfmSprite_setDirection(pBullet, !dir);
 
-                collision.skip = 1;
+                collision.flags |= CF_SKIP;
             } break;
             IGNORE(T_ATK_SWORD, T_SWORDY)
             IGNORE(T_ATK_SWORD, T_GUNNY)
@@ -219,7 +219,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 rv = gfmGroup_removeNode(pNode);
                 ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-                collision.skip = 1;
+                collision.flags |= CF_SKIP;
             } break;
             CASE(T_TEL_BULLET, T_FLOOR) {
                 gfmGroupNode *pNode;
@@ -271,7 +271,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 }
                 rv = gfmGroup_removeNode(pNode);
                 ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-                collision.skip = 1;
+                collision.flags |= CF_SKIP;
             } break;
             IGNORE(T_TEL_BULLET, T_GUNNY)
             IGNORE(T_TEL_BULLET, T_FX)
