@@ -39,10 +39,11 @@ static void cleanPreviousTarget() {
 /**
  * Setup the teleport target at a static position
  *
- * @param  [ in]x Target's center
- * @param  [ in]y Target's center
+ * @param  [ in]x   Target's center
+ * @param  [ in]y   Target's center
+ * @param  [ in]pos 'Relative' position of the target
  */
-err teleporterTargetPosition(int x, int y) {
+err teleporterTargetPosition(int x, int y, teleportPosition pos) {
     gfmSprite *pEffect;
     gfmRV rv;
     int type;
@@ -52,6 +53,15 @@ err teleporterTargetPosition(int x, int y) {
     pEffect = spawnFx(x - 4, y - 4, 8/*w*/, 8/*h*/, 0/*dir*/, 0/*ttl*/
             , FX_TELEPORT_TARGET, T_FX);
     ASSERT(pEffect, ERR_GFMERR);
+    if (pos == TP_RIGHT) {
+        gfmSprite_setOffset(pEffect, 4/*offx*/, 0/*offy*/);
+    }
+    else if (pos == TP_LEFT) {
+        gfmSprite_setOffset(pEffect, -4/*offx*/, 0/*offy*/);
+    }
+    else {
+        gfmSprite_setOffset(pEffect, 0/*offx*/, 0/*offy*/);
+    }
     rv = gfmSprite_getChild((void**)&teleport.pCurEffect, &type, pEffect);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
@@ -67,7 +77,7 @@ err teleporterTargetEntity(entityCtx *pTarget) {
     err erv;
     /* No need to set the position right now since it will be updated shortly
      * afterward */
-    erv = teleporterTargetPosition(0, 0);
+    erv = teleporterTargetPosition(0, 0, TP_ENTITY);
     ASSERT(erv == ERR_OK, erv);
 
     teleport.pTarget = pTarget;

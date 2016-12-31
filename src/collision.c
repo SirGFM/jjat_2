@@ -240,6 +240,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 /* Check if visible */
                 if (GFMRV_TRUE == gfm_isObjectInsideCamera(game.pCtx, pFloor)) {
                     int cx, x, y;
+                    teleportPosition pos;
 
                     /* Since the bullet only moves horizontally, use the floor's
                      * horizontal position and the bullet's vertical */
@@ -251,15 +252,21 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                     /* Ugly, hacky assumption: if the center - half the width is
                      * to the right of the floor's left side, then it's to the
                      * floor's right */
-                    if (cx - 8 >= x) {
+                    if (cx - BULLET_WIDTH / 2 >= x) {
                         int w;
                         /* The bullet collided to the left, so adjust its position */
                         rv = gfmObject_getWidth(&w, pFloor);
                         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
                         x += w;
+                        x += BULLET_WIDTH / 2;
+                        pos = TP_LEFT;
+                    }
+                    else {
+                        x -= BULLET_WIDTH / 2;
+                        pos = TP_RIGHT;
                     }
 
-                    erv = teleporterTargetPosition(x, y);
+                    erv = teleporterTargetPosition(x, y, pos);
                     ASSERT(erv == ERR_OK, erv);
                 }
                 rv = gfmGroup_removeNode(pNode);

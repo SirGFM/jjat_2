@@ -202,15 +202,15 @@ err preUpdateGunny(gunnyCtx *gunny) {
                 vx = BULLET_SPEED;
             }
             else {
-                x -= 13;
+                x -= 4;
                 vx = -BULLET_SPEED;
             }
 
-            pBullet = spawnFx(x, y, 16/*w*/, 5/*h*/, dir, 6000/*ttl*/
+            pBullet = spawnFx(x, y, BULLET_WIDTH, 2/*h*/, dir, 6000/*ttl*/
                     , FX_GUNNY_BULLET, T_TEL_BULLET);
             ASSERT(pBullet != 0, ERR_GFMERR);
             gfmSprite_setHorizontalVelocity(pBullet, vx);
-            gfmSprite_setOffset(pBullet, 0/*offx*/, -2/*offy*/);
+            gfmSprite_setOffset(pBullet, -6/*offx*/, -2/*offy*/);
 
             gunny->flags |= gunny_attack;
             gunny->flags |= gunny_justAttacked;

@@ -10,6 +10,8 @@
 
 #include <stdint.h>
 
+#define BULLET_WIDTH 8
+
 struct stGunnyCtx {
     /** Base object */
     entityCtx entity;
