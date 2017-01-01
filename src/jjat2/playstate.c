@@ -6,9 +6,11 @@
 #include <base/game.h>
 #include <base/gfx.h>
 
+#include <GFraMe/gfmCamera.h>
 #include <GFraMe/gfmParser.h>
 #include <GFraMe/gfmTilemap.h>
 
+#include <jjat2/camera.h>
 #include <jjat2/dictionary.h>
 #include <jjat2/fx_group.h>
 #include <jjat2/gunny.h>
@@ -61,11 +63,15 @@ void freePlaystate() {
 }
 
 /** Updates the quadtree's bounds according to the currently loaded map */
-static err _updateQuadtreeSize() {
+static err _updateWorldSize() {
     gfmRV rv;
 
     rv = gfmTilemap_getDimension(&playstate.width, &playstate.height
             , playstate.pMap);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    rv = gfmCamera_setWorldDimensions(game.pCamera, playstate.width
+            , playstate.height);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     /** Make the quadtree 2 tiles larger than the actual map */
@@ -101,7 +107,7 @@ err loadPlaystate() {
     rv = gfmTilemap_loadf(playstate.pMap, game.pCtx, "levels/map_test_tm.gfm"
             , 22 , pDictNames, pDictTypes, dictLen);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    erv = _updateQuadtreeSize();
+    erv = _updateWorldSize();
     ASSERT(erv == ERR_OK, erv);
 
     rv = gfmParser_initStatic(playstate.pParser, game.pCtx,
@@ -134,6 +140,10 @@ err loadPlaystate() {
     rv = gfmParser_reset(playstate.pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+    erv = resetCameraPosition(&playstate.swordy.entity
+            , &playstate.gunny.entity);
+    ASSERT(erv == ERR_OK, erv);
+
     erv = _loadStaticQuadtree();
     ASSERT(erv == ERR_OK, erv);
 
@@ -144,6 +154,14 @@ err loadPlaystate() {
     return ERR_OK;
 }
 
+/**
+ * Handles colliding the active player with a invisible static dummy (placed at
+ * the inactive player's position)
+ *
+ * @param  [ in]pActive   The active player
+ * @param  [ in]pInactive The inactive player
+ * @param  [ in]pDummy    The dummy
+ */
 inline static void _handleAsyncCollision(entityCtx *pActive
         , entityCtx *pInactive, entityCtx *pDummy) {
     int x, y;
@@ -206,6 +224,9 @@ err updatePlaystate() {
 err drawPlaystate() {
     gfmRV rv;
     err erv;
+
+    erv = updateCamera(&playstate.swordy.entity, &playstate.gunny.entity);
+    ASSERT(erv == ERR_OK, erv);
 
     rv = gfmTilemap_draw(playstate.pMap, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);

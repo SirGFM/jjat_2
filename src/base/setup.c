@@ -89,6 +89,9 @@ err setupGame(int argc, char *argv[]) {
     rv = gfm_setFPSCounterPos(game.pCtx, 4/*x*/, 4/*y*/);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+    rv = gfm_getCamera(&game.pCamera, game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
 #if defined(JJATENGINE)
     /** If playing on asynchronous mode, set only swordy as active */
     if (config.flags & CFG_SYNCCONTROL) {

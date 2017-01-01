@@ -26,6 +26,7 @@
          base/main.o \
          base/static.o \
          base/setup.o \
+         jjat2/camera.o \
          jjat2/dictionary.o \
          jjat2/entity.o \
          jjat2/fx_group.o \

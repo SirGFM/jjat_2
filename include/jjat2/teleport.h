@@ -15,6 +15,13 @@
 
 #include <jjat2/entity.h>
 
+enum enTeleportPosition {
+    TP_LEFT = 0
+  , TP_RIGHT
+  , TP_ENTITY
+};
+typedef enum enTeleportPosition teleportPosition;
+
 struct stTeleportCtx {
     /** Current node following whatever is being targeted */
     gfmGroupNode *pCurEffect;
@@ -32,10 +39,11 @@ void resetTeleporterTarget();
 /**
  * Setup the teleport target at a static position
  *
- * @param  [ in]x Target's center
- * @param  [ in]y Target's center
+ * @param  [ in]x   Target's center
+ * @param  [ in]y   Target's center
+ * @param  [ in]pos 'Relative' position of the target
  */
-err teleporterTargetPosition(int x, int y);
+err teleporterTargetPosition(int x, int y, teleportPosition pos);
 
 /**
  * Setup the teleport target at an entity

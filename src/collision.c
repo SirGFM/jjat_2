@@ -95,8 +95,8 @@ err doCollide(gfmQuadtreeRoot *pQt) {
     /* Continue colliding until the quadtree finishes (or collision is
      * skipped) */
     rv = GFMRV_QUADTREE_OVERLAPED;
-    collision.skip = 0;
-    while (rv != GFMRV_QUADTREE_DONE && !collision.skip) {
+    collision.flags  &= ~CF_SKIP;
+    while (rv != GFMRV_QUADTREE_DONE && !(collision.flags & CF_SKIP)) {
         collisionNode node1, node2;
         int isFirstCase;
         int fallthrough;
@@ -125,8 +125,18 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 rv = gfmObject_justOverlaped(node1.pObject, node2.pObject);
                 if (rv == GFMRV_TRUE) {
                     gfmCollision dir;
+
                     gfmObject_getCurrentCollision(&dir, player->pObject);
-                    gfmObject_collide(node1.pObject, node2.pObject);
+
+                    if (!((dir & gfmCollision_up) && (dir & gfmCollision_hor))) {
+                        gfmObject_collide(node1.pObject, node2.pObject);
+                    }
+                    else {
+                        /* Fix colliding against corners when there are two
+                         * separated objects in a wall */
+                        gfmObject_separateHorizontal(node1.pObject, node2.pObject);
+                    }
+
                     if (dir & gfmCollision_down) {
                         gfmObject_setVerticalVelocity(player->pObject, 0);
                         /* Corner case!! If the player would get stuck on a
@@ -144,13 +154,37 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                                     , y - 1);
                         }
                     }
-                    else if (dir & gfmCollision_up) {
+                    else if ((dir & gfmCollision_up) && !(dir & gfmCollision_hor)) {
                         int y;
                         gfmObject_setVerticalVelocity(player->pObject, 0);
                         gfmObject_getVerticalPosition(&y, player->pObject);
                         gfmObject_setVerticalPosition(player->pObject, y + 1);
+
+                    }
+                } /* if (rv == GFMRV_TRUE) */
+#if  defined(JJATENGINE)
+                else if (collision.flags & CF_FIXTELEPORT) {
+                    collisionNode *floor;
+                    int fy, py, h;
+
+                    /* Entity was (possibly) just teleported into the ground.
+                     * Manually check and fix it */
+                    if (isFirstCase) {
+                        floor = &node1;
+                    }
+                    else {
+                        floor = &node2;
+                    }
+
+                    gfmObject_getVerticalPosition(&fy, floor->pObject);
+                    gfmObject_getVerticalPosition(&py, player->pObject);
+                    gfmObject_getHeight(&h, player->pObject);
+
+                    if (py + h >= fy) {
+                        gfmObject_setVerticalPosition(player->pObject, fy - h);
                     }
                 }
+#endif  /* JJATENGINE */
                 rv = GFMRV_OK;
             } break;
             CASE(T_SWORDY, T_GUNNY) {
@@ -188,7 +222,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 gfmSprite_setHorizontalVelocity(pBullet, -vx);
                 gfmSprite_setDirection(pBullet, !dir);
 
-                collision.skip = 1;
+                collision.flags |= CF_SKIP;
             } break;
             IGNORE(T_ATK_SWORD, T_SWORDY)
             IGNORE(T_ATK_SWORD, T_GUNNY)
@@ -219,7 +253,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 rv = gfmGroup_removeNode(pNode);
                 ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-                collision.skip = 1;
+                collision.flags |= CF_SKIP;
             } break;
             CASE(T_TEL_BULLET, T_FLOOR) {
                 gfmGroupNode *pNode;
@@ -240,6 +274,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 /* Check if visible */
                 if (GFMRV_TRUE == gfm_isObjectInsideCamera(game.pCtx, pFloor)) {
                     int cx, x, y;
+                    teleportPosition pos;
 
                     /* Since the bullet only moves horizontally, use the floor's
                      * horizontal position and the bullet's vertical */
@@ -251,20 +286,26 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                     /* Ugly, hacky assumption: if the center - half the width is
                      * to the right of the floor's left side, then it's to the
                      * floor's right */
-                    if (cx - 8 >= x) {
+                    if (cx - BULLET_WIDTH / 2 >= x) {
                         int w;
                         /* The bullet collided to the left, so adjust its position */
                         rv = gfmObject_getWidth(&w, pFloor);
                         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
                         x += w;
+                        x += BULLET_WIDTH / 2;
+                        pos = TP_LEFT;
+                    }
+                    else {
+                        x -= BULLET_WIDTH / 2;
+                        pos = TP_RIGHT;
                     }
 
-                    erv = teleporterTargetPosition(x, y);
+                    erv = teleporterTargetPosition(x, y, pos);
                     ASSERT(erv == ERR_OK, erv);
                 }
                 rv = gfmGroup_removeNode(pNode);
                 ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-                collision.skip = 1;
+                collision.flags |= CF_SKIP;
             } break;
             IGNORE(T_TEL_BULLET, T_GUNNY)
             IGNORE(T_TEL_BULLET, T_FX)

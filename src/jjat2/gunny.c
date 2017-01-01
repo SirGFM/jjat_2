@@ -97,6 +97,7 @@ err initGunny(gunnyCtx *gunny) {
     gunny->entity.shorthopVelocity = GUNNY_HOP_SPEED;
     gunny->entity.standGravity = GUNNY_JUMP_GRAV;
     gunny->entity.fallGravity = GUNNY_FALL_GRAV;
+    initEntity(&gunny->entity);
 
     return ERR_OK;
 }
@@ -145,27 +146,6 @@ err drawGunny(gunnyCtx *gunny) {
 
     rv = gfmSprite_draw(gunny->entity.pSelf, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-
-#if defined(DEBUG)
-    do {
-        static int counter = 0;
-        int x, y;
-        if (DID_JUST_PRESS(gunnyAtk)) {
-            counter = 0;
-        }
-        else if (IS_PRESSED(gunnyAtk)) {
-            counter += game.elapsed;
-        }
-        gfmSprite_getPosition(&x, &y, gunny->entity.pSelf);
-        gfmDebug_printf(game.pCtx, x, y - 24
-                , "    TIME: %03i\n"
-                  "  ATTACK: %01i\n"
-                  "RELEASED: %01i\n"
-                , counter
-                , gunny->flags & gunny_attack
-                , !(gunny->flags & gunny_justAttacked));
-    } while (0);
-#endif
 
     return ERR_OK;
 }
@@ -222,15 +202,15 @@ err preUpdateGunny(gunnyCtx *gunny) {
                 vx = BULLET_SPEED;
             }
             else {
-                x -= 13;
+                x -= 4;
                 vx = -BULLET_SPEED;
             }
 
-            pBullet = spawnFx(x, y, 16/*w*/, 5/*h*/, dir, 6000/*ttl*/
+            pBullet = spawnFx(x, y, BULLET_WIDTH, 2/*h*/, dir, 6000/*ttl*/
                     , FX_GUNNY_BULLET, T_TEL_BULLET);
             ASSERT(pBullet != 0, ERR_GFMERR);
             gfmSprite_setHorizontalVelocity(pBullet, vx);
-            gfmSprite_setOffset(pBullet, 0/*offx*/, -2/*offy*/);
+            gfmSprite_setOffset(pBullet, -6/*offx*/, -2/*offy*/);
 
             gunny->flags |= gunny_attack;
             gunny->flags |= gunny_justAttacked;
