@@ -114,7 +114,9 @@ err doCollide(gfmQuadtreeRoot *pQt) {
         switch (MERGE_TYPES(node1.type, node2.type)) {
 /*== PLAYER'S COLLISION ======================================================*/
             CASE(T_FLOOR, T_GUNNY)
-            CASE(T_FLOOR, T_SWORDY) {
+            CASE(T_FLOOR, T_SWORDY)
+            CASE(T_FLOOR_NOTP, T_GUNNY)
+            CASE(T_FLOOR_NOTP, T_SWORDY) {
                 collisionNode *player;
                 if (isFirstCase) {
                     player = &node2;
@@ -227,6 +229,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_ATK_SWORD, T_SWORDY)
             IGNORE(T_ATK_SWORD, T_GUNNY)
             IGNORE(T_ATK_SWORD, T_FLOOR)
+            IGNORE(T_ATK_SWORD, T_FLOOR_NOTP)
             IGNORE(T_ATK_SWORD, T_FX)
             IGNORESELF(T_ATK_SWORD)
             break;
@@ -307,6 +310,22 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 ASSERT(rv == GFMRV_OK, ERR_GFMERR);
                 collision.flags |= CF_SKIP;
             } break;
+            CASE(T_TEL_BULLET, T_FLOOR_NOTP) {
+                gfmGroupNode *pNode;
+
+                if (isFirstCase) {
+                    pNode = (gfmGroupNode*)node1.pChild;
+                }
+                else {
+                    pNode = (gfmGroupNode*)node2.pChild;
+                }
+
+                /* TODO Play vanish animation */
+
+                rv = gfmGroup_removeNode(pNode);
+                ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+                collision.flags |= CF_SKIP;
+            } break;
             IGNORE(T_TEL_BULLET, T_GUNNY)
             IGNORE(T_TEL_BULLET, T_FX)
             IGNORESELF(T_TEL_BULLET)
@@ -315,6 +334,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_SWORD_FX, T_SWORDY)
             IGNORE(T_SWORD_FX, T_GUNNY)
             IGNORE(T_SWORD_FX, T_FLOOR)
+            IGNORE(T_SWORD_FX, T_FLOOR_NOTP)
             IGNORE(T_SWORD_FX, T_FX)
             IGNORE(T_SWORD_FX, T_ATK_SWORD)
             IGNORE(T_SWORD_FX, T_TEL_BULLET)
@@ -324,6 +344,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_FX, T_SWORDY)
             IGNORE(T_FX, T_GUNNY)
             IGNORE(T_FX, T_FLOOR)
+            IGNORE(T_FX, T_FLOOR_NOTP)
             IGNORESELF(T_FX)
             break;
             /* On Linux, a SIGINT is raised any time a unhandled collision

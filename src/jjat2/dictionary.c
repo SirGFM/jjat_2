@@ -11,7 +11,9 @@
  * on the first parameter of a X macro, while the type may be retrieved on its
  * second parameter */
 #define DICTIONARY_LIST \
-    X("floor", T_FLOOR)
+    X("floor", T_FLOOR) \
+    X("floor_notp", T_FLOOR_NOTP) \
+    X("spike", T_SPIKE)
 
 /** Names (i.e., labels) that identifies types. Label position must match type
  * position in pDictTypes. */
