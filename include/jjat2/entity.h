@@ -12,6 +12,11 @@
 
 #include <stdint.h>
 
+enum enEntityFlag {
+    EF_ALIVE    = 0x01
+};
+typedef enum enEntityFlag entityFlag;
+
 /** Absolute speed when airborne sprites are set as 'floating' */
 #define FLOAT_SPEED     32
 
@@ -52,6 +57,8 @@ struct stEntityCtx {
     gfmSprite *pSelf;
     /** Sprite (if any) that is carrying this entity */
     gfmSprite *pCarrying;
+    /** Generic entity flags */
+    entityFlag flags;
     /** Time, in milliseconds, while jump may be pressed after leaving the
      * ground */
     int16_t jumpGrace;

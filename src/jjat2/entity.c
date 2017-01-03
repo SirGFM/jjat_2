@@ -21,6 +21,7 @@
  */
 void initEntity(entityCtx *entity) {
     gfmSprite_setVerticalAcceleration(entity->pSelf, entity->standGravity);
+    entity->flags = EF_ALIVE;
 }
 
 /**

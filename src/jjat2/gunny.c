@@ -144,6 +144,8 @@ err parseGunny(gunnyCtx *gunny, gfmParser *pParser) {
 err drawGunny(gunnyCtx *gunny) {
     gfmRV rv;
 
+    gfmDebug_printf(game.pCtx, 0, 72, "GUNNY ALIVE: %i", gunny->entity.flags & EF_ALIVE);
+
     if (game.flags & AC_GUNNY) {
         rv = gfmSprite_draw(gunny->entity.pSelf, game.pCtx);
     }

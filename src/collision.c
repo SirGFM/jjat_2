@@ -32,6 +32,8 @@ struct stCollisionNode {
 };
 typedef struct stCollisionNode collisionNode;
 
+#define SPIKE_OFFSET    4
+
 /** Merge two types into a single one */
 #define MERGE_TYPES(type1, type2) \
     (TYPE(type1) | (TYPE(type2) << T_BITS))
@@ -136,7 +138,8 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                     else {
                         /* Fix colliding against corners when there are two
                          * separated objects in a wall */
-                        gfmObject_separateHorizontal(node1.pObject, node2.pObject);
+                        gfmObject_separateHorizontal(node1.pObject
+                                , node2.pObject);
                     }
 
                     if (dir & gfmCollision_down) {
@@ -189,6 +192,46 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 #endif  /* JJATENGINE */
                 rv = GFMRV_OK;
             } break;
+            CASE(T_SPIKE, T_GUNNY)
+            CASE(T_SPIKE, T_SWORDY) {
+                collisionNode *player;
+                collisionNode *spike;
+                gfmCollision hdir, vdir;
+
+                if (isFirstCase) {
+                    player = &node2;
+                    spike = &node1;
+                }
+                else {
+                    player = &node1;
+                    spike = &node2;
+                }
+
+                gfmObject_isOverlaping(node1.pObject, node2.pObject);
+                gfmObject_getCurrentCollision(&vdir, player->pObject);
+                gfmObject_justOverlaped(node1.pObject, node2.pObject);
+                gfmObject_getCurrentCollision(&hdir, player->pObject);
+
+                if (hdir & gfmCollision_hor) {
+                    /* Collide horizontally to avoid clipping */
+                    gfmObject_separateHorizontal(node1.pObject
+                            , node2.pObject);
+                }
+                else if (vdir & gfmCollision_down) {
+                    int py, sy, ph;
+
+                    gfmObject_getVerticalPosition(&py, player->pObject);
+                    gfmObject_getHeight(&ph, player->pObject);
+                    gfmObject_getVerticalPosition(&sy, spike->pObject);
+
+                    if (py + ph >= sy + SPIKE_OFFSET) {
+                        /* Kill the player */
+                        ((entityCtx*)player->pChild)->flags &= ~EF_ALIVE;
+                    }
+                }
+
+                rv = GFMRV_OK;
+            } break;
             CASE(T_SWORDY, T_GUNNY) {
                 swordyCtx *swordy;
                 gunnyCtx *gunny;
@@ -231,6 +274,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_ATK_SWORD, T_FLOOR)
             IGNORE(T_ATK_SWORD, T_FLOOR_NOTP)
             IGNORE(T_ATK_SWORD, T_FX)
+            IGNORE(T_ATK_SWORD, T_SPIKE)
             IGNORESELF(T_ATK_SWORD)
             break;
 /*== GUNNY'S BULLET ==========================================================*/
@@ -310,6 +354,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 ASSERT(rv == GFMRV_OK, ERR_GFMERR);
                 collision.flags |= CF_SKIP;
             } break;
+            CASE(T_TEL_BULLET, T_SPIKE)
             CASE(T_TEL_BULLET, T_FLOOR_NOTP) {
                 gfmGroupNode *pNode;
 
@@ -338,6 +383,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_SWORD_FX, T_FX)
             IGNORE(T_SWORD_FX, T_ATK_SWORD)
             IGNORE(T_SWORD_FX, T_TEL_BULLET)
+            IGNORE(T_SWORD_FX, T_SPIKE)
             IGNORESELF(T_SWORD_FX)
             break;
 /*== COLLISION-LESS EFFECTS ==================================================*/
@@ -345,6 +391,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_FX, T_GUNNY)
             IGNORE(T_FX, T_FLOOR)
             IGNORE(T_FX, T_FLOOR_NOTP)
+            IGNORE(T_FX, T_SPIKE)
             IGNORESELF(T_FX)
             break;
             /* On Linux, a SIGINT is raised any time a unhandled collision

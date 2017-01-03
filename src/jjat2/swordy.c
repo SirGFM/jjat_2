@@ -146,6 +146,8 @@ err parseSwordy(swordyCtx *swordy, gfmParser *pParser) {
 err drawSwordy(swordyCtx *swordy) {
     gfmRV rv;
 
+    gfmDebug_printf(game.pCtx, 0, 64, "SWORDY ALIVE: %i", swordy->entity.flags & EF_ALIVE);
+
     if (game.flags & AC_SWORDY) {
         rv = gfmSprite_draw(swordy->entity.pSelf, game.pCtx);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
