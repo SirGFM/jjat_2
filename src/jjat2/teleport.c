@@ -10,6 +10,7 @@
  */
 #include <base/collision.h>
 #include <base/error.h>
+#include <base/game.h>
 
 #include <conf/type.h>
 
@@ -70,38 +71,59 @@ err teleporterTargetPosition(int x, int y, teleportPosition pos) {
 }
 
 /**
+ * Center the effect at the current target
+ */
+static inline err _centerAtEntity() {
+    gfmSprite *pEffect;
+    gfmRV rv;
+    int cx, cy;
+
+    rv = gfmGroup_getNodeSprite(&pEffect, teleport.pCurEffect);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmSprite_getCenter(&cx, &cy, teleport.pTarget->pSelf);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    gfmSprite_setPosition(pEffect, cx - 4, cy - 4);
+
+    return ERR_OK;
+
+}
+
+/**
  * Setup the teleport target at an entity
  *
  * @param  [ in]pTarget The entity
  */
 err teleporterTargetEntity(entityCtx *pTarget) {
     err erv;
-    /* No need to set the position right now since it will be updated shortly
-     * afterward */
+
     erv = teleporterTargetPosition(0, 0, TP_ENTITY);
     ASSERT(erv == ERR_OK, erv);
-
     teleport.pTarget = pTarget;
-    return ERR_OK;
+
+    return _centerAtEntity();
 }
 
 /** Update the teleporter's position */
 err updateTeleporterTarget() {
-    gfmSprite *pEffect;
     gfmRV rv;
-    int cx, cy;
+
+    if (teleport.pCurEffect) {
+        gfmSprite *pEffect;
+
+        rv = gfmGroup_getNodeSprite(&pEffect, teleport.pCurEffect);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+        if (gfmCamera_isSpriteInside(game.pCamera, pEffect) == GFMRV_FALSE) {
+            cleanPreviousTarget();
+            return ERR_OK;
+        }
+    }
 
     if (teleport.pTarget == 0 || teleport.pCurEffect == 0) {
         return ERR_OK;
     }
 
-    rv = gfmSprite_getCenter(&cx, &cy, teleport.pTarget->pSelf);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    rv = gfmGroup_getNodeSprite(&pEffect, teleport.pCurEffect);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    rv = gfmSprite_setPosition(pEffect, cx - 4, cy - 4);
-
-    return ERR_OK;
+    return _centerAtEntity();
 }
 
 /**
