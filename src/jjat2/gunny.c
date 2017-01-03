@@ -144,7 +144,22 @@ err parseGunny(gunnyCtx *gunny, gfmParser *pParser) {
 err drawGunny(gunnyCtx *gunny) {
     gfmRV rv;
 
-    rv = gfmSprite_draw(gunny->entity.pSelf, game.pCtx);
+    if (game.flags & AC_GUNNY) {
+        rv = gfmSprite_draw(gunny->entity.pSelf, game.pCtx);
+    }
+    else {
+        int cx, cy, frame, isFlipped, x, y;
+
+        gfmCamera_getPosition(&cx, &cy, game.pCamera);
+        gfmSprite_getPosition(&x, &y, gunny->entity.pSelf);
+        gfmSprite_getFrame(&frame, gunny->entity.pSelf);
+        gfmSprite_getDirection(&isFlipped, gunny->entity.pSelf);
+
+        x = x - cx + gunny_offx;
+        y = y - cy + gunny_offy;
+        rv = gfm_drawTile(game.pCtx, gfx.pSset16x16, x, y, frame + 64
+                , isFlipped);
+    }
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     return ERR_OK;

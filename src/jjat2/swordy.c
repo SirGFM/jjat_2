@@ -146,8 +146,23 @@ err parseSwordy(swordyCtx *swordy, gfmParser *pParser) {
 err drawSwordy(swordyCtx *swordy) {
     gfmRV rv;
 
-    rv = gfmSprite_draw(swordy->entity.pSelf, game.pCtx);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    if (game.flags & AC_SWORDY) {
+        rv = gfmSprite_draw(swordy->entity.pSelf, game.pCtx);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    }
+    else {
+        int cx, cy, frame, isFlipped, x, y;
+
+        gfmCamera_getPosition(&cx, &cy, game.pCamera);
+        gfmSprite_getPosition(&x, &y, swordy->entity.pSelf);
+        gfmSprite_getFrame(&frame, swordy->entity.pSelf);
+        gfmSprite_getDirection(&isFlipped, swordy->entity.pSelf);
+
+        x = x - cx + swordy_offx;
+        y = y - cy + swordy_offy;
+        rv = gfm_drawTile(game.pCtx, gfx.pSset16x16, x, y, frame + 64
+                , isFlipped);
+    }
 
     return ERR_OK;
 }
