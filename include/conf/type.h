@@ -23,10 +23,11 @@
     (type & T_MASK)
 
 enum enType {
-      T_FLOOR     = gfmType_reserved_5  /* ( 8) purple */
-    , T_PLAYER    = gfmType_reserved_7  /* (10) light red */
+      T_HAZARD    = gfmType_reserved_2  /* ( 5) pink */
+    , T_PLAYER    = gfmType_reserved_3  /* ( 6) light blue */
+    , T_FLOOR     = gfmType_reserved_5  /* ( 8) purple */
+    , T_ENEMY     = gfmType_reserved_7  /* (10) light red */
     , T_FX        = gfmType_reserved_10 /* (13) dirty yellow/green */
-    , T_HAZARD    = gfmType_reserved_2  /* ( 5) pink */
 
     , T_FLOOR_NOTP = (1 << T_BASE_NBITS) | T_FLOOR
     , T_SWORDY     = (1 << T_BASE_NBITS) | T_PLAYER
@@ -35,6 +36,7 @@ enum enType {
     , T_SWORD_FX   = (3 << T_BASE_NBITS) | T_FX
     , T_TEL_BULLET = (4 << T_BASE_NBITS) | T_PLAYER
     , T_SPIKE      = (1 << T_BASE_NBITS) | T_HAZARD
+    , T_WALKY      = (1 << T_BASE_NBITS) | T_ENEMY
 };
 typedef enum enType type;
 

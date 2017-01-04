@@ -13,6 +13,7 @@
 #include <jjat2/camera.h>
 #include <jjat2/dictionary.h>
 #include <jjat2/fx_group.h>
+#include <jjat2/enemy.h>
 #include <jjat2/gunny.h>
 #include <jjat2/playstate.h>
 #include <jjat2/swordy.h>
@@ -24,6 +25,7 @@
 err initPlaystate() {
     gfmRV rv;
     err erv;
+    int i;
 
     erv = initSwordy(&playstate.swordy);
     ASSERT(erv == ERR_OK, erv);
@@ -46,11 +48,20 @@ err initPlaystate() {
             , T_PLAYER);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+    i = 0;
+    while (i < MAX_ENTITIES) {
+        rv = gfmSprite_getNew(&playstate.entities[i].pSelf);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        i++;
+    }
+
     return ERR_OK;
 }
 
 /** If the playstate has been initialized, properly free it up. */
 void freePlaystate() {
+    int i;
+
     if (playstate.pMap != 0) {
         gfmTilemap_free(&playstate.pMap);
     }
@@ -60,6 +71,12 @@ void freePlaystate() {
     gfmSprite_free(&playstate.asyncDummy.pSelf);
     freeSwordy(&playstate.swordy);
     freeGunny(&playstate.gunny);
+
+    i = 0;
+    while (i < MAX_ENTITIES) {
+        gfmSprite_free(&playstate.entities[i].pSelf);
+        i++;
+    }
 }
 
 /** Updates the quadtree's bounds according to the currently loaded map */
@@ -114,6 +131,7 @@ err loadPlaystate() {
             "levels/map_test_obj.gfm");
     ASSERT(erv == ERR_OK, erv);
 
+    playstate.entityCount = 0;
     while (1) {
         char *type;
         err erv;
@@ -134,6 +152,12 @@ err loadPlaystate() {
         else if (strcmp(type, "gunny_pos") == 0) {
             erv = parseGunny(&playstate.gunny, playstate.pParser);
             ASSERT(erv == ERR_OK, erv);
+        }
+        else if (strcmp(type, "walky") == 0) {
+            entityCtx *pEnt = &playstate.entities[playstate.entityCount];
+            erv = parseEnemy(pEnt, playstate.pParser, T_WALKY);
+            ASSERT(erv == ERR_OK, erv);
+            playstate.entityCount++;
         }
     }
 
@@ -178,6 +202,7 @@ inline static void _handleAsyncCollision(entityCtx *pActive
 err updatePlaystate() {
     gfmRV rv;
     err erv;
+    int i;
 
     rv = gfmQuadtree_initRoot(collision.pQt, -8/*x*/, -8/*y*/, playstate.width
             , playstate.height, 8/*depth*/, 16/*nodes*/);
@@ -185,6 +210,13 @@ err updatePlaystate() {
 
     rv = gfmTilemap_update(playstate.pMap, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    i = 0;
+    while (i < MAX_ENTITIES) {
+        erv = preUpdateEnemy(&playstate.entities[i]);
+        ASSERT(erv == ERR_OK, erv);
+        i++;
+    }
 
     erv = preUpdateSwordy(&playstate.swordy);
     ASSERT(erv == ERR_OK, erv);
@@ -206,6 +238,14 @@ err updatePlaystate() {
                 , &playstate.asyncDummy);
     }
 
+    i = 0;
+    while (i < MAX_ENTITIES) {
+        erv = postUpdateEnemy(&playstate.entities[i]);
+        ASSERT(erv == ERR_OK, erv);
+        i++;
+    }
+
+
     erv = postUpdateSwordy(&playstate.swordy);
     ASSERT(erv == ERR_OK, erv);
     erv = postUpdateGunny(&playstate.gunny);
@@ -224,12 +264,20 @@ err updatePlaystate() {
 err drawPlaystate() {
     gfmRV rv;
     err erv;
+    int i;
 
     erv = updateCamera(&playstate.swordy.entity, &playstate.gunny.entity);
     ASSERT(erv == ERR_OK, erv);
 
     rv = gfmTilemap_draw(playstate.pMap, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    i = 0;
+    while (i < MAX_ENTITIES) {
+        erv = drawEnemy(&playstate.entities[i]);
+        ASSERT(erv == ERR_OK, erv);
+        i++;
+    }
 
     erv = drawGunny(&playstate.gunny);
     ASSERT(erv == ERR_OK, erv);

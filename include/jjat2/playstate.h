@@ -9,6 +9,7 @@
 #include <GFraMe/gfmParser.h>
 #include <GFraMe/gfmTilemap.h>
 
+#include <jjat2/entity.h>
 #include <jjat2/gunny.h>
 #include <jjat2/swordy.h>
 
@@ -16,6 +17,7 @@
 #define TM_MAX_WIDTH    320
 #define TM_MAX_HEIGHT   240
 #define TM_DEFAULT_TILE -1
+#define MAX_ENTITIES     32
 
 struct stPlaystateCtx {
     /** The level parser */
@@ -26,12 +28,16 @@ struct stPlaystateCtx {
     int height;
     /** Map's width, in pixels */
     int width;
+    /** How many entities there are on the current map */
+    int entityCount;
     /** Swordy character */
     swordyCtx swordy;
     /** Gunny character */
     gunnyCtx gunny;
     /** Dummy object used to represent the inactive object */
     entityCtx asyncDummy;
+    /** List of enemies and interactables */
+    entityCtx entities[MAX_ENTITIES];
 };
 typedef struct stPlaystateCtx playstateCtx;
 
