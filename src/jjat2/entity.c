@@ -258,14 +258,14 @@ err postUpdateEntity(entityCtx *entity) {
         }
         gfmSprite_setVerticalVelocity(entity->pSelf, vy);
 
+        entity->pCarrying = 0;
+
         /* Collide against static objects */
         rv = gfmQuadtree_collideSprite(collision.pStaticQt, entity->pSelf);
         if (rv == GFMRV_QUADTREE_OVERLAPED) {
             return doCollide(collision.pStaticQt);
         }
         ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
-
-        entity->pCarrying = 0;
     }
 
     return ERR_OK;
