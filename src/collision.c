@@ -10,7 +10,6 @@
 
 #include <jjat2/entity.h>
 #include <jjat2/gunny.h>
-#include <jjat2/swordy.h>
 #include <jjat2/teleport.h>
 
 #include <GFraMe/gfmError.h>
@@ -234,18 +233,18 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 rv = GFMRV_OK;
             } break;
             CASE(T_SWORDY, T_GUNNY) {
-                swordyCtx *swordy;
+                entityCtx *swordy;
                 entityCtx *gunny;
                 if (isFirstCase) {
-                    swordy = (swordyCtx*)node1.pChild;
+                    swordy = (entityCtx*)node1.pChild;
                     gunny = (entityCtx*)node2.pChild;
                 }
                 else {
                     gunny = (entityCtx*)node1.pChild;
-                    swordy = (swordyCtx*)node2.pChild;
+                    swordy = (entityCtx*)node2.pChild;
                 }
 
-                collideTwoEntities(&swordy->entity, gunny);
+                collideTwoEntities(swordy, gunny);
                 rv = GFMRV_OK;
             } break;
 /*== SWORDY'S ATTACK =========================================================*/

@@ -10,8 +10,6 @@
 #include <GFraMe/gfmTilemap.h>
 
 #include <jjat2/entity.h>
-#include <jjat2/gunny.h>
-#include <jjat2/swordy.h>
 
 /* TODO Calculate the max width/height for tilemaps */
 #define TM_MAX_WIDTH    320
@@ -31,7 +29,7 @@ struct stPlaystateCtx {
     /** How many entities there are on the current map */
     int entityCount;
     /** Swordy character */
-    swordyCtx swordy;
+    entityCtx swordy;
     /** Gunny character */
     entityCtx gunny;
     /** Dummy object used to represent the inactive object */
