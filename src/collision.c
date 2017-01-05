@@ -114,8 +114,10 @@ err doCollide(gfmQuadtreeRoot *pQt) {
         fallthrough = 0;
         switch (MERGE_TYPES(node1.type, node2.type)) {
 /*== PLAYER'S COLLISION ======================================================*/
+            CASE(T_FLOOR, T_WALKY)
             CASE(T_FLOOR, T_GUNNY)
             CASE(T_FLOOR, T_SWORDY)
+            CASE(T_FLOOR_NOTP, T_WALKY)
             CASE(T_FLOOR_NOTP, T_GUNNY)
             CASE(T_FLOOR_NOTP, T_SWORDY) {
                 collisionNode *entity;
@@ -232,19 +234,16 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 
                 rv = GFMRV_OK;
             } break;
+            CASE(T_SWORDY, T_WALKY)
+            CASE(T_GUNNY, T_WALKY)
             CASE(T_SWORDY, T_GUNNY) {
-                entityCtx *swordy;
-                entityCtx *gunny;
-                if (isFirstCase) {
-                    swordy = (entityCtx*)node1.pChild;
-                    gunny = (entityCtx*)node2.pChild;
-                }
-                else {
-                    gunny = (entityCtx*)node1.pChild;
-                    swordy = (entityCtx*)node2.pChild;
-                }
+                entityCtx *entA;
+                entityCtx *entB;
 
-                collideTwoEntities(swordy, gunny);
+                entA = (entityCtx*)node1.pChild;
+                entB = (entityCtx*)node2.pChild;
+
+                collideTwoEntities(entA, entB);
                 rv = GFMRV_OK;
             } break;
 /*== SWORDY'S ATTACK =========================================================*/
@@ -269,6 +268,24 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 
                 collision.flags |= CF_SKIP;
             } break;
+            CASE(T_ATK_SWORD, T_WALKY) {
+                gfmSprite *pSword;
+                entityCtx *walky;
+
+                if (isFirstCase) {
+                    walky = (entityCtx*)node2.pChild;
+                    pSword = node1.pSprite;
+                }
+                else {
+                    walky = (entityCtx*)node1.pChild;
+                    pSword = node2.pSprite;
+                }
+
+                walky->flags &= ~EF_ALIVE;
+                gfmSprite_setType(pSword, T_SWORD_FX);
+
+                collision.flags |= CF_SKIP;
+            } break;
             IGNORE(T_ATK_SWORD, T_SWORDY)
             IGNORE(T_ATK_SWORD, T_GUNNY)
             IGNORE(T_ATK_SWORD, T_FLOOR)
@@ -278,6 +295,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORESELF(T_ATK_SWORD)
             break;
 /*== GUNNY'S BULLET ==========================================================*/
+            CASE(T_TEL_BULLET, T_WALKY)
             CASE(T_TEL_BULLET, T_SWORDY) {
                 gfmGroupNode *pNode;
                 entityCtx *pEntity;
@@ -293,7 +311,8 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 }
 
                 /* Check if visible */
-                if (GFMRV_TRUE == gfm_isSpriteInsideCamera(game.pCtx, pEntity->pSelf)) {
+                if (GFMRV_TRUE == gfm_isSpriteInsideCamera(game.pCtx
+                            , pEntity->pSelf)) {
                     erv = teleporterTargetEntity(pEntity);
                     ASSERT(erv == ERR_OK, erv);
                 }
@@ -376,6 +395,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORESELF(T_TEL_BULLET)
             break;
 /*== SWORDY'S ATTACK TRAIL (AFTER HITTING ANYTHING) ==========================*/
+            IGNORE(T_SWORD_FX, T_WALKY)
             IGNORE(T_SWORD_FX, T_SWORDY)
             IGNORE(T_SWORD_FX, T_GUNNY)
             IGNORE(T_SWORD_FX, T_FLOOR)
@@ -387,6 +407,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORESELF(T_SWORD_FX)
             break;
 /*== COLLISION-LESS EFFECTS ==================================================*/
+            IGNORE(T_FX, T_WALKY)
             IGNORE(T_FX, T_SWORDY)
             IGNORE(T_FX, T_GUNNY)
             IGNORE(T_FX, T_FLOOR)

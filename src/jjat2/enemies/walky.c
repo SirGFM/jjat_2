@@ -17,8 +17,9 @@
 #define walky_offx      -1
 #define walky_offy      -2
 
-#define WALKY_FALL_TIME     3
-#define WALKY_FALL_HEIGHT   1
+#define WALKY_SPEED        TILES_TO_PX(2.5)
+#define WALKY_FALL_TIME     16
+#define WALKY_FALL_HEIGHT   4
 #define WALKY_FALL_GRAV     JUMP_ACCELERATION(WALKY_FALL_TIME, WALKY_FALL_HEIGHT)
 
 /** List of animations */
@@ -61,14 +62,13 @@ err initWalky(entityCtx *pEnt, int x, int y) {
     erv = setEntityAnimation(pEnt, STAND, 1/*force*/);
     ASSERT(erv == ERR_OK, erv);
 
-#if 0
-    /* TODO Set all entity attributes */
+    /* By default, walk right */
+    rv = gfmSprite_setHorizontalVelocity(pEnt->pSelf, WALKY_SPEED);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    /* Set all entity attributes */
     pEnt->standGravity = WALKY_FALL_GRAV;
     pEnt->fallGravity = WALKY_FALL_GRAV;
-#else
-    pEnt->standGravity = 0;
-    pEnt->fallGravity = 0;
-#endif
     initEntity(pEnt);
 
     return ERR_OK;
@@ -90,26 +90,43 @@ err preUpdateWalky(entityCtx *pEnt) {
     rv = gfmSprite_getCollision(&col, pEnt->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    if (!(col & gfmCollision_down)) {
-        /* TODO Stand still until grounded again */
+    if (col & gfmCollision_down) {
+        /* TODO Flip if next tile is empty */
+    }
+
+    if (!(pEnt->flags & EF_ALIVE)) {
+        /* Hold position if dead */
+        rv = gfmSprite_setVelocity(pEnt->pSelf, 0, 0);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        rv = gfmSprite_setVerticalAcceleration(pEnt->pSelf, 0);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     }
     else if (col & gfmCollision_left) {
-        /* TODO Move right */
+        /* Move right */
+        rv = gfmSprite_setHorizontalVelocity(pEnt->pSelf, WALKY_SPEED);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     }
     else if (col & gfmCollision_right) {
-        /* TODO Move left */
+        /* Move left */
+        rv = gfmSprite_setHorizontalVelocity(pEnt->pSelf, -WALKY_SPEED);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    }
+    else if (!(col & gfmCollision_down)) {
+        /* Stand still until grounded again */
+        rv = gfmSprite_setHorizontalVelocity(pEnt->pSelf, 0);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     }
 
     rv = gfmSprite_update(pEnt->pSelf, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-#if 0
-    /* TODO Collide walky */
+    /* Collide only if still alive */
     if (pEnt->flags & EF_ALIVE) {
+        err erv;
+
         erv = collideEntity(pEnt);
         ASSERT(erv == ERR_OK, erv);
     }
-#endif
 
     if (pEnt->currentAnimation == DEATH) {
         if (gfmSprite_didAnimationFinish(pEnt->pSelf) == GFMRV_TRUE) {
