@@ -136,6 +136,7 @@ err loadPlaystate() {
         char *type;
         err erv;
 
+        ASSERT(playstate.entityCount < MAX_ENTITIES, ERR_BUFFERTOOSMALL);
         rv = gfmParser_parseNext(playstate.pParser);
         if (rv == GFMRV_PARSER_FINISHED) {
             break;
@@ -212,7 +213,7 @@ err updatePlaystate() {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     i = 0;
-    while (i < MAX_ENTITIES) {
+    while (i < playstate.entityCount) {
         erv = preUpdateEnemy(&playstate.entities[i]);
         ASSERT(erv == ERR_OK, erv);
         i++;
@@ -239,7 +240,7 @@ err updatePlaystate() {
     }
 
     i = 0;
-    while (i < MAX_ENTITIES) {
+    while (i < playstate.entityCount) {
         erv = postUpdateEnemy(&playstate.entities[i]);
         ASSERT(erv == ERR_OK, erv);
         i++;
@@ -273,7 +274,7 @@ err drawPlaystate() {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     i = 0;
-    while (i < MAX_ENTITIES) {
+    while (i < playstate.entityCount) {
         erv = drawEnemy(&playstate.entities[i]);
         ASSERT(erv == ERR_OK, erv);
         i++;
