@@ -33,7 +33,7 @@ struct stPlaystateCtx {
     /** Swordy character */
     swordyCtx swordy;
     /** Gunny character */
-    gunnyCtx gunny;
+    entityCtx gunny;
     /** Dummy object used to represent the inactive object */
     entityCtx asyncDummy;
     /** List of enemies and interactables */

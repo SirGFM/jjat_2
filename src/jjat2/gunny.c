@@ -39,8 +39,8 @@
 #define gunny_offy -6
 
 enum {
-      gunny_attack       = 0x01
-    , gunny_justAttacked = 0x02
+      gunny_attack       = (EF_AVAILABLEF_FLAG << 0)
+    , gunny_justAttacked = (EF_AVAILABLEF_FLAG << 1)
 };
 
 /** List of animations */
@@ -73,31 +73,31 @@ static int pGunnyAnimData[] = {
  *
  * @param  [ in]gunny The player to be initialized
  */
-err initGunny(gunnyCtx *gunny) {
+err initGunny(entityCtx *gunny) {
     err erv;
     gfmRV rv;
 
     /* Initialize the sprite */
-    rv = gfmSprite_getNew(&gunny->entity.pSelf);
+    rv = gfmSprite_getNew(&gunny->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    rv = gfmSprite_init(gunny->entity.pSelf, 0, 0, gunny_width, gunny_height
+    rv = gfmSprite_init(gunny->pSelf, 0, 0, gunny_width, gunny_height
             , gfx.pSset16x16, gunny_offx, gunny_offy, gunny, T_GUNNY);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    rv = gfmSprite_addAnimationsStatic(gunny->entity.pSelf, pGunnyAnimData);
+    rv = gfmSprite_addAnimationsStatic(gunny->pSelf, pGunnyAnimData);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     /* Play its default animation */
-    gunny->entity.maxAnimation = GUNNY_ANIM_COUNT;
-    erv = setEntityAnimation(&gunny->entity, STAND, 1/*force*/);
+    gunny->maxAnimation = GUNNY_ANIM_COUNT;
+    erv = setEntityAnimation(gunny, STAND, 1/*force*/);
     ASSERT(erv == ERR_OK, erv);
 
     /* Set all entity attributes */
-    gunny->entity.jumpGrace = DEF_JUMP_GRACE;
-    gunny->entity.jumpVelocity = GUNNY_JUMP_SPEED;
-    gunny->entity.shorthopVelocity = GUNNY_HOP_SPEED;
-    gunny->entity.standGravity = GUNNY_JUMP_GRAV;
-    gunny->entity.fallGravity = GUNNY_FALL_GRAV;
-    initEntity(&gunny->entity);
+    gunny->jumpGrace = DEF_JUMP_GRACE;
+    gunny->jumpVelocity = GUNNY_JUMP_SPEED;
+    gunny->shorthopVelocity = GUNNY_HOP_SPEED;
+    gunny->standGravity = GUNNY_JUMP_GRAV;
+    gunny->fallGravity = GUNNY_FALL_GRAV;
+    initEntity(gunny);
 
     return ERR_OK;
 }
@@ -107,9 +107,9 @@ err initGunny(gunnyCtx *gunny) {
  *
  * @param  [ in]gunny The player to be freed
  */
-void freeGunny(gunnyCtx *gunny) {
-    if (gunny->entity.pSelf) {
-        gfmSprite_free(&gunny->entity.pSelf);
+void freeGunny(entityCtx *gunny) {
+    if (gunny->pSelf) {
+        gfmSprite_free(&gunny->pSelf);
     }
 }
 
@@ -119,18 +119,17 @@ void freeGunny(gunnyCtx *gunny) {
  * @param  [ in]gunny  The player
  * @param  [ in]pParser Parser that has just parsed a "gunny_pos"
  */
-err parseGunny(gunnyCtx *gunny, gfmParser *pParser) {
+err parseGunny(entityCtx *gunny, gfmParser *pParser) {
     gfmRV rv;
     err erv;
     int x, y;
 
     rv = gfmParser_getPos(&x, &y, pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    rv = gfmSprite_setPosition(gunny->entity.pSelf, x + gunny_width
-            , y - gunny_height);
+    rv = gfmSprite_setPosition(gunny->pSelf, x + gunny_width, y - gunny_height);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    erv = setEntityAnimation(&gunny->entity, STAND, 1/*force*/);
+    erv = setEntityAnimation(gunny, STAND, 1/*force*/);
     ASSERT(erv == ERR_OK, erv);
 
     return ERR_OK;
@@ -141,21 +140,21 @@ err parseGunny(gunnyCtx *gunny, gfmParser *pParser) {
  *
  * @param  [ in]gunny The player
  */
-err drawGunny(gunnyCtx *gunny) {
+err drawGunny(entityCtx *gunny) {
     gfmRV rv;
 
-    gfmDebug_printf(game.pCtx, 0, 72, "GUNNY ALIVE: %i", gunny->entity.flags & EF_ALIVE);
+    gfmDebug_printf(game.pCtx, 0, 72, "GUNNY ALIVE: %i", gunny->flags & EF_ALIVE);
 
     if (game.flags & AC_GUNNY) {
-        rv = gfmSprite_draw(gunny->entity.pSelf, game.pCtx);
+        rv = gfmSprite_draw(gunny->pSelf, game.pCtx);
     }
     else {
         int cx, cy, frame, isFlipped, x, y;
 
         gfmCamera_getPosition(&cx, &cy, game.pCamera);
-        gfmSprite_getPosition(&x, &y, gunny->entity.pSelf);
-        gfmSprite_getFrame(&frame, gunny->entity.pSelf);
-        gfmSprite_getDirection(&isFlipped, gunny->entity.pSelf);
+        gfmSprite_getPosition(&x, &y, gunny->pSelf);
+        gfmSprite_getFrame(&frame, gunny->pSelf);
+        gfmSprite_getDirection(&isFlipped, gunny->pSelf);
 
         x = x - cx + gunny_offx;
         y = y - cy + gunny_offy;
@@ -172,7 +171,7 @@ err drawGunny(gunnyCtx *gunny) {
  *
  * @param  [ in]gunny The player to be updated
  */
-err preUpdateGunny(gunnyCtx *gunny) {
+err preUpdateGunny(entityCtx *gunny) {
     gfmRV rv;
     err erv;
 
@@ -183,20 +182,18 @@ err preUpdateGunny(gunnyCtx *gunny) {
     /* Update horizontal movement */
     do {
         if (IS_PRESSED(gunnyLeft)) {
-            rv = gfmSprite_setHorizontalVelocity(gunny->entity.pSelf
-                    , -GUNNY_SPEED);
+            rv = gfmSprite_setHorizontalVelocity(gunny->pSelf, -GUNNY_SPEED);
         }
         else if (IS_PRESSED(gunnyRight)) {
-            rv = gfmSprite_setHorizontalVelocity(gunny->entity.pSelf
-                    , GUNNY_SPEED);
+            rv = gfmSprite_setHorizontalVelocity(gunny->pSelf, GUNNY_SPEED);
         }
         else {
-            rv = gfmSprite_setHorizontalVelocity(gunny->entity.pSelf, 0);
+            rv = gfmSprite_setHorizontalVelocity(gunny->pSelf, 0);
         }
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     } while (0); /* Update horizontal movement */
 
-    erv = updateEntityJump(&gunny->entity, input.gunnyJump.state);
+    erv = updateEntityJump(gunny, input.gunnyJump.state);
     if (erv == ERR_DIDJUMP) {
         /* Set the error so the assert isn't triggered */
         erv = ERR_OK;
@@ -211,8 +208,8 @@ err preUpdateGunny(gunnyCtx *gunny) {
             double vx;
             int dir, x, y;
 
-            gfmSprite_getPosition(&x, &y, gunny->entity.pSelf);
-            gfmSprite_getDirection(&dir, gunny->entity.pSelf);
+            gfmSprite_getPosition(&x, &y, gunny->pSelf);
+            gfmSprite_getDirection(&dir, gunny->pSelf);
             y += 3;
             if (dir == 0) {
                 x += 3;
@@ -234,16 +231,16 @@ err preUpdateGunny(gunnyCtx *gunny) {
         }
     } while (0); /* Handle attack */
 
-    rv = gfmSprite_update(gunny->entity.pSelf, game.pCtx);
+    rv = gfmSprite_update(gunny->pSelf, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    erv = collideEntity(&gunny->entity);
+    erv = collideEntity(gunny);
     ASSERT(erv == ERR_OK, erv);
 
     /* End attack animation */
     do {
         /* Clean flag as soon as animation stops */
-        if (gunny->entity.currentAnimation == ATK
-                && gfmSprite_didAnimationFinish(gunny->entity.pSelf)
+        if (gunny->currentAnimation == ATK
+                && gfmSprite_didAnimationFinish(gunny->pSelf)
                 == GFMRV_TRUE) {
             gunny->flags &= ~gunny_attack;
         }
@@ -257,7 +254,7 @@ err preUpdateGunny(gunnyCtx *gunny) {
  *
  * @param  [ in]gunny The player to be updated
  */
-err postUpdateGunny(gunnyCtx *gunny) {
+err postUpdateGunny(entityCtx *gunny) {
     double vx, vy;
     err erv;
     gfmCollision dir;
@@ -267,36 +264,37 @@ err postUpdateGunny(gunnyCtx *gunny) {
         return ERR_OK;
     }
 
-    hasCarrier = (gunny->entity.pCarrying != 0);
+    hasCarrier = (gunny->pCarrying != 0);
 
-    erv = postUpdateEntity(&gunny->entity);
+    erv = postUpdateEntity(gunny);
     ASSERT(erv == ERR_OK, erv);
-    setEntityDirection(&gunny->entity);
+    setEntityDirection(gunny);
 
-    gfmSprite_getVelocity(&vx, &vy, gunny->entity.pSelf);
-    gfmSprite_getCollision(&dir, gunny->entity.pSelf);
+    gfmSprite_getVelocity(&vx, &vy, gunny->pSelf);
+    gfmSprite_getCollision(&dir, gunny->pSelf);
 
     /* Set animation */
     if (gunny->flags & gunny_attack) {
-        setEntityAnimation(&gunny->entity, ATK, 0/*force*/);
+        setEntityAnimation(gunny, ATK, 0/*force*/);
     }
     else if (hasCarrier) {
-        setEntityAnimation(&gunny->entity, STAND, 0/*force*/);
+        setEntityAnimation(gunny, STAND, 0/*force*/);
     }
     else if (vy > FLOAT_SPEED) {
-        setEntityAnimation(&gunny->entity, FALL, 0/*force*/);
+        setEntityAnimation(gunny, FALL, 0/*force*/);
     }
     else if (vy < -FLOAT_SPEED) {
-        setEntityAnimation(&gunny->entity, JUMP, 0/*force*/);
+        setEntityAnimation(gunny, JUMP, 0/*force*/);
     }
-    else if ((dir & gfmCollision_down) == 0 && vy >= -FLOAT_SPEED && vy <= FLOAT_SPEED) {
-        setEntityAnimation(&gunny->entity, FLOAT, 0/*force*/);
+    else if ((dir & gfmCollision_down) == 0 && vy >= -FLOAT_SPEED
+            && vy <= FLOAT_SPEED) {
+        setEntityAnimation(gunny, FLOAT, 0/*force*/);
     }
     else if (vx != 0) {
-        setEntityAnimation(&gunny->entity, RUN, 0/*force*/);
+        setEntityAnimation(gunny, RUN, 0/*force*/);
     }
     else {
-        setEntityAnimation(&gunny->entity, STAND, 0/*force*/);
+        setEntityAnimation(gunny, STAND, 0/*force*/);
     }
 
     return ERR_OK;
@@ -307,13 +305,13 @@ err postUpdateGunny(gunnyCtx *gunny) {
  *
  * @param  [ in]gunny The player to be teleported
  */
-err updateGunnyTeleport(gunnyCtx *gunny) {
+err updateGunnyTeleport(entityCtx *gunny) {
     err erv;
 
     if (!(gunny->flags & gunny_justAttacked) && DID_JUST_PRESS(gunnyAtk)
             && teleport.pCurEffect != 0) {
         /* Teleport */
-        erv = teleportEntity(&gunny->entity);
+        erv = teleportEntity(gunny);
         ASSERT(erv == ERR_OK, erv);
     }
 

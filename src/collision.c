@@ -119,18 +119,18 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             CASE(T_FLOOR, T_SWORDY)
             CASE(T_FLOOR_NOTP, T_GUNNY)
             CASE(T_FLOOR_NOTP, T_SWORDY) {
-                collisionNode *player;
+                collisionNode *entity;
                 if (isFirstCase) {
-                    player = &node2;
+                    entity = &node2;
                 }
                 else {
-                    player = &node1;
+                    entity = &node1;
                 }
                 rv = gfmObject_justOverlaped(node1.pObject, node2.pObject);
                 if (rv == GFMRV_TRUE) {
                     gfmCollision dir;
 
-                    gfmObject_getCurrentCollision(&dir, player->pObject);
+                    gfmObject_getCurrentCollision(&dir, entity->pObject);
 
                     if (!((dir & gfmCollision_up) && (dir & gfmCollision_hor))) {
                         gfmObject_collide(node1.pObject, node2.pObject);
@@ -143,27 +143,27 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                     }
 
                     if (dir & gfmCollision_down) {
-                        gfmObject_setVerticalVelocity(player->pObject, 0);
-                        /* Corner case!! If the player would get stuck on a
+                        gfmObject_setVerticalVelocity(entity->pObject, 0);
+                        /* Corner case!! If the entity would get stuck on a
                          * corner, push 'em toward the platform */
                         if (dir & gfmCollision_left) {
                             int x, y;
-                            gfmObject_getPosition(&x, &y, player->pObject);
-                            gfmObject_setPosition(player->pObject, x - 1
+                            gfmObject_getPosition(&x, &y, entity->pObject);
+                            gfmObject_setPosition(entity->pObject, x - 1
                                     , y - 1);
                         }
                         else if (dir & gfmCollision_right) {
                             int x, y;
-                            gfmObject_getPosition(&x, &y, player->pObject);
-                            gfmObject_setPosition(player->pObject, x + 1
+                            gfmObject_getPosition(&x, &y, entity->pObject);
+                            gfmObject_setPosition(entity->pObject, x + 1
                                     , y - 1);
                         }
                     }
                     else if ((dir & gfmCollision_up) && !(dir & gfmCollision_hor)) {
                         int y;
-                        gfmObject_setVerticalVelocity(player->pObject, 0);
-                        gfmObject_getVerticalPosition(&y, player->pObject);
-                        gfmObject_setVerticalPosition(player->pObject, y + 1);
+                        gfmObject_setVerticalVelocity(entity->pObject, 0);
+                        gfmObject_getVerticalPosition(&y, entity->pObject);
+                        gfmObject_setVerticalPosition(entity->pObject, y + 1);
 
                     }
                 } /* if (rv == GFMRV_TRUE) */
@@ -182,35 +182,36 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                     }
 
                     gfmObject_getVerticalPosition(&fy, floor->pObject);
-                    gfmObject_getVerticalPosition(&py, player->pObject);
-                    gfmObject_getHeight(&h, player->pObject);
+                    gfmObject_getVerticalPosition(&py, entity->pObject);
+                    gfmObject_getHeight(&h, entity->pObject);
 
                     if (py + h >= fy) {
-                        gfmObject_setVerticalPosition(player->pObject, fy - h);
+                        gfmObject_setVerticalPosition(entity->pObject, fy - h);
                     }
                 }
 #endif  /* JJATENGINE */
                 rv = GFMRV_OK;
             } break;
+            CASE(T_SPIKE, T_WALKY)
             CASE(T_SPIKE, T_GUNNY)
             CASE(T_SPIKE, T_SWORDY) {
-                collisionNode *player;
+                collisionNode *entity;
                 collisionNode *spike;
                 gfmCollision hdir, vdir;
 
                 if (isFirstCase) {
-                    player = &node2;
+                    entity = &node2;
                     spike = &node1;
                 }
                 else {
-                    player = &node1;
+                    entity = &node1;
                     spike = &node2;
                 }
 
                 gfmObject_isOverlaping(node1.pObject, node2.pObject);
-                gfmObject_getCurrentCollision(&vdir, player->pObject);
+                gfmObject_getCurrentCollision(&vdir, entity->pObject);
                 gfmObject_justOverlaped(node1.pObject, node2.pObject);
-                gfmObject_getCurrentCollision(&hdir, player->pObject);
+                gfmObject_getCurrentCollision(&hdir, entity->pObject);
 
                 if (hdir & gfmCollision_hor) {
                     /* Collide horizontally to avoid clipping */
@@ -220,13 +221,13 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 else if (vdir & gfmCollision_down) {
                     int py, sy, ph;
 
-                    gfmObject_getVerticalPosition(&py, player->pObject);
-                    gfmObject_getHeight(&ph, player->pObject);
+                    gfmObject_getVerticalPosition(&py, entity->pObject);
+                    gfmObject_getHeight(&ph, entity->pObject);
                     gfmObject_getVerticalPosition(&sy, spike->pObject);
 
                     if (py + ph >= sy + SPIKE_OFFSET) {
-                        /* Kill the player */
-                        ((entityCtx*)player->pChild)->flags &= ~EF_ALIVE;
+                        /* Kill the entity */
+                        ((entityCtx*)entity->pChild)->flags &= ~EF_ALIVE;
                     }
                 }
 
@@ -234,17 +235,17 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             } break;
             CASE(T_SWORDY, T_GUNNY) {
                 swordyCtx *swordy;
-                gunnyCtx *gunny;
+                entityCtx *gunny;
                 if (isFirstCase) {
                     swordy = (swordyCtx*)node1.pChild;
-                    gunny = (gunnyCtx*)node2.pChild;
+                    gunny = (entityCtx*)node2.pChild;
                 }
                 else {
-                    gunny = (gunnyCtx*)node1.pChild;
+                    gunny = (entityCtx*)node1.pChild;
                     swordy = (swordyCtx*)node2.pChild;
                 }
 
-                collideTwoEntities(&swordy->entity, &gunny->entity);
+                collideTwoEntities(&swordy->entity, gunny);
                 rv = GFMRV_OK;
             } break;
 /*== SWORDY'S ATTACK =========================================================*/

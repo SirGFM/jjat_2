@@ -12,26 +12,19 @@
 
 #define BULLET_WIDTH 8
 
-struct stGunnyCtx {
-    /** Base object */
-    entityCtx entity;
-    uint32_t flags;
-};
-typedef struct stGunnyCtx gunnyCtx;
-
 /**
  * Initialize the gunny character
  *
  * @param  [ in]gunny The player to be initialized
  */
-err initGunny(gunnyCtx *gunny);
+err initGunny(entityCtx *gunny);
 
 /**
  * Release all memory alloc'ed by the structure.
  *
  * @param  [ in]gunny The player to be freed
  */
-void freeGunny(gunnyCtx *gunny);
+void freeGunny(entityCtx *gunny);
 
 /**
  * Parse gunny into its position
@@ -39,35 +32,35 @@ void freeGunny(gunnyCtx *gunny);
  * @param  [ in]gunny   The player
  * @param  [ in]pParser Parser that has just parsed a "gunny_pos"
  */
-err parseGunny(gunnyCtx *gunny, gfmParser *pParser);
+err parseGunny(entityCtx *gunny, gfmParser *pParser);
 
 /**
  * Render a gunny
  *
  * @param  [ in]gunny The player
  */
-err drawGunny(gunnyCtx *gunny);
+err drawGunny(entityCtx *gunny);
 
 /**
  * Update the object's physics.
  *
  * @param  [ in]gunny The player to be updated
  */
-err preUpdateGunny(gunnyCtx *gunny);
+err preUpdateGunny(entityCtx *gunny);
 
 /**
  * Set gunny's animation and fix its entity's collision.
  *
  * @param  [ in]gunny The player to be updated
  */
-err postUpdateGunny(gunnyCtx *gunny);
+err postUpdateGunny(entityCtx *gunny);
 
 /**
  * Check if gunny should be teleported and do so.
  *
  * @param  [ in]gunny The player to be teleported
  */
-err updateGunnyTeleport(gunnyCtx *gunny);
+err updateGunnyTeleport(entityCtx *gunny);
 
 #endif /* __JJAT2_GUNNY_H__ */
 

@@ -166,7 +166,7 @@ err loadPlaystate() {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     erv = resetCameraPosition(&playstate.swordy.entity
-            , &playstate.gunny.entity);
+            , &playstate.gunny);
     ASSERT(erv == ERR_OK, erv);
 
     erv = _loadStaticQuadtree();
@@ -231,11 +231,11 @@ err updatePlaystate() {
 
     /* Fix the collision between both players, if only one is active */
     if ((game.flags & AC_BOTH) == AC_SWORDY) {
-        _handleAsyncCollision(&playstate.swordy.entity, &playstate.gunny.entity
+        _handleAsyncCollision(&playstate.swordy.entity, &playstate.gunny
                 , &playstate.asyncDummy);
     }
     else if ((game.flags & AC_BOTH) == AC_GUNNY) {
-        _handleAsyncCollision(&playstate.gunny.entity, &playstate.swordy.entity
+        _handleAsyncCollision(&playstate.gunny, &playstate.swordy.entity
                 , &playstate.asyncDummy);
     }
 
@@ -267,7 +267,7 @@ err drawPlaystate() {
     err erv;
     int i;
 
-    erv = updateCamera(&playstate.swordy.entity, &playstate.gunny.entity);
+    erv = updateCamera(&playstate.swordy.entity, &playstate.gunny);
     ASSERT(erv == ERR_OK, erv);
 
     rv = gfmTilemap_draw(playstate.pMap, game.pCtx);

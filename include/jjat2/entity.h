@@ -13,8 +13,9 @@
 #include <stdint.h>
 
 enum enEntityFlag {
-    EF_ALIVE      = 0x01
-  , EF_DEACTIVATE = 0x02
+    EF_ALIVE           = 0x00001
+  , EF_DEACTIVATE      = 0x00002
+  , EF_AVAILABLEF_FLAG = 0x10000
 };
 typedef enum enEntityFlag entityFlag;
 
