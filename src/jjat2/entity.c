@@ -173,13 +173,13 @@ err collideEntity(entityCtx *entity) {
  * @param  [ in]entity   The entity
  * @param  [ in]carrying The sprite carrying the entity
  */
-void carryEntity(entityCtx *entity, gfmSprite *carrying) {
+void carryEntity(entityCtx *entity, entityCtx *carrying) {
     int dx, x, tmp;
     gfmCollision beforeDir, afterDir;
 
     /* Retrieve the movement from carrying since the previous frame (into dx) */
-    gfmSprite_getCenter(&dx, &tmp, carrying);
-    gfmSprite_getLastCenter(&x, &tmp, carrying);
+    gfmSprite_getCenter(&dx, &tmp, carrying->pSelf);
+    gfmSprite_getLastCenter(&x, &tmp, carrying->pSelf);
     dx -= x;
     /* Get entity's horizontal position (into x) */
     gfmSprite_getHorizontalPosition(&x, entity->pSelf);
@@ -188,7 +188,7 @@ void carryEntity(entityCtx *entity, gfmSprite *carrying) {
      * check the collision flags again to check for position adjustments */
     gfmSprite_getCurrentCollision(&beforeDir, entity->pSelf);
     gfmSprite_setHorizontalPosition(entity->pSelf, x + dx);
-    gfmSprite_justOverlaped(entity->pSelf, carrying);
+    gfmSprite_justOverlaped(entity->pSelf, carrying->pSelf);
     gfmSprite_getCurrentCollision(&afterDir, entity->pSelf);
 
     /* Adjustments happens on both corners, to ensure the entity doesn't get
@@ -253,25 +253,28 @@ err postUpdateEntity(entityCtx *entity) {
     /* If the entity is being carried, collide against every static object and
      * then adjust its velocity */
     if (entity->pCarrying) {
+        gfmSprite *pCarrying;
         double vy;
         gfmRV rv;
 
+        pCarrying = entity->pCarrying->pSelf;
+
         /* Get carrying's VY (into vy) */
-        gfmSprite_getVerticalVelocity(&vy, entity->pCarrying);
+        gfmSprite_getVerticalVelocity(&vy, pCarrying);
 
         /* TODO Potential bug: If the carrying sprite is also being carried, its
          * collision must be resolved before this entity's collision */
 
         /* Collide to actually set the vertical position */
-        gfmSprite_setFixed(entity->pCarrying);
-        gfmSprite_separateVertical(entity->pSelf, entity->pCarrying);
-        gfmSprite_setMovable(entity->pCarrying);
+        gfmSprite_setFixed(pCarrying);
+        gfmSprite_separateVertical(entity->pSelf, pCarrying);
+        gfmSprite_setMovable(pCarrying);
 
         /* Update the entity vertical velocity (make it fall slightly faster and
          * avoid getting separated from the object) */
         if (vy >= TILES_TO_PX(2)) {
             double ay;
-            gfmSprite_getVerticalAcceleration(&ay, entity->pCarrying);
+            gfmSprite_getVerticalAcceleration(&ay, pCarrying);
             vy = 1.06125 * (vy + ay * (game.elapsed * 0.001));
         }
         else if (vy >= -TILES_TO_PX(5)) {
@@ -336,11 +339,11 @@ void collideTwoEntities(entityCtx *entA, entityCtx *entB) {
         gfmSprite_getCurrentCollision(&bdir, entB->pSelf);
         if (adir & gfmCollision_down) {
             /* entA is above entB */
-            carryEntity(entA, entB->pSelf);
+            carryEntity(entA, entB);
         }
         else if (bdir & gfmCollision_down) {
             /* entB is above entA */
-            carryEntity(entB, entA->pSelf);
+            carryEntity(entB, entA);
         }
     }
 }

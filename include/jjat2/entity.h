@@ -61,7 +61,7 @@ struct stEntityCtx {
     /** The internal sprite */
     gfmSprite *pSelf;
     /** Sprite (if any) that is carrying this entity */
-    gfmSprite *pCarrying;
+    struct stEntityCtx *pCarrying;
     /** Generic entity flags */
     entityFlag flags;
     /** Time, in milliseconds, while jump may be pressed after leaving the
@@ -143,9 +143,9 @@ err collideEntity(entityCtx *entity);
  * solves potential zipping through platforms.
  *
  * @param  [ in]entity   The entity
- * @param  [ in]carrying The sprite carrying the entity
+ * @param  [ in]carrying The carrying the entity
  */
-void carryEntity(entityCtx *entity, gfmSprite *carrying);
+void carryEntity(entityCtx *entity, entityCtx *carrying);
 
 /**
  * Finalize updating the entity's physics
