@@ -310,8 +310,8 @@ err preUpdateSwordy(entityCtx *swordy) {
         ASSERT(erv == ERR_OK, erv);
     } while (0); /* Update jump */
 
-    rv = gfmSprite_update(swordy->pSelf, game.pCtx);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    erv = preUpdateEntity(swordy);
+    ASSERT(erv == ERR_OK, erv);
 
     /* Adjust attack animation */
     do {
@@ -342,9 +342,6 @@ err preUpdateSwordy(entityCtx *swordy) {
             swordy->flags &= ~flag_attacking;
         }
     } while (0);
-
-    erv = collideEntity(swordy);
-    ASSERT(erv == ERR_OK, erv);
 
     return ERR_OK;
 }

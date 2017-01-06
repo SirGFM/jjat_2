@@ -15,12 +15,15 @@
 enum enEntityFlag {
     EF_ALIVE           = 0x00001
   , EF_DEACTIVATE      = 0x00002
+  , EF_SKIP_COLLISION  = 0x00004
   , EF_AVAILABLEF_FLAG = 0x10000
 };
 typedef enum enEntityFlag entityFlag;
 
 /** Absolute speed when airborne sprites are set as 'floating' */
 #define FLOAT_SPEED     32
+/** Maximum speed at which entities may fall */
+#define MAX_FALL_SPEED  410
 
 /** Default grace time to while jumping is possible after leaving the ground */
 #define DEF_JUMP_GRACE  FRAMES_TO_MS(5)
@@ -143,6 +146,13 @@ err collideEntity(entityCtx *entity);
  * @param  [ in]carrying The sprite carrying the entity
  */
 void carryEntity(entityCtx *entity, gfmSprite *carrying);
+
+/**
+ * Finalize updating the entity's physics
+ *
+ * @param  [ in]entity   The entity
+ */
+err preUpdateEntity(entityCtx *entity);
 
 /**
  * Post update an entity

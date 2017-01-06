@@ -111,18 +111,6 @@ err updateEntityJump(entityCtx *entity, gfmInputState jumpBt) {
 
     entity->jumpGrace -= game.elapsed;
 
-    if (vy > 0) {
-        /* Set fall gravity */
-        rv = gfmSprite_setVerticalAcceleration(entity->pSelf,
-                entity->fallGravity);
-    }
-    else if (vy < 0) {
-        /* Set jump gravity */
-        rv = gfmSprite_setVerticalAcceleration(entity->pSelf,
-                entity->standGravity);
-    }
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-
     return erv;
 }
 
@@ -134,6 +122,9 @@ err updateEntityJump(entityCtx *entity, gfmInputState jumpBt) {
 err collideEntityStatic(entityCtx *entity) {
     err erv;
     gfmRV rv;
+    if (entity->flags & EF_SKIP_COLLISION) {
+        return ERR_OK;
+    }
     rv = gfmQuadtree_collideSprite(collision.pStaticQt, entity->pSelf);
     if (rv == GFMRV_QUADTREE_OVERLAPED) {
         erv = doCollide(collision.pStaticQt);
@@ -152,6 +143,9 @@ err collideEntityStatic(entityCtx *entity) {
 err collideEntity(entityCtx *entity) {
     err erv;
     gfmRV rv;
+    if (entity->flags & EF_SKIP_COLLISION) {
+        return ERR_OK;
+    }
     rv = gfmQuadtree_collideSprite(collision.pStaticQt, entity->pSelf);
     if (rv == GFMRV_QUADTREE_OVERLAPED) {
         erv = doCollide(collision.pStaticQt);
@@ -211,7 +205,40 @@ void carryEntity(entityCtx *entity, gfmSprite *carrying) {
          * object (which will fix collision against the map) */
         entity->pCarrying = carrying;
     }
+}
 
+/**
+ * Finalize updating the entity's physics
+ *
+ * @param  [ in]entity   The entity
+ */
+err preUpdateEntity(entityCtx *entity) {
+    double vy;
+    gfmRV rv;
+    err erv;
+
+    rv = gfmSprite_getVerticalVelocity(&vy, entity->pSelf);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    if (vy > 0) {
+        /* Set fall gravity */
+        gfmSprite_setVerticalAcceleration(entity->pSelf, entity->fallGravity);
+    }
+    else if (vy < 0) {
+        /* Set jump gravity */
+        gfmSprite_setVerticalAcceleration(entity->pSelf, entity->standGravity);
+    }
+
+    if (vy >= MAX_FALL_SPEED) {
+        gfmSprite_setVerticalVelocity(entity->pSelf, MAX_FALL_SPEED);
+    }
+
+    rv = gfmSprite_update(entity->pSelf, game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    erv = collideEntity(entity);
+    ASSERT(erv == ERR_OK, erv);
+
+    return ERR_OK;
 }
 
 /**

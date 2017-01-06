@@ -82,6 +82,7 @@ err initWalky(entityCtx *pEnt, int x, int y) {
 err preUpdateWalky(entityCtx *pEnt) {
     gfmCollision col;
     gfmRV rv;
+    err erv;
 
     if (pEnt->flags & EF_DEACTIVATE) {
         return ERR_OK;
@@ -117,16 +118,13 @@ err preUpdateWalky(entityCtx *pEnt) {
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     }
 
-    rv = gfmSprite_update(pEnt->pSelf, game.pCtx);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-
     /* Collide only if still alive */
-    if (pEnt->flags & EF_ALIVE) {
-        err erv;
-
-        erv = collideEntity(pEnt);
-        ASSERT(erv == ERR_OK, erv);
+    if (!(pEnt->flags & EF_ALIVE)) {
+        pEnt->flags |= EF_SKIP_COLLISION;
     }
+
+    erv = preUpdateEntity(pEnt);
+    ASSERT(erv == ERR_OK, erv);
 
     if (pEnt->currentAnimation == DEATH) {
         if (gfmSprite_didAnimationFinish(pEnt->pSelf) == GFMRV_TRUE) {

@@ -231,9 +231,7 @@ err preUpdateGunny(entityCtx *gunny) {
         }
     } while (0); /* Handle attack */
 
-    rv = gfmSprite_update(gunny->pSelf, game.pCtx);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    erv = collideEntity(gunny);
+    erv = preUpdateEntity(gunny);
     ASSERT(erv == ERR_OK, erv);
 
     /* End attack animation */
