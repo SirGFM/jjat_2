@@ -171,10 +171,8 @@ err collideEntity(entityCtx *entity) {
 static err handleCarrying(entityCtx *entity) {
     gfmSprite *pCarrierSpr;
     double vy;
-    int dx, x, tmp;
     err erv;
     gfmRV rv;
-    gfmCollision beforeDir, afterDir;
 
     /* Ensure the bottom-most entity and handled first. This makes horizontal
      * movement be correctly propagated through the entities */
@@ -188,39 +186,16 @@ static err handleCarrying(entityCtx *entity) {
 
     pCarrierSpr = entity->pCarrying->pSelf;
 
-    /* TODO Possible bug: If a sprite moves less than a single pixel in a frame,
-     * it won't be able to escape its carrier by moving horizontally! */
-
-    /* Retrieve the movement from carrying since the previous frame (into dx) */
-    gfmSprite_getCenter(&dx, &tmp, pCarrierSpr);
-    gfmSprite_getLastCenter(&x, &tmp, pCarrierSpr);
-    dx -= x;
-    /* Get entity's horizontal position (into x) */
-    gfmSprite_getHorizontalPosition(&x, entity->pSelf);
-
     /* Get the collision flags as this started, update the entity's position and
      * check the collision flags again to check for position adjustments */
-    gfmSprite_getCurrentCollision(&beforeDir, entity->pSelf);
-    gfmSprite_setHorizontalPosition(entity->pSelf, x + dx);
-    gfmSprite_justOverlaped(entity->pSelf, pCarrierSpr);
-    gfmSprite_getCurrentCollision(&afterDir, entity->pSelf);
-
-    /* Adjustments happens on both corners, to ensure the entity doesn't get
-     * stuck on carrying's edge */
-    if ((beforeDir & gfmCollision_left) && !(afterDir & gfmCollision_left)) {
-        gfmSprite_setHorizontalPosition(entity->pSelf, x + dx + 1);
-    }
-    else if ((beforeDir & gfmCollision_right)
-            && !(afterDir & gfmCollision_right)) {
-        gfmSprite_setHorizontalPosition(entity->pSelf, x + dx - 1);
-    }
+    gfmSprite_applyDeltaX(entity->pSelf, pCarrierSpr);
 
     /* Get carrying's VY (into vy) */
     gfmSprite_getVerticalVelocity(&vy, pCarrierSpr);
 
-    /* Collide to actually set the vertical position (the previous
-     * gfm_justOverlaped guarantees this to work) */
+    /* Collide to actually set the vertical position */
     gfmSprite_setFixed(pCarrierSpr);
+    gfmSprite_justOverlaped(entity->pSelf, pCarrierSpr);
     gfmSprite_separateVertical(entity->pSelf, pCarrierSpr);
     gfmSprite_setMovable(pCarrierSpr);
 
