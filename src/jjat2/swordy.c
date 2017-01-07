@@ -355,13 +355,10 @@ err postUpdateSwordy(entityCtx *swordy) {
     double vx, vy;
     err erv;
     gfmCollision dir;
-    int hasCarrier;
 
     if (!(game.flags & AC_SWORDY)) {
         return ERR_OK;
     }
-
-    hasCarrier = (swordy->pCarrying != 0);
 
     erv = postUpdateEntity(swordy);
     ASSERT(erv == ERR_OK, erv);
@@ -375,7 +372,7 @@ err postUpdateSwordy(entityCtx *swordy) {
         setEntityAnimation(swordy, ATK, swordy->flags & flag_atkResetAnim);
         swordy->flags &= ~flag_atkResetAnim;
     }
-    else if (hasCarrier) {
+    else if (swordy->flags & EF_HAS_CARRIER) {
         setEntityAnimation(swordy, STAND, 0/*force*/);
     }
     else if (swordy->flags & flag_jumpCounter_2) {

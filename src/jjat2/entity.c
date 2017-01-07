@@ -232,6 +232,7 @@ static err handleCarrying(entityCtx *entity) {
     ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
 
     entity->pCarrying = 0;
+    entity->flags |= EF_HAS_CARRIER;
 
     return ERR_OK;
 }
@@ -245,6 +246,8 @@ err preUpdateEntity(entityCtx *entity) {
     double vy;
     gfmRV rv;
     err erv;
+
+    entity->flags &= ~EF_HAS_CARRIER;
 
     rv = gfmSprite_getVerticalVelocity(&vy, entity->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);

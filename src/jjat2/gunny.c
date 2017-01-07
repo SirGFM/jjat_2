@@ -256,13 +256,10 @@ err postUpdateGunny(entityCtx *gunny) {
     double vx, vy;
     err erv;
     gfmCollision dir;
-    int hasCarrier;
 
     if (!(game.flags & AC_GUNNY)) {
         return ERR_OK;
     }
-
-    hasCarrier = (gunny->pCarrying != 0);
 
     erv = postUpdateEntity(gunny);
     ASSERT(erv == ERR_OK, erv);
@@ -275,7 +272,7 @@ err postUpdateGunny(entityCtx *gunny) {
     if (gunny->flags & gunny_attack) {
         setEntityAnimation(gunny, ATK, 0/*force*/);
     }
-    else if (hasCarrier) {
+    else if (gunny->flags & EF_HAS_CARRIER) {
         setEntityAnimation(gunny, STAND, 0/*force*/);
     }
     else if (vy > FLOAT_SPEED) {
