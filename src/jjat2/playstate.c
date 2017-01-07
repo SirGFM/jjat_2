@@ -21,6 +21,9 @@
 
 #include <string.h>
 
+/** Maximum number of characters for the path to any given level */
+#define MAX_LEVEL_NAME  128
+
 /** Initialize the playstate so a level may be later loaded and played */
 err initPlaystate() {
     gfmRV rv;
@@ -115,20 +118,75 @@ static err _loadStaticQuadtree() {
     return ERR_OK;
 }
 
-/** Setup the playstate so it may start to be executed */
-err loadPlaystate() {
+/**
+ * Load a level into the playstate
+ *
+ * Levels are expected to be on 'assets/levels/', and every level should have a
+ * tilemap layer and an object layer, which should be named *_tm.gfm and
+ * *_obj.gfm respectively.
+ *
+ * @param  [ in]levelName The name of the level, which will get the directory
+ *                        prepended and then the layers and extension. Therefore
+ *                        to load the level with layers on
+ *                        "levels/map_test_tm.gfm" and "levels/map_test_obj.gfm"
+ *                        one should call this function with "map_test" as its
+ *                        argument.
+ */
+static err _loadLevel(char *levelName) {
+    char stLevelName[MAX_LEVEL_NAME];
+    int len, pos;
     gfmRV rv;
     err erv;
 
-    /* TODO Decide where the first map will be loaded from */
-    rv = gfmTilemap_loadf(playstate.pMap, game.pCtx, "levels/map_test_tm.gfm"
-            , 22 , pDictNames, pDictTypes, dictLen);
+#define MAX_VALID_LEN \
+    (MAX_LEVEL_NAME - (sizeof("levels/") - 1) - (sizeof("_obj.gfm") - 1) - 1)
+/** Length of a static string */
+#define LEN(str) (sizeof(str) - 1)
+/** Append a static string to the level name */
+#define APPEND(str) \
+    do { \
+        memcpy(stLevelName + pos, str, sizeof(str)); \
+    } while (0)
+/** Append a static string to the level name and updates its position */
+#define APPEND_POS(str) \
+    do { \
+        APPEND(str); \
+        pos += LEN(str); \
+    } while (0)
+/** Append a dynamic string to the level name and updates its position */
+#define APPEND_DYN(str, len) \
+    do { \
+        memcpy(stLevelName + pos, str, len); \
+        pos += len; \
+    } while (0)
+
+    /* Level names will get "levels/", "_tm.gfm" and "_obj.gfm" concatenated, so
+     * it must be at most this many characters long:
+     *     MAX_LEVEL_NAME - (sizeof("levels/") - 1) - (sizeof("_obj.gfm") - 1) - 1
+     * The last "- 1" is for the '\0'
+     */
+    len = strlen(levelName);
+    ASSERT(len <= MAX_LEVEL_NAME, ERR_INVALIDLEVELNAME);
+
+    pos = 0;
+    APPEND_POS("levels/");
+    /* TODO Check if levelName is actually a valid path */
+    APPEND_DYN(levelName, len);
+
+    /* Load the tilemap */
+    APPEND("_tm.gfm");
+    rv = gfmTilemap_loadf(playstate.pMap, game.pCtx, stLevelName
+            , pos + LEN("_tm.gfm"), pDictNames, pDictTypes, dictLen);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     erv = _updateWorldSize();
     ASSERT(erv == ERR_OK, erv);
+    erv = _loadStaticQuadtree();
+    ASSERT(erv == ERR_OK, erv);
 
-    rv = gfmParser_initStatic(playstate.pParser, game.pCtx,
-            "levels/map_test_obj.gfm");
+    /* Load the objects */
+    APPEND("_obj.gfm");
+    rv = gfmParser_init(playstate.pParser, game.pCtx, stLevelName
+            , pos + LEN("_obj.gfm"));
     ASSERT(erv == ERR_OK, erv);
 
     playstate.entityCount = 0;
@@ -174,14 +232,22 @@ err loadPlaystate() {
     erv = resetCameraPosition(&playstate.swordy, &playstate.gunny);
     ASSERT(erv == ERR_OK, erv);
 
-    erv = _loadStaticQuadtree();
-    ASSERT(erv == ERR_OK, erv);
-
     rv = gfmGroup_killAll(fx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     resetTeleporterTarget();
 
+#undef LEN
+#undef APPEND_DYN
+#undef APPEND_POS
+#undef APPEND
+#undef MAX_VALID_LEN
     return ERR_OK;
+}
+
+/** Setup the playstate so it may start to be executed */
+err loadPlaystate() {
+    /* TODO Decide where the first map will be loaded from */
+    return _loadLevel("map_test");
 }
 
 /**
