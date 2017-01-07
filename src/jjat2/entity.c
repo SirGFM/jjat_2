@@ -358,3 +358,23 @@ void collideTwoEntities(entityCtx *entA, entityCtx *entB) {
     }
 }
 
+/**
+ * Do some damage to the entity
+ *
+ * @param  [ in]entity The entity
+ * @param  [ in]damage How much damage was dealt
+ */
+void hitEntity(entityCtx *entity, int damage) {
+    /* TODO Accumulate damage before killing the entity */
+    entity->flags &= ~EF_ALIVE;
+}
+
+/**
+ * Kill the entity
+ *
+ * @param  [ in]entity The entity
+ */
+void killEntity(entityCtx *entity) {
+    entity->flags &= ~EF_ALIVE;
+}
+

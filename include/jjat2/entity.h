@@ -190,5 +190,20 @@ void setEntityDirection(entityCtx *entity);
  */
 void collideTwoEntities(entityCtx *entA, entityCtx *entB);
 
+/**
+ * Do some damage to the entity
+ *
+ * @param  [ in]entity The entity
+ * @param  [ in]damage How much damage was dealt
+ */
+void hitEntity(entityCtx *entity, int damage);
+
+/**
+ * Kill the entity
+ *
+ * @param  [ in]entity The entity
+ */
+void killEntity(entityCtx *entity);
+
 #endif /* __JJAT2_ENTITY_H__ */
 

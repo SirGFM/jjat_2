@@ -9,6 +9,7 @@
 #include <conf/type.h>
 
 #include <jjat2/entity.h>
+#include <jjat2/fx_group.h>
 #include <jjat2/gunny.h>
 #include <jjat2/teleport.h>
 #include <jjat2/enemies/g_walky.h>
@@ -86,6 +87,24 @@ static void _getSubtype(collisionNode *pNode) {
 }
 
 /**
+ * Remove the bullet and spawn an explosion in its place
+ *
+ * @param  [ in]bullet The bullet that collided
+ */
+static void _explodeStar(collisionNode *bullet) {
+    gfmSprite *pSpr;
+    int x, y;
+
+    gfmSprite_getPosition(&x, &y, bullet->pSprite);
+    gfmGroup_removeNode((gfmGroupNode*)bullet->pChild);
+    pSpr = spawnFx(x, y, 4/*w*/, 4/*h*/, 0/*dir*/, 250/*ttl*/, FX_STAR_EXPLOSION
+            , T_FX);
+    if (pSpr) {
+        gfmSprite_setOffset(pSpr, -1, -1);
+    }
+}
+
+/**
  * Continue handling collision.
  * 
  * Different from the other functions on this module, this one is declared on
@@ -118,7 +137,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
         isFirstCase = 0;
         fallthrough = 0;
         switch (MERGE_TYPES(node1.type, node2.type)) {
-/*== PLAYER'S COLLISION ======================================================*/
+/*== ENVIRONMENT'S COLLISION =================================================*/
             CASE(T_FLOOR, T_WALKY)
             CASE(T_FLOOR, T_G_WALKY)
             CASE(T_FLOOR, T_GUNNY)
@@ -236,11 +255,22 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 
                     if (py + ph >= sy + SPIKE_OFFSET) {
                         /* Kill the entity */
-                        ((entityCtx*)entity->pChild)->flags &= ~EF_ALIVE;
+                        killEntity((entityCtx*)entity->pChild);
                     }
                 }
 
                 rv = GFMRV_OK;
+            } break;
+            CASE(T_FLOOR_NOTP, T_G_WALKY_ATK)
+            CASE(T_FLOOR, T_G_WALKY_ATK) {
+                if (isFirstCase) {
+                    _explodeStar(&node2);
+                }
+                else {
+                    _explodeStar(&node1);
+                }
+                rv = GFMRV_OK;
+                collision.flags |= CF_SKIP;
             } break;
 /*== ENTITIES'S COLLISION ====================================================*/
             SELFCASE(T_G_WALKY)
@@ -263,6 +293,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 rv = GFMRV_OK;
             } break;
 /*== SWORDY'S ATTACK =========================================================*/
+            CASE(T_ATK_SWORD, T_G_WALKY_ATK)
             CASE(T_ATK_SWORD, T_TEL_BULLET) {
                 /* Reflect the bullet */
                 gfmSprite *pBullet;
@@ -297,7 +328,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                     pSword = node2.pSprite;
                 }
 
-                walky->flags &= ~EF_ALIVE;
+                killEntity(walky);
                 gfmSprite_setType(pSword, T_SWORD_FX);
 
                 collision.flags |= CF_SKIP;
@@ -317,7 +348,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 
                 gfmObject_justOverlaped(node1.pObject, node2.pObject);
                 if (onGreenWalkyAttacked(gWalky, pSword->pObject) == ERR_OK) {
-                    gWalky->flags &= ~EF_ALIVE;
+                    killEntity(gWalky);
                     gfmSprite_setType(pSword->pSprite, T_SWORD_FX);
 
                     collision.flags |= CF_SKIP;
@@ -459,6 +490,30 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_TEL_BULLET, T_FX)
             IGNORESELF(T_TEL_BULLET)
             break;
+/*== DAMAGE TO ENTITY ========================================================*/
+            CASE(T_SWORDY, T_G_WALKY_ATK)
+            CASE(T_GUNNY, T_G_WALKY_ATK)
+            CASE(T_WALKY, T_G_WALKY_ATK)
+            CASE(T_G_WALKY, T_G_WALKY_ATK) {
+                entityCtx *pEnt;
+                int damage;
+
+                /* Ugly hack: the damage should be stored on the unused part of
+                 * the type */
+                if (isFirstCase) {
+                    pEnt = (entityCtx*)node1.pChild;
+                    damage = node2.type;
+                    _explodeStar(&node2);
+                }
+                else {
+                    pEnt = (entityCtx*)node2.pChild;
+                    damage = node1.type;
+                    _explodeStar(&node1);
+                }
+
+                damage >>= T_BITS;
+                hitEntity(pEnt, damage);
+            } break;
 /*== SWORDY'S ATTACK TRAIL (AFTER HITTING ANYTHING) ==========================*/
             IGNORE(T_SWORD_FX, T_G_WALKY)
             IGNORE(T_SWORD_FX, T_WALKY)
@@ -473,6 +528,9 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORESELF(T_SWORD_FX)
             break;
 /*== COLLISION-LESS EFFECTS ==================================================*/
+            IGNORE(T_G_WALKY_ATK, T_SPIKE)
+            IGNORE(T_G_WALKY_ATK, T_TEL_BULLET)
+            IGNORE(T_FX, T_G_WALKY_ATK)
             IGNORE(T_FX, T_G_WALKY)
             IGNORE(T_FX, T_WALKY)
             IGNORE(T_FX, T_SWORDY)
@@ -481,6 +539,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_FX, T_FLOOR_NOTP)
             IGNORE(T_FX, T_SPIKE)
             IGNORESELF(T_FX)
+            IGNORESELF(T_G_WALKY_ATK)
             break;
             /* On Linux, a SIGINT is raised any time a unhandled collision
              * happens. When debugging, GDB will stop here and allow the user to

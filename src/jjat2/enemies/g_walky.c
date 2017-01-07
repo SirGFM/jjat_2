@@ -9,6 +9,7 @@
 #include <conf/type.h>
 
 #include <jjat2/entity.h>
+#include <jjat2/fx_group.h>
 
 #include <GFraMe/gfmSprite.h>
 
@@ -20,6 +21,10 @@
 #define G_WALKY_FALL_TIME   16
 #define G_WALKY_FALL_HEIGHT 4
 #define G_WALKY_FALL_GRAV   JUMP_ACCELERATION(G_WALKY_FALL_TIME, G_WALKY_FALL_HEIGHT)
+
+enum {
+      GWALKY_DIDATTACK = (EF_AVAILABLEF_FLAG << 0)
+};
 
 /** List of animations */
 enum enGWalkyAnim {
@@ -95,8 +100,6 @@ err preUpdateGreenWalky(entityCtx *pEnt) {
         pEnt->flags |= EF_SKIP_COLLISION;
     }
 
-    /* TODO Attack? */
-
     erv = preUpdateEntity(pEnt);
     ASSERT(erv == ERR_OK, erv);
 
@@ -109,12 +112,37 @@ err preUpdateGreenWalky(entityCtx *pEnt) {
             setEntityAnimation(pEnt, ATTACK, 0/*force*/);
         }
     } else if (pEnt->currentAnimation == ATTACK) {
-        if (gfmSprite_didAnimationJustChangeFrame(pEnt->pSelf) == GFMRV_TRUE) {
+        if (gfmSprite_didAnimationJustChangeFrame(pEnt->pSelf) == GFMRV_TRUE
+                && !(pEnt->flags & GWALKY_DIDATTACK)) {
             int frame;
 
             gfmSprite_getFrame(&frame, pEnt->pSelf);
-            if (frame == 1561) {
-                /* TODO If changed into the last attack frame, spawn the bullet */
+            if (frame == 1557) {
+                gfmSprite *pSpr;
+                double vx;
+                int dir, x, y;
+
+                gfmSprite_getPosition(&x, &y, pEnt->pSelf);
+                gfmSprite_getDirection(&dir, pEnt->pSelf);
+                if (dir) {
+                    /* If flipped (i.e., facing left) */
+                    x -= 4;
+                    vx = -120;
+                }
+                else {
+                    x += g_walky_width;
+                    vx = 120;
+                }
+
+                /* TODO Set damage within the type */
+                /* If changed into the last attack frame, spawn the bullet */
+                pSpr = spawnFx(x, y, 4/*w*/, 4/*h*/, 0/*dir*/, 0/*ttl*/
+                        , FX_STAR_ATK, T_G_WALKY_ATK);
+                ASSERT(pSpr, ERR_GFMERR);
+                gfmSprite_setOffset(pSpr, -1, -1);
+                gfmSprite_setHorizontalVelocity(pSpr, vx);
+
+                pEnt->flags |= GWALKY_DIDATTACK;
             }
         }
     }
@@ -204,6 +232,7 @@ err onGreenWalkyAttacked(entityCtx *pEnt, gfmObject *pAttacker) {
         gfmSprite_setDirection(pEnt->pSelf, 0/*not-flipped*/);
     }
     setEntityAnimation(pEnt, DEFEND, 1/*force*/);
+    pEnt->flags &= ~GWALKY_DIDATTACK;
 
     return ERR_NOHIT;
 }
