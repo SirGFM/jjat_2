@@ -166,6 +166,13 @@ err preUpdateEntity(entityCtx *entity);
 err postUpdateEntity(entityCtx *entity);
 
 /**
+ * Draw the entity
+ *
+ * @param  [ in]entity   The entity
+ */
+err drawEntity(entityCtx *entity);
+
+/**
  * Updates an entity's direction according to its velocity.
  *
  * @param  [ in]entity   The entity

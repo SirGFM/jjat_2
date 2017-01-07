@@ -14,6 +14,7 @@ enum enConfigFlags {
   , CFG_FULLSCREEN  = 0x02
 #if defined(JJATENGINE)
   , CFG_SYNCCONTROL = 0x04
+  , CFG_SIMPLEDRAW  = 0x08
 #endif /* JJATENGINE */
 };
 typedef enum enConfigFlags configFlags;

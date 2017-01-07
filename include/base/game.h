@@ -24,6 +24,7 @@ enum enGameFlags {
   , AC_GUNNY        = 0x02
   , AC_BOTH         = (AC_SWORDY | AC_GUNNY)
   , CMD_CUSTOMINPUT = 0x04
+  , FX_PRETTYRENDER = 0x08
 };
 typedef enum enGameFlags gameFlags;
 #endif /* JJATENGINE */

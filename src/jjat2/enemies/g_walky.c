@@ -158,16 +158,11 @@ err postUpdateGreenWalky(entityCtx *pEnt) {
  * @param  [ in]pEnt The player
  */
 err drawGreenWalky(entityCtx *pEnt) {
-    gfmRV rv;
-
     if (pEnt->flags & EF_DEACTIVATE) {
         return ERR_OK;
     }
 
-    rv = gfmSprite_draw(pEnt->pSelf, game.pCtx);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-
-    return ERR_OK;
+    return drawEntity(pEnt);
 }
 
 /**

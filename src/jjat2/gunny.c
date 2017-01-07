@@ -141,14 +141,13 @@ err parseGunny(entityCtx *gunny, gfmParser *pParser) {
  * @param  [ in]gunny The player
  */
 err drawGunny(entityCtx *gunny) {
-    gfmRV rv;
-
     gfmDebug_printf(game.pCtx, 0, 72, "GUNNY ALIVE: %i", gunny->flags & EF_ALIVE);
 
     if (game.flags & AC_GUNNY) {
-        rv = gfmSprite_draw(gunny->pSelf, game.pCtx);
+        return drawEntity(gunny);
     }
     else {
+        gfmRV rv;
         int cx, cy, frame, isFlipped, x, y;
 
         gfmCamera_getPosition(&cx, &cy, game.pCamera);
@@ -160,8 +159,8 @@ err drawGunny(entityCtx *gunny) {
         y = y - cy + gunny_offy;
         rv = gfm_drawTile(game.pCtx, gfx.pSset16x16, x, y, frame + 64
                 , isFlipped);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     }
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     return ERR_OK;
 }

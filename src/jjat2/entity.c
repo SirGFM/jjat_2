@@ -176,7 +176,7 @@ static err handleCarrying(entityCtx *entity) {
 
     /* Ensure the bottom-most entity and handled first. This makes horizontal
      * movement be correctly propagated through the entities */
-    if (!entity->pCarrying) {
+    if (!entity->pCarrying || (entity->flags & EF_HAS_CARRIER)) {
         return ERR_OK;
     }
     else if (entity->pCarrying->pCarrying) {
@@ -231,7 +231,6 @@ static err handleCarrying(entityCtx *entity) {
     }
     ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
 
-    entity->pCarrying = 0;
     entity->flags |= EF_HAS_CARRIER;
 
     return ERR_OK;
@@ -247,7 +246,8 @@ err preUpdateEntity(entityCtx *entity) {
     gfmRV rv;
     err erv;
 
-    entity->flags &= ~EF_HAS_CARRIER;
+    entity->flags &= ~(EF_HAS_CARRIER);
+    entity->pCarrying = 0;
 
     rv = gfmSprite_getVerticalVelocity(&vy, entity->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
@@ -286,6 +286,26 @@ err postUpdateEntity(entityCtx *entity) {
      * then adjust its velocity */
     if (entity->pCarrying) {
         return handleCarrying(entity);
+    }
+
+    return ERR_OK;
+}
+
+/**
+ * Draw the entity
+ *
+ * @param  [ in]entity   The entity
+ */
+err drawEntity(entityCtx *entity) {
+    gfmRV rv;
+    err erv;
+
+    rv = gfmSprite_draw(entity->pSelf, game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    if ((game.flags & FX_PRETTYRENDER) && entity->pCarrying) {
+        erv = drawEntity(entity->pCarrying);
+        ASSERT(erv == ERR_OK, erv);
     }
 
     return ERR_OK;

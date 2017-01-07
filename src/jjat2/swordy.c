@@ -148,15 +148,13 @@ err parseSwordy(entityCtx *swordy, gfmParser *pParser) {
  * @param  [ in]swordy The player
  */
 err drawSwordy(entityCtx *swordy) {
-    gfmRV rv;
-
     gfmDebug_printf(game.pCtx, 0, 64, "SWORDY ALIVE: %i", swordy->flags & EF_ALIVE);
 
     if (game.flags & AC_SWORDY) {
-        rv = gfmSprite_draw(swordy->pSelf, game.pCtx);
-        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        return drawEntity(swordy);
     }
     else {
+        gfmRV rv;
         int cx, cy, frame, isFlipped, x, y;
 
         gfmCamera_getPosition(&cx, &cy, game.pCamera);
@@ -168,6 +166,7 @@ err drawSwordy(entityCtx *swordy) {
         y = y - cy + swordy_offy;
         rv = gfm_drawTile(game.pCtx, gfx.pSset16x16, x, y, frame + 64
                 , isFlipped);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     }
 
     return ERR_OK;
