@@ -104,11 +104,18 @@ err preUpdateGreenWalky(entityCtx *pEnt) {
         if (gfmSprite_didAnimationFinish(pEnt->pSelf) == GFMRV_TRUE) {
             pEnt->flags |= EF_DEACTIVATE;
         }
-    }
-
-    if (pEnt->currentAnimation == DEATH) {
+    } else if (pEnt->currentAnimation == DEFEND) {
         if (gfmSprite_didAnimationFinish(pEnt->pSelf) == GFMRV_TRUE) {
-            pEnt->flags |= EF_DEACTIVATE;
+            setEntityAnimation(pEnt, ATTACK, 0/*force*/);
+        }
+    } else if (pEnt->currentAnimation == ATTACK) {
+        if (gfmSprite_didAnimationJustChangeFrame(pEnt->pSelf) == GFMRV_TRUE) {
+            int frame;
+
+            gfmSprite_getFrame(&frame, pEnt->pSelf);
+            if (frame == 1561) {
+                /* TODO If changed into the last attack frame, spawn the bullet */
+            }
         }
     }
 
@@ -186,8 +193,8 @@ err onGreenWalkyAttacked(entityCtx *pEnt, gfmObject *pAttacker) {
         }
 
         gfmSprite_getDirection(&dir, pEnt->pSelf);
-        if ((col & gfmCollision_left) && !dir
-                || (col & gfmCollision_right) && dir) {
+        if (((col & gfmCollision_left) && !dir)
+                || ((col & gfmCollision_right) && dir)) {
             return ERR_OK;
         }
     }
