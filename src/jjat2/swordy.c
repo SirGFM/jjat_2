@@ -310,7 +310,10 @@ err preUpdateSwordy(entityCtx *swordy) {
         ASSERT(erv == ERR_OK, erv);
     } while (0); /* Update jump */
 
+    /* Don't collide while updating, since attacking moves Swordy */
+    swordy->flags |= EF_SKIP_COLLISION;
     erv = preUpdateEntity(swordy);
+    swordy->flags &= ~EF_SKIP_COLLISION;
     ASSERT(erv == ERR_OK, erv);
 
     /* Adjust attack animation */
@@ -342,6 +345,9 @@ err preUpdateSwordy(entityCtx *swordy) {
             swordy->flags &= ~flag_attacking;
         }
     } while (0);
+
+    erv = collideEntity(swordy);
+    ASSERT(erv == ERR_OK, erv);
 
     return ERR_OK;
 }
