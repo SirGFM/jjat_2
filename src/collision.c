@@ -58,6 +58,10 @@ typedef struct stCollisionNode collisionNode;
     case (MERGE_TYPES(type2, type1)): \
         fallthrough = 1;
 
+/** Collide against self type */
+#define SELFCASE(type) \
+    case (MERGE_TYPES(type, type)):
+
 /** Ignore collision with entities of the same type */
 #define IGNORESELF(type) \
     case (MERGE_TYPES(type, type)):
@@ -196,7 +200,6 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 #endif  /* JJATENGINE */
                 rv = GFMRV_OK;
             } break;
-            CASE(T_WALKY, T_G_WALKY)
             CASE(T_SPIKE, T_WALKY)
             CASE(T_SPIKE, T_G_WALKY)
             CASE(T_SPIKE, T_GUNNY)
@@ -239,6 +242,10 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 
                 rv = GFMRV_OK;
             } break;
+/*== ENTITIES'S COLLISION ====================================================*/
+            SELFCASE(T_G_WALKY)
+            SELFCASE(T_WALKY)
+            CASE(T_WALKY, T_G_WALKY)
             CASE(T_SWORDY, T_G_WALKY)
             CASE(T_GUNNY, T_G_WALKY)
             CASE(T_SWORDY, T_WALKY)
@@ -250,7 +257,9 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 entA = (entityCtx*)node1.pChild;
                 entB = (entityCtx*)node2.pChild;
 
-                collideTwoEntities(entA, entB);
+                if (entA != entB) {
+                    collideTwoEntities(entA, entB);
+                }
                 rv = GFMRV_OK;
             } break;
 /*== SWORDY'S ATTACK =========================================================*/
@@ -472,10 +481,6 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_FX, T_FLOOR_NOTP)
             IGNORE(T_FX, T_SPIKE)
             IGNORESELF(T_FX)
-            break;
-/*== IGNORE SELF-COLLISION ===================================================*/
-            IGNORESELF(T_WALKY)
-            IGNORESELF(T_G_WALKY)
             break;
             /* On Linux, a SIGINT is raised any time a unhandled collision
              * happens. When debugging, GDB will stop here and allow the user to
