@@ -493,8 +493,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 /*== DAMAGE TO ENTITY ========================================================*/
             CASE(T_SWORDY, T_G_WALKY_ATK)
             CASE(T_GUNNY, T_G_WALKY_ATK)
-            CASE(T_WALKY, T_G_WALKY_ATK)
-            CASE(T_G_WALKY, T_G_WALKY_ATK) {
+            CASE(T_WALKY, T_G_WALKY_ATK) {
                 entityCtx *pEnt;
                 int damage;
 
@@ -513,6 +512,31 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 
                 damage >>= T_BITS;
                 hitEntity(pEnt, damage);
+            } break;
+            CASE(T_G_WALKY, T_G_WALKY_ATK) {
+                entityCtx *pEnt;
+                gfmObject *pObject;
+                int damage;
+
+                /* Ugly hack: the damage should be stored on the unused part of
+                 * the type */
+                if (isFirstCase) {
+                    pEnt = (entityCtx*)node1.pChild;
+                    pObject = node2.pObject;
+                    damage = node2.type;
+                    _explodeStar(&node2);
+                }
+                else {
+                    pEnt = (entityCtx*)node2.pChild;
+                    pObject = node1.pObject;
+                    damage = node1.type;
+                    _explodeStar(&node1);
+                }
+
+                if (onGreenWalkyAttacked(pEnt, pObject) == ERR_OK) {
+                    damage >>= T_BITS;
+                    hitEntity(pEnt, damage);
+                }
             } break;
 /*== SWORDY'S ATTACK TRAIL (AFTER HITTING ANYTHING) ==========================*/
             IGNORE(T_SWORD_FX, T_G_WALKY)
