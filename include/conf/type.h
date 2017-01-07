@@ -37,6 +37,7 @@ enum enType {
     , T_TEL_BULLET = (4 << T_BASE_NBITS) | T_PLAYER
     , T_SPIKE      = (1 << T_BASE_NBITS) | T_HAZARD
     , T_WALKY      = (1 << T_BASE_NBITS) | T_ENEMY
+    , T_G_WALKY    = (2 << T_BASE_NBITS) | T_ENEMY
 };
 typedef enum enType type;
 

@@ -12,6 +12,7 @@
 #include <jjat2/entity.h>
 
 #include <jjat2/enemies/walky.h>
+#include <jjat2/enemies/g_walky.h>
 
 #include <GFraMe/gfmSprite.h>
 #include <GFraMe/gfmParser.h>
@@ -32,14 +33,13 @@ err parseEnemy(entityCtx *pEnt, gfmParser *pParser, type t) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     switch (t) {
-        case T_WALKY: {
-            erv = initWalky(pEnt, x, y);
-            ASSERT(erv == ERR_OK, erv);
-        } break;
+        case T_WALKY:   erv = initWalky(pEnt, x, y); break;
+        case T_G_WALKY: erv = initGreenWalky(pEnt, x, y); break;
         default: {
             ASSERT(0, ERR_INVALIDTYPE);
         }
     }
+    ASSERT(erv == ERR_OK, erv);
 
     return ERR_OK;
 }
@@ -58,9 +58,8 @@ err preUpdateEnemy(entityCtx *pEnt) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     switch (type) {
-        case T_WALKY: {
-            return preUpdateWalky(pEnt);
-        } break;
+        case T_WALKY:   return preUpdateWalky(pEnt);
+        case T_G_WALKY: return preUpdateGreenWalky(pEnt);
         default: {
             return ERR_INVALIDTYPE;
         }
@@ -81,9 +80,8 @@ err postUpdateEnemy(entityCtx *pEnt) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     switch (type) {
-        case T_WALKY: {
-            return postUpdateWalky(pEnt);
-        } break;
+        case T_WALKY:   return postUpdateWalky(pEnt);
+        case T_G_WALKY: return postUpdateGreenWalky(pEnt);
         default: {
             return ERR_INVALIDTYPE;
         }
@@ -104,9 +102,8 @@ err drawEnemy(entityCtx *pEnt) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     switch (type) {
-        case T_WALKY: {
-            return drawWalky(pEnt);
-        } break;
+        case T_WALKY:   return drawWalky(pEnt);
+        case T_G_WALKY: return drawGreenWalky(pEnt);
         default: {
             return ERR_INVALIDTYPE;
         }

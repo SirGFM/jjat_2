@@ -1,3 +1,4 @@
 obj swordy_pos 16 288 16 16
 obj gunny_pos 16 376 16 16
 obj walky 56 256 8 8
+obj g_walky 128 352 8 8

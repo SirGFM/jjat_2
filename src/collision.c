@@ -11,6 +11,7 @@
 #include <jjat2/entity.h>
 #include <jjat2/gunny.h>
 #include <jjat2/teleport.h>
+#include <jjat2/enemies/g_walky.h>
 
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gfmObject.h>
@@ -115,9 +116,11 @@ err doCollide(gfmQuadtreeRoot *pQt) {
         switch (MERGE_TYPES(node1.type, node2.type)) {
 /*== PLAYER'S COLLISION ======================================================*/
             CASE(T_FLOOR, T_WALKY)
+            CASE(T_FLOOR, T_G_WALKY)
             CASE(T_FLOOR, T_GUNNY)
             CASE(T_FLOOR, T_SWORDY)
             CASE(T_FLOOR_NOTP, T_WALKY)
+            CASE(T_FLOOR_NOTP, T_G_WALKY)
             CASE(T_FLOOR_NOTP, T_GUNNY)
             CASE(T_FLOOR_NOTP, T_SWORDY) {
                 collisionNode *entity;
@@ -193,7 +196,9 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 #endif  /* JJATENGINE */
                 rv = GFMRV_OK;
             } break;
+            CASE(T_WALKY, T_G_WALKY)
             CASE(T_SPIKE, T_WALKY)
+            CASE(T_SPIKE, T_G_WALKY)
             CASE(T_SPIKE, T_GUNNY)
             CASE(T_SPIKE, T_SWORDY) {
                 collisionNode *entity;
@@ -234,6 +239,8 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 
                 rv = GFMRV_OK;
             } break;
+            CASE(T_SWORDY, T_G_WALKY)
+            CASE(T_GUNNY, T_G_WALKY)
             CASE(T_SWORDY, T_WALKY)
             CASE(T_GUNNY, T_WALKY)
             CASE(T_SWORDY, T_GUNNY) {
@@ -286,6 +293,27 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 
                 collision.flags |= CF_SKIP;
             } break;
+            CASE(T_ATK_SWORD, T_G_WALKY) {
+                collisionNode *pSword;
+                entityCtx *gWalky;
+
+                if (isFirstCase) {
+                    gWalky = (entityCtx*)node2.pChild;
+                    pSword = &node1;
+                }
+                else {
+                    gWalky = (entityCtx*)node1.pChild;
+                    pSword = &node2;
+                }
+
+                gfmObject_justOverlaped(node1.pObject, node2.pObject);
+                if (onGreenWalkyAttacked(gWalky, pSword->pObject) == ERR_OK) {
+                    gWalky->flags &= ~EF_ALIVE;
+                    gfmSprite_setType(pSword->pSprite, T_SWORD_FX);
+
+                    collision.flags |= CF_SKIP;
+                }
+            } break;
             IGNORE(T_ATK_SWORD, T_SWORDY)
             IGNORE(T_ATK_SWORD, T_GUNNY)
             IGNORE(T_ATK_SWORD, T_FLOOR)
@@ -318,6 +346,34 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 }
                 rv = gfmGroup_removeNode(pNode);
                 ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+                collision.flags |= CF_SKIP;
+            } break;
+            CASE(T_TEL_BULLET, T_G_WALKY) {
+                collisionNode *pNode;
+                entityCtx *pGWalky;
+                err erv;
+
+                if (isFirstCase) {
+                    pNode = &node1;
+                    pGWalky = (entityCtx*)node2.pChild;
+                }
+                else {
+                    pNode = &node2;
+                    pGWalky = (entityCtx*)node1.pChild;
+                }
+
+                gfmObject_justOverlaped(node1.pObject, node2.pObject);
+                if (onGreenWalkyAttacked(pGWalky, pNode->pObject) == ERR_OK) {
+                    /* Check if visible */
+                    if (GFMRV_TRUE == gfm_isSpriteInsideCamera(game.pCtx
+                                , pGWalky->pSelf)) {
+                        erv = teleporterTargetEntity(pGWalky);
+                        ASSERT(erv == ERR_OK, erv);
+                    }
+                    rv = gfmGroup_removeNode((gfmGroupNode*)pNode->pChild);
+                    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+                }
 
                 collision.flags |= CF_SKIP;
             } break;
@@ -395,6 +451,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORESELF(T_TEL_BULLET)
             break;
 /*== SWORDY'S ATTACK TRAIL (AFTER HITTING ANYTHING) ==========================*/
+            IGNORE(T_SWORD_FX, T_G_WALKY)
             IGNORE(T_SWORD_FX, T_WALKY)
             IGNORE(T_SWORD_FX, T_SWORDY)
             IGNORE(T_SWORD_FX, T_GUNNY)
@@ -407,6 +464,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORESELF(T_SWORD_FX)
             break;
 /*== COLLISION-LESS EFFECTS ==================================================*/
+            IGNORE(T_FX, T_G_WALKY)
             IGNORE(T_FX, T_WALKY)
             IGNORE(T_FX, T_SWORDY)
             IGNORE(T_FX, T_GUNNY)
@@ -414,6 +472,10 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_FX, T_FLOOR_NOTP)
             IGNORE(T_FX, T_SPIKE)
             IGNORESELF(T_FX)
+            break;
+/*== IGNORE SELF-COLLISION ===================================================*/
+            IGNORESELF(T_WALKY)
+            IGNORESELF(T_G_WALKY)
             break;
             /* On Linux, a SIGINT is raised any time a unhandled collision
              * happens. When debugging, GDB will stop here and allow the user to

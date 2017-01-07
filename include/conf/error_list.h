@@ -21,6 +21,7 @@
     X(ERR_NOKEYPRESSED) \
     X(ERR_INVALIDTYPE) \
     X(ERR_BUFFERTOOSMALL) \
+    X(ERR_NOHIT) \
     X(ERR_MAX)
 
 #endif /* __CONF_ERROR_LIST_H__ */

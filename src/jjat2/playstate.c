@@ -160,6 +160,12 @@ err loadPlaystate() {
             ASSERT(erv == ERR_OK, erv);
             playstate.entityCount++;
         }
+        else if (strcmp(type, "g_walky") == 0) {
+            entityCtx *pEnt = &playstate.entities[playstate.entityCount];
+            erv = parseEnemy(pEnt, playstate.pParser, T_G_WALKY);
+            ASSERT(erv == ERR_OK, erv);
+            playstate.entityCount++;
+        }
     }
 
     rv = gfmParser_reset(playstate.pParser);
