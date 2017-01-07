@@ -193,6 +193,9 @@ err onGreenWalkyAttacked(entityCtx *pEnt, gfmObject *pAttacker) {
             return ERR_OK;
         }
     }
+    else if (pEnt->currentAnimation == ATTACK) {
+        return ERR_OK;
+    }
 
     if (col & gfmCollision_left) {
         gfmSprite_setDirection(pEnt->pSelf, 1/*flip*/);
