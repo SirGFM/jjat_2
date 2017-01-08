@@ -210,11 +210,11 @@ err preUpdateGunny(entityCtx *gunny) {
             gfmSprite_getPosition(&x, &y, gunny->pSelf);
             gfmSprite_getDirection(&dir, gunny->pSelf);
             y += 3;
-            if (dir == 0) {
+            if (dir == DIR_RIGHT) {
                 x += 3;
                 vx = BULLET_SPEED;
             }
-            else {
+            else if (dir == DIR_LEFT) {
                 x -= 4;
                 vx = -BULLET_SPEED;
             }

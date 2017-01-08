@@ -323,10 +323,10 @@ void setEntityDirection(entityCtx *entity) {
 
     gfmSprite_getHorizontalVelocity(&vx, entity->pSelf);
     if (vx > 0) {
-        gfmSprite_setDirection(entity->pSelf, 0);
+        gfmSprite_setDirection(entity->pSelf, DIR_RIGHT);
     }
     else if (vx < 0) {
-        gfmSprite_setDirection(entity->pSelf, 1);
+        gfmSprite_setDirection(entity->pSelf, DIR_LEFT);
     }
 }
 

@@ -124,12 +124,12 @@ err preUpdateGreenWalky(entityCtx *pEnt) {
 
                 gfmSprite_getPosition(&x, &y, pEnt->pSelf);
                 gfmSprite_getDirection(&dir, pEnt->pSelf);
-                if (dir) {
+                if (dir == DIR_LEFT) {
                     /* If flipped (i.e., facing left) */
                     x -= 4;
                     vx = -120;
                 }
-                else {
+                else if (dir == DIR_RIGHT) {
                     x += g_walky_width;
                     vx = 120;
                 }
@@ -215,9 +215,10 @@ err onGreenWalkyAttacked(entityCtx *pEnt, gfmObject *pAttacker) {
             return ERR_OK;
         }
 
+        /* Got hit on the back while defending */
         gfmSprite_getDirection(&dir, pEnt->pSelf);
-        if (((col & gfmCollision_left) && !dir)
-                || ((col & gfmCollision_right) && dir)) {
+        if (((col & gfmCollision_left) && dir == DIR_RIGHT)
+                || ((col & gfmCollision_right) && dir == DIR_LEFT)) {
             return ERR_OK;
         }
     }

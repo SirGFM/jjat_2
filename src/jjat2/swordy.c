@@ -216,11 +216,11 @@ err preUpdateSwordy(entityCtx *swordy) {
             gfmSprite_getPosition(&x, &y, swordy->pSelf);
             gfmSprite_getDirection(&dir, swordy->pSelf);
             y -= 2;
-            if (dir == 0) {
+            if (dir == DIR_RIGHT) {
                 x += 3;
                 swordy->flags &= ~flag_atkMoveLeft;
             }
-            else {
+            else if (dir == DIR_LEFT) {
                 x -= 13;
                 swordy->flags |= flag_atkMoveLeft;
             }
@@ -245,10 +245,10 @@ err preUpdateSwordy(entityCtx *swordy) {
         if (swordy->currentAnimation == ATK) {
             int dir;
             gfmSprite_getDirection(&dir, swordy->pSelf);
-            if (dir == 0 && IS_PRESSED(swordyLeft)) {
+            if (dir == DIR_RIGHT && IS_PRESSED(swordyLeft)) {
                 swordy->flags |= flag_atkMoveLeft;
             }
-            else if (dir == 1 && IS_PRESSED(swordyRight)) {
+            else if (dir == DIR_LEFT && IS_PRESSED(swordyRight)) {
                 swordy->flags &= ~flag_atkMoveLeft;
             }
         }

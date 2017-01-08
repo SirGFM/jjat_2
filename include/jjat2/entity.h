@@ -12,6 +12,13 @@
 
 #include <stdint.h>
 
+/** Every sprite is facing right, by default. This enumeration reflects that to
+ * make the code mode readable */
+enum {
+    DIR_RIGHT = 0
+  , DIR_LEFT  = 1
+};
+
 enum enEntityFlag {
     EF_ALIVE           = 0x00001
   , EF_DEACTIVATE      = 0x00002
