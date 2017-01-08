@@ -92,7 +92,43 @@ err preUpdateWalky(entityCtx *pEnt) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     if (col & gfmCollision_down) {
+        gfmRV rv;
+        int dir, type, x, y;
+
         /* TODO Flip if next tile is empty */
+        gfmSprite_getDirection(&dir, pEnt->pSelf);
+        gfmSprite_getPosition(&x, &y, pEnt->pSelf);
+        y += walky_height;
+        if (dir) {
+            x--;
+        }
+        else {
+            x += walky_width + 1;
+        }
+
+        rv = gfmTilemap_getTypeAt(&type, game.pMap, x, y);
+        if (rv == GFMRV_TILEMAP_NO_TILETYPE) {
+            if (dir == 1) {
+                /* Move right */
+                rv = gfmSprite_setHorizontalVelocity(pEnt->pSelf, WALKY_SPEED);
+                ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+            }
+            else {
+                /* Move left */
+                rv = gfmSprite_setHorizontalVelocity(pEnt->pSelf, -WALKY_SPEED);
+                ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+            }
+        }
+        else {
+            double vx;
+
+            /* Otherwise, guarantee that walky is moving */
+            gfmSprite_getHorizontalVelocity(&vx, pEnt->pSelf);
+            if (vx == 0) {
+                rv = gfmSprite_setHorizontalVelocity(pEnt->pSelf, WALKY_SPEED);
+                ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+            }
+        }
     }
 
     if (!(pEnt->flags & EF_ALIVE)) {

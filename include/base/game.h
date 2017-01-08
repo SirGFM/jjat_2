@@ -10,6 +10,9 @@
 
 #include <GFraMe/gframe.h>
 #include <GFraMe/gfmCamera.h>
+#if defined(JJATENGINE)
+#include <GFraMe/gfmTilemap.h>
+#endif /* JJATENGINE */
 
 enum enDebugRunState {
     DBG_PAUSED  = 0x0000,
@@ -35,6 +38,9 @@ struct stGameCtx {
     /** The game's default camera */
     gfmCamera *pCamera;
 #if defined(JJATENGINE)
+    /** The game's main map */
+    gfmTilemap *pMap;
+    /** Lots of flags to control the game */
     gameFlags flags;
 #endif /* JJATENGINE */
     /** Fixed time elapsed since the last frame, in milliseconds. Note that even

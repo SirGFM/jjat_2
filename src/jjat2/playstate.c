@@ -58,6 +58,8 @@ err initPlaystate() {
         i++;
     }
 
+    game.pMap = playstate.pMap;
+
     return ERR_OK;
 }
 
