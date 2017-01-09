@@ -33,8 +33,8 @@ err parseEnemy(entityCtx *pEnt, gfmParser *pParser, type t) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     switch (t) {
-        case T_WALKY:   erv = initWalky(pEnt, x, y); break;
-        case T_G_WALKY: erv = initGreenWalky(pEnt, x, y); break;
+        case T_EN_WALKY:   erv = initWalky(pEnt, x, y); break;
+        case T_EN_G_WALKY: erv = initGreenWalky(pEnt, x, y); break;
         default: {
             ASSERT(0, ERR_INVALIDTYPE);
         }
@@ -58,8 +58,8 @@ err preUpdateEnemy(entityCtx *pEnt) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     switch (type) {
-        case T_WALKY:   return preUpdateWalky(pEnt);
-        case T_G_WALKY: return preUpdateGreenWalky(pEnt);
+        case T_EN_WALKY:   return preUpdateWalky(pEnt);
+        case T_EN_G_WALKY: return preUpdateGreenWalky(pEnt);
         default: {
             return ERR_INVALIDTYPE;
         }
@@ -80,8 +80,8 @@ err postUpdateEnemy(entityCtx *pEnt) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     switch (type) {
-        case T_WALKY:   return postUpdateWalky(pEnt);
-        case T_G_WALKY: return postUpdateGreenWalky(pEnt);
+        case T_EN_WALKY:   return postUpdateWalky(pEnt);
+        case T_EN_G_WALKY: return postUpdateGreenWalky(pEnt);
         default: {
             return ERR_INVALIDTYPE;
         }
@@ -102,8 +102,8 @@ err drawEnemy(entityCtx *pEnt) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     switch (type) {
-        case T_WALKY:   return drawWalky(pEnt);
-        case T_G_WALKY: return drawGreenWalky(pEnt);
+        case T_EN_WALKY:   return drawWalky(pEnt);
+        case T_EN_G_WALKY: return drawGreenWalky(pEnt);
         default: {
             return ERR_INVALIDTYPE;
         }

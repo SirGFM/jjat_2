@@ -138,12 +138,12 @@ err doCollide(gfmQuadtreeRoot *pQt) {
         fallthrough = 0;
         switch (MERGE_TYPES(node1.type, node2.type)) {
 /*== ENVIRONMENT'S COLLISION =================================================*/
-            CASE(T_FLOOR, T_WALKY)
-            CASE(T_FLOOR, T_G_WALKY)
+            CASE(T_FLOOR, T_EN_WALKY)
+            CASE(T_FLOOR, T_EN_G_WALKY)
             CASE(T_FLOOR, T_GUNNY)
             CASE(T_FLOOR, T_SWORDY)
-            CASE(T_FLOOR_NOTP, T_WALKY)
-            CASE(T_FLOOR_NOTP, T_G_WALKY)
+            CASE(T_FLOOR_NOTP, T_EN_WALKY)
+            CASE(T_FLOOR_NOTP, T_EN_G_WALKY)
             CASE(T_FLOOR_NOTP, T_GUNNY)
             CASE(T_FLOOR_NOTP, T_SWORDY) {
                 collisionNode *entity;
@@ -219,8 +219,8 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 #endif  /* JJATENGINE */
                 rv = GFMRV_OK;
             } break;
-            CASE(T_SPIKE, T_WALKY)
-            CASE(T_SPIKE, T_G_WALKY)
+            CASE(T_SPIKE, T_EN_WALKY)
+            CASE(T_SPIKE, T_EN_G_WALKY)
             CASE(T_SPIKE, T_GUNNY)
             CASE(T_SPIKE, T_SWORDY) {
                 collisionNode *entity;
@@ -261,8 +261,8 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 
                 rv = GFMRV_OK;
             } break;
-            CASE(T_FLOOR_NOTP, T_G_WALKY_ATK)
-            CASE(T_FLOOR, T_G_WALKY_ATK) {
+            CASE(T_FLOOR_NOTP, T_EN_G_WALKY_ATK)
+            CASE(T_FLOOR, T_EN_G_WALKY_ATK) {
                 if (isFirstCase) {
                     _explodeStar(&node2);
                 }
@@ -273,13 +273,13 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 collision.flags |= CF_SKIP;
             } break;
 /*== ENTITIES'S COLLISION ====================================================*/
-            SELFCASE(T_G_WALKY)
-            SELFCASE(T_WALKY)
-            CASE(T_WALKY, T_G_WALKY)
-            CASE(T_SWORDY, T_G_WALKY)
-            CASE(T_GUNNY, T_G_WALKY)
-            CASE(T_SWORDY, T_WALKY)
-            CASE(T_GUNNY, T_WALKY)
+            SELFCASE(T_EN_G_WALKY)
+            SELFCASE(T_EN_WALKY)
+            CASE(T_EN_WALKY, T_EN_G_WALKY)
+            CASE(T_SWORDY, T_EN_G_WALKY)
+            CASE(T_GUNNY, T_EN_G_WALKY)
+            CASE(T_SWORDY, T_EN_WALKY)
+            CASE(T_GUNNY, T_EN_WALKY)
             CASE(T_SWORDY, T_GUNNY) {
                 entityCtx *entA;
                 entityCtx *entB;
@@ -293,7 +293,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 rv = GFMRV_OK;
             } break;
 /*== SWORDY'S ATTACK =========================================================*/
-            CASE(T_ATK_SWORD, T_G_WALKY_ATK)
+            CASE(T_ATK_SWORD, T_EN_G_WALKY_ATK)
             CASE(T_ATK_SWORD, T_TEL_BULLET) {
                 /* Reflect the bullet */
                 gfmSprite *pBullet;
@@ -315,7 +315,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 
                 collision.flags |= CF_SKIP;
             } break;
-            CASE(T_ATK_SWORD, T_WALKY) {
+            CASE(T_ATK_SWORD, T_EN_WALKY) {
                 gfmSprite *pSword;
                 entityCtx *walky;
 
@@ -333,7 +333,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 
                 collision.flags |= CF_SKIP;
             } break;
-            CASE(T_ATK_SWORD, T_G_WALKY) {
+            CASE(T_ATK_SWORD, T_EN_G_WALKY) {
                 collisionNode *pSword;
                 entityCtx *gWalky;
 
@@ -363,7 +363,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORESELF(T_ATK_SWORD)
             break;
 /*== GUNNY'S BULLET ==========================================================*/
-            CASE(T_TEL_BULLET, T_WALKY)
+            CASE(T_TEL_BULLET, T_EN_WALKY)
             CASE(T_TEL_BULLET, T_SWORDY) {
                 gfmGroupNode *pNode;
                 entityCtx *pEntity;
@@ -389,7 +389,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 
                 collision.flags |= CF_SKIP;
             } break;
-            CASE(T_TEL_BULLET, T_G_WALKY) {
+            CASE(T_TEL_BULLET, T_EN_G_WALKY) {
                 collisionNode *pNode;
                 entityCtx *pGWalky;
                 err erv;
@@ -491,9 +491,9 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORESELF(T_TEL_BULLET)
             break;
 /*== DAMAGE TO ENTITY ========================================================*/
-            CASE(T_SWORDY, T_G_WALKY_ATK)
-            CASE(T_GUNNY, T_G_WALKY_ATK)
-            CASE(T_WALKY, T_G_WALKY_ATK) {
+            CASE(T_SWORDY, T_EN_G_WALKY_ATK)
+            CASE(T_GUNNY, T_EN_G_WALKY_ATK)
+            CASE(T_EN_WALKY, T_EN_G_WALKY_ATK) {
                 entityCtx *pEnt;
                 int damage;
 
@@ -513,7 +513,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 damage >>= T_BITS;
                 hitEntity(pEnt, damage);
             } break;
-            CASE(T_G_WALKY, T_G_WALKY_ATK) {
+            CASE(T_EN_G_WALKY, T_EN_G_WALKY_ATK) {
                 entityCtx *pEnt;
                 gfmObject *pObject;
                 int damage;
@@ -539,8 +539,8 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 }
             } break;
 /*== SWORDY'S ATTACK TRAIL (AFTER HITTING ANYTHING) ==========================*/
-            IGNORE(T_SWORD_FX, T_G_WALKY)
-            IGNORE(T_SWORD_FX, T_WALKY)
+            IGNORE(T_SWORD_FX, T_EN_G_WALKY)
+            IGNORE(T_SWORD_FX, T_EN_WALKY)
             IGNORE(T_SWORD_FX, T_SWORDY)
             IGNORE(T_SWORD_FX, T_GUNNY)
             IGNORE(T_SWORD_FX, T_FLOOR)
@@ -552,18 +552,18 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORESELF(T_SWORD_FX)
             break;
 /*== COLLISION-LESS EFFECTS ==================================================*/
-            IGNORE(T_G_WALKY_ATK, T_SPIKE)
-            IGNORE(T_G_WALKY_ATK, T_TEL_BULLET)
-            IGNORE(T_FX, T_G_WALKY_ATK)
-            IGNORE(T_FX, T_G_WALKY)
-            IGNORE(T_FX, T_WALKY)
+            IGNORE(T_EN_G_WALKY_ATK, T_SPIKE)
+            IGNORE(T_EN_G_WALKY_ATK, T_TEL_BULLET)
+            IGNORE(T_FX, T_EN_G_WALKY_ATK)
+            IGNORE(T_FX, T_EN_G_WALKY)
+            IGNORE(T_FX, T_EN_WALKY)
             IGNORE(T_FX, T_SWORDY)
             IGNORE(T_FX, T_GUNNY)
             IGNORE(T_FX, T_FLOOR)
             IGNORE(T_FX, T_FLOOR_NOTP)
             IGNORE(T_FX, T_SPIKE)
             IGNORESELF(T_FX)
-            IGNORESELF(T_G_WALKY_ATK)
+            IGNORESELF(T_EN_G_WALKY_ATK)
             break;
             /* On Linux, a SIGINT is raised any time a unhandled collision
              * happens. When debugging, GDB will stop here and allow the user to

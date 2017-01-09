@@ -52,7 +52,7 @@ err initWalky(entityCtx *pEnt, int x, int y) {
 
     y -= walky_height;
     rv = gfmSprite_init(pEnt->pSelf, x, y, walky_width, walky_height
-            , gfx.pSset8x8, walky_offx, walky_offy, pEnt, T_WALKY);
+            , gfx.pSset8x8, walky_offx, walky_offy, pEnt, T_EN_WALKY);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     rv = gfmSprite_addAnimationsStatic(pEnt->pSelf, pWalkyAnimData);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);

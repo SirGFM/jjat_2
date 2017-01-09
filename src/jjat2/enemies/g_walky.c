@@ -58,7 +58,7 @@ err initGreenWalky(entityCtx *pEnt, int x, int y) {
 
     y -= g_walky_height;
     rv = gfmSprite_init(pEnt->pSelf, x, y, g_walky_width, g_walky_height
-            , gfx.pSset8x8, g_walky_offx, g_walky_offy, pEnt, T_G_WALKY);
+            , gfx.pSset8x8, g_walky_offx, g_walky_offy, pEnt, T_EN_G_WALKY);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     rv = gfmSprite_addAnimationsStatic(pEnt->pSelf, pGWalkyAnimData);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
@@ -137,7 +137,7 @@ err preUpdateGreenWalky(entityCtx *pEnt) {
                 /* TODO Set damage within the type */
                 /* If changed into the last attack frame, spawn the bullet */
                 pSpr = spawnFx(x, y, 4/*w*/, 4/*h*/, 0/*dir*/, 0/*ttl*/
-                        , FX_STAR_ATK, T_G_WALKY_ATK);
+                        , FX_STAR_ATK, T_EN_G_WALKY_ATK);
                 ASSERT(pSpr, ERR_GFMERR);
                 gfmSprite_setOffset(pSpr, -1, -1);
                 gfmSprite_setHorizontalVelocity(pSpr, vx);
