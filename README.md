@@ -2,6 +2,28 @@
 
 Second iteration of JJAT's engine, now based on GFraMe v2.
 
+## Player Interaction Reasoning
+
+### Backstory
+
+* The game starts on the lab where Swordy and Gunny were created(?)
+* Other creatures were created on same lab (for which reason?)
+* There should be biological creatures originated elsewhere
+
+### Swordy Interactions
+
+* Swordy can hit any biological creature
+* Swordy can reflect **energy** attacks
+* However, **physical** attacks can't be reflected
+* Swordy should be able disable (and then hit) some enemies with armor
+
+### Gunny Interactions
+
+* Gunny can target any creature from the lab (how to differentiate?)
+* Gunny can target any enemy with armor
+* Gunny can only target constructed tiles (e.g., within the lab), but not broken
+  ones
+
 ## Remapping Input
 
 Each in-game action is mapped to a virtual key. The table bellow shows how keys
@@ -22,7 +44,7 @@ should be referenced when remapping them through the command line:
 
 \* Action only enable when asynchronous mode is active.
 
-To remap the inputs, each key identifier must be folowed by a colon and every
+To remap the inputs, each key identifier must be followed by a colon and every
 key value (as defined on [gfmInput.h](https://github.com/SirGFM/GFraMe/blob/master/include/GFraMe/gfmInput.h))
 as 2 digits hexadecimal values (in Big-Endian). Good luck doing that
 manually... Eventually, there will be a menu for automatically doing that.
