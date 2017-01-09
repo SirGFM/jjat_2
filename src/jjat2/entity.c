@@ -9,6 +9,7 @@
 #include <base/input.h>
 
 #include <jjat2/entity.h>
+#include <jjat2/playstate.h>
 
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gfmInput.h>
@@ -378,3 +379,45 @@ void killEntity(entityCtx *entity) {
     entity->flags &= ~EF_ALIVE;
 }
 
+/**
+ * Flip the entity if it reaches an edge
+ *
+ * @param  [ in]entity The entity
+ * @param  [ in]vx     The entity's velocity
+ */
+void flipEntityOnEdge(entityCtx *entity, double vx) {
+    gfmRV rv;
+    int dir, h, type, w, x, y;
+
+    gfmSprite_getDimensions(&w, &h, entity->pSelf);
+    gfmSprite_getDirection(&dir, entity->pSelf);
+    gfmSprite_getPosition(&x, &y, entity->pSelf);
+    y += h;
+    if (dir == DIR_LEFT) {
+        x--;
+    }
+    else if (dir == DIR_RIGHT) {
+        x += w + 1;
+    }
+
+    rv = gfmTilemap_getTypeAt(&type, playstate.pMap, x, y);
+    if (rv == GFMRV_TILEMAP_NO_TILETYPE) {
+        if (dir == DIR_LEFT) {
+            /* Flip to move right */
+            gfmSprite_setHorizontalVelocity(entity->pSelf, vx);
+        }
+        else if (dir == DIR_RIGHT){
+            /* Flip to move left */
+            gfmSprite_setHorizontalVelocity(entity->pSelf, -vx);
+        }
+    }
+    else {
+        double curVx;
+
+        /* Otherwise, guarantee that it is moving */
+        gfmSprite_getHorizontalVelocity(&curVx, entity->pSelf);
+        if (curVx == 0) {
+            gfmSprite_setHorizontalVelocity(entity->pSelf, vx);
+        }
+    }
+}

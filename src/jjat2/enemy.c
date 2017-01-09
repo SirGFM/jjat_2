@@ -13,6 +13,7 @@
 
 #include <jjat2/enemies/walky.h>
 #include <jjat2/enemies/g_walky.h>
+#include <jjat2/enemies/spiky.h>
 
 #include <GFraMe/gfmSprite.h>
 #include <GFraMe/gfmParser.h>
@@ -32,7 +33,8 @@ err parseEnemy(entityCtx *pEnt, gfmParser *pParser, type t) {
     rv = gfmParser_getPos(&x, &y, pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    switch (t) {
+    switch (t & T_MASK) {
+        case T_EN_SPIKY:   erv = initSpiky(pEnt, x, y); break;
         case T_EN_WALKY:   erv = initWalky(pEnt, x, y); break;
         case T_EN_G_WALKY: erv = initGreenWalky(pEnt, x, y); break;
         default: {
@@ -57,7 +59,8 @@ err preUpdateEnemy(entityCtx *pEnt) {
     rv = gfmSprite_getChild(&pChild, &type, pEnt->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    switch (type) {
+    switch (type & T_MASK) {
+        case T_EN_SPIKY:   return preUpdateSpiky(pEnt);
         case T_EN_WALKY:   return preUpdateWalky(pEnt);
         case T_EN_G_WALKY: return preUpdateGreenWalky(pEnt);
         default: {
@@ -79,7 +82,8 @@ err postUpdateEnemy(entityCtx *pEnt) {
     rv = gfmSprite_getChild(&pChild, &type, pEnt->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    switch (type) {
+    switch (type & T_MASK) {
+        case T_EN_SPIKY:   return postUpdateSpiky(pEnt);
         case T_EN_WALKY:   return postUpdateWalky(pEnt);
         case T_EN_G_WALKY: return postUpdateGreenWalky(pEnt);
         default: {
@@ -101,7 +105,8 @@ err drawEnemy(entityCtx *pEnt) {
     rv = gfmSprite_getChild(&pChild, &type, pEnt->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    switch (type) {
+    switch (type & T_MASK) {
+        case T_EN_SPIKY:   return drawSpiky(pEnt);
         case T_EN_WALKY:   return drawWalky(pEnt);
         case T_EN_G_WALKY: return drawGreenWalky(pEnt);
         default: {

@@ -138,10 +138,12 @@ err doCollide(gfmQuadtreeRoot *pQt) {
         fallthrough = 0;
         switch (MERGE_TYPES(node1.type, node2.type)) {
 /*== ENVIRONMENT'S COLLISION =================================================*/
+            CASE(T_FLOOR, T_EN_SPIKY)
             CASE(T_FLOOR, T_EN_WALKY)
             CASE(T_FLOOR, T_EN_G_WALKY)
             CASE(T_FLOOR, T_GUNNY)
             CASE(T_FLOOR, T_SWORDY)
+            CASE(T_FLOOR_NOTP, T_EN_SPIKY)
             CASE(T_FLOOR_NOTP, T_EN_WALKY)
             CASE(T_FLOOR_NOTP, T_EN_G_WALKY)
             CASE(T_FLOOR_NOTP, T_GUNNY)
@@ -219,6 +221,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 #endif  /* JJATENGINE */
                 rv = GFMRV_OK;
             } break;
+            CASE(T_SPIKE, T_EN_SPIKY)
             CASE(T_SPIKE, T_EN_WALKY)
             CASE(T_SPIKE, T_EN_G_WALKY)
             CASE(T_SPIKE, T_GUNNY)
@@ -273,8 +276,11 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 collision.flags |= CF_SKIP;
             } break;
 /*== ENTITIES'S COLLISION ====================================================*/
-            SELFCASE(T_EN_G_WALKY)
+            SELFCASE(T_EN_SPIKY)
             SELFCASE(T_EN_WALKY)
+            SELFCASE(T_EN_G_WALKY)
+            CASE(T_EN_G_WALKY, T_EN_SPIKY)
+            CASE(T_EN_WALKY, T_EN_SPIKY)
             CASE(T_EN_WALKY, T_EN_G_WALKY)
             CASE(T_SWORDY, T_EN_G_WALKY)
             CASE(T_GUNNY, T_EN_G_WALKY)
@@ -289,6 +295,38 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 
                 if (entA != entB) {
                     collideTwoEntities(entA, entB);
+                }
+                rv = GFMRV_OK;
+            } break;
+            CASE(T_SWORDY, T_EN_SPIKY)
+            CASE(T_GUNNY, T_EN_SPIKY) {
+                entityCtx *pPlayer, *pEnemy;
+                int damage;
+
+                if (isFirstCase) {
+                    pPlayer = (entityCtx*)node1.pChild;
+                    pEnemy = (entityCtx*)node2.pChild;
+                    damage = (node2.type >> T_BITS);
+                }
+                else {
+                    pPlayer = (entityCtx*)node2.pChild;
+                    pEnemy = (entityCtx*)node1.pChild;
+                    damage = (node1.type >> T_BITS);
+                }
+
+                rv = gfmObject_justOverlaped(node1.pObject, node2.pObject);
+                if (rv == GFMRV_TRUE) {
+                    gfmCollision col;
+                    int dir;
+
+                    gfmSprite_getCollision(&col, pEnemy->pSelf);
+                    gfmSprite_getDirection(&dir, pEnemy->pSelf);
+
+                    if ((dir == DIR_RIGHT && (col & gfmCollision_right))
+                            || (dir == DIR_LEFT && (col & gfmCollision_left))) {
+                        hitEntity(pPlayer, damage);
+                        collision.flags |= CF_SKIP;
+                    }
                 }
                 rv = GFMRV_OK;
             } break;
@@ -315,6 +353,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 
                 collision.flags |= CF_SKIP;
             } break;
+            CASE(T_ATK_SWORD, T_EN_SPIKY)
             CASE(T_ATK_SWORD, T_EN_WALKY) {
                 gfmSprite *pSword;
                 entityCtx *walky;
@@ -363,6 +402,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORESELF(T_ATK_SWORD)
             break;
 /*== GUNNY'S BULLET ==========================================================*/
+            CASE(T_TEL_BULLET, T_EN_SPIKY)
             CASE(T_TEL_BULLET, T_EN_WALKY)
             CASE(T_TEL_BULLET, T_SWORDY) {
                 gfmGroupNode *pNode;
@@ -493,6 +533,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 /*== DAMAGE TO ENTITY ========================================================*/
             CASE(T_SWORDY, T_EN_G_WALKY_ATK)
             CASE(T_GUNNY, T_EN_G_WALKY_ATK)
+            CASE(T_EN_SPIKY, T_EN_G_WALKY_ATK)
             CASE(T_EN_WALKY, T_EN_G_WALKY_ATK) {
                 entityCtx *pEnt;
                 int damage;
@@ -539,8 +580,9 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 }
             } break;
 /*== SWORDY'S ATTACK TRAIL (AFTER HITTING ANYTHING) ==========================*/
-            IGNORE(T_SWORD_FX, T_EN_G_WALKY)
+            IGNORE(T_SWORD_FX, T_EN_SPIKY)
             IGNORE(T_SWORD_FX, T_EN_WALKY)
+            IGNORE(T_SWORD_FX, T_EN_G_WALKY)
             IGNORE(T_SWORD_FX, T_SWORDY)
             IGNORE(T_SWORD_FX, T_GUNNY)
             IGNORE(T_SWORD_FX, T_FLOOR)
@@ -557,6 +599,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_FX, T_EN_G_WALKY_ATK)
             IGNORE(T_FX, T_EN_G_WALKY)
             IGNORE(T_FX, T_EN_WALKY)
+            IGNORE(T_FX, T_EN_SPIKY)
             IGNORE(T_FX, T_SWORDY)
             IGNORE(T_FX, T_GUNNY)
             IGNORE(T_FX, T_FLOOR)

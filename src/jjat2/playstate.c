@@ -58,8 +58,6 @@ err initPlaystate() {
         i++;
     }
 
-    game.pMap = playstate.pMap;
-
     return ERR_OK;
 }
 
@@ -223,6 +221,12 @@ static err _loadLevel(char *levelName) {
         else if (strcmp(type, "g_walky") == 0) {
             entityCtx *pEnt = &playstate.entities[playstate.entityCount];
             erv = parseEnemy(pEnt, playstate.pParser, T_EN_G_WALKY);
+            ASSERT(erv == ERR_OK, erv);
+            playstate.entityCount++;
+        }
+        else if (strcmp(type, "spiky") == 0) {
+            entityCtx *pEnt = &playstate.entities[playstate.entityCount];
+            erv = parseEnemy(pEnt, playstate.pParser, T_EN_SPIKY);
             ASSERT(erv == ERR_OK, erv);
             playstate.entityCount++;
         }

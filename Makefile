@@ -36,8 +36,9 @@
          jjat2/static.o \
          jjat2/swordy.o \
          jjat2/teleport.o \
-         jjat2/enemies/walky.o \
-         jjat2/enemies/g_walky.o
+         jjat2/enemies/g_walky.o \
+         jjat2/enemies/spiky.o \
+         jjat2/enemies/walky.o
 
 # Define the target name
   TARGET := game

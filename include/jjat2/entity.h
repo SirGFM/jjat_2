@@ -212,5 +212,13 @@ void hitEntity(entityCtx *entity, int damage);
  */
 void killEntity(entityCtx *entity);
 
+/**
+ * Flip the entity if it reaches an edge
+ *
+ * @param  [ in]entity The entity
+ * @param  [ in]vx     The entity's velocity
+ */
+void flipEntityOnEdge(entityCtx *entity, double vx);
+
 #endif /* __JJAT2_ENTITY_H__ */
 
