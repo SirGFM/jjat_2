@@ -137,6 +137,10 @@ err doCollide(gfmQuadtreeRoot *pQt) {
         isFirstCase = 0;
         fallthrough = 0;
         switch (MERGE_TYPES(node1.type, node2.type)) {
+/*== CHANGE MAP ==============================================================*/
+            CASE(T_LOADZONE, T_GUNNY)
+            CASE(T_LOADZONE, T_SWORDY) {
+            } break;
 /*== ENVIRONMENT'S COLLISION =================================================*/
             CASE(T_FLOOR, T_EN_SPIKY)
             CASE(T_FLOOR, T_EN_WALKY)
@@ -596,6 +600,17 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 /*== COLLISION-LESS EFFECTS ==================================================*/
             IGNORE(T_EN_G_WALKY_ATK, T_SPIKE)
             IGNORE(T_EN_G_WALKY_ATK, T_TEL_BULLET)
+            IGNORE(T_LOADZONE, T_FX)
+            IGNORE(T_LOADZONE, T_SWORD_FX)
+            IGNORE(T_LOADZONE, T_ATK_SWORD)
+            IGNORE(T_LOADZONE, T_TEL_BULLET)
+            IGNORE(T_LOADZONE, T_EN_G_WALKY_ATK)
+            IGNORE(T_LOADZONE, T_EN_G_WALKY)
+            IGNORE(T_LOADZONE, T_EN_WALKY)
+            IGNORE(T_LOADZONE, T_EN_SPIKY)
+            IGNORE(T_LOADZONE, T_FLOOR)
+            IGNORE(T_LOADZONE, T_FLOOR_NOTP)
+            IGNORE(T_LOADZONE, T_SPIKE)
             IGNORE(T_FX, T_EN_G_WALKY_ATK)
             IGNORE(T_FX, T_EN_G_WALKY)
             IGNORE(T_FX, T_EN_WALKY)

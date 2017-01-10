@@ -30,6 +30,7 @@ enum enType {
     , T_FX        = gfmType_reserved_10 /* (13) dirty yellow/green */
 
     , T_FLOOR_NOTP     = (1 << T_BASE_NBITS) | T_FLOOR
+    , T_LOADZONE       = (2 << T_BASE_NBITS) | T_FLOOR
     , T_SWORDY         = (1 << T_BASE_NBITS) | T_PLAYER
     , T_GUNNY          = (2 << T_BASE_NBITS) | T_PLAYER
     , T_ATK_SWORD      = (3 << T_BASE_NBITS) | T_PLAYER
