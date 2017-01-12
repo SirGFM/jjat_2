@@ -24,6 +24,7 @@ enum enEntityFlag {
   , EF_DEACTIVATE      = 0x00002
   , EF_SKIP_COLLISION  = 0x00004
   , EF_HAS_CARRIER     = 0x00008
+  , EF_LOADZONE        = 0x00010
   , EF_AVAILABLEF_FLAG = 0x10000
 };
 typedef enum enEntityFlag entityFlag;

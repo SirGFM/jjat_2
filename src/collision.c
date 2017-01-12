@@ -11,6 +11,7 @@
 #include <jjat2/entity.h>
 #include <jjat2/fx_group.h>
 #include <jjat2/gunny.h>
+#include <jjat2/playstate.h>
 #include <jjat2/teleport.h>
 #include <jjat2/enemies/g_walky.h>
 
@@ -140,6 +141,17 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 /*== CHANGE MAP ==============================================================*/
             CASE(T_LOADZONE, T_GUNNY)
             CASE(T_LOADZONE, T_SWORDY) {
+                entityCtx *pEnt;
+                if (isFirstCase) {
+                    pEnt = (entityCtx*)node2.pChild;
+                    onHitLoadzone(node2.type, node1.type >> T_BITS);
+                }
+                else {
+                    pEnt = (entityCtx*)node1.pChild;
+                    onHitLoadzone(node1.type, node2.type >> T_BITS);
+                }
+
+                pEnt->flags |= EF_LOADZONE;
             } break;
 /*== ENVIRONMENT'S COLLISION =================================================*/
             CASE(T_FLOOR, T_EN_SPIKY)

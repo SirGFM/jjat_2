@@ -29,6 +29,13 @@
 #define MAX_VALID_LEN \
     (MAX_LEVEL_NAME - (sizeof("levels/") - 1) - (sizeof("_obj.gfm") - 1) - 1)
 
+#define PF_TEL_SHIFT 4
+enum {
+    PF_TEL_SWORDY = 0x01
+  , PF_TEL_GUNNY  = 0x02
+  , PF_TEL_LEVEL  = 0xf0
+};
+
 /** Region where the name of maps accessible from the current one is stored */
 static char _stMapsName[MAX_MAPS * (MAX_VALID_LEN + 1)];
 
@@ -79,6 +86,8 @@ err initPlaystate() {
         i++;
     }
 
+    playstate.flags |= PF_TEL_LEVEL;
+
     return ERR_OK;
 }
 
@@ -109,13 +118,40 @@ void freePlaystate() {
     }
 }
 
+/**
+ * Setup loading the next map.
+ *
+ * @param  [ in]type Type of entity that entered the loadzone
+ */
+void onHitLoadzone(int type, int level) {
+    int curLevel;
+
+    /* Check if the triggered level is the same as the stored one (or if no
+     * level has been set yet) */
+    curLevel = (playstate.flags & PF_TEL_LEVEL) >> PF_TEL_SHIFT;
+    if (curLevel != (PF_TEL_LEVEL >> PF_TEL_SHIFT) && curLevel != level) {
+        return;
+    }
+
+    if (type == T_SWORDY) {
+        playstate.flags |= PF_TEL_SWORDY;
+    }
+    else if (type == T_GUNNY) {
+        playstate.flags |= PF_TEL_GUNNY;
+    }
+
+    playstate.flags |= PF_TEL_LEVEL & (level << PF_TEL_SHIFT);
+}
+
 /** Updates the quadtree's bounds according to the currently loaded map */
 static err _updateWorldSize() {
     gfmRV rv;
+    int height, width;
 
-    rv = gfmTilemap_getDimension(&playstate.width, &playstate.height
-            , playstate.pMap);
+    rv = gfmTilemap_getDimension(&width, &height, playstate.pMap);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    playstate.width = width;
+    playstate.height = height;
 
     rv = gfmCamera_setWorldDimensions(game.pCamera, playstate.width
             , playstate.height);
@@ -166,7 +202,7 @@ static err _loadStaticQuadtree() {
 static int _getInt(char *pStr) {
     int ret = 0;
     while (*pStr) {
-        ret = ret * 10 + ('0' - *pStr);
+        ret = ret * 10 + (*pStr - '0');
         pStr++;
     }
     return ret;
@@ -376,8 +412,16 @@ static err _loadLevel(char *levelName, int setPlayer) {
 
 /** Setup the playstate so it may start to be executed */
 err loadPlaystate() {
-    /* TODO Decide where the first map will be loaded from */
-    return _loadLevel("map_test", 1/*setPlayer*/);
+    if ((playstate.flags & PF_TEL_LEVEL) == PF_TEL_LEVEL) {
+        /* Load the default first level */
+        return _loadLevel("map_map0", 1/*setPlayer*/);
+    }
+    else {
+        /* Load the level pointed by the loadzone */
+        int level = (playstate.flags & PF_TEL_LEVEL) >> PF_TEL_SHIFT;
+        char *pMap = playstate.pMapNames[level];
+        return _loadLevel(pMap, 0/*setPlayer*/);
+    }
 }
 
 /**
@@ -405,6 +449,9 @@ err updatePlaystate() {
     gfmRV rv;
     err erv;
     int i;
+
+    playstate.flags &= ~(PF_TEL_SWORDY | PF_TEL_GUNNY);
+    playstate.flags |= PF_TEL_LEVEL;
 
     rv = gfmQuadtree_initRoot(collision.pQt, -16/*x*/, -16/*y*/, playstate.width
             , playstate.height, 8/*depth*/, 16/*nodes*/);
@@ -458,6 +505,12 @@ err updatePlaystate() {
     ASSERT(erv == ERR_OK, erv);
     erv = updateGunnyTeleport(&playstate.gunny);
     ASSERT(erv == ERR_OK, erv);
+
+    /** Check if a loadzone was triggered by both players */
+    if ((playstate.flags & (PF_TEL_SWORDY | PF_TEL_GUNNY))
+            == (PF_TEL_SWORDY | PF_TEL_GUNNY)) {
+        /* TODO Actually trigger level transition & loading */
+    }
 
     return ERR_OK;
 }

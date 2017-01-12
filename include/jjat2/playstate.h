@@ -12,6 +12,8 @@
 
 #include <jjat2/entity.h>
 
+#include <stdint.h>
+
 /* TODO Calculate the max width/height for tilemaps */
 #define TM_MAX_WIDTH    320
 #define TM_MAX_HEIGHT   240
@@ -31,16 +33,6 @@ struct stPlaystateCtx {
     gfmParser *pParser;
     /** The game's map */
     gfmTilemap *pMap;
-    /** How many map names (for teleporting) there are on this map */
-    int teleportCount;
-    /** How many areas there are on this map */
-    int areaCount;
-    /** Map's height, in pixels */
-    int height;
-    /** Map's width, in pixels */
-    int width;
-    /** How many entities there are on the current map */
-    int entityCount;
     /** Swordy character */
     entityCtx swordy;
     /** Gunny character */
@@ -49,6 +41,18 @@ struct stPlaystateCtx {
     entityCtx asyncDummy;
     /** List of enemies and interactables */
     entityCtx entities[MAX_ENTITIES];
+    /** Map's height, in pixels */
+    uint16_t height;
+    /** Map's width, in pixels */
+    uint16_t width;
+    /** How many map names (for teleporting) there are on this map */
+    uint8_t teleportCount;
+    /** How many areas there are on this map */
+    uint8_t areaCount;
+    /** How many entities there are on the current map */
+    uint8_t entityCount;
+    /** Generic flags */
+    uint8_t flags;
 };
 typedef struct stPlaystateCtx playstateCtx;
 
@@ -60,6 +64,13 @@ err initPlaystate();
 
 /** If the playstate has been initialized, properly free it up. */
 void freePlaystate();
+
+/**
+ * Setup loading the next map.
+ *
+ * @param  [ in]type Type of entity that entered the loadzone
+ */
+void onHitLoadzone(int type, int level);
 
 /** Setup the playstate so it may start to be executed */
 err loadPlaystate();
