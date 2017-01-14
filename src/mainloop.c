@@ -14,6 +14,7 @@
 #include <GFraMe/gfmQuadtree.h>
 
 #include <jjat2/fx_group.h>
+#include <jjat2/leveltransition.h>
 #include <jjat2/playstate.h>
 #include <jjat2/static.h>
 
@@ -27,6 +28,8 @@ err mainloop() {
     ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
     erv = initFxGroup();
     ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
+    erv = initLeveltransition();
+    ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
 
     /* Set initial state */
     game.nextState = ST_PLAYSTATE;
@@ -36,6 +39,7 @@ err mainloop() {
         if (game.nextState != ST_NONE) {
             switch (game.nextState) {
                 case ST_PLAYSTATE: erv = loadPlaystate(); break;
+                case ST_LEVELTRANSITION: erv = setupLeveltransition(); break;
                 default: {}
             }
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
@@ -68,6 +72,7 @@ err mainloop() {
             /* Update the current state */
             switch (game.currentState) {
                 case ST_PLAYSTATE: erv = updatePlaystate(); break;
+                case ST_LEVELTRANSITION: erv = updateLeveltransition(); break;
                 default: {}
             }
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
@@ -85,6 +90,7 @@ err mainloop() {
             /* Render the current state */
             switch (game.currentState) {
                 case ST_PLAYSTATE: erv = drawPlaystate(); break;
+                case ST_LEVELTRANSITION: erv = drawLeveltransition(); break;
                 default: {}
             }
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
@@ -110,6 +116,7 @@ err mainloop() {
 
     erv = ERR_OK;
 __ret:
+    freeLeveltransition();
     freeFxGroup();
     freePlaystate();
 

@@ -4,10 +4,14 @@
  * Declare all static variables/contexts.
  */
 #include <jjat2/fx_group.h>
+#include <jjat2/leveltransition.h>
 #include <jjat2/playstate.h>
 #include <jjat2/teleport.h>
 
 #include <string.h>
+
+/** Animation for the level transition */
+leveltransitionCtx lvltransition;
 
 /** The game's playstate */
 playstateCtx playstate;
@@ -24,5 +28,6 @@ void zeroizeGameGlobalCtx() {
     memset(&playstate, 0x0, sizeof(playstateCtx));
     memset(&fx, 0x0, sizeof(gfmGroup*));
     memset(&teleport, 0x0, sizeof(teleportCtx));
+    memset(&lvltransition, 0x0, sizeof(leveltransitionCtx));
 }
 

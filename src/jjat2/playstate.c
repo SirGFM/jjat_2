@@ -16,18 +16,12 @@
 #include <jjat2/fx_group.h>
 #include <jjat2/enemy.h>
 #include <jjat2/gunny.h>
+#include <jjat2/leveltransition.h>
 #include <jjat2/playstate.h>
 #include <jjat2/swordy.h>
 #include <jjat2/teleport.h>
 
 #include <string.h>
-
-/** Maximum number of characters for the path to any given level */
-#define MAX_LEVEL_NAME  128
-/** Maximum length for any level name. Since this is later modified (with prefix
- * and postfix), this length does NOT leave a free space for the trailing '\0' */
-#define MAX_VALID_LEN \
-    (MAX_LEVEL_NAME - (sizeof("levels/") - 1) - (sizeof("_obj.gfm") - 1) - 1)
 
 #define PF_TEL_SHIFT 4
 enum {
@@ -35,9 +29,12 @@ enum {
   , PF_TEL_GUNNY  = 0x02
   , PF_TEL_LEVEL  = 0xf0
 };
-
-/** Region where the name of maps accessible from the current one is stored */
-static char _stMapsName[MAX_MAPS * (MAX_VALID_LEN + 1)];
+#define _setLevelIndex(index) \
+    ((index << PF_TEL_SHIFT) & PF_TEL_LEVEL)
+#define _getLevelIndex(flags) \
+    ((flags & PF_TEL_LEVEL) >> PF_TEL_SHIFT)
+#define _noLevelIndex \
+    (PF_TEL_LEVEL >> PF_TEL_SHIFT)
 
 /** Initialize the playstate so a level may be later loaded and played */
 err initPlaystate() {
@@ -73,19 +70,6 @@ err initPlaystate() {
         i++;
     }
 
-    i = 0;
-    while (i < MAX_AREAS) {
-        rv = gfmObject_getNew(&playstate.pAreas[i]);
-        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-        i++;
-    }
-
-    i = 0;
-    while (i < MAX_MAPS) {
-        playstate.pMapNames[i] = _stMapsName + i * (MAX_VALID_LEN + 1);
-        i++;
-    }
-
     playstate.flags |= PF_TEL_LEVEL;
 
     return ERR_OK;
@@ -110,12 +94,6 @@ void freePlaystate() {
         gfmSprite_free(&playstate.entities[i].pSelf);
         i++;
     }
-
-    i = 0;
-    while (i < MAX_AREAS) {
-        gfmObject_free(&playstate.pAreas[i]);
-        i++;
-    }
 }
 
 /**
@@ -123,13 +101,14 @@ void freePlaystate() {
  *
  * @param  [ in]type Type of entity that entered the loadzone
  */
-void onHitLoadzone(int type, int level) {
-    int curLevel;
+void onHitLoadzone(int type, int levelType) {
+    int curLevel, level;
 
     /* Check if the triggered level is the same as the stored one (or if no
      * level has been set yet) */
-    curLevel = (playstate.flags & PF_TEL_LEVEL) >> PF_TEL_SHIFT;
-    if (curLevel != (PF_TEL_LEVEL >> PF_TEL_SHIFT) && curLevel != level) {
+    curLevel = _getLevelIndex(playstate.flags);
+    level = getLoadzoneIndex(levelType);
+    if (curLevel != _noLevelIndex && curLevel != level) {
         return;
     }
 
@@ -140,7 +119,8 @@ void onHitLoadzone(int type, int level) {
         playstate.flags |= PF_TEL_GUNNY;
     }
 
-    playstate.flags |= PF_TEL_LEVEL & (level << PF_TEL_SHIFT);
+    playstate.flags &= ~PF_TEL_LEVEL;
+    playstate.flags |= _setLevelIndex(level);
 }
 
 /** Updates the quadtree's bounds according to the currently loaded map */
@@ -167,7 +147,7 @@ static err _updateWorldSize() {
 /** Load the static quadtree */
 static err _loadStaticQuadtree() {
     gfmRV rv;
-    int i;
+    err erv;
 
     rv = gfmQuadtree_initRoot(collision.pStaticQt, -16/*x*/, -16/*y*/
             , playstate.width, playstate.height, 8/*depth*/, 16/*nodes*/);
@@ -178,34 +158,11 @@ static err _loadStaticQuadtree() {
 
     rv = gfmQuadtree_populateTilemap(collision.pStaticQt, playstate.pMap);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    i = 0;
-    while (i < playstate.areaCount) {
-        rv = gfmObject_setFixed(playstate.pAreas[i]);
-        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-        rv = gfmObject_update(playstate.pAreas[i], game.pCtx);
-        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-        rv = gfmQuadtree_populateObject(collision.pStaticQt
-                , playstate.pAreas[i]);
-        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-        i++;
-    }
+
+    erv = calculateStaticLeveltransition();
+    ASSERT(erv == ERR_OK, erv);
 
     return ERR_OK;
-}
-
-/**
- * Retrieve an integer from a string
- *
- * @param  [ in]pStr The string
- * @return           The integer
- */
-static int _getInt(char *pStr) {
-    int ret = 0;
-    while (*pStr) {
-        ret = ret * 10 + (*pStr - '0');
-        pStr++;
-    }
-    return ret;
 }
 
 /**
@@ -249,6 +206,8 @@ static err _loadLevel(char *levelName, int setPlayer) {
         pos += len; \
     } while (0)
 
+    ASSERT(levelName != 0, ERR_ARGUMENTBAD);
+
     /* Level names will get "levels/", "_tm.gfm" and "_obj.gfm" concatenated, so
      * it must be at most this many characters long:
      *     MAX_LEVEL_NAME - (sizeof("levels/") - 1) - (sizeof("_obj.gfm") - 1) - 1
@@ -276,16 +235,14 @@ static err _loadLevel(char *levelName, int setPlayer) {
             , pos + LEN("_obj.gfm"));
     ASSERT(erv == ERR_OK, erv);
 
+    resetLeveltransition();
+
     playstate.entityCount = 0;
-    playstate.teleportCount = 0;
-    playstate.areaCount = 0;
     while (1) {
         char *type;
         err erv;
 
         ASSERT(playstate.entityCount < MAX_ENTITIES, ERR_BUFFERTOOSMALL);
-        ASSERT(playstate.teleportCount < MAX_MAPS, ERR_BUFFERTOOSMALL);
-        ASSERT(playstate.areaCount < MAX_AREAS, ERR_BUFFERTOOSMALL);
         rv = gfmParser_parseNext(playstate.pParser);
         if (rv == GFMRV_PARSER_FINISHED) {
             break;
@@ -296,67 +253,12 @@ static err _loadLevel(char *levelName, int setPlayer) {
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
         if (strcmp(type, "loadzone") == 0) {
-            gfmObject *pObj = playstate.pAreas[playstate.areaCount];
-            int *pos = &playstate.teleportPosition[playstate.teleportCount];
-            char *pName = playstate.pMapNames[playstate.teleportCount];
-            int i, l, h, tgtX, tgtY, w, x, y;
-
-            rv = gfmParser_getPos(&x, &y, playstate.pParser);
-            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-            rv = gfmParser_getDimensions(&w, &h, playstate.pParser);
-            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-
-            rv = gfmParser_getNumProperties(&l, playstate.pParser);
-            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-
-            tgtX = -1;
-            tgtY = -1;
-            pName[0] = '\0';
-            i = 0;
-            while (i < l) {
-                char *pKey, *pVal;
-
-                rv = gfmParser_getProperty(&pKey, &pVal, playstate.pParser, i);
-                ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-
-                if (strcmp(pKey, "tgt_x") == 0) {
-                    tgtX = _getInt(pVal);
-                }
-                else if (strcmp(pKey, "tgt_y") == 0) {
-                    tgtY = _getInt(pVal);
-                }
-                else if (strcmp(pKey, "dest") == 0) {
-                    ASSERT(strlen(pVal) < MAX_VALID_LEN, ERR_PARSINGERR);
-                    strcpy(pName, pVal);
-                }
-
-                i++;
-            }
-            ASSERT(tgtX > -1 && tgtX < 0x10000, ERR_PARSINGERR);
-            ASSERT(tgtY > -1 && tgtY < 0x10000, ERR_PARSINGERR);
-            ASSERT(pName[0] != '\0', ERR_PARSINGERR);
-
-            *pos = (tgtY << 16) | tgtX;
-
-            rv = gfmObject_init(pObj, x, y, w, h, 0/*child*/
-                    , (playstate.teleportCount << T_BITS) | T_LOADZONE);
-            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-
-            playstate.areaCount++;
-            playstate.teleportCount++;
+            erv = parseLoadzone(playstate.pParser);
+            ASSERT(erv == ERR_OK, erv);
         }
         else if (strcmp(type, "invisible_wall") == 0) {
-            gfmObject *pObj = playstate.pAreas[playstate.areaCount];
-            int h, w, x, y;
-
-            rv = gfmParser_getPos(&x, &y, playstate.pParser);
-            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-            rv = gfmParser_getDimensions(&w, &h, playstate.pParser);
-            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-            rv = gfmObject_init(pObj, x, y, w, h, 0/*child*/, T_FLOOR_NOTP);
-            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-
-            playstate.areaCount++;
+            erv = parseInvisibleWall(playstate.pParser);
+            ASSERT(erv == ERR_OK, erv);
         }
         else if (strcmp(type, "swordy_pos") == 0) {
             if (setPlayer) {
@@ -418,9 +320,7 @@ err loadPlaystate() {
     }
     else {
         /* Load the level pointed by the loadzone */
-        int level = (playstate.flags & PF_TEL_LEVEL) >> PF_TEL_SHIFT;
-        char *pMap = playstate.pMapNames[level];
-        return _loadLevel(pMap, 0/*setPlayer*/);
+        return _loadLevel(getNextLevelName(), 0/*setPlayer*/);
     }
 }
 
@@ -509,7 +409,12 @@ err updatePlaystate() {
     /** Check if a loadzone was triggered by both players */
     if ((playstate.flags & (PF_TEL_SWORDY | PF_TEL_GUNNY))
             == (PF_TEL_SWORDY | PF_TEL_GUNNY)) {
-        /* TODO Actually trigger level transition & loading */
+        int curLevel;
+
+        curLevel = _getLevelIndex(playstate.flags);
+
+        /* TODO Setup & trigger level transition/loading */
+        //switchToLevelTransition(curLevel);
     }
 
     return ERR_OK;
@@ -541,6 +446,18 @@ err drawPlaystate() {
 
     rv = gfmGroup_draw(fx, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    return ERR_OK;
+}
+
+/** Draw only the players */
+err drawPlayers() {
+    err erv;
+
+    erv = drawGunny(&playstate.gunny);
+    ASSERT(erv == ERR_OK, erv);
+    erv = drawSwordy(&playstate.swordy);
+    ASSERT(erv == ERR_OK, erv);
 
     return ERR_OK;
 }

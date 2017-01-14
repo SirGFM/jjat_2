@@ -144,11 +144,11 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 entityCtx *pEnt;
                 if (isFirstCase) {
                     pEnt = (entityCtx*)node2.pChild;
-                    onHitLoadzone(node2.type, node1.type >> T_BITS);
+                    onHitLoadzone(node2.type, node1.type);
                 }
                 else {
                     pEnt = (entityCtx*)node1.pChild;
-                    onHitLoadzone(node1.type, node2.type >> T_BITS);
+                    onHitLoadzone(node1.type, node2.type);
                 }
 
                 pEnt->flags |= EF_LOADZONE;
