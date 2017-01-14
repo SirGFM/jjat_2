@@ -27,7 +27,7 @@ struct stLeveltransitionCtx {
     /** Target position for the player, after teleporting to a new map */
     uint32_t teleportPosition[MAX_AREAS];
     /** Controls the transition animation */
-    uint32_t timer;
+    int32_t timer;
     /** How many areas were used on the current level */
     uint8_t areasCount;
     /** Index of the level to be loaded */

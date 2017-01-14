@@ -318,23 +318,45 @@ err updateLeveltransition() {
     rv = gfmCamera_getPosition(&x, &y, game.pCamera);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+#define TWEEN(var_op) \
+    do { \
+        var_op ((TRANSITION_TIME - lvltransition.timer) * START_POS) / TRANSITION_TIME \
+                + (lvltransition.timer * END_POS) / TRANSITION_TIME; \
+    } while (0)
+
     if (lvltransition.timer < TRANSITION_TIME) {
         switch (type & TEL_DIR_MASK) {
             case TEL_UP: {
                 x -= 16;
-                y += (500 - 2 * lvltransition.timer) * HEIGHT_IN_TILES * 8 / 500;
+#define START_POS (V_HEIGHT)
+#define END_POS   (-16)
+                TWEEN(y +=);
+#undef START_POS
+#undef END_POS
             } break;
             case TEL_DOWN: {
                 x -= 16;
-                y -= (500 - 2 * lvltransition.timer) * HEIGHT_IN_TILES * 8 / 500;
+#define START_POS (-HEIGHT_IN_TILES * 8)
+#define END_POS   (-16)
+                TWEEN(y +=);
+#undef START_POS
+#undef END_POS
             } break;
             case TEL_LEFT: {
-                x += (500 - 2 * lvltransition.timer) * WIDTH_IN_TILES * 8 / 500;
                 y -= 16;
+#define START_POS (V_WIDTH)
+#define END_POS   (-16)
+                TWEEN(x +=);
+#undef START_POS
+#undef END_POS
             } break;
             case TEL_RIGHT: {
-                x -= (500 - 2 * lvltransition.timer) * WIDTH_IN_TILES * 8 / 500;
                 y -= 16;
+#define START_POS (-WIDTH_IN_TILES * 8)
+#define END_POS   (-16)
+                TWEEN(x +=);
+#undef START_POS
+#undef END_POS
             } break;
         }
     }
