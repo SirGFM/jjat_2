@@ -45,6 +45,7 @@ enum {
   , TEL_RIGHT      = 0x30000000
 
   , TEL_DIR_MASK   = 0x30000000
+  , TEL_DIR_BITS   = 24
   , TEL_INDEX_MASK = 0x0ff00000
   , TEL_INDEX_BITS = 20
 };
@@ -79,13 +80,7 @@ static int _getInt(char *pStr) {
  * @param  [ in]cy       The camera position
  */
 static void _tweenTilemapIn(int cx, int cy) {
-    void *pChild;
-    int type;
-
-    gfmObject_getChild(&pChild, &type
-            , lvltransition.pAreas[lvltransition.index]);
-
-    switch (type & TEL_DIR_MASK) {
+    switch ((lvltransition.dir << TEL_DIR_BITS) & TEL_DIR_MASK) {
         case TEL_UP: {
             cx -= 16;
 #define START_POS (V_HEIGHT)
@@ -175,13 +170,7 @@ static void _setPlayersPosition() {
  * @param  [ in]cy       The camera position
  */
 static void _tweenTilemapOut(int cx, int cy) {
-    void *pChild;
-    int type;
-
-    gfmObject_getChild(&pChild, &type
-            , lvltransition.pAreas[lvltransition.index]);
-
-    switch (type & TEL_DIR_MASK) {
+    switch ((lvltransition.dir << TEL_DIR_BITS) & TEL_DIR_MASK) {
         case TEL_UP: {
             cx -= 16;
 #define START_POS (-16)
@@ -468,17 +457,28 @@ err updateLeveltransition() {
     gfmRV rv;
     int x, y;
 
-    ASSERT(lvltransition.index < lvltransition.areasCount, ERR_INDEXOOB);
-
     lvltransition.timer += game.elapsed;
 
     rv = gfmCamera_getPosition(&x, &y, game.pCamera);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     if (lvltransition.timer < TRANSITION_TIME) {
+        void *pChild;
+        int type;
+
+        ASSERT(lvltransition.index < lvltransition.areasCount, ERR_INDEXOOB);
+
+        gfmObject_getChild(&pChild, &type
+                , lvltransition.pAreas[lvltransition.index]);
+
+        lvltransition.dir = (type & TEL_DIR_MASK) >> TEL_DIR_BITS;
+
+
         _tweenTilemapIn(x, y);
     }
     else if (lvltransition.timer < 2 * TRANSITION_TIME) {
+        ASSERT(lvltransition.index < lvltransition.areasCount, ERR_INDEXOOB);
+
         _tweenSprite(playstate.swordy.pSelf, x, y, TRANSITION_TIME);
         _tweenSprite(playstate.gunny.pSelf, x, y, TRANSITION_TIME);
 
@@ -486,9 +486,16 @@ err updateLeveltransition() {
     }
     else if (lvltransition.timer < 3 * TRANSITION_TIME) {
         if (!lvltransition.loaded) {
+            err erv;
+
+            ASSERT(lvltransition.index < lvltransition.areasCount
+                    , ERR_INDEXOOB);
+
             _setPlayersPosition();
 
-            /* TODO Load level */
+            /* Load level & reset the FPS counter to ensure there's no lag */
+            erv = loadPlaystate();
+            ASSERT(erv == ERR_OK, erv);
             rv = gfm_resetFPS(game.pCtx);
             ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 

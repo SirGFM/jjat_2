@@ -34,6 +34,8 @@ struct stLeveltransitionCtx {
     uint8_t index;
     /** Whether the next level has been loaded */
     uint8_t loaded;
+    /** Direction of the current transition (shifted 24 bits) */
+    uint8_t dir;
 };
 typedef struct stLeveltransitionCtx leveltransitionCtx;
 

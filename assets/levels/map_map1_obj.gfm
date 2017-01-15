@@ -1,0 +1,6 @@
+obj terminal 224 208 16 16
+obj g_walky 200 208 8 8 [ do_attack , 0 ]
+obj g_walky 144 208 8 8
+obj loadzone 0 88 16 48 [ dest , map_map0 ] [ dir , right ] [ tgt_x , 35 ] [ tgt_y , 25 ]
+area invisible_wall -24 0 24 240
+area invisible_wall 320 0 24 240
