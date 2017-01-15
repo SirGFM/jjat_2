@@ -417,6 +417,9 @@ err updatePlaystate() {
         switchToLevelTransition(curLevel);
     }
 
+    erv = updateCamera(&playstate.swordy, &playstate.gunny);
+    ASSERT(erv == ERR_OK, erv);
+
     return ERR_OK;
 }
 
@@ -425,9 +428,6 @@ err drawPlaystate() {
     gfmRV rv;
     err erv;
     int i;
-
-    erv = updateCamera(&playstate.swordy, &playstate.gunny);
-    ASSERT(erv == ERR_OK, erv);
 
     rv = gfmTilemap_draw(playstate.pMap, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
