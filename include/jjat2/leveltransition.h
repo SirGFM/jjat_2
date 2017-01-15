@@ -26,6 +26,10 @@ struct stLeveltransitionCtx {
     gfmTilemap *pTransition;
     /** Target position for the player, after teleporting to a new map */
     uint32_t teleportPosition[MAX_AREAS];
+    /** Initial position of gunny's tween */
+    uint32_t gunnyPos;
+    /** Initial position of swordy's tween */
+    uint32_t swordyPos;
     /** Controls the transition animation */
     int32_t timer;
     /** How many areas were used on the current level */

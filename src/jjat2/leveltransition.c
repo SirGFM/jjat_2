@@ -122,13 +122,12 @@ static void _tweenTilemapIn(int cx, int cy) {
  * Tween a sprite in screen space toward the next position (coverted to screen
  * space)
  *
- * @param  [ in]pSpr     The sprite
  * @param  [ in]cx       The camera position
  * @param  [ in]cy       The camera position
  * @param  [ in]initTime Time when the tween started
  */
-static void _tweenSprite(gfmSprite *pSpr, int cx, int cy, int initTime) {
-    int dstX, dstY, px, py, tgtX, tgtY;
+static void _tweenPlayers(int cx, int cy, int initTime) {
+    int dstX, dstY, srcX, srcY, tgtX, tgtY;
 
     /* Adjust the target position to be within the current camera */
     tgtX = (lvltransition.teleportPosition[lvltransition.index] & 0xffff)
@@ -136,18 +135,33 @@ static void _tweenSprite(gfmSprite *pSpr, int cx, int cy, int initTime) {
     tgtY = ((lvltransition.teleportPosition[lvltransition.index] >> 16)
             & 0xffff) + cy;
 
-    gfmSprite_getPosition(&px, &py, pSpr);
-#define START_POS (px)
+    srcX = lvltransition.swordyPos & 0xffff;
+    srcY = (lvltransition.swordyPos >> 16) & 0xffff;
+#define START_POS (srcX)
 #define END_POS   (tgtX)
             TWEEN(dstX =, initTime);
 #undef START_POS
 #undef END_POS
-#define START_POS (py)
+#define START_POS (srcY)
 #define END_POS   (tgtY)
             TWEEN(dstY =, initTime);
 #undef START_POS
 #undef END_POS
-    gfmSprite_setPosition(pSpr, dstX, dstY);
+    setSwordyPositionFromParser(&playstate.swordy, dstX, dstY);
+
+    srcX = lvltransition.gunnyPos & 0xffff;
+    srcY = (lvltransition.gunnyPos >> 16) & 0xffff;
+#define START_POS (srcX)
+#define END_POS   (tgtX)
+            TWEEN(dstX =, initTime);
+#undef START_POS
+#undef END_POS
+#define START_POS (srcY)
+#define END_POS   (tgtY)
+            TWEEN(dstY =, initTime);
+#undef START_POS
+#undef END_POS
+    setGunnyPositionFromParser(&playstate.gunny, dstX, dstY);
 }
 
 /** Set both sprites position at the next position in world space */
@@ -446,6 +460,11 @@ err setupLeveltransition() {
     rv = gfmTilemap_setPosition(lvltransition.pTransition, x, y);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+    gfmSprite_getPosition(&x, &y, playstate.swordy.pSelf);
+    lvltransition.swordyPos = ((y & 0xffff) << 16) | (x & 0xffff);
+    gfmSprite_getPosition(&x, &y, playstate.gunny.pSelf);
+    lvltransition.gunnyPos = ((y & 0xffff) << 16) | (x & 0xffff);
+
     lvltransition.loaded = 0;
     lvltransition.timer = 0;
 
@@ -479,8 +498,7 @@ err updateLeveltransition() {
     else if (lvltransition.timer < 2 * TRANSITION_TIME) {
         ASSERT(lvltransition.index < lvltransition.areasCount, ERR_INDEXOOB);
 
-        _tweenSprite(playstate.swordy.pSelf, x, y, TRANSITION_TIME);
-        _tweenSprite(playstate.gunny.pSelf, x, y, TRANSITION_TIME);
+        _tweenPlayers(x, y, TRANSITION_TIME);
 
         gfmTilemap_setPosition(lvltransition.pTransition, -16, -16);
     }

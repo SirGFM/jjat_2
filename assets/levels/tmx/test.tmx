@@ -281,7 +281,7 @@
     <property name="dest" value="map_map1"/>
     <property name="dir" value="left"/>
     <property name="tgt_x" value="4"/>
-    <property name="tgt_y" value="15"/>
+    <property name="tgt_y" value="17"/>
    </properties>
   </object>
   <object id="28" name="wall" type="invisible_wall" x="-40" y="-40" width="40" height="280"/>
@@ -353,7 +353,7 @@
     <property name="dest" value="map_map0"/>
     <property name="dir" value="right"/>
     <property name="tgt_x" value="35"/>
-    <property name="tgt_y" value="25"/>
+    <property name="tgt_y" value="27"/>
    </properties>
   </object>
   <object id="27" name="wall" type="invisible_wall" x="-24" y="0" width="24" height="240"/>
