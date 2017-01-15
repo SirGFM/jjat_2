@@ -114,6 +114,17 @@ void freeGunny(entityCtx *gunny) {
 }
 
 /**
+ * Set gunny's position based on a value retrieved from the parser
+ *
+ * @param  [ in]gunny The player
+ * @param  [ in]x     The position
+ * @param  [ in]y     The position
+ */
+void setGunnyPositionFromParser(entityCtx *gunny, int x, int y) {
+    gfmSprite_setPosition(gunny->pSelf, x + gunny_width, y - gunny_height);
+}
+
+/**
  * Parse gunny into its position
  *
  * @param  [ in]gunny  The player
@@ -126,8 +137,7 @@ err parseGunny(entityCtx *gunny, gfmParser *pParser) {
 
     rv = gfmParser_getPos(&x, &y, pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    rv = gfmSprite_setPosition(gunny->pSelf, x + gunny_width, y - gunny_height);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    setGunnyPositionFromParser(gunny, x, y);
 
     erv = setEntityAnimation(gunny, STAND, 1/*force*/);
     ASSERT(erv == ERR_OK, erv);

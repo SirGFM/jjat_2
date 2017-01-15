@@ -120,6 +120,17 @@ void freeSwordy(entityCtx *swordy) {
 }
 
 /**
+ * Set swordy's position based on a value retrieved from the parser
+ *
+ * @param  [ in]swordy The player
+ * @param  [ in]x      The position
+ * @param  [ in]y      The position
+ */
+void setSwordyPositionFromParser(entityCtx *swordy, int x, int y) {
+    gfmSprite_setPosition(swordy->pSelf, x + swordy_width, y - swordy_height);
+}
+
+/**
  * Parse swordy into its position
  *
  * @param  [ in]swordy  The player
@@ -132,9 +143,7 @@ err parseSwordy(entityCtx *swordy, gfmParser *pParser) {
 
     rv = gfmParser_getPos(&x, &y, pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    rv = gfmSprite_setPosition(swordy->pSelf, x + swordy_width
-            , y - swordy_height);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    setSwordyPositionFromParser(swordy, x, y);
 
     erv = setEntityAnimation(swordy, STAND, 1/*force*/);
     ASSERT(erv == ERR_OK, erv);

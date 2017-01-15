@@ -32,6 +32,8 @@ struct stLeveltransitionCtx {
     uint8_t areasCount;
     /** Index of the level to be loaded */
     uint8_t index;
+    /** Whether the next level has been loaded */
+    uint8_t loaded;
 };
 typedef struct stLeveltransitionCtx leveltransitionCtx;
 

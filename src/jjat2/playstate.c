@@ -413,8 +413,8 @@ err updatePlaystate() {
 
         curLevel = _getLevelIndex(playstate.flags);
 
-        /* TODO Setup & trigger level transition/loading */
-        //switchToLevelTransition(curLevel);
+        /* Setup & trigger level transition/loading */
+        switchToLevelTransition(curLevel);
     }
 
     return ERR_OK;

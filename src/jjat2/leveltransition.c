@@ -12,13 +12,16 @@
 #include <conf/game.h>
 #include <conf/type.h>
 
+#include <jjat2/gunny.h>
 #include <jjat2/leveltransition.h>
 #include <jjat2/playstate.h>
+#include <jjat2/swordy.h>
 
 #include <GFraMe/gfmCamera.h>
 #include <GFraMe/gfmObject.h>
 #include <GFraMe/gfmParser.h>
 #include <GFraMe/gfmQuadtree.h>
+#include <GFraMe/gfmSprite.h>
 #include <GFraMe/gfmTilemap.h>
 
 #include <string.h>
@@ -60,6 +63,163 @@ static int _getInt(char *pStr) {
     }
     return ret;
 }
+
+#define TWEEN(var_op, init_time) \
+    do { \
+        var_op ( ((TRANSITION_TIME - (lvltransition.timer - (init_time))) \
+                * (START_POS)) / TRANSITION_TIME) \
+            + ( ((lvltransition.timer - (init_time)) * (END_POS)) \
+                / TRANSITION_TIME); \
+    } while (0)
+
+/**
+ * Tween the tilemap INTO the screen
+ *
+ * @param  [ in]cx       The camera position
+ * @param  [ in]cy       The camera position
+ */
+static void _tweenTilemapIn(int cx, int cy) {
+    void *pChild;
+    int type;
+
+    gfmObject_getChild(&pChild, &type
+            , lvltransition.pAreas[lvltransition.index]);
+
+    switch (type & TEL_DIR_MASK) {
+        case TEL_UP: {
+            cx -= 16;
+#define START_POS (V_HEIGHT)
+#define END_POS   (-16)
+            TWEEN(cy +=, 0);
+#undef START_POS
+#undef END_POS
+        } break;
+        case TEL_DOWN: {
+            cx -= 16;
+#define START_POS (-HEIGHT_IN_TILES * 8)
+#define END_POS   (-16)
+            TWEEN(cy +=, 0);
+#undef START_POS
+#undef END_POS
+        } break;
+        case TEL_LEFT: {
+            cy -= 16;
+#define START_POS (V_WIDTH)
+#define END_POS   (-16)
+            TWEEN(cx +=, 0);
+#undef START_POS
+#undef END_POS
+        } break;
+        case TEL_RIGHT: {
+            cy -= 16;
+#define START_POS (-WIDTH_IN_TILES * 8)
+#define END_POS   (-16)
+            TWEEN(cx +=, 0);
+#undef START_POS
+#undef END_POS
+        } break;
+    }
+
+    gfmTilemap_setPosition(lvltransition.pTransition, cx, cy);
+}
+
+/**
+ * Tween a sprite in screen space toward the next position (coverted to screen
+ * space)
+ *
+ * @param  [ in]pSpr     The sprite
+ * @param  [ in]cx       The camera position
+ * @param  [ in]cy       The camera position
+ * @param  [ in]initTime Time when the tween started
+ */
+static void _tweenSprite(gfmSprite *pSpr, int cx, int cy, int initTime) {
+    int dstX, dstY, px, py, tgtX, tgtY;
+
+    /* Adjust the target position to be within the current camera */
+    tgtX = (lvltransition.teleportPosition[lvltransition.index] & 0xffff)
+            + cx;
+    tgtY = ((lvltransition.teleportPosition[lvltransition.index] >> 16)
+            & 0xffff) + cy;
+
+    gfmSprite_getPosition(&px, &py, pSpr);
+#define START_POS (px)
+#define END_POS   (tgtX)
+            TWEEN(dstX =, initTime);
+#undef START_POS
+#undef END_POS
+#define START_POS (py)
+#define END_POS   (tgtY)
+            TWEEN(dstY =, initTime);
+#undef START_POS
+#undef END_POS
+    gfmSprite_setPosition(pSpr, dstX, dstY);
+}
+
+/** Set both sprites position at the next position in world space */
+static void _setPlayersPosition() {
+    int tgtX, tgtY;
+
+    /* Adjust the target position to be within the current camera */
+    tgtX = lvltransition.teleportPosition[lvltransition.index] & 0xffff;
+    tgtY = (lvltransition.teleportPosition[lvltransition.index] >> 16)
+            & 0xffff;
+
+    setSwordyPositionFromParser(&playstate.swordy, tgtX, tgtY);
+    setGunnyPositionFromParser(&playstate.gunny, tgtX, tgtY);
+}
+
+/**
+ * Tween the tilemap OUTSIDE the screen
+ *
+ * @param  [ in]cx       The camera position
+ * @param  [ in]cy       The camera position
+ */
+static void _tweenTilemapOut(int cx, int cy) {
+    void *pChild;
+    int type;
+
+    gfmObject_getChild(&pChild, &type
+            , lvltransition.pAreas[lvltransition.index]);
+
+    switch (type & TEL_DIR_MASK) {
+        case TEL_UP: {
+            cx -= 16;
+#define START_POS (-16)
+#define END_POS   (-HEIGHT_IN_TILES * 8)
+            TWEEN(cy +=, 2 * TRANSITION_TIME);
+#undef START_POS
+#undef END_POS
+        } break;
+        case TEL_DOWN: {
+            cx -= 16;
+#define START_POS (-16)
+#define END_POS   (V_HEIGHT)
+            TWEEN(cy +=, 2 * TRANSITION_TIME);
+#undef START_POS
+#undef END_POS
+        } break;
+        case TEL_LEFT: {
+            cy -= 16;
+#define START_POS (-16)
+#define END_POS   (-WIDTH_IN_TILES * 8)
+            TWEEN(cx +=, 2 * TRANSITION_TIME);
+#undef START_POS
+#undef END_POS
+        } break;
+        case TEL_RIGHT: {
+            cy -= 16;
+#define START_POS (-16)
+#define END_POS   (V_WIDTH)
+            TWEEN(cx +=, 2 * TRANSITION_TIME);
+#undef START_POS
+#undef END_POS
+        } break;
+    }
+
+    gfmTilemap_setPosition(lvltransition.pTransition, cx, cy);
+}
+
+#undef TWEEN
 
 /**
  * Retrieves the index of a level given its type
@@ -220,11 +380,11 @@ err parseLoadzone(gfmParser *pParser) {
         i++;
     }
     ASSERT(dir != -1, ERR_PARSINGERR);
-    ASSERT(tgtX > -1 && tgtX < 0x10000, ERR_PARSINGERR);
-    ASSERT(tgtY > -1 && tgtY < 0x10000, ERR_PARSINGERR);
+    ASSERT(tgtX > -1 && tgtX < 0x00200, ERR_PARSINGERR);
+    ASSERT(tgtY > -1 && tgtY < 0x00200, ERR_PARSINGERR);
     ASSERT(pName[0] != '\0', ERR_PARSINGERR);
 
-    *pos = (tgtY << 16) | tgtX;
+    *pos = ((tgtY * 8) << 16) | (tgtX * 8);
 
     type = T_LOADZONE;
     type |= TEL_INDEX_MASK & (lvltransition.areasCount << TEL_INDEX_BITS);
@@ -296,6 +456,8 @@ err setupLeveltransition() {
 
     rv = gfmTilemap_setPosition(lvltransition.pTransition, x, y);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    lvltransition.loaded = 0;
     lvltransition.timer = 0;
 
     return ERR_OK;
@@ -303,66 +465,41 @@ err setupLeveltransition() {
 
 /** Update the transition animation */
 err updateLeveltransition() {
-    void *pChild;
     gfmRV rv;
-    int type, x, y;
+    int x, y;
 
     ASSERT(lvltransition.index < lvltransition.areasCount, ERR_INDEXOOB);
-
-    rv = gfmObject_getChild(&pChild, &type
-            , lvltransition.pAreas[lvltransition.index]);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     lvltransition.timer += game.elapsed;
 
     rv = gfmCamera_getPosition(&x, &y, game.pCamera);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-#define TWEEN(var_op) \
-    do { \
-        var_op ((TRANSITION_TIME - lvltransition.timer) * START_POS) / TRANSITION_TIME \
-                + (lvltransition.timer * END_POS) / TRANSITION_TIME; \
-    } while (0)
-
     if (lvltransition.timer < TRANSITION_TIME) {
-        switch (type & TEL_DIR_MASK) {
-            case TEL_UP: {
-                x -= 16;
-#define START_POS (V_HEIGHT)
-#define END_POS   (-16)
-                TWEEN(y +=);
-#undef START_POS
-#undef END_POS
-            } break;
-            case TEL_DOWN: {
-                x -= 16;
-#define START_POS (-HEIGHT_IN_TILES * 8)
-#define END_POS   (-16)
-                TWEEN(y +=);
-#undef START_POS
-#undef END_POS
-            } break;
-            case TEL_LEFT: {
-                y -= 16;
-#define START_POS (V_WIDTH)
-#define END_POS   (-16)
-                TWEEN(x +=);
-#undef START_POS
-#undef END_POS
-            } break;
-            case TEL_RIGHT: {
-                y -= 16;
-#define START_POS (-WIDTH_IN_TILES * 8)
-#define END_POS   (-16)
-                TWEEN(x +=);
-#undef START_POS
-#undef END_POS
-            } break;
-        }
+        _tweenTilemapIn(x, y);
     }
+    else if (lvltransition.timer < 2 * TRANSITION_TIME) {
+        _tweenSprite(playstate.swordy.pSelf, x, y, TRANSITION_TIME);
+        _tweenSprite(playstate.gunny.pSelf, x, y, TRANSITION_TIME);
 
-    rv = gfmTilemap_setPosition(lvltransition.pTransition, x, y);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        gfmTilemap_setPosition(lvltransition.pTransition, -16, -16);
+    }
+    else if (lvltransition.timer < 3 * TRANSITION_TIME) {
+        if (!lvltransition.loaded) {
+            _setPlayersPosition();
+
+            /* TODO Load level */
+            rv = gfm_resetFPS(game.pCtx);
+            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+            lvltransition.loaded = 1;
+        }
+        _tweenTilemapOut(x, y);
+    }
+    else {
+        /** Manually set the state so it doesn't get reloaded */
+        game.currentState = ST_PLAYSTATE;
+    }
 
     return ERR_OK;
 }

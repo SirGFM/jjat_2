@@ -23,6 +23,15 @@ err initSwordy(entityCtx *swordy);
 void freeSwordy(entityCtx *swordy);
 
 /**
+ * Set swordy's position based on a value retrieved from the parser
+ *
+ * @param  [ in]swordy The player
+ * @param  [ in]x      The position
+ * @param  [ in]y      The position
+ */
+void setSwordyPositionFromParser(entityCtx *swordy, int x, int y);
+
+/**
  * Parse swordy into its position
  *
  * @param  [ in]swordy  The player

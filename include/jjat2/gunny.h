@@ -27,6 +27,15 @@ err initGunny(entityCtx *gunny);
 void freeGunny(entityCtx *gunny);
 
 /**
+ * Set gunny's position based on a value retrieved from the parser
+ *
+ * @param  [ in]gunny The player
+ * @param  [ in]x     The position
+ * @param  [ in]y     The position
+ */
+void setGunnyPositionFromParser(entityCtx *gunny, int x, int y);
+
+/**
  * Parse gunny into its position
  *
  * @param  [ in]gunny   The player
