@@ -477,11 +477,18 @@ err drawPlaystate() {
 /** Draw only the players */
 err drawPlayers() {
     err erv;
+    gameFlags prettyRender;
+
+    /* Disable pretty render to avoid a small graphical glitch */
+    prettyRender = game.flags & FX_PRETTYRENDER;
+    game.flags &= ~FX_PRETTYRENDER;
 
     erv = drawGunny(&playstate.gunny);
     ASSERT(erv == ERR_OK, erv);
     erv = drawSwordy(&playstate.swordy);
     ASSERT(erv == ERR_OK, erv);
+
+    game.flags |= prettyRender;
 
     return ERR_OK;
 }
