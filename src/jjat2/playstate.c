@@ -55,6 +55,11 @@ err initPlaystate() {
     rv = gfmTilemap_init(playstate.pMap, gfx.pSset8x8, TM_MAX_WIDTH
             , TM_MAX_HEIGHT, TM_DEFAULT_TILE);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmTilemap_getNew(&playstate.pBackground);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmTilemap_init(playstate.pBackground, gfx.pSset8x8, TM_MAX_WIDTH
+            , TM_MAX_HEIGHT, TM_DEFAULT_TILE);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     rv = gfmSprite_getNew(&playstate.asyncDummy.pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
@@ -81,6 +86,9 @@ void freePlaystate() {
 
     if (playstate.pMap != 0) {
         gfmTilemap_free(&playstate.pMap);
+    }
+    if (playstate.pBackground != 0) {
+        gfmTilemap_free(&playstate.pBackground);
     }
     if (playstate.pParser != 0) {
         gfmParser_free(&playstate.pParser);
@@ -222,12 +230,19 @@ static err _loadLevel(char *levelName, int setPlayer) {
     APPEND_DYN(levelName, len);
 
     /* Load the tilemap */
-    APPEND("_tm.gfm");
+    APPEND("_fg_tm.gfm");
     rv = gfmTilemap_loadf(playstate.pMap, game.pCtx, stLevelName
-            , pos + LEN("_tm.gfm"), pDictNames, pDictTypes, dictLen);
+            , pos + LEN("_fg_tm.gfm"), pDictNames, pDictTypes, dictLen);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     erv = _updateWorldSize();
     ASSERT(erv == ERR_OK, erv);
+
+    if (game.flags & FX_PRETTYRENDER) {
+        APPEND("_bg_tm.gfm");
+        rv = gfmTilemap_loadf(playstate.pBackground, game.pCtx, stLevelName
+                , pos + LEN("_bg_tm.gfm"), pDictNames, pDictTypes, dictLen);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    }
 
     /* Load the objects */
     APPEND("_obj.gfm");
@@ -359,6 +374,10 @@ err updatePlaystate() {
 
     rv = gfmTilemap_update(playstate.pMap, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    if (game.flags & FX_PRETTYRENDER) {
+        rv = gfmTilemap_update(playstate.pBackground, game.pCtx);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    }
 
     i = 0;
     while (i < playstate.entityCount) {
@@ -429,8 +448,10 @@ err drawPlaystate() {
     err erv;
     int i;
 
-    rv = gfmTilemap_draw(playstate.pMap, game.pCtx);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    if (game.flags & FX_PRETTYRENDER) {
+        rv = gfmTilemap_draw(playstate.pBackground, game.pCtx);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    }
 
     i = 0;
     while (i < playstate.entityCount) {
@@ -443,6 +464,9 @@ err drawPlaystate() {
     ASSERT(erv == ERR_OK, erv);
     erv = drawSwordy(&playstate.swordy);
     ASSERT(erv == ERR_OK, erv);
+
+    rv = gfmTilemap_draw(playstate.pMap, game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     rv = gfmGroup_draw(fx, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
