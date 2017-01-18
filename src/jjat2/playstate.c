@@ -449,6 +449,52 @@ err drawPlaystate() {
     int i;
 
     if (game.flags & FX_PRETTYRENDER) {
+#if 0
+        int height, width, x, y;
+        int sx, sy, gx, gy;
+
+        /* Retrieve the mean position of the players */
+        gfmSprite_getCenter(&sx, &sy, playstate.swordy.pSelf);
+        gfmSprite_getCenter(&gx, &gy, playstate.gunny.pSelf);
+        x = (sx + gx) / 2;
+        y = (sy + gy) / 2;
+
+        gfmTilemap_getDimension(&width, &height, playstate.pBackground);
+        width /= 2;
+        height /= 2;
+
+        if (x < width) {
+            x *= 8;
+            x /= width;
+            x = 8 - x;
+        }
+        else if (x > width) {
+            x -= width;
+            x *= 8;
+            x /= width;
+            x *= -1;
+        }
+        else {
+            x = 0;
+        }
+
+        if (y < height) {
+            y *= 8;
+            y /= height;
+            y = 8 - y;
+        }
+        else if (y > height) {
+            y -= height;
+            y *= 8;
+            y /= height;
+            y *= -1;
+        }
+        else {
+            y = 0;
+        }
+
+        gfmTilemap_setPosition(playstate.pBackground, x, y);
+#endif
         rv = gfmTilemap_draw(playstate.pBackground, game.pCtx);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     }
