@@ -511,10 +511,10 @@ err drawPlaystate() {
     erv = drawSwordy(&playstate.swordy);
     ASSERT(erv == ERR_OK, erv);
 
-    rv = gfmTilemap_draw(playstate.pMap, game.pCtx);
+    rv = gfmGroup_draw(fx, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    rv = gfmGroup_draw(fx, game.pCtx);
+    rv = gfmTilemap_draw(playstate.pMap, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     return ERR_OK;
