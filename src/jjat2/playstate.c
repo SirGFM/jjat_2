@@ -6,6 +6,8 @@
 #include <base/game.h>
 #include <base/gfx.h>
 
+#include <conf/game.h>
+
 #include <GFraMe/gfmCamera.h>
 #include <GFraMe/gfmObject.h>
 #include <GFraMe/gfmParser.h>
@@ -331,7 +333,7 @@ static err _loadLevel(char *levelName, int setPlayer) {
 err loadPlaystate() {
     if ((playstate.flags & PF_TEL_LEVEL) == PF_TEL_LEVEL) {
         /* Load the default first level */
-        return _loadLevel("map_map0", 1/*setPlayer*/);
+        return _loadLevel(FIRST_MAP, 1/*setPlayer*/);
     }
     else {
         /* Load the level pointed by the loadzone */

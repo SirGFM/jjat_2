@@ -1,8 +1,0 @@
-obj swordy_pos 32 216 16 16
-obj gunny_pos 56 216 16 16
-obj walky 184 120 8 8
-area invisible_wall 0 -40 232 40
-area invisible_wall 320 -40 40 280
-obj loadzone 232 -40 88 40 [ dest , "mapN" ] [ dir , down ] [ tgt_x , 0 ] [ tgt_y , 0 ]
-obj loadzone 304 168 16 48 [ dest , map_map1 ] [ dir , left ] [ tgt_x , 4 ] [ tgt_y , 17 ]
-area invisible_wall -40 -40 40 280
