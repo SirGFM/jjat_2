@@ -458,8 +458,8 @@ err drawPlaystate() {
         /* Retrieve the mean position of the players */
         gfmSprite_getCenter(&sx, &sy, playstate.swordy.pSelf);
         gfmSprite_getCenter(&gx, &gy, playstate.gunny.pSelf);
-        x = (sx + gx) / 2;
-        y = (sy + gy) / 2;
+        x = (sx + gx) / 2 + 8;
+        y = (sy + gy) / 2 + 8;
 
         gfmTilemap_getDimension(&width, &height, playstate.pBackground);
         width /= 2;
@@ -495,6 +495,8 @@ err drawPlaystate() {
             y = 0;
         }
 
+        x -= 8;
+        y -= 8;
         gfmTilemap_setPosition(playstate.pBackground, x, y);
 #endif
         rv = gfmTilemap_draw(playstate.pBackground, game.pCtx);
