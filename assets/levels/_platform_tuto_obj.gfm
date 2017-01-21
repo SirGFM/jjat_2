@@ -1,0 +1,9 @@
+obj loadzone -16 144 32 32 [ dest , _main_lab ] [ dir , right ] [ tgt_x , 35 ] [ tgt_y , 22 ]
+area invisible_wall -32 0 32 240
+obj spiky 264 232 8 8
+obj spiky 280 232 8 8
+obj g_walky 40 128 8 8
+obj walky 40 136 8 8
+obj spiky 40 120 8 8
+area invisible_wall 320 0 32 240
+obj loadzone 304 16 32 48 [ dest , _action_tuto ] [ dir , right ] [ tgt_x , 10 ] [ tgt_y , 10 ]
