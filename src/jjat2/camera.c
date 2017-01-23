@@ -10,10 +10,10 @@
 #include <jjat2/entity.h>
 #include <GFraMe/gfmCamera.h>
 
-#define CAMERA_X    80
-#define CAMERA_Y    32
-#define CAMERA_W    160
-#define CAMERA_H    112
+#define CAMERA_X    160
+#define CAMERA_Y    120
+#define CAMERA_W    80
+#define CAMERA_H    60
 
 /**
  * Center the camera at both characters.

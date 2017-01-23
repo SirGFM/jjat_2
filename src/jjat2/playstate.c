@@ -140,16 +140,13 @@ static err _updateWorldSize() {
 
     rv = gfmTilemap_getDimension(&width, &height, playstate.pMap);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    playstate.width = width;
-    playstate.height = height;
 
-    rv = gfmCamera_setWorldDimensions(game.pCamera, playstate.width
-            , playstate.height);
+    rv = gfmCamera_setWorldDimensions(game.pCamera, width, height);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     /** Make the quadtree 4 tiles larger than the actual map */
-    playstate.width += 32;
-    playstate.height += 32;
+    playstate.width = width + 32;
+    playstate.height = height + 32;
 
     return ERR_OK;
 }
