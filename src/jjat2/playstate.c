@@ -396,7 +396,10 @@ err updatePlaystate() {
     ASSERT(erv == ERR_OK, erv);
 
     /* Fix the collision between both players, if only one is active */
-    if ((game.flags & AC_BOTH) == AC_SWORDY) {
+    if ((game.flags & AC_BOTH) == AC_BOTH) {
+        /* Ignore this on synchronous mode */
+    }
+    else if ((game.flags & AC_BOTH) == AC_SWORDY) {
         _handleAsyncCollision(&playstate.swordy, &playstate.gunny
                 , &playstate.asyncDummy);
     }
