@@ -25,6 +25,9 @@
 
 #include <string.h>
 
+#define swordy_icon 106
+#define gunny_icon  107
+
 #define PF_TEL_SHIFT 4
 enum {
     PF_TEL_SWORDY = 0x01
@@ -520,6 +523,11 @@ err drawPlaystate() {
 
     rv = gfmTilemap_draw(playstate.pMap, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    erv = drawEntityIcon(&playstate.swordy, swordy_icon);
+    ASSERT(erv == ERR_OK, erv);
+    erv = drawEntityIcon(&playstate.gunny, gunny_icon);
+    ASSERT(erv == ERR_OK, erv);
 
     return ERR_OK;
 }

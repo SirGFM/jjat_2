@@ -181,6 +181,14 @@ err postUpdateEntity(entityCtx *entity);
 err drawEntity(entityCtx *entity);
 
 /**
+ * If the entity is offscreen, draw an 8x8 icon on its edge
+ *
+ * @param [ in]entity The entity
+ * @param [ in]tile   The index/tile of the entity's icon
+ */
+err drawEntityIcon(entityCtx *entity, int tile);
+
+/**
  * Updates an entity's direction according to its velocity.
  *
  * @param  [ in]entity   The entity

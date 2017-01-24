@@ -6,6 +6,7 @@
 #include <base/collision.h>
 #include <base/error.h>
 #include <base/game.h>
+#include <base/gfx.h>
 #include <base/input.h>
 
 #include <jjat2/entity.h>
@@ -308,6 +309,53 @@ err drawEntity(entityCtx *entity) {
         erv = drawEntity(entity->pCarrying);
         ASSERT(erv == ERR_OK, erv);
     }
+
+    return ERR_OK;
+}
+
+/**
+ * If the entity is offscreen, draw an 8x8 icon on its edge
+ *
+ * @param [ in]entity The entity
+ * @param [ in]tile   The index/tile of the entity's icon
+ */
+err drawEntityIcon(entityCtx *entity, int tile) {
+    gfmRV rv;
+    int ch, cw, cx, cy, flip, x, y;
+
+    if (gfmCamera_isSpriteInside(game.pCamera, entity->pSelf) == GFMRV_TRUE) {
+        return ERR_OK;
+    }
+
+    gfmCamera_getPosition(&cx, &cy, game.pCamera);
+    gfmCamera_getDimensions(&cw, &ch, game.pCamera);
+    gfmSprite_getCenter(&x, &y, entity->pSelf);
+    gfmSprite_getDirection(&flip, entity->pSelf);
+
+    /* Convert the sprite's position from world space to "clamped screen
+     * space" */
+    if (x < cx) {
+        x = 0;
+    }
+    else if (x > cx + cw) {
+        x = cw - 8;
+    }
+    else {
+        x -= cx;
+    }
+
+    if (y < cy) {
+        y = 0;
+    }
+    else if (y > cy + ch) {
+        y = ch - 8;
+    }
+    else {
+        y -= cy;
+    }
+
+    rv = gfm_drawTile(game.pCtx, gfx.pSset8x8, x, y, tile, flip);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     return ERR_OK;
 }
