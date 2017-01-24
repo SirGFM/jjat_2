@@ -6,14 +6,15 @@
 
 #include <base/error.h>
 #include <base/game.h>
+#include <conf/game.h>
 #include <jjat2/camera.h>
 #include <jjat2/entity.h>
 #include <GFraMe/gfmCamera.h>
 
-#define CAMERA_X    160
-#define CAMERA_Y    120
-#define CAMERA_W    80
-#define CAMERA_H    60
+#define CAMERA_W    8
+#define CAMERA_H    8
+#define CAMERA_X    ((V_WIDTH - CAMERA_W) / 2)
+#define CAMERA_Y    ((V_HEIGHT - CAMERA_H) / 2)
 /** These values for the tween may only became an issue if a sprite goes beyond
  * position 1048575 (2^19)... i.e., unlikely */
 #define MIN_TWEEN   0
