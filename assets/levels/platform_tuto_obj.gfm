@@ -4,6 +4,6 @@ obj g_walky 48 136 8 8
 obj walky 48 144 8 8
 obj spiky 48 128 8 8
 area invisible_wall 480 0 32 240
-obj loadzone 464 16 32 32 [ dest , _action_tuto ] [ dir , right ] [ tgt_x , 10 ] [ tgt_y , 10 ]
+obj loadzone 464 16 32 32 [ dest , teleport_tuto ] [ dir , left ] [ tgt_x , 3 ] [ tgt_y , 37 ]
 obj walky 432 280 8 8
 obj spiky 432 272 8 8
