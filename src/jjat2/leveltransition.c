@@ -441,14 +441,14 @@ err setupLeveltransition() {
     switch (type & TEL_DIR_MASK) {
         case TEL_UP: {
             x -= 16;
-            y += HEIGHT_IN_TILES * 8;
+            y += V_HEIGHT;
         } break;
         case TEL_DOWN: {
             x -= 16;
             y -= HEIGHT_IN_TILES * 8;
         } break;
         case TEL_LEFT: {
-            x += WIDTH_IN_TILES * 8;
+            x += V_WIDTH;
             y -= 16;
         } break;
         case TEL_RIGHT: {
@@ -500,7 +500,7 @@ err updateLeveltransition() {
 
         _tweenPlayers(x, y, TRANSITION_TIME);
 
-        gfmTilemap_setPosition(lvltransition.pTransition, -16, -16);
+        gfmTilemap_setPosition(lvltransition.pTransition, x - 16, y - 16);
     }
     else if (lvltransition.timer < 3 * TRANSITION_TIME) {
         if (!lvltransition.loaded) {
@@ -518,6 +518,10 @@ err updateLeveltransition() {
             ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
             lvltransition.loaded = 1;
+
+            /* Fix the transition layer position */
+            gfmCamera_getPosition(&x, &y, game.pCamera);
+            gfmTilemap_setPosition(lvltransition.pTransition, x - 16, y - 16);
         }
         _tweenTilemapOut(x, y);
     }
