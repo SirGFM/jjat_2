@@ -17,16 +17,18 @@
 /** Enumeration for the UI control bitfield */
 enum enUIControl {
     /* UI position */
-    UI_BOTTOM    = 0x00000000
-  , UI_TOP       = 0x80000000
-  , UI_POS_MASK  = 0x80000000
-    /* Whether... recaching... should happen... when implemented */
-  , UI_DIRTY     = 0x40000000
+    UI_BOTTOM       = 0x00000000
+  , UI_TOP          = 0x80000000
+  , UI_POS_MASK     = 0x80000000
+    /* Whether the border and map name should be copied from top <-> bottom */
+  , UI_DIRTY_TOP    = 0x40000000
+  , UI_DIRTY_BOTTOM = 0x20000000
+  , UI_DIRTY_MASK   = 0x60000000
     /* Max time for each animation step (in milliseconds) */
-  , UI_TIME_MASK = 0x3fffffff
-  , UI_DISPLAY   = 333
-  , UI_WAIT      = 2500
-  , UI_HIDE      = 3000
+  , UI_TIME_MASK    = 0x1fffffff
+  , UI_DISPLAY      = 333
+  , UI_WAIT         = 2500
+  , UI_HIDE         = 3000
 };
 typedef enum enUIControl uiControl;
 
@@ -65,6 +67,22 @@ void showUI();
  * @param  [ in]pos The position
  */
 void setUIPosition(uiControl pos);
+
+/**
+ * Set swordy's life
+ *
+ * @param  [ in]cur It's current life
+ * @param  [ in]max It's maximum life
+ */
+void setSwordyLife(int cur, int max);
+
+/**
+ * Set gunny's life
+ *
+ * @param  [ in]cur It's current life
+ * @param  [ in]max It's maximum life
+ */
+void setGunnyLife(int cur, int max);
 
 /** Update the UI position */
 err updateUI();
