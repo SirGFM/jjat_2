@@ -323,6 +323,9 @@ static err _loadLevel(char *levelName, int setPlayer) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     resetTeleporterTarget();
 
+    setMapTitle(levelName);
+    showUI();
+
 #undef LEN
 #undef APPEND_DYN
 #undef APPEND_POS

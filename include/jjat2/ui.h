@@ -17,18 +17,18 @@
 /** Enumeration for the UI control bitfield */
 enum enUIControl {
     /* UI position */
-    UI_BOTTOM       = 0x00000000
-  , UI_TOP          = 0x80000000
-  , UI_POS_MASK     = 0x80000000
+    UI_BOTTOM       = 0x80000000
+  , UI_TOP          = 0x40000000
+  , UI_POS_MASK     = 0xc0000000
     /* Whether the border and map name should be copied from top <-> bottom */
-  , UI_DIRTY_TOP    = 0x40000000
-  , UI_DIRTY_BOTTOM = 0x20000000
-  , UI_DIRTY_MASK   = 0x60000000
+  , UI_DIRTY_TOP    = 0x20000000
+  , UI_DIRTY_BOTTOM = 0x10000000
+  , UI_DIRTY_MASK   = 0x30000000
     /* Max time for each animation step (in milliseconds) */
-  , UI_TIME_MASK    = 0x1fffffff
+  , UI_TIME_MASK    = 0x0fffffff
   , UI_DISPLAY      = 333
-  , UI_WAIT         = 2500
-  , UI_HIDE         = 3000
+  , UI_WAIT         = 2333
+  , UI_HIDE         = 2666
 };
 typedef enum enUIControl uiControl;
 
@@ -49,6 +49,9 @@ err initUI();
 
 /** Release all resources used by the UI */
 void freeUI();
+
+/** Reset the UI */
+void resetUI();
 
 /**
  * Set the title of the map on the UI
