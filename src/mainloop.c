@@ -17,6 +17,7 @@
 #include <jjat2/leveltransition.h>
 #include <jjat2/playstate.h>
 #include <jjat2/static.h>
+#include <jjat2/ui.h>
 
 /** Run the main loop until the game is closed */
 err mainloop() {
@@ -29,6 +30,8 @@ err mainloop() {
     erv = initFxGroup();
     ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
     erv = initLeveltransition();
+    ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
+    erv = initUI();
     ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
 
     /* Set initial state */
@@ -116,6 +119,7 @@ err mainloop() {
 
     erv = ERR_OK;
 __ret:
+    freeUI();
     freeLeveltransition();
     freeFxGroup();
     freePlaystate();

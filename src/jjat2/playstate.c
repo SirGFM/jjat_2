@@ -22,6 +22,7 @@
 #include <jjat2/playstate.h>
 #include <jjat2/swordy.h>
 #include <jjat2/teleport.h>
+#include <jjat2/ui.h>
 
 #include <string.h>
 
@@ -322,6 +323,9 @@ static err _loadLevel(char *levelName, int setPlayer) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     resetTeleporterTarget();
 
+    setMapTitle(levelName);
+    showUI();
+
 #undef LEN
 #undef APPEND_DYN
 #undef APPEND_POS
@@ -441,6 +445,9 @@ err updatePlaystate() {
         switchToLevelTransition(curLevel);
     }
 
+    erv = updateUI();
+    ASSERT(erv == ERR_OK, erv);
+
     erv = updateCamera(&playstate.swordy, &playstate.gunny);
     ASSERT(erv == ERR_OK, erv);
 
@@ -527,6 +534,9 @@ err drawPlaystate() {
     erv = drawEntityIcon(&playstate.swordy, swordy_icon);
     ASSERT(erv == ERR_OK, erv);
     erv = drawEntityIcon(&playstate.gunny, gunny_icon);
+    ASSERT(erv == ERR_OK, erv);
+
+    erv = drawUI();
     ASSERT(erv == ERR_OK, erv);
 
     return ERR_OK;
