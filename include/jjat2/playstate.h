@@ -32,8 +32,10 @@ struct stPlaystateCtx {
     gfmParser *pParser;
     /** The game's map */
     gfmTilemap *pMap;
+#if defined(JJAT_ENABLE_BACKGROUND)
     /** The game's background */
     gfmTilemap *pBackground;
+#endif /* JJAT_ENABLE_BACKGROUND */
     /** Swordy character */
     entityCtx swordy;
     /** Gunny character */

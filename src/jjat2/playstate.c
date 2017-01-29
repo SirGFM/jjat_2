@@ -61,11 +61,13 @@ err initPlaystate() {
     rv = gfmTilemap_init(playstate.pMap, gfx.pSset8x8, TM_MAX_WIDTH
             , TM_MAX_HEIGHT, TM_DEFAULT_TILE);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+#if defined(JJAT_ENABLE_BACKGROUND)
     rv = gfmTilemap_getNew(&playstate.pBackground);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     rv = gfmTilemap_init(playstate.pBackground, gfx.pSset8x8, TM_MAX_WIDTH
             , TM_MAX_HEIGHT, TM_DEFAULT_TILE);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+#endif /* JJAT_ENABLE_BACKGROUND */
 
     rv = gfmSprite_getNew(&playstate.asyncDummy.pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
@@ -93,9 +95,11 @@ void freePlaystate() {
     if (playstate.pMap != 0) {
         gfmTilemap_free(&playstate.pMap);
     }
+#if defined(JJAT_ENABLE_BACKGROUND)
     if (playstate.pBackground != 0) {
         gfmTilemap_free(&playstate.pBackground);
     }
+#endif /* JJAT_ENABLE_BACKGROUND */
     if (playstate.pParser != 0) {
         gfmParser_free(&playstate.pParser);
     }
@@ -240,12 +244,14 @@ static err _loadLevel(char *levelName, int setPlayer) {
     erv = _updateWorldSize();
     ASSERT(erv == ERR_OK, erv);
 
+#if defined(JJAT_ENABLE_BACKGROUND)
     if (game.flags & FX_PRETTYRENDER) {
         APPEND("_bg_tm.gfm");
         rv = gfmTilemap_loadf(playstate.pBackground, game.pCtx, stLevelName
                 , pos + LEN("_bg_tm.gfm"), pDictNames, pDictTypes, dictLen);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     }
+#endif /* JJAT_ENABLE_BACKGROUND */
 
     /* Load the objects */
     APPEND("_obj.gfm");
@@ -380,10 +386,12 @@ err updatePlaystate() {
 
     rv = gfmTilemap_update(playstate.pMap, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+#if defined(JJAT_ENABLE_BACKGROUND)
     if (game.flags & FX_PRETTYRENDER) {
         rv = gfmTilemap_update(playstate.pBackground, game.pCtx);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     }
+#endif /* JJAT_ENABLE_BACKGROUND */
 
     i = 0;
     while (i < playstate.entityCount) {
@@ -460,8 +468,8 @@ err drawPlaystate() {
     err erv;
     int i;
 
+#if defined(JJAT_ENABLE_BACKGROUND)
     if (game.flags & FX_PRETTYRENDER) {
-#if 0
         int height, width, x, y;
         int sx, sy, gx, gy;
 
@@ -508,10 +516,11 @@ err drawPlaystate() {
         x -= 8;
         y -= 8;
         gfmTilemap_setPosition(playstate.pBackground, x, y);
-#endif
+
         rv = gfmTilemap_draw(playstate.pBackground, game.pCtx);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     }
+#endif /* JJAT_ENABLE_BACKGROUND */
 
     i = 0;
     while (i < playstate.entityCount) {
