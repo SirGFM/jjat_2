@@ -30,6 +30,8 @@
 #define SWORDY_FALL_GRAV JUMP_ACCELERATION(SWORDY_FALL_TIME, SWORDY_JUMP_HEIGHT)
 #define SWORDY_SPEED TILES_TO_PX(12.5)
 
+#define SWORDY_ATK_DURATION 333
+
 #define swordy_width 6
 #define swordy_height 12
 #define swordy_offx -5
@@ -243,7 +245,8 @@ err preUpdateSwordy(entityCtx *swordy) {
                 swordy->flags |= flag_atkSecondSlash;
             }
 
-            spawnFx(x, y, 16/*w*/, 16/*h*/, dir, 333/*ttl*/, anim, T_ATK_SWORD);
+            spawnFx(x, y, 16/*w*/, 16/*h*/, dir, SWORDY_ATK_DURATION, anim
+                    , T_ATK_SWORD);
 
             swordy->flags |= flag_attacking;
             swordy->flags |= flag_atkResetAnim;
