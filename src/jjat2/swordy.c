@@ -47,6 +47,7 @@ enum {
                                   | EF_AVAILABLEF_FLAG << 6)
     , flag_jumpCounter_1    = (EF_AVAILABLEF_FLAG << 5)
     , flag_jumpCounter_2    = (EF_AVAILABLEF_FLAG << 6)
+    , flag_aerial_attack    = (EF_AVAILABLEF_FLAG << 7)
 };
 
 /** List of animations */
@@ -58,6 +59,7 @@ enum enSwordyAnim {
     FALL,
     SECJUMP,
     ATK,
+    AIR_ATK,
     HURT,
     SWORDY_ANIM_COUNT
 };
@@ -73,6 +75,7 @@ static int pSwordyAnimData[] = {
 /*  FALL   */ 2 , 8 ,  1 , 41,42,
 /* SECJUMP */ 4 , 8 ,  1 , 43,44,45,46,
 /*   ATK   */ 5 , 12,  0 , 47,48,49,50,51,
+/* AIR_ATK */ 5 , 12,  0 , 52,53,54,55,40,
 /*   HURT  */ 2 , 8 ,  1 , 48,49
 };
 
@@ -202,10 +205,11 @@ err preUpdateSwordy(entityCtx *swordy) {
 
     /* Handle attack */
     do {
-        int canAtk;
+        int canAtk, isDown;
 
         /* Queue an attack as soon as possible */
-        if (DID_JUST_PRESS(swordyAtk) && (col & gfmCollision_down)) {
+        isDown = col & gfmCollision_down;
+        if (DID_JUST_PRESS(swordyAtk)) {
             swordy->flags |= flag_atkCombo;
         }
 
@@ -216,14 +220,20 @@ err preUpdateSwordy(entityCtx *swordy) {
             gfmSprite_getFrame(&frame, swordy->pSelf);
             canAtk = (frame == 51);
         }
+        else if (swordy->currentAnimation == AIR_ATK) {
+            int frame;
+
+            gfmSprite_getFrame(&frame, swordy->pSelf);
+            canAtk = (frame == 40);
+        }
         else {
             canAtk = 1;
         }
 
-        /* TODO Handle aerial attack */
-        if (canAtk && (swordy->flags & flag_atkCombo)) {
+        if (canAtk && (swordy->flags & flag_atkCombo) && isDown) {
             int anim, dir, x, y;
 
+            /* Handle grounded attack */
             gfmSprite_getPosition(&x, &y, swordy->pSelf);
             gfmSprite_getDirection(&dir, swordy->pSelf);
             y -= 2;
@@ -249,6 +259,31 @@ err preUpdateSwordy(entityCtx *swordy) {
                     , T_ATK_SWORD);
 
             swordy->flags |= flag_attacking;
+            swordy->flags |= flag_atkResetAnim;
+            swordy->flags &= ~flag_atkCombo;
+            /* Comment the line bellow for a fun (but useless) bug that let the
+             * player stand in-place attacking almost non-stop */
+            swordy->flags &= ~flag_aerial_attack;
+        }
+        else if (canAtk && (swordy->flags & flag_atkCombo)) {
+            int anim, dir, x, y;
+
+            /* Handle aerial attack */
+            gfmSprite_getPosition(&x, &y, swordy->pSelf);
+            gfmSprite_getDirection(&dir, swordy->pSelf);
+            y -= 2;
+            if (dir == DIR_RIGHT) {
+                x += 3;
+            }
+            else if (dir == DIR_LEFT) {
+                x -= 13;
+            }
+            anim = FX_SWORDY_SLASH_VERTICAL;
+
+            spawnFx(x, y, 16/*w*/, 16/*h*/, dir, SWORDY_ATK_DURATION, anim
+                    , T_ATK_SWORD);
+
+            swordy->flags |= flag_aerial_attack;
             swordy->flags |= flag_atkResetAnim;
             swordy->flags &= ~flag_atkCombo;
         }
@@ -312,8 +347,9 @@ err preUpdateSwordy(entityCtx *swordy) {
                 swordy->flags |= flag_jumpCounter_2;
             }
 
-            /* Jump-cancel grounded attacks */
+            /* Jump-cancel attacks */
             swordy->flags &= ~flag_attacking;
+            swordy->flags &= ~flag_aerial_attack;
 
             /* Set the error so the assert isn't triggered */
             erv = ERR_OK;
@@ -360,6 +396,20 @@ err preUpdateSwordy(entityCtx *swordy) {
     erv = collideEntity(swordy);
     ASSERT(erv == ERR_OK, erv);
 
+    /* Cancel air-attack on touch platform and after the last frame */
+    do {
+        if (swordy->currentAnimation == AIR_ATK) {
+            rv = gfmSprite_getCollision(&col, swordy->pSelf);
+            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+            if ((col & gfmCollision_down)
+                    || gfmSprite_didAnimationFinish(swordy->pSelf)
+                    == GFMRV_TRUE) {
+                swordy->flags &= ~flag_aerial_attack;
+            }
+        }
+    } while (0);
+
     return ERR_OK;
 }
 
@@ -385,7 +435,11 @@ err postUpdateSwordy(entityCtx *swordy) {
     gfmSprite_getCollision(&dir, swordy->pSelf);
 
     /* Set animation */
-    if (swordy->flags & flag_attacking) {
+    if (swordy->flags & flag_aerial_attack) {
+        setEntityAnimation(swordy, AIR_ATK, swordy->flags & flag_atkResetAnim);
+        swordy->flags &= ~flag_atkResetAnim;
+    }
+    else if (swordy->flags & flag_attacking) {
         setEntityAnimation(swordy, ATK, swordy->flags & flag_atkResetAnim);
         swordy->flags &= ~flag_atkResetAnim;
     }
