@@ -271,12 +271,12 @@ err preUpdateSwordy(entityCtx *swordy) {
             /* Handle aerial attack */
             gfmSprite_getPosition(&x, &y, swordy->pSelf);
             gfmSprite_getDirection(&dir, swordy->pSelf);
-            y -= 2;
+            y -= 4;
             if (dir == DIR_RIGHT) {
-                x += 3;
+                x += 6;
             }
             else if (dir == DIR_LEFT) {
-                x -= 13;
+                x -= 16;
             }
             anim = FX_SWORDY_SLASH_VERTICAL;
 
