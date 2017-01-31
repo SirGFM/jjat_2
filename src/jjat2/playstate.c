@@ -436,12 +436,6 @@ err updatePlaystate() {
     erv = postUpdateGunny(&playstate.gunny);
     ASSERT(erv == ERR_OK, erv);
 
-    /* This may result in a few 1-frame display bugs for the target... */
-    erv = updateTeleporterTarget();
-    ASSERT(erv == ERR_OK, erv);
-    erv = updateGunnyTeleport(&playstate.gunny);
-    ASSERT(erv == ERR_OK, erv);
-
     /** Check if a loadzone was triggered by both players */
     if ((playstate.flags & (PF_TEL_SWORDY | PF_TEL_GUNNY))
             == (PF_TEL_SWORDY | PF_TEL_GUNNY)) {
@@ -452,6 +446,12 @@ err updatePlaystate() {
         /* Setup & trigger level transition/loading */
         switchToLevelTransition(curLevel);
     }
+
+    /* This may result in a few 1-frame display bugs for the target... */
+    erv = updateTeleporterTarget();
+    ASSERT(erv == ERR_OK, erv);
+    erv = updateGunnyTeleport(&playstate.gunny);
+    ASSERT(erv == ERR_OK, erv);
 
     erv = updateUI();
     ASSERT(erv == ERR_OK, erv);
