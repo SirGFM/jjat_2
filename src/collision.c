@@ -214,24 +214,31 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 } /* if (rv == GFMRV_TRUE) */
 #if  defined(JJATENGINE)
                 else if (collision.flags & CF_FIXTELEPORT) {
-                    collisionNode *floor;
-                    int fy, py, h;
-
                     /* Entity was (possibly) just teleported into the ground.
                      * Manually check and fix it */
-                    if (isFirstCase) {
-                        floor = &node1;
-                    }
-                    else {
-                        floor = &node2;
-                    }
+                    if (gfmObject_isOverlaping(node1.pObject, node2.pObject)
+                            == GFMRV_TRUE) {
+                        collisionNode *floor;
+                        int fh, fy, ph, py;
 
-                    gfmObject_getVerticalPosition(&fy, floor->pObject);
-                    gfmObject_getVerticalPosition(&py, entity->pObject);
-                    gfmObject_getHeight(&h, entity->pObject);
+                        if (isFirstCase) {
+                            floor = &node1;
+                        }
+                        else {
+                            floor = &node2;
+                        }
 
-                    if (py + h >= fy) {
-                        gfmObject_setVerticalPosition(entity->pObject, fy - h);
+                        gfmObject_getVerticalPosition(&fy, floor->pObject);
+                        gfmObject_getHeight(&fh, floor->pObject);
+                        gfmObject_getVerticalPosition(&py, entity->pObject);
+                        gfmObject_getHeight(&ph, entity->pObject);
+
+                        if (py >= fy) {
+                            gfmObject_setVerticalPosition(entity->pObject, fy + fh);
+                        }
+                        else if (py + ph <= fy + fh) {
+                            gfmObject_setVerticalPosition(entity->pObject, fy - ph);
+                        }
                     }
                 }
 #endif  /* JJATENGINE */
