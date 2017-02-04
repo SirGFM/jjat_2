@@ -252,6 +252,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 collisionNode *entity;
                 collisionNode *spike;
                 gfmCollision hdir, vdir;
+                int py, sy, ph;
 
                 if (isFirstCase) {
                     entity = &node2;
@@ -267,22 +268,22 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 gfmObject_justOverlaped(node1.pObject, node2.pObject);
                 gfmObject_getCurrentCollision(&hdir, entity->pObject);
 
-                if (hdir & gfmCollision_hor) {
+                gfmObject_getVerticalPosition(&py, entity->pObject);
+                gfmObject_getHeight(&ph, entity->pObject);
+                gfmObject_getVerticalPosition(&sy, spike->pObject);
+
+
+                if (py + ph < sy + SPIKE_OFFSET) {
+                    /* Does nothing unless within the collideable aread */
+                }
+                else if (hdir & gfmCollision_hor) {
                     /* Collide horizontally to avoid clipping */
                     gfmObject_separateHorizontal(node1.pObject
                             , node2.pObject);
                 }
                 else if (vdir & gfmCollision_down) {
-                    int py, sy, ph;
-
-                    gfmObject_getVerticalPosition(&py, entity->pObject);
-                    gfmObject_getHeight(&ph, entity->pObject);
-                    gfmObject_getVerticalPosition(&sy, spike->pObject);
-
-                    if (py + ph >= sy + SPIKE_OFFSET) {
-                        /* Kill the entity */
-                        killEntity((entityCtx*)entity->pChild);
-                    }
+                    /* Kill the entity */
+                    killEntity((entityCtx*)entity->pChild);
                 }
 
                 rv = GFMRV_OK;
