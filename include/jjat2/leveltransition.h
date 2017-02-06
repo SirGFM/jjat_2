@@ -17,13 +17,32 @@
 
 #define MAX_AREAS   16
 
+/** Packed teleport/loadzone data that is stored within the type */
+enum enLevelTransitionFlags {
+    TEL_UP         = 0x00000000
+  , TEL_DOWN       = 0x10000000
+  , TEL_LEFT       = 0x20000000
+  , TEL_RIGHT      = 0x30000000
+
+  , TEL_DIR_MASK   = 0x30000000
+  , TEL_DIR_BITS   = 24
+  , TEL_INDEX_MASK = 0x0ff00000
+  , TEL_INDEX_BITS = 20
+};
+typedef enum enLevelTransitionFlags levelTransitionFlags;
+
 struct stLeveltransitionCtx {
+    /** Pointer to the level name */
+    char *pCachedName;
     /** Maps connected to the current one */
     char *pNames[MAX_AREAS];
     /** Teleports (and their walls) on the current map */
     gfmObject *pAreas[MAX_AREAS];
     /** Foreground layer used to simulate a transition effect */
     gfmTilemap *pTransition;
+    /** Target position for the current transition. X is packed into the lower
+     * 16 and Y is packed into the higher 16 bits */
+    uint32_t cachedTargetPosition;
     /** Target position for the player, after teleporting to a new map */
     uint32_t teleportPosition[MAX_AREAS];
     /** Initial position of gunny's tween */

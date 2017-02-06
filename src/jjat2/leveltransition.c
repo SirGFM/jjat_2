@@ -37,19 +37,6 @@ static char _stMapsName[MAX_AREAS * (MAX_VALID_LEN + 1)];
 /** Forward declaration of the transition tilemap */
 static int _tilemap[WIDTH_IN_TILES * HEIGHT_IN_TILES];
 
-/** Packed teleport/loadzone data that is stored within the type */
-enum {
-    TEL_UP         = 0x00000000
-  , TEL_DOWN       = 0x10000000
-  , TEL_LEFT       = 0x20000000
-  , TEL_RIGHT      = 0x30000000
-
-  , TEL_DIR_MASK   = 0x30000000
-  , TEL_DIR_BITS   = 24
-  , TEL_INDEX_MASK = 0x0ff00000
-  , TEL_INDEX_BITS = 20
-};
-
 /**
  * Retrieve an integer from a string
  *
@@ -130,10 +117,8 @@ static void _tweenPlayers(int cx, int cy, int initTime) {
     int dstX, dstY, srcX, srcY, tgtX, tgtY;
 
     /* Adjust the target position to be within the current camera */
-    tgtX = (lvltransition.teleportPosition[lvltransition.index] & 0xffff)
-            + cx;
-    tgtY = ((lvltransition.teleportPosition[lvltransition.index] >> 16)
-            & 0xffff) + cy;
+    tgtX = (lvltransition.cachedTargetPosition & 0xffff) + cx;
+    tgtY = ((lvltransition.cachedTargetPosition >> 16) & 0xffff) + cy;
 
     srcX = lvltransition.swordyPos & 0xffff;
     srcY = (lvltransition.swordyPos >> 16) & 0xffff;
@@ -169,9 +154,8 @@ static void _setPlayersPosition() {
     int tgtX, tgtY;
 
     /* Adjust the target position to be within the current camera */
-    tgtX = lvltransition.teleportPosition[lvltransition.index] & 0xffff;
-    tgtY = (lvltransition.teleportPosition[lvltransition.index] >> 16)
-            & 0xffff;
+    tgtX = lvltransition.cachedTargetPosition & 0xffff;
+    tgtY = (lvltransition.cachedTargetPosition >> 16) & 0xffff;
 
     setSwordyPositionFromParser(&playstate.swordy, tgtX, tgtY);
     setGunnyPositionFromParser(&playstate.gunny, tgtX, tgtY);
@@ -245,8 +229,7 @@ void switchToLevelTransition(int index) {
 
 /** Retrieve the name of the level to be loaded */
 char* getNextLevelName() {
-    ASSERT(lvltransition.index < lvltransition.areasCount, 0);
-    return lvltransition.pNames[lvltransition.index];
+    return lvltransition.pCachedName;
 }
 
 /** Alloc all required resources */
@@ -424,21 +407,25 @@ err parseInvisibleWall(gfmParser *pParser) {
     return ERR_OK;
 }
 
-/** Prepare the transition animation */
-err setupLeveltransition() {
-    void *pChild;
+/**
+ * Prepare level transition into a generic level
+ *
+ * @param  [ in]levelName Level's name
+ * @param  [ in]tgtX      Starting position of players
+ * @param  [ in]tgtY      Starting position of players
+ * @param  [ in]dir       Movement direction of the transition overlay
+ */
+err setupGenericLeveltransition(char *levelName, int tgtX, int tgtY
+        , levelTransitionFlags dir) {
     gfmRV rv;
-    int type, x, y;
+    int x, y;
 
-    ASSERT(lvltransition.index < lvltransition.areasCount, ERR_INDEXOOB);
-
-    rv = gfmObject_getChild(&pChild, &type
-            , lvltransition.pAreas[lvltransition.index]);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    ASSERT(tgtX <= 0xffff, ERR_ARGUMENTBAD);
+    ASSERT(tgtY <= 0xffff, ERR_ARGUMENTBAD);
 
     rv = gfmCamera_getPosition(&x, &y, game.pCamera);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    switch (type & TEL_DIR_MASK) {
+    switch (dir) {
         case TEL_UP: {
             x -= 16;
             y += V_HEIGHT;
@@ -455,6 +442,9 @@ err setupLeveltransition() {
             x -= WIDTH_IN_TILES * 8;
             y -= 16;
         } break;
+        default: {
+            ASSERT(0, ERR_ARGUMENTBAD);
+        }
     }
 
     rv = gfmTilemap_setPosition(lvltransition.pTransition, x, y);
@@ -465,10 +455,36 @@ err setupLeveltransition() {
     gfmSprite_getPosition(&x, &y, playstate.gunny.pSelf);
     lvltransition.gunnyPos = ((y & 0xffff) << 16) | (x & 0xffff);
 
+    lvltransition.pCachedName = levelName;
+    lvltransition.dir = 0xff & (dir >> TEL_DIR_BITS);
+    lvltransition.cachedTargetPosition = (tgtY << 16) | tgtX;
     lvltransition.loaded = 0;
     lvltransition.timer = 0;
 
     return ERR_OK;
+}
+
+/** Prepare the transition animation */
+err setupLeveltransition() {
+    void *pChild;
+    char *pName;
+    gfmRV rv;
+    int type, tgtX, tgtY;
+    levelTransitionFlags dir;
+
+    ASSERT(lvltransition.index < lvltransition.areasCount, ERR_INDEXOOB);
+
+    rv = gfmObject_getChild(&pChild, &type
+            , lvltransition.pAreas[lvltransition.index]);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    pName = lvltransition.pNames[lvltransition.index];
+    dir = type & TEL_DIR_MASK;
+    tgtX = (lvltransition.teleportPosition[lvltransition.index] & 0xffff);
+    tgtY = ((lvltransition.teleportPosition[lvltransition.index] >> 16)
+            & 0xffff);
+
+    return setupGenericLeveltransition(pName, tgtX, tgtY, dir);
 }
 
 /** Update the transition animation */
@@ -476,28 +492,17 @@ err updateLeveltransition() {
     gfmRV rv;
     int x, y;
 
+    /* TODO Check that the operation was started */
+
     lvltransition.timer += game.elapsed;
 
     rv = gfmCamera_getPosition(&x, &y, game.pCamera);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     if (lvltransition.timer < TRANSITION_TIME) {
-        void *pChild;
-        int type;
-
-        ASSERT(lvltransition.index < lvltransition.areasCount, ERR_INDEXOOB);
-
-        gfmObject_getChild(&pChild, &type
-                , lvltransition.pAreas[lvltransition.index]);
-
-        lvltransition.dir = (type & TEL_DIR_MASK) >> TEL_DIR_BITS;
-
-
         _tweenTilemapIn(x, y);
     }
     else if (lvltransition.timer < 2 * TRANSITION_TIME) {
-        ASSERT(lvltransition.index < lvltransition.areasCount, ERR_INDEXOOB);
-
         _tweenPlayers(x, y, TRANSITION_TIME);
 
         gfmTilemap_setPosition(lvltransition.pTransition, x - 16, y - 16);
@@ -505,9 +510,6 @@ err updateLeveltransition() {
     else if (lvltransition.timer < 3 * TRANSITION_TIME) {
         if (!lvltransition.loaded) {
             err erv;
-
-            ASSERT(lvltransition.index < lvltransition.areasCount
-                    , ERR_INDEXOOB);
 
             _setPlayersPosition();
 
