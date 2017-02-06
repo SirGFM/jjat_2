@@ -31,34 +31,44 @@ enum enLevelTransitionFlags {
 };
 typedef enum enLevelTransitionFlags levelTransitionFlags;
 
-struct stLeveltransitionCtx {
-    /** Pointer to the level name */
-    char *pCachedName;
+struct stLeveltransitionGeometryCtx {
     /** Maps connected to the current one */
     char *pNames[MAX_AREAS];
     /** Teleports (and their walls) on the current map */
     gfmObject *pAreas[MAX_AREAS];
+    /** Target position for the player, after teleporting to a new map */
+    uint32_t teleportPosition[MAX_AREAS];
+    /** How many areas were used on the current level */
+    uint8_t areasCount;
+    /** Index of the level to be loaded */
+    uint8_t index;
+};
+typedef struct stLeveltransitionGeometryCtx leveltransitionGeometryCtx;
+
+struct stLeveltransitionCtx {
+    /** Pointer to the level name */
+    char *pCachedName;
     /** Foreground layer used to simulate a transition effect */
     gfmTilemap *pTransition;
     /** Target position for the current transition. X is packed into the lower
      * 16 and Y is packed into the higher 16 bits */
     uint32_t cachedTargetPosition;
-    /** Target position for the player, after teleporting to a new map */
-    uint32_t teleportPosition[MAX_AREAS];
     /** Initial position of gunny's tween */
     uint32_t gunnyPos;
     /** Initial position of swordy's tween */
     uint32_t swordyPos;
     /** Controls the transition animation */
     int32_t timer;
-    /** How many areas were used on the current level */
-    uint8_t areasCount;
-    /** Index of the level to be loaded */
-    uint8_t index;
+    /** Padding to keep everything nicely packed into 64 bits */
+    int32_t padding_0;
+    /** Padding to keep everything nicely packed into 32 bits */
+    uint16_t padding_1;
     /** Whether the next level has been loaded */
     uint8_t loaded;
     /** Direction of the current transition (shifted 24 bits) */
     uint8_t dir;
+    /** Geometry data loaded from the parser */
+    leveltransitionGeometryCtx geometry;
 };
 typedef struct stLeveltransitionCtx leveltransitionCtx;
 

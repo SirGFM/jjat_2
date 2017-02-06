@@ -223,7 +223,7 @@ int getLoadzoneIndex(int levelType) {
  * @param  [ in]index Index of the loadzone
  */
 void switchToLevelTransition(int index) {
-    lvltransition.index = (uint8_t)index;
+    lvltransition.geometry.index = (uint8_t)index;
     game.nextState = ST_LEVELTRANSITION;
 }
 
@@ -249,9 +249,10 @@ err initLeveltransition() {
 
     i = 0;
     while (i < MAX_AREAS) {
-        rv = gfmObject_getNew(&lvltransition.pAreas[i]);
+        rv = gfmObject_getNew(&lvltransition.geometry.pAreas[i]);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-        lvltransition.pNames[i] = _stMapsName + (MAX_VALID_LEN + 1) * i;
+        lvltransition.geometry.pNames[i] = _stMapsName
+                + (MAX_VALID_LEN + 1) * i;
         i++;
     }
 
@@ -268,14 +269,14 @@ void freeLeveltransition() {
 
     i = 0;
     while (i < MAX_AREAS) {
-        gfmObject_free(&lvltransition.pAreas[i]);
+        gfmObject_free(&lvltransition.geometry.pAreas[i]);
         i++;
     }
 }
 
 /** Reset all objects parsed on the previous level */
 void resetLeveltransition() {
-    lvltransition.areasCount = 0;
+    lvltransition.geometry.areasCount = 0;
 }
 
 /** Setup static collision against all level transition objects */
@@ -284,13 +285,13 @@ err calculateStaticLeveltransition() {
     int i;
 
     i = 0;
-    while (i < lvltransition.areasCount) {
-        rv = gfmObject_setFixed(lvltransition.pAreas[i]);
+    while (i < lvltransition.geometry.areasCount) {
+        rv = gfmObject_setFixed(lvltransition.geometry.pAreas[i]);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-        rv = gfmObject_update(lvltransition.pAreas[i], game.pCtx);
+        rv = gfmObject_update(lvltransition.geometry.pAreas[i], game.pCtx);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
         rv = gfmQuadtree_populateObject(collision.pStaticQt
-                , lvltransition.pAreas[i]);
+                , lvltransition.geometry.pAreas[i]);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
         i++;
     }
@@ -308,13 +309,14 @@ err parseLoadzone(gfmParser *pParser) {
     uint32_t *pos;
     char *pName;
     gfmRV rv;
-    int dir, i, h, l, tgtX, tgtY, type, w, x, y;
+    int count, dir, i, h, l, tgtX, tgtY, type, w, x, y;
 
-    ASSERT(lvltransition.areasCount < MAX_AREAS, ERR_BUFFERTOOSMALL);
+    count = lvltransition.geometry.areasCount;
+    ASSERT(count < MAX_AREAS, ERR_BUFFERTOOSMALL);
 
-    pObj = lvltransition.pAreas[lvltransition.areasCount];
-    pos = &lvltransition.teleportPosition[lvltransition.areasCount];
-    pName = lvltransition.pNames[lvltransition.areasCount];
+    pObj = lvltransition.geometry.pAreas[count];
+    pos = &lvltransition.geometry.teleportPosition[count];
+    pName = lvltransition.geometry.pNames[count];
 
     rv = gfmParser_getPos(&x, &y, playstate.pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
@@ -373,12 +375,12 @@ err parseLoadzone(gfmParser *pParser) {
     *pos = ((tgtY * 8) << 16) | (tgtX * 8);
 
     type = T_LOADZONE;
-    type |= TEL_INDEX_MASK & (lvltransition.areasCount << TEL_INDEX_BITS);
+    type |= TEL_INDEX_MASK & (count << TEL_INDEX_BITS);
     type |= dir;
     rv = gfmObject_init(pObj, x, y, w, h, 0/*child*/, type);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    lvltransition.areasCount++;
+    lvltransition.geometry.areasCount++;
     return ERR_OK;
 }
 
@@ -392,9 +394,9 @@ err parseInvisibleWall(gfmParser *pParser) {
     gfmRV rv;
     int h, w, x, y;
 
-    ASSERT(lvltransition.areasCount < MAX_AREAS, ERR_BUFFERTOOSMALL);
+    ASSERT(lvltransition.geometry.areasCount < MAX_AREAS, ERR_BUFFERTOOSMALL);
 
-    pObj = lvltransition.pAreas[lvltransition.areasCount];
+    pObj = lvltransition.geometry.pAreas[lvltransition.geometry.areasCount];
 
     rv = gfmParser_getPos(&x, &y, playstate.pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
@@ -403,7 +405,7 @@ err parseInvisibleWall(gfmParser *pParser) {
     rv = gfmObject_init(pObj, x, y, w, h, 0/*child*/, T_FLOOR_NOTP);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    lvltransition.areasCount++;
+    lvltransition.geometry.areasCount++;
     return ERR_OK;
 }
 
@@ -469,20 +471,20 @@ err setupLeveltransition() {
     void *pChild;
     char *pName;
     gfmRV rv;
-    int type, tgtX, tgtY;
+    int index, type, tgtX, tgtY;
     levelTransitionFlags dir;
 
-    ASSERT(lvltransition.index < lvltransition.areasCount, ERR_INDEXOOB);
+    index = lvltransition.geometry.index;
+    ASSERT(index < lvltransition.geometry.areasCount, ERR_INDEXOOB);
 
     rv = gfmObject_getChild(&pChild, &type
-            , lvltransition.pAreas[lvltransition.index]);
+            , lvltransition.geometry.pAreas[index]);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    pName = lvltransition.pNames[lvltransition.index];
+    pName = lvltransition.geometry.pNames[index];
     dir = type & TEL_DIR_MASK;
-    tgtX = (lvltransition.teleportPosition[lvltransition.index] & 0xffff);
-    tgtY = ((lvltransition.teleportPosition[lvltransition.index] >> 16)
-            & 0xffff);
+    tgtX = lvltransition.geometry.teleportPosition[index] & 0xffff;
+    tgtY = (lvltransition.geometry.teleportPosition[index] >> 16) & 0xffff;
 
     return setupGenericLeveltransition(pName, tgtX, tgtY, dir);
 }
