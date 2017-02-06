@@ -3,6 +3,7 @@
  *
  * Declare all static variables/contexts.
  */
+#include <jjat2/checkpoint.h>
 #include <jjat2/fx_group.h>
 #include <jjat2/leveltransition.h>
 #include <jjat2/playstate.h>
@@ -10,6 +11,9 @@
 #include <jjat2/ui.h>
 
 #include <string.h>
+
+/** The checkpoint context */
+checkpointCtx checkpoint;
 
 /** The UI context */
 uiCtx ui;
@@ -34,5 +38,6 @@ void zeroizeGameGlobalCtx() {
     memset(&teleport, 0x0, sizeof(teleportCtx));
     memset(&lvltransition, 0x0, sizeof(leveltransitionCtx));
     memset(&ui, 0x0, sizeof(uiCtx));
+    memset(&checkpoint, 0x0, sizeof(checkpointCtx));
 }
 

@@ -27,6 +27,7 @@
          base/static.o \
          base/setup.o \
          jjat2/camera.o \
+         jjat2/checkpoint.o \
          jjat2/dictionary.o \
          jjat2/enemy.o \
          jjat2/entity.o \

@@ -118,6 +118,17 @@ err parseLoadzone(gfmParser *pParser);
  */
 err parseInvisibleWall(gfmParser *pParser);
 
+/**
+ * Prepare level transition into a generic level
+ *
+ * @param  [ in]levelName Level's name
+ * @param  [ in]tgtX      Starting position of players
+ * @param  [ in]tgtY      Starting position of players
+ * @param  [ in]dir       Movement direction of the transition overlay
+ */
+err setupGenericLeveltransition(char *levelName, int tgtX, int tgtY
+        , levelTransitionFlags dir);
+
 /** Prepare the transition animation */
 err setupLeveltransition();
 
