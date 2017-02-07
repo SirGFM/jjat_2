@@ -14,6 +14,7 @@
 #include <GFraMe/gfmTilemap.h>
 
 #include <jjat2/camera.h>
+#include <jjat2/checkpoint.h>
 #include <jjat2/dictionary.h>
 #include <jjat2/fx_group.h>
 #include <jjat2/enemy.h>
@@ -331,6 +332,29 @@ static err _loadLevel(char *levelName, int setPlayer) {
 
     setMapTitle(levelName);
     showUI();
+
+    if (setPlayer) {
+        int h, tgtX, tgtY, w;
+
+        rv = gfmSprite_getPosition(&tgtX, &tgtY, playstate.swordy.pSelf);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        rv = gfmSprite_getDimensions(&w, &h, playstate.swordy.pSelf);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+        /* Retrieve the position of the tile beneath the players.
+         * The remainder of a division by 8 is always the 3 least significant
+         * bits, so get those directly. */
+        tgtX -= w;
+        tgtX -= tgtX & 7;
+        tgtY += h;
+        tgtY -= tgtY & 7;
+
+        /* Setting the player position implies that this is the first level on
+         * this playthrough (either a new game or a loaded one). Therefore,
+         * setup the checkpoint */
+        erv = setCheckpoint(levelName, tgtX, tgtY);
+        ASSERT(erv == ERR_OK, erv);
+    }
 
 #undef LEN
 #undef APPEND_DYN
