@@ -460,7 +460,7 @@ err setupGenericLeveltransition(char *levelName, int tgtX, int tgtY
     lvltransition.pCachedName = levelName;
     lvltransition.dir = 0xff & (dir >> TEL_DIR_BITS);
     lvltransition.cachedTargetPosition = (tgtY << 16) | tgtX;
-    lvltransition.loaded = 0;
+    lvltransition.flags = 0;
     lvltransition.timer = 0;
 
     return ERR_OK;
@@ -473,6 +473,12 @@ err setupLeveltransition() {
     gfmRV rv;
     int index, type, tgtX, tgtY;
     levelTransitionFlags dir;
+
+    /* Skip setup as it has already been done */
+    if (lvltransition.flags & LT_CHECKPOINT) {
+        lvltransition.flags = 0;
+        return ERR_OK;
+    }
 
     index = lvltransition.geometry.index;
     ASSERT(index < lvltransition.geometry.areasCount, ERR_INDEXOOB);
@@ -510,7 +516,7 @@ err updateLeveltransition() {
         gfmTilemap_setPosition(lvltransition.pTransition, x - 16, y - 16);
     }
     else if (lvltransition.timer < 3 * TRANSITION_TIME) {
-        if (!lvltransition.loaded) {
+        if (!(lvltransition.flags & LT_LOADED)) {
             err erv;
 
             _setPlayersPosition();
@@ -521,7 +527,7 @@ err updateLeveltransition() {
             rv = gfm_resetFPS(game.pCtx);
             ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-            lvltransition.loaded = 1;
+            lvltransition.flags |= LT_LOADED;
 
             /* Fix the transition layer position */
             gfmCamera_getPosition(&x, &y, game.pCamera);

@@ -44,6 +44,8 @@ err loadCheckpoint() {
     ASSERT(erv == ERR_OK, erv);
 
     game.nextState = ST_LEVELTRANSITION;
+    lvltransition.flags |= LT_CHECKPOINT;
+    /* TODO Reset player life */
 
     return ERR_OK;
 }

@@ -31,6 +31,11 @@ enum enLevelTransitionFlags {
 };
 typedef enum enLevelTransitionFlags levelTransitionFlags;
 
+enum {
+    LT_LOADED     = 0x01
+  , LT_CHECKPOINT = 0x02
+};
+
 struct stLeveltransitionGeometryCtx {
     /** Maps connected to the current one */
     char *pNames[MAX_AREAS];
@@ -63,8 +68,12 @@ struct stLeveltransitionCtx {
     int32_t padding_0;
     /** Padding to keep everything nicely packed into 32 bits */
     uint16_t padding_1;
-    /** Whether the next level has been loaded */
-    uint8_t loaded;
+    /**
+     * Generic flags:
+     *  - LT_LOADED - whether the level was loaded
+     *  - LT_CHECKPOINT - whether the transition was triggered by a checkpoint
+     */
+    uint8_t flags;
     /** Direction of the current transition (shifted 24 bits) */
     uint8_t dir;
     /** Geometry data loaded from the parser */
