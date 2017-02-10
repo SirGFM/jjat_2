@@ -8,6 +8,7 @@
 #include <base/game.h>
 #include <conf/type.h>
 
+#include <jjat2/checkpoint.h>
 #include <jjat2/entity.h>
 #include <jjat2/fx_group.h>
 #include <jjat2/gunny.h>
@@ -298,6 +299,39 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 }
                 rv = GFMRV_OK;
                 collision.flags |= CF_SKIP;
+            } break;
+            CASE(T_CHECKPOINT, T_GUNNY)
+            CASE(T_CHECKPOINT, T_SWORDY) {
+                collisionNode *checkpoint;
+
+                if (isFirstCase) {
+                    checkpoint = &node1;
+                }
+                else {
+                    checkpoint = &node2;
+                }
+
+                if ((checkpoint->type & CHECKPOINT_TRIGGERED) == 0) {
+                    gfmSprite *pSpr;
+                    int h, w, x, y;
+                    err erv;
+
+                    gfmObject_getPosition(&x, &y, checkpoint->pObject);
+                    gfmObject_getDimensions(&w, &h, checkpoint->pObject);
+
+                    /* TODO set the checkpoint */
+#if 0
+                    erv = setCheckpoint(char *pName, int tgtX, int tgtY);
+                    ASSERT(erv == ERR_OK, erv);
+#endif /* 0 */
+
+                    pSpr = spawnFx(x, y, w, h, 0/*dir*/, checkpointSavedDuration
+                            , FX_CHECKPOINT_SAVED, T_FX);
+                    ASSERT(pSpr != 0, ERR_BUFFERTOOSMALL);
+
+                    gfmObject_setType(checkpoint->pObject
+                            , (T_CHECKPOINT | CHECKPOINT_TRIGGERED));
+                }
             } break;
 /*== ENTITIES'S COLLISION ====================================================*/
             SELFCASE(T_EN_SPIKY)
@@ -618,6 +652,16 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORESELF(T_SWORD_FX)
             break;
 /*== COLLISION-LESS EFFECTS ==================================================*/
+            IGNORE(T_CHECKPOINT, T_FLOOR)
+            IGNORE(T_CHECKPOINT, T_FLOOR_NOTP)
+            IGNORE(T_CHECKPOINT, T_TEL_BULLET)
+            IGNORE(T_CHECKPOINT, T_ATK_SWORD)
+            IGNORE(T_CHECKPOINT, T_SWORD_FX)
+            IGNORE(T_CHECKPOINT, T_FX)
+            IGNORE(T_CHECKPOINT, T_EN_G_WALKY_ATK)
+            IGNORE(T_CHECKPOINT, T_EN_G_WALKY)
+            IGNORE(T_CHECKPOINT, T_EN_WALKY)
+            IGNORE(T_CHECKPOINT, T_EN_SPIKY)
             IGNORE(T_EN_G_WALKY_ATK, T_SPIKE)
             IGNORE(T_EN_G_WALKY_ATK, T_TEL_BULLET)
             IGNORE(T_LOADZONE, T_FX)

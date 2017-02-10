@@ -128,6 +128,13 @@ err parseLoadzone(gfmParser *pParser);
 err parseInvisibleWall(gfmParser *pParser);
 
 /**
+ * Parse a checkpoint
+ *
+ * @param  [ in]pParser The parser pointing at a checkpoint
+ */
+err parseCheckpoint(gfmParser *pParser);
+
+/**
  * Prepare level transition into a generic level
  *
  * @param  [ in]levelName Level's name

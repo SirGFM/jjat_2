@@ -285,6 +285,10 @@ static err _loadLevel(char *levelName, int setPlayer) {
             erv = parseInvisibleWall(playstate.pParser);
             ASSERT(erv == ERR_OK, erv);
         }
+        else if (strcmp(type, "checkpoint") == 0) {
+            erv = parseCheckpoint(playstate.pParser);
+            ASSERT(erv == ERR_OK, erv);
+        }
         else if (strcmp(type, "swordy_pos") == 0) {
             if (setPlayer) {
                 erv = parseSwordy(&playstate.swordy, playstate.pParser);
@@ -558,10 +562,9 @@ err drawPlaystate() {
     erv = drawSwordy(&playstate.swordy);
     ASSERT(erv == ERR_OK, erv);
 
-    rv = gfmGroup_draw(fx, game.pCtx);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-
     rv = gfmTilemap_draw(playstate.pMap, game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmGroup_draw(fx, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     erv = drawEntityIcon(&playstate.swordy, swordy_icon);

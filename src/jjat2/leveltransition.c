@@ -410,6 +410,31 @@ err parseInvisibleWall(gfmParser *pParser) {
 }
 
 /**
+ * Parse a checkpoint
+ *
+ * @param  [ in]pParser The parser pointing at a checkpoint
+ */
+err parseCheckpoint(gfmParser *pParser) {
+    gfmObject *pObj;
+    gfmRV rv;
+    int h, w, x, y;
+
+    ASSERT(lvltransition.geometry.areasCount < MAX_AREAS, ERR_BUFFERTOOSMALL);
+
+    pObj = lvltransition.geometry.pAreas[lvltransition.geometry.areasCount];
+
+    rv = gfmParser_getPos(&x, &y, playstate.pParser);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmParser_getDimensions(&w, &h, playstate.pParser);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmObject_init(pObj, x, y, w, h, 0/*child*/, T_CHECKPOINT);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    lvltransition.geometry.areasCount++;
+    return ERR_OK;
+}
+
+/**
  * Prepare level transition into a generic level
  *
  * @param  [ in]levelName Level's name
