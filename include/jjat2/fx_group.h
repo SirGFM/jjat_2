@@ -18,6 +18,8 @@
 /** Maximum number of concurrent effects on screen */
 #define MAX_FX_NUM  128
 
+extern const int checkpointSavedDuration;
+
 /** List of animations available */
 enum enFxAnim {
       FX_SWORDY_SLASH_DOWN
@@ -27,6 +29,7 @@ enum enFxAnim {
     , FX_TELEPORT_TARGET
     , FX_STAR_ATK
     , FX_STAR_EXPLOSION
+    , FX_CHECKPOINT_SAVED
     , FX_MAX
 };
 typedef enum enFxAnim fxAnim;

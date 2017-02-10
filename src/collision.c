@@ -8,9 +8,11 @@
 #include <base/game.h>
 #include <conf/type.h>
 
+#include <jjat2/checkpoint.h>
 #include <jjat2/entity.h>
 #include <jjat2/fx_group.h>
 #include <jjat2/gunny.h>
+#include <jjat2/leveltransition.h>
 #include <jjat2/playstate.h>
 #include <jjat2/teleport.h>
 #include <jjat2/enemies/g_walky.h>
@@ -252,6 +254,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 collisionNode *entity;
                 collisionNode *spike;
                 gfmCollision hdir, vdir;
+                int py, sy, ph;
 
                 if (isFirstCase) {
                     entity = &node2;
@@ -267,22 +270,22 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 gfmObject_justOverlaped(node1.pObject, node2.pObject);
                 gfmObject_getCurrentCollision(&hdir, entity->pObject);
 
-                if (hdir & gfmCollision_hor) {
+                gfmObject_getVerticalPosition(&py, entity->pObject);
+                gfmObject_getHeight(&ph, entity->pObject);
+                gfmObject_getVerticalPosition(&sy, spike->pObject);
+
+
+                if (py + ph < sy + SPIKE_OFFSET) {
+                    /* Does nothing unless within the collideable aread */
+                }
+                else if (hdir & gfmCollision_hor) {
                     /* Collide horizontally to avoid clipping */
                     gfmObject_separateHorizontal(node1.pObject
                             , node2.pObject);
                 }
                 else if (vdir & gfmCollision_down) {
-                    int py, sy, ph;
-
-                    gfmObject_getVerticalPosition(&py, entity->pObject);
-                    gfmObject_getHeight(&ph, entity->pObject);
-                    gfmObject_getVerticalPosition(&sy, spike->pObject);
-
-                    if (py + ph >= sy + SPIKE_OFFSET) {
-                        /* Kill the entity */
-                        killEntity((entityCtx*)entity->pChild);
-                    }
+                    /* Kill the entity */
+                    killEntity((entityCtx*)entity->pChild);
                 }
 
                 rv = GFMRV_OK;
@@ -297,6 +300,42 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 }
                 rv = GFMRV_OK;
                 collision.flags |= CF_SKIP;
+            } break;
+            CASE(T_CHECKPOINT, T_GUNNY)
+            CASE(T_CHECKPOINT, T_SWORDY) {
+                collisionNode *checkpoint;
+
+                if (isFirstCase) {
+                    checkpoint = &node1;
+                }
+                else {
+                    checkpoint = &node2;
+                }
+
+                if ((checkpoint->type & TEL_CHECKPOINT_TRIGGERED) == 0) {
+                    char *pName;
+                    gfmSprite *pSpr;
+                    int i, h, tgtX, tgtY, w, x, y;
+                    err erv;
+
+                    gfmObject_getPosition(&x, &y, checkpoint->pObject);
+                    gfmObject_getDimensions(&w, &h, checkpoint->pObject);
+
+
+                    /* Set the checkpoint */
+                    i = getLoadzoneIndex(checkpoint->type);
+                    erv = getLevelTransitionData(&pName, &tgtX, &tgtY, i);
+                    ASSERT(erv == ERR_OK, erv);
+                    erv = setCheckpoint(pName, tgtX, tgtY);
+                    ASSERT(erv == ERR_OK, erv);
+
+                    pSpr = spawnFx(x, y, w, h, 0/*dir*/, checkpointSavedDuration
+                            , FX_CHECKPOINT_SAVED, T_FX);
+                    ASSERT(pSpr != 0, ERR_BUFFERTOOSMALL);
+
+                    gfmObject_setType(checkpoint->pObject
+                            , (T_CHECKPOINT | TEL_CHECKPOINT_TRIGGERED));
+                }
             } break;
 /*== ENTITIES'S COLLISION ====================================================*/
             SELFCASE(T_EN_SPIKY)
@@ -617,6 +656,16 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORESELF(T_SWORD_FX)
             break;
 /*== COLLISION-LESS EFFECTS ==================================================*/
+            IGNORE(T_CHECKPOINT, T_FLOOR)
+            IGNORE(T_CHECKPOINT, T_FLOOR_NOTP)
+            IGNORE(T_CHECKPOINT, T_TEL_BULLET)
+            IGNORE(T_CHECKPOINT, T_ATK_SWORD)
+            IGNORE(T_CHECKPOINT, T_SWORD_FX)
+            IGNORE(T_CHECKPOINT, T_FX)
+            IGNORE(T_CHECKPOINT, T_EN_G_WALKY_ATK)
+            IGNORE(T_CHECKPOINT, T_EN_G_WALKY)
+            IGNORE(T_CHECKPOINT, T_EN_WALKY)
+            IGNORE(T_CHECKPOINT, T_EN_SPIKY)
             IGNORE(T_EN_G_WALKY_ATK, T_SPIKE)
             IGNORE(T_EN_G_WALKY_ATK, T_TEL_BULLET)
             IGNORE(T_LOADZONE, T_FX)

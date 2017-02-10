@@ -17,6 +17,8 @@
 
 #include <jjat2/fx_group.h>
 
+const int checkpointSavedDuration = 1000 / 15 * 9;
+
 static int pFxAnimData[] = {
 /*                         len|fps|loop|data... */
 /*   FX_SWORDY_SLASH_DOWN   */  6 , 25,  0 , 161,162,162,163,164,160
@@ -26,6 +28,7 @@ static int pFxAnimData[] = {
 /*    FX_TELEPORT_TARGET    */, 4 , 12,  1 , 192,193,194,195
 /*       FX_STAR_ATK        */, 2 , 12,  1 , 200,201
 /*     FX_STAR_EXPLOSION    */, 3 , 12,  0 , 202,203,204
+/*   FX_CHECKPOINT_SAVED    */, 9 , 15,  0 , 205,206,207,208,209,208,210,208,205
 };
 static int fxAnimDataLen = sizeof(pFxAnimData) / sizeof(int);
 

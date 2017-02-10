@@ -14,6 +14,7 @@
 #include <GFraMe/gfmTilemap.h>
 
 #include <jjat2/camera.h>
+#include <jjat2/checkpoint.h>
 #include <jjat2/dictionary.h>
 #include <jjat2/fx_group.h>
 #include <jjat2/enemy.h>
@@ -284,6 +285,10 @@ static err _loadLevel(char *levelName, int setPlayer) {
             erv = parseInvisibleWall(playstate.pParser);
             ASSERT(erv == ERR_OK, erv);
         }
+        else if (strcmp(type, "checkpoint") == 0) {
+            erv = parseCheckpoint(playstate.pParser);
+            ASSERT(erv == ERR_OK, erv);
+        }
         else if (strcmp(type, "swordy_pos") == 0) {
             if (setPlayer) {
                 erv = parseSwordy(&playstate.swordy, playstate.pParser);
@@ -332,6 +337,29 @@ static err _loadLevel(char *levelName, int setPlayer) {
     setMapTitle(levelName);
     showUI();
 
+    if (setPlayer) {
+        int h, tgtX, tgtY, w;
+
+        rv = gfmSprite_getPosition(&tgtX, &tgtY, playstate.swordy.pSelf);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        rv = gfmSprite_getDimensions(&w, &h, playstate.swordy.pSelf);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+        /* Retrieve the position of the tile beneath the players.
+         * The remainder of a division by 8 is always the 3 least significant
+         * bits, so get those directly. */
+        tgtX -= w;
+        tgtX -= tgtX & 7;
+        tgtY += h;
+        tgtY -= tgtY & 7;
+
+        /* Setting the player position implies that this is the first level on
+         * this playthrough (either a new game or a loaded one). Therefore,
+         * setup the checkpoint */
+        erv = setCheckpoint(levelName, tgtX, tgtY);
+        ASSERT(erv == ERR_OK, erv);
+    }
+
 #undef LEN
 #undef APPEND_DYN
 #undef APPEND_POS
@@ -349,6 +377,11 @@ err loadPlaystate() {
         /* Load the level pointed by the loadzone */
         return _loadLevel(getNextLevelName(), 0/*setPlayer*/);
     }
+}
+
+/** Remove the flag that signals that no level is being loaded */
+void clearPlaystateLevelFlag() {
+    playstate.flags &= ~PF_TEL_LEVEL;
 }
 
 /**
@@ -459,6 +492,16 @@ err updatePlaystate() {
     erv = updateCamera(&playstate.swordy, &playstate.gunny);
     ASSERT(erv == ERR_OK, erv);
 
+    /* Reload the checkpoint */
+    if (!(playstate.swordy.flags & EF_ALIVE)
+            || !(playstate.gunny.flags & EF_ALIVE)) {
+        erv = loadCheckpoint();
+        ASSERT(erv == ERR_OK, erv);
+
+        playstate.swordy.flags |= EF_ALIVE;
+        playstate.gunny.flags |= EF_ALIVE;
+    }
+
     return ERR_OK;
 }
 
@@ -534,10 +577,9 @@ err drawPlaystate() {
     erv = drawSwordy(&playstate.swordy);
     ASSERT(erv == ERR_OK, erv);
 
-    rv = gfmGroup_draw(fx, game.pCtx);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-
     rv = gfmTilemap_draw(playstate.pMap, game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmGroup_draw(fx, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     erv = drawEntityIcon(&playstate.swordy, swordy_icon);

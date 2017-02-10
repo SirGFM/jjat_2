@@ -25,7 +25,7 @@
 /** Maximum length for any level name. Since this is later modified (with prefix
  * and postfix), this length does NOT leave a free space for the trailing '\0' */
 #define MAX_VALID_LEN \
-    (MAX_LEVEL_NAME - (sizeof("levels/") - 1) - (sizeof("_bg") - 1) - (sizeof("_obj.gfm") - 1) - 1)
+    (MAX_LEVEL_NAME - (sizeof("levels/") - 1) - (sizeof("_bg_tm.gfm") - 1) - 1)
 
 struct stPlaystateCtx {
     /** The level parser */
@@ -73,6 +73,9 @@ void onHitLoadzone(int type, int levelType);
 
 /** Setup the playstate so it may start to be executed */
 err loadPlaystate();
+
+/** Remove the flag that signals that no level is being loaded */
+void clearPlaystateLevelFlag();
 
 /** Update the playstate */
 err updatePlaystate();

@@ -11,6 +11,10 @@ type spike 905
 type floor_notp 907
 type floor_notp 908
 type floor_notp 909
+type floor_notp 948
+type floor_notp 949
+type floor_notp 950
+type floor_notp 951
 type floor 960
 type floor 961
 type floor 962
@@ -39,6 +43,10 @@ type floor 1034
 type floor_notp 1035
 type floor_notp 1036
 type floor_notp 1037
+type floor 1204
+type floor 1205
+type floor 1206
+type floor 1207
 map 40 40
   961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 
   961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 961 

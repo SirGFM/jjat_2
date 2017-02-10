@@ -1,0 +1,6 @@
+area invisible_wall 0 -24 320 24
+obj loadzone 304 136 32 32 [ dest , teleport_tuto ] [ dir , left ] [ tgt_x , 4 ] [ tgt_y , 9 ]
+area invisible_wall 320 0 32 240
+area invisible_wall -32 0 32 240
+obj loadzone -16 136 32 32 [ dest , attack_tuto ] [ dir , left ] [ tgt_x , 55 ] [ tgt_y , 28 ]
+obj checkpoint 152 168 16 24 [ dest , checkpoint_tuto ] [ tgt_x , 19 ] [ tgt_y , 24 ]
