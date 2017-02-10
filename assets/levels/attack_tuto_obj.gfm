@@ -1,2 +1,11 @@
 obj loadzone 464 192 32 32 [ dest , checkpoint_tuto ] [ dir , right ] [ tgt_x , 3 ] [ tgt_y , 21 ]
 area invisible_wall 480 0 32 240
+obj walky 256 224 8 8
+obj walky 416 88 8 8
+obj walky 320 40 8 8
+obj g_walky 112 80 8 8
+obj g_walky 112 128 8 8
+obj g_walky 16 176 8 8
+obj g_walky 64 216 8 8
+area invisible_wall -32 0 32 240
+obj loadzone -16 192 32 32 [ dest , checkpoint_tuto ] [ dir , right ] [ tgt_x , 3 ] [ tgt_y , 21 ]
