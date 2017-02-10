@@ -492,6 +492,16 @@ err updatePlaystate() {
     erv = updateCamera(&playstate.swordy, &playstate.gunny);
     ASSERT(erv == ERR_OK, erv);
 
+    /* Reload the checkpoint */
+    if (!(playstate.swordy.flags & EF_ALIVE)
+            || !(playstate.gunny.flags & EF_ALIVE)) {
+        erv = loadCheckpoint();
+        ASSERT(erv == ERR_OK, erv);
+
+        playstate.swordy.flags |= EF_ALIVE;
+        playstate.gunny.flags |= EF_ALIVE;
+    }
+
     return ERR_OK;
 }
 
