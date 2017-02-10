@@ -31,6 +31,24 @@
 #define HEIGHT_IN_TILES (V_HEIGHT / 8 + 4)
 #define TM_DEFAULT_TILE -1
 
+enum enLevelInfoFlags {
+    LIF_NAME = 0x01
+  , LIF_TGTX = 0x02
+  , LIF_TGTY = 0x04
+  , LIF_DIR  = 0x08
+};
+typedef enum enLevelInfoFlags levelInfoFlags;
+
+/** Parseable information used when loading levels */
+struct stLevelInfo {
+    char *pName;
+    int tgtX;
+    int tgtY;
+    int dir;
+    levelInfoFlags required;
+};
+typedef struct stLevelInfo levelInfo;
+
 /** Region where the name of maps accessible from the current one is stored */
 static char _stMapsName[MAX_AREAS * (MAX_VALID_LEN + 1)];
 
@@ -232,6 +250,28 @@ char* getNextLevelName() {
     return lvltransition.pCachedName;
 }
 
+/**
+ * Retrieve the transition data for a given level
+ *
+ * @param  [out]ppName Name of the target level
+ * @param  [out]pTgtX  Target position within the level (in pixels)
+ * @param  [out]pTgtY  Target position within the level (in pixels)
+ * @param  [ in]index  Level's index
+ */
+err getLevelTransitionData(char **ppName, int *pTgtX, int *pTgtY, int index) {
+    int pos;
+
+    ASSERT(index < lvltransition.geometry.areasCount, ERR_INDEXOOB);
+
+    pos = lvltransition.geometry.teleportPosition[index];
+
+    *ppName = lvltransition.geometry.pNames[index];
+    *pTgtX = pos & 0xffff;
+    *pTgtY = (pos >> 16) & 0xffff;
+
+    return ERR_OK;
+}
+
 /** Alloc all required resources */
 err initLeveltransition() {
     gfmRV rv;
@@ -300,36 +340,23 @@ err calculateStaticLeveltransition() {
 }
 
 /**
- * Parse a loadzone
+ * Load information used to load the level from the parser
  *
- * @param  [ in]pParser The parser pointing at a loadzone
+ * @param  [ in]pParser The parser
+ * @param  [ in]pInfo   The parsed information
  */
-err parseLoadzone(gfmParser *pParser) {
-    gfmObject *pObj;
-    uint32_t *pos;
-    char *pName;
+static err parseLevelInfo(gfmParser *pParser, levelInfo *pInfo) {
     gfmRV rv;
-    int count, dir, i, h, l, tgtX, tgtY, type, w, x, y;
-
-    count = lvltransition.geometry.areasCount;
-    ASSERT(count < MAX_AREAS, ERR_BUFFERTOOSMALL);
-
-    pObj = lvltransition.geometry.pAreas[count];
-    pos = &lvltransition.geometry.teleportPosition[count];
-    pName = lvltransition.geometry.pNames[count];
-
-    rv = gfmParser_getPos(&x, &y, playstate.pParser);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    rv = gfmParser_getDimensions(&w, &h, playstate.pParser);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    int i, l;
 
     rv = gfmParser_getNumProperties(&l, playstate.pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    dir = -1;
-    tgtX = -1;
-    tgtY = -1;
-    pName[0] = '\0';
+    pInfo->dir = -1;
+    pInfo->tgtX = -1;
+    pInfo->tgtY = -1;
+    pInfo->pName = 0;
+
     i = 0;
     while (i < l) {
         char *pKey, *pVal;
@@ -338,27 +365,27 @@ err parseLoadzone(gfmParser *pParser) {
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
         if (strcmp(pKey, "tgt_x") == 0) {
-            tgtX = _getInt(pVal);
+            pInfo->tgtX = _getInt(pVal);
         }
         else if (strcmp(pKey, "tgt_y") == 0) {
-            tgtY = _getInt(pVal);
+            pInfo->tgtY = _getInt(pVal);
         }
         else if (strcmp(pKey, "dest") == 0) {
             ASSERT(strlen(pVal) < MAX_VALID_LEN, ERR_PARSINGERR);
-            strcpy(pName, pVal);
+            pInfo->pName = pVal;
         }
         else if (strcmp(pKey, "dir") == 0) {
             if (strcmp(pVal, "left") == 0) {
-                dir = TEL_LEFT;
+                pInfo->dir = TEL_LEFT;
             }
             else if (strcmp(pVal, "right") == 0) {
-                dir = TEL_RIGHT;
+                pInfo->dir = TEL_RIGHT;
             }
             else if (strcmp(pVal, "up") == 0) {
-                dir = TEL_UP;
+                pInfo->dir = TEL_UP;
             }
             else if (strcmp(pVal, "down") == 0) {
-                dir = TEL_DOWN;
+                pInfo->dir = TEL_DOWN;
             }
             else {
                 ASSERT(0, ERR_PARSINGERR);
@@ -367,17 +394,50 @@ err parseLoadzone(gfmParser *pParser) {
 
         i++;
     }
-    ASSERT(dir != -1, ERR_PARSINGERR);
-    ASSERT(tgtX > -1 && tgtX < 0x00200, ERR_PARSINGERR);
-    ASSERT(tgtY > -1 && tgtY < 0x00200, ERR_PARSINGERR);
-    ASSERT(pName[0] != '\0', ERR_PARSINGERR);
 
-    *pos = ((tgtY * 8) << 16) | (tgtX * 8);
+    ASSERT(!(pInfo->required & LIF_DIR) || pInfo->dir != -1, ERR_PARSINGERR);
+    ASSERT(!(pInfo->required & LIF_TGTX)
+            || (pInfo->tgtX > -1 && pInfo->tgtX < 0x00200), ERR_PARSINGERR);
+    ASSERT(!(pInfo->required & LIF_TGTY)
+            || (pInfo->tgtY > -1 && pInfo->tgtY < 0x00200), ERR_PARSINGERR);
+    ASSERT(!(pInfo->required & LIF_NAME) || pInfo->pName != 0, ERR_PARSINGERR);
+
+    return ERR_OK;
+}
+
+/**
+ * Parse a loadzone
+ *
+ * @param  [ in]pParser The parser pointing at a loadzone
+ */
+err parseLoadzone(gfmParser *pParser) {
+    levelInfo info;
+    gfmRV rv;
+    err erv;
+    int count, h, type, w, x, y;
+
+    count = lvltransition.geometry.areasCount;
+    ASSERT(count < MAX_AREAS, ERR_BUFFERTOOSMALL);
+
+    rv = gfmParser_getPos(&x, &y, playstate.pParser);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmParser_getDimensions(&w, &h, playstate.pParser);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    info.required = (LIF_NAME | LIF_TGTX | LIF_TGTY | LIF_DIR);
+    erv = parseLevelInfo(pParser, &info);
+    ASSERT(erv == ERR_OK, erv);
+
+    strcpy(lvltransition.geometry.pNames[count], info.pName);
+    lvltransition.geometry.teleportPosition[count] = ((info.tgtY * 8) << 16)
+            | (info.tgtX * 8);
 
     type = T_LOADZONE;
     type |= TEL_INDEX_MASK & (count << TEL_INDEX_BITS);
-    type |= dir;
-    rv = gfmObject_init(pObj, x, y, w, h, 0/*child*/, type);
+    type |= info.dir;
+
+    rv = gfmObject_init(lvltransition.geometry.pAreas[count], x, y, w, h
+            , 0/*child*/, type);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     lvltransition.geometry.areasCount++;
@@ -416,10 +476,13 @@ err parseInvisibleWall(gfmParser *pParser) {
  */
 err parseCheckpoint(gfmParser *pParser) {
     gfmObject *pObj;
+    levelInfo info;
     gfmRV rv;
-    int h, w, x, y;
+    err erv;
+    int count, h, type, w, x, y;
 
-    ASSERT(lvltransition.geometry.areasCount < MAX_AREAS, ERR_BUFFERTOOSMALL);
+    count = lvltransition.geometry.areasCount;
+    ASSERT(count < MAX_AREAS, ERR_BUFFERTOOSMALL);
 
     pObj = lvltransition.geometry.pAreas[lvltransition.geometry.areasCount];
 
@@ -427,7 +490,18 @@ err parseCheckpoint(gfmParser *pParser) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     rv = gfmParser_getDimensions(&w, &h, playstate.pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    rv = gfmObject_init(pObj, x, y, w, h, 0/*child*/, T_CHECKPOINT);
+
+    info.required = (LIF_NAME | LIF_TGTX | LIF_TGTY);
+    erv = parseLevelInfo(pParser, &info);
+    ASSERT(erv == ERR_OK, erv);
+
+    strcpy(lvltransition.geometry.pNames[count], info.pName);
+    lvltransition.geometry.teleportPosition[count] = ((info.tgtY * 8) << 16)
+            | (info.tgtX * 8);
+
+    type = T_CHECKPOINT;
+    type |= TEL_INDEX_MASK & (count << TEL_INDEX_BITS);
+    rv = gfmObject_init(pObj, x, y, w, h, 0/*child*/, type);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     lvltransition.geometry.areasCount++;
@@ -502,6 +576,7 @@ err setupLeveltransition() {
     /* Skip setup as it has already been done */
     if (lvltransition.flags & LT_CHECKPOINT) {
         lvltransition.flags = 0;
+        clearPlaystateLevelFlag();
         return ERR_OK;
     }
 

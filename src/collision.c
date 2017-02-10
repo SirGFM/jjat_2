@@ -12,6 +12,7 @@
 #include <jjat2/entity.h>
 #include <jjat2/fx_group.h>
 #include <jjat2/gunny.h>
+#include <jjat2/leveltransition.h>
 #include <jjat2/playstate.h>
 #include <jjat2/teleport.h>
 #include <jjat2/enemies/g_walky.h>
@@ -311,26 +312,29 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                     checkpoint = &node2;
                 }
 
-                if ((checkpoint->type & CHECKPOINT_TRIGGERED) == 0) {
+                if ((checkpoint->type & TEL_CHECKPOINT_TRIGGERED) == 0) {
+                    char *pName;
                     gfmSprite *pSpr;
-                    int h, w, x, y;
+                    int i, h, tgtX, tgtY, w, x, y;
                     err erv;
 
                     gfmObject_getPosition(&x, &y, checkpoint->pObject);
                     gfmObject_getDimensions(&w, &h, checkpoint->pObject);
 
-                    /* TODO set the checkpoint */
-#if 0
-                    erv = setCheckpoint(char *pName, int tgtX, int tgtY);
+
+                    /* Set the checkpoint */
+                    i = getLoadzoneIndex(checkpoint->type);
+                    erv = getLevelTransitionData(&pName, &tgtX, &tgtY, i);
                     ASSERT(erv == ERR_OK, erv);
-#endif /* 0 */
+                    erv = setCheckpoint(pName, tgtX, tgtY);
+                    ASSERT(erv == ERR_OK, erv);
 
                     pSpr = spawnFx(x, y, w, h, 0/*dir*/, checkpointSavedDuration
                             , FX_CHECKPOINT_SAVED, T_FX);
                     ASSERT(pSpr != 0, ERR_BUFFERTOOSMALL);
 
                     gfmObject_setType(checkpoint->pObject
-                            , (T_CHECKPOINT | CHECKPOINT_TRIGGERED));
+                            , (T_CHECKPOINT | TEL_CHECKPOINT_TRIGGERED));
                 }
             } break;
 /*== ENTITIES'S COLLISION ====================================================*/

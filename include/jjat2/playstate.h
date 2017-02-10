@@ -74,6 +74,9 @@ void onHitLoadzone(int type, int levelType);
 /** Setup the playstate so it may start to be executed */
 err loadPlaystate();
 
+/** Remove the flag that signals that no level is being loaded */
+void clearPlaystateLevelFlag();
+
 /** Update the playstate */
 err updatePlaystate();
 

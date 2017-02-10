@@ -8,10 +8,6 @@
 #include <conf/type.h>
 #include <jjat2/playstate.h>
 
-enum {
-    CHECKPOINT_TRIGGERED = (1 << T_BITS)
-};
-
 struct stCheckpointCtx {
     /** Name of the level */
     char pName[MAX_VALID_LEN];

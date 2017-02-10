@@ -19,15 +19,17 @@
 
 /** Packed teleport/loadzone data that is stored within the type */
 enum enLevelTransitionFlags {
-    TEL_UP         = 0x00000000
-  , TEL_DOWN       = 0x10000000
-  , TEL_LEFT       = 0x20000000
-  , TEL_RIGHT      = 0x30000000
+    TEL_UP                   = 0x00000000
+  , TEL_DOWN                 = 0x10000000
+  , TEL_LEFT                 = 0x20000000
+  , TEL_RIGHT                = 0x30000000
 
-  , TEL_DIR_MASK   = 0x30000000
-  , TEL_DIR_BITS   = 24
-  , TEL_INDEX_MASK = 0x0ff00000
-  , TEL_INDEX_BITS = 20
+  , TEL_CHECKPOINT_TRIGGERED = 0x10000000
+
+  , TEL_DIR_MASK             = 0x30000000
+  , TEL_DIR_BITS             = 24
+  , TEL_INDEX_MASK           = 0x0ff00000
+  , TEL_INDEX_BITS           = 20
 };
 typedef enum enLevelTransitionFlags levelTransitionFlags;
 
@@ -100,6 +102,16 @@ void switchToLevelTransition(int index);
 
 /** Retrieve the name of the level to be loaded */
 char* getNextLevelName();
+
+/**
+ * Retrieve the transition data for a given level
+ *
+ * @param  [out]ppName Name of the target level
+ * @param  [out]pTgtX  Target position within the level
+ * @param  [out]pTgtY  Target position within the level
+ * @param  [ in]index  Level's index
+ */
+err getLevelTransitionData(char **ppName, int *pTgtX, int *pTgtY, int index);
 
 /** Alloc all required resources */
 err initLeveltransition();

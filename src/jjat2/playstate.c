@@ -379,6 +379,11 @@ err loadPlaystate() {
     }
 }
 
+/** Remove the flag that signals that no level is being loaded */
+void clearPlaystateLevelFlag() {
+    playstate.flags &= ~PF_TEL_LEVEL;
+}
+
 /**
  * Handles colliding the active player with a invisible static dummy (placed at
  * the inactive player's position)

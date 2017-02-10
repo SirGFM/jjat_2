@@ -765,7 +765,13 @@
     <property name="tgt_y" value="28"/>
    </properties>
   </object>
-  <object id="97" name="checkpoint" type="checkpoint" x="152" y="168" width="16" height="24"/>
+  <object id="97" name="checkpoint" type="checkpoint" x="152" y="168" width="16" height="24">
+   <properties>
+    <property name="dest" value="checkpoint_tuto"/>
+    <property name="tgt_x" value="19"/>
+    <property name="tgt_y" value="24"/>
+   </properties>
+  </object>
  </objectgroup>
  <layer name="checkpoint_tuto_fg_tm" width="120" height="50" offsetx="480" offsety="-424">
   <properties>
