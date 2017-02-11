@@ -26,17 +26,12 @@
  * @param  [ in]t       Type of the parsed enemy
  */
 err parseEnemy(entityCtx *pEnt, gfmParser *pParser, type t) {
-    gfmRV rv;
     err erv;
-    int x, y;
-
-    rv = gfmParser_getPos(&x, &y, pParser);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     switch (t & T_MASK) {
-        case T_EN_SPIKY:   erv = initSpiky(pEnt, x, y); break;
-        case T_EN_WALKY:   erv = initWalky(pEnt, x, y); break;
-        case T_EN_G_WALKY: erv = initGreenWalky(pEnt, x, y); break;
+        case T_EN_SPIKY:   erv = initSpiky(pEnt, pParser); break;
+        case T_EN_WALKY:   erv = initWalky(pEnt, pParser); break;
+        case T_EN_G_WALKY: erv = initGreenWalky(pEnt, pParser); break;
         default: {
             ASSERT(0, ERR_INVALIDTYPE);
         }

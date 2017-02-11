@@ -5,17 +5,16 @@
 #define __JJAT2_SPIKY_H__
 
 #include <base/error.h>
-
 #include <jjat2/entity.h>
+#include <GFraMe/gfmParser.h>
 
 /**
  * Initialize a 'spiky' entity
  *
- * @param [ in]pEnt The entity
- * @param [ in]x    Horizontal position (left!)
- * @param [ in]y    Vertical position (bottom!)
+ * @param  [ in]pEnt    The entity
+ * @param  [ in]pParser Parser that has just parsed an enemy
  */
-err initSpiky(entityCtx *pEnt, int x, int y);
+err initSpiky(entityCtx *pEnt, gfmParser *pParser);
 
 /**
  * Update the object's physics.

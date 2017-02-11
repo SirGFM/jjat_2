@@ -12,6 +12,7 @@
 #include <jjat2/fx_group.h>
 #include <jjat2/enemies/spiky.h>
 
+#include <GFraMe/gfmParser.h>
 #include <GFraMe/gfmSprite.h>
 
 #define spiky_width     4
@@ -49,13 +50,16 @@ static int pSpikyAnimData[] = {
 /**
  * Initialize a 'spiky' entity
  *
- * @param [ in]pEnt The entity
- * @param [ in]x    Horizontal position (left!)
- * @param [ in]y    Vertical position (bottom!)
+ * @param  [ in]pEnt    The entity
+ * @param  [ in]pParser Parser that has just parsed an enemy
  */
-err initSpiky(entityCtx *pEnt, int x, int y) {
+err initSpiky(entityCtx *pEnt, gfmParser *pParser) {
     gfmRV rv;
     err erv;
+    int x, y;
+
+    rv = gfmParser_getPos(&x, &y, pParser);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     y -= spiky_height;
     rv = gfmSprite_init(pEnt->pSelf, x, y, spiky_width, spiky_height

@@ -11,6 +11,7 @@
 #include <jjat2/entity.h>
 #include <jjat2/fx_group.h>
 
+#include <GFraMe/gfmParser.h>
 #include <GFraMe/gfmSprite.h>
 
 #define g_walky_width     6
@@ -48,13 +49,16 @@ static int pGWalkyAnimData[] = {
 /**
  * Initialize a 'g_walky' entity
  *
- * @param [ in]pEnt The entity
- * @param [ in]x    Horizontal position (left!)
- * @param [ in]y    Vertical position (bottom!)
+ * @param  [ in]pEnt    The entity
+ * @param  [ in]pParser Parser that has just parsed an enemy
  */
-err initGreenWalky(entityCtx *pEnt, int x, int y) {
+err initGreenWalky(entityCtx *pEnt, gfmParser *pParser) {
     gfmRV rv;
     err erv;
+    int x, y;
+
+    rv = gfmParser_getPos(&x, &y, pParser);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     y -= g_walky_height;
     rv = gfmSprite_init(pEnt->pSelf, x, y, g_walky_width, g_walky_height

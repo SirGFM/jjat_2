@@ -5,19 +5,17 @@
 #define __JJAT2_G_WALKY_H__
 
 #include <base/error.h>
-
 #include <jjat2/entity.h>
-
 #include <GFraMe/gfmObject.h>
+#include <GFraMe/gfmParser.h>
 
 /**
  * Initialize a 'g_walky' entity
  *
- * @param [ in]pEnt The entity
- * @param [ in]x    Horizontal position (left!)
- * @param [ in]y    Vertical position (bottom!)
+ * @param  [ in]pEnt    The entity
+ * @param  [ in]pParser Parser that has just parsed an enemy
  */
-err initGreenWalky(entityCtx *pEnt, int x, int y);
+err initGreenWalky(entityCtx *pEnt, gfmParser *pParser);
 
 /**
  * Update the object's physics.
