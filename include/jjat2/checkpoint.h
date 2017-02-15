@@ -6,15 +6,11 @@
 
 #include <base/error.h>
 #include <conf/type.h>
+#include <jjat2/leveltransition.h>
 #include <jjat2/playstate.h>
 
 struct stCheckpointCtx {
-    /** Name of the level */
-    char pName[MAX_VALID_LEN];
-    /** Position of the players */
-    int tgtX;
-    /** Position of the players */
-    int tgtY;
+    leveltransitionData data;
 };
 typedef struct stCheckpointCtx checkpointCtx;
 
@@ -23,11 +19,9 @@ extern checkpointCtx checkpoint;
 /**
  * Assign a new checkpoint, overwritting the previous one
  *
- * @param  [ in]pName Name of the level
- * @param  [ in]tgtX  Position of the players
- * @param  [ in]tgtY  Position of the players
+ * @param  [ in]pData Data for the level transition
  */
-err setCheckpoint(char *pName, int tgtX, int tgtY);
+err setCheckpoint(leveltransitionData *pData);
 
 /** Setup (and start) the level transition so the checkpoint is loaded. */
 err loadCheckpoint();

@@ -6,11 +6,13 @@
 
 #include <base/error.h>
 
+#include <GFraMe/gfmHitbox.h>
 #include <GFraMe/gfmObject.h>
 #include <GFraMe/gfmParser.h>
 #include <GFraMe/gfmTilemap.h>
 
 #include <jjat2/entity.h>
+#include <jjat2/leveltransition.h>
 
 #include <stdint.h>
 
@@ -19,6 +21,7 @@
 #define TM_MAX_HEIGHT   240
 #define TM_DEFAULT_TILE -1
 #define MAX_ENTITIES    32
+#define MAX_AREAS       16
 
 /** Maximum number of characters for the path to any given level */
 #define MAX_LEVEL_NAME  128
@@ -28,6 +31,10 @@
     (MAX_LEVEL_NAME - (sizeof("levels/") - 1) - (sizeof("_bg_tm.gfm") - 1) - 1)
 
 struct stPlaystateCtx {
+    /** Next level to be loaded, if any */
+    leveltransitionData *pNextLevel;
+    /** Static areas (like loadzones, checkpoints and so on) */
+    gfmHitbox *pAreas;
     /** The level parser */
     gfmParser *pParser;
     /** The game's map */
@@ -48,10 +55,14 @@ struct stPlaystateCtx {
     uint16_t height;
     /** Map's width, in pixels */
     uint16_t width;
+    /** How many areas were used on the current level */
+    uint8_t areasCount;
     /** How many entities there are on the current map */
     uint8_t entityCount;
     /** Generic flags */
     uint8_t flags;
+    /** Context for the hitboxes */
+    leveltransitionData data[MAX_AREAS];
 };
 typedef struct stPlaystateCtx playstateCtx;
 
@@ -68,8 +79,9 @@ void freePlaystate();
  * Setup loading the next map.
  *
  * @param  [ in]type Type of entity that entered the loadzone
+ * @param  [ in]pData Data of the loadzone that was hit
  */
-void onHitLoadzone(int type, int levelType);
+void onHitLoadzone(int type, leveltransitionData *pData);
 
 /** Setup the playstate so it may start to be executed */
 err loadPlaystate();

@@ -9,6 +9,7 @@
 #include <conf/game.h>
 
 #include <GFraMe/gfmCamera.h>
+#include <GFraMe/gfmHitbox.h>
 #include <GFraMe/gfmObject.h>
 #include <GFraMe/gfmParser.h>
 #include <GFraMe/gfmTilemap.h>
@@ -27,21 +28,24 @@
 
 #include <string.h>
 
+/** Region where the names of maps accessible from the current one are stored */
+static char _stMapsName[MAX_AREAS * (MAX_VALID_LEN + 1)];
+
+enum enLevelInfoFlags {
+    LIF_NAME = 0x01
+  , LIF_TGTX = 0x02
+  , LIF_TGTY = 0x04
+  , LIF_DIR  = 0x08
+};
+typedef enum enLevelInfoFlags levelInfoFlags;
+
 #define swordy_icon 106
 #define gunny_icon  107
 
-#define PF_TEL_SHIFT 4
 enum {
     PF_TEL_SWORDY = 0x01
   , PF_TEL_GUNNY  = 0x02
-  , PF_TEL_LEVEL  = 0xf0
 };
-#define _setLevelIndex(index) \
-    ((index << PF_TEL_SHIFT) & PF_TEL_LEVEL)
-#define _getLevelIndex(flags) \
-    ((flags & PF_TEL_LEVEL) >> PF_TEL_SHIFT)
-#define _noLevelIndex \
-    (PF_TEL_LEVEL >> PF_TEL_SHIFT)
 
 /** Initialize the playstate so a level may be later loaded and played */
 err initPlaystate() {
@@ -84,7 +88,14 @@ err initPlaystate() {
         i++;
     }
 
-    playstate.flags |= PF_TEL_LEVEL;
+    /* Alloc the areas list and prepare every data */
+    rv = gfmHitbox_getNewList(&playstate.pAreas, MAX_AREAS);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    i = 0;
+    while (i < MAX_AREAS) {
+        playstate.data[i].pName = _stMapsName + (MAX_VALID_LEN + 1) * i;
+        i++;
+    }
 
     return ERR_OK;
 }
@@ -93,6 +104,9 @@ err initPlaystate() {
 void freePlaystate() {
     int i;
 
+    if (playstate.pAreas != 0) {
+        gfmHitbox_free(&playstate.pAreas);
+    }
     if (playstate.pMap != 0) {
         gfmTilemap_free(&playstate.pMap);
     }
@@ -119,15 +133,12 @@ void freePlaystate() {
  * Setup loading the next map.
  *
  * @param  [ in]type Type of entity that entered the loadzone
+ * @param  [ in]pData Data of the loadzone that was hit
  */
-void onHitLoadzone(int type, int levelType) {
-    int curLevel, level;
-
+void onHitLoadzone(int type, leveltransitionData *pData) {
     /* Check if the triggered level is the same as the stored one (or if no
      * level has been set yet) */
-    curLevel = _getLevelIndex(playstate.flags);
-    level = getLoadzoneIndex(levelType);
-    if (curLevel != _noLevelIndex && curLevel != level) {
+    if (playstate.pNextLevel != 0 && pData != playstate.pNextLevel) {
         return;
     }
 
@@ -138,8 +149,7 @@ void onHitLoadzone(int type, int levelType) {
         playstate.flags |= PF_TEL_GUNNY;
     }
 
-    playstate.flags &= ~PF_TEL_LEVEL;
-    playstate.flags |= _setLevelIndex(level);
+    playstate.pNextLevel = pData;
 }
 
 /** Updates the quadtree's bounds according to the currently loaded map */
@@ -163,7 +173,6 @@ static err _updateWorldSize() {
 /** Load the static quadtree */
 static err _loadStaticQuadtree() {
     gfmRV rv;
-    err erv;
 
     rv = gfmQuadtree_initRoot(collision.pStaticQt, -16/*x*/, -16/*y*/
             , playstate.width, playstate.height, 8/*depth*/, 16/*nodes*/);
@@ -175,9 +184,185 @@ static err _loadStaticQuadtree() {
     rv = gfmQuadtree_populateTilemap(collision.pStaticQt, playstate.pMap);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    erv = calculateStaticLeveltransition();
+    rv = gfmHitbox_populateQuadtree(playstate.pAreas, collision.pStaticQt
+            , playstate.areasCount);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    return ERR_OK;
+}
+
+/**
+ * Retrieve an integer from a string
+ *
+ * @param  [ in]pStr The string
+ * @return           The integer
+ */
+static int _getInt(char *pStr) {
+    int ret = 0;
+    while (*pStr) {
+        ret = ret * 10 + (*pStr - '0');
+        pStr++;
+    }
+    return ret;
+}
+
+
+/**
+ * Load information used to load the level from the parser
+ *
+ * @param  [ in]pParser The parser
+ * @param  [ in]pInfo   The parsed information
+ */
+static err _parseLevelInfo(gfmParser *pParser, leveltransitionData *pInfo
+        , levelInfoFlags required) {
+    gfmRV rv;
+    int i, l;
+
+    rv = gfmParser_getNumProperties(&l, pParser);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    pInfo->dir = -1;
+    pInfo->x = 0xffff;
+    pInfo->y = 0xffff;
+    pInfo->pName[0] = '\0';
+
+    i = 0;
+    while (i < l) {
+        char *pKey, *pVal;
+
+        rv = gfmParser_getProperty(&pKey, &pVal, pParser, i);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+        if (strcmp(pKey, "tgt_x") == 0) {
+            int val;
+
+            val = _getInt(pVal);
+            ASSERT(val >= 0 && val < 0x2000, ERR_PARSINGERR);
+            pInfo->x = (uint16_t)val * 8;
+        }
+        else if (strcmp(pKey, "tgt_y") == 0) {
+            int val;
+
+            val = _getInt(pVal);
+            ASSERT(val >= 0 && val < 0x2000, ERR_PARSINGERR);
+            pInfo->y = (uint16_t)val * 8;
+        }
+        else if (strcmp(pKey, "dest") == 0) {
+            ASSERT(strlen(pVal) < MAX_VALID_LEN, ERR_PARSINGERR);
+            strcpy(pInfo->pName, pVal);
+        }
+        else if (strcmp(pKey, "dir") == 0) {
+            if (strcmp(pVal, "left") == 0) {
+                pInfo->dir = TEL_LEFT;
+            }
+            else if (strcmp(pVal, "right") == 0) {
+                pInfo->dir = TEL_RIGHT;
+            }
+            else if (strcmp(pVal, "up") == 0) {
+                pInfo->dir = TEL_UP;
+            }
+            else if (strcmp(pVal, "down") == 0) {
+                pInfo->dir = TEL_DOWN;
+            }
+            else {
+                ASSERT(0, ERR_PARSINGERR);
+            }
+        }
+
+        i++;
+    }
+
+    ASSERT(!(required & LIF_DIR) || pInfo->dir != -1, ERR_PARSINGERR);
+    ASSERT(!(required & LIF_TGTX) || pInfo->x != 0xffff, ERR_PARSINGERR);
+    ASSERT(!(required & LIF_TGTY) || pInfo->y != 0xffff, ERR_PARSINGERR);
+    ASSERT(!(required & LIF_NAME) || pInfo->pName[0] != '\0', ERR_PARSINGERR);
+            
+
+    return ERR_OK;
+}
+
+/**
+ * Parse a loadzone
+ *
+ * @param  [ in]pParser The parser pointing at a loadzone
+ */
+static err _parseLoadzone(gfmParser *pParser) {
+    leveltransitionData *pData;
+    gfmRV rv;
+    err erv;
+    int h, w, x, y;
+
+    ASSERT(playstate.areasCount < MAX_AREAS, ERR_BUFFERTOOSMALL);
+
+    rv = gfmParser_getPos(&x, &y, pParser);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmParser_getDimensions(&w, &h, pParser);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    pData = playstate.data + playstate.areasCount;
+    erv = _parseLevelInfo(pParser, pData
+            , (LIF_NAME | LIF_TGTX | LIF_TGTY | LIF_DIR));
     ASSERT(erv == ERR_OK, erv);
 
+    rv = gfmHitbox_initItem(playstate.pAreas, pData, x, y, w, h, T_LOADZONE
+            , playstate.areasCount);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    playstate.areasCount++;
+    return ERR_OK;
+}
+
+/**
+ * Parse a invisible wall
+ *
+ * @param  [ in]pParser The parser pointing at a invisible wall
+ */
+static err _parseInvisibleWall(gfmParser *pParser) {
+    gfmRV rv;
+    int h, w, x, y;
+
+    ASSERT(playstate.areasCount < MAX_AREAS, ERR_BUFFERTOOSMALL);
+
+    rv = gfmParser_getPos(&x, &y, pParser);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmParser_getDimensions(&w, &h, pParser);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    rv = gfmHitbox_initItem(playstate.pAreas
+            , playstate.data + playstate.areasCount, x, y, w, h, T_FLOOR_NOTP
+            , playstate.areasCount);
+
+    playstate.areasCount++;
+    return ERR_OK;
+}
+
+/**
+ * Parse a checkpoint
+ *
+ * @param  [ in]pParser The parser pointing at a checkpoint
+ */
+static err _parseCheckpoint(gfmParser *pParser) {
+    leveltransitionData *pData;
+    gfmRV rv;
+    err erv;
+    int h, w, x, y;
+
+    ASSERT(playstate.areasCount < MAX_AREAS, ERR_BUFFERTOOSMALL);
+
+    rv = gfmParser_getPos(&x, &y, pParser);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmParser_getDimensions(&w, &h, pParser);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    pData = playstate.data + playstate.areasCount;
+    erv = _parseLevelInfo(pParser, pData, (LIF_NAME | LIF_TGTX | LIF_TGTY));
+    ASSERT(erv == ERR_OK, erv);
+
+    rv = gfmHitbox_initItem(playstate.pAreas, pData, x, y, w, h, T_CHECKPOINT
+            , playstate.areasCount);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    playstate.areasCount++;
     return ERR_OK;
 }
 
@@ -260,9 +445,8 @@ static err _loadLevel(char *levelName, int setPlayer) {
             , pos + LEN("_obj.gfm"));
     ASSERT(erv == ERR_OK, erv);
 
-    resetLeveltransition();
-
     playstate.entityCount = 0;
+    playstate.areasCount = 0;
     while (1) {
         char *type;
         err erv;
@@ -278,15 +462,15 @@ static err _loadLevel(char *levelName, int setPlayer) {
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
         if (strcmp(type, "loadzone") == 0) {
-            erv = parseLoadzone(playstate.pParser);
+            erv = _parseLoadzone(playstate.pParser);
             ASSERT(erv == ERR_OK, erv);
         }
         else if (strcmp(type, "invisible_wall") == 0) {
-            erv = parseInvisibleWall(playstate.pParser);
+            erv = _parseInvisibleWall(playstate.pParser);
             ASSERT(erv == ERR_OK, erv);
         }
         else if (strcmp(type, "checkpoint") == 0) {
-            erv = parseCheckpoint(playstate.pParser);
+            erv = _parseCheckpoint(playstate.pParser);
             ASSERT(erv == ERR_OK, erv);
         }
         else if (strcmp(type, "swordy_pos") == 0) {
@@ -338,6 +522,7 @@ static err _loadLevel(char *levelName, int setPlayer) {
     showUI();
 
     if (setPlayer) {
+        leveltransitionData data;
         int h, tgtX, tgtY, w;
 
         rv = gfmSprite_getPosition(&tgtX, &tgtY, playstate.swordy.pSelf);
@@ -356,7 +541,10 @@ static err _loadLevel(char *levelName, int setPlayer) {
         /* Setting the player position implies that this is the first level on
          * this playthrough (either a new game or a loaded one). Therefore,
          * setup the checkpoint */
-        erv = setCheckpoint(levelName, tgtX, tgtY);
+        strcpy(data.pName, levelName);
+        data.x = (uint16_t)tgtX;
+        data.y = (uint16_t)tgtY;
+        erv = setCheckpoint(&data);
         ASSERT(erv == ERR_OK, erv);
     }
 
@@ -369,19 +557,19 @@ static err _loadLevel(char *levelName, int setPlayer) {
 
 /** Setup the playstate so it may start to be executed */
 err loadPlaystate() {
-    if ((playstate.flags & PF_TEL_LEVEL) == PF_TEL_LEVEL) {
+    if (playstate.pNextLevel == 0) {
         /* Load the default first level */
         return _loadLevel(FIRST_MAP, 1/*setPlayer*/);
     }
     else {
         /* Load the level pointed by the loadzone */
-        return _loadLevel(getNextLevelName(), 0/*setPlayer*/);
+        return _loadLevel(playstate.pNextLevel->pName, 0/*setPlayer*/);
     }
 }
 
 /** Remove the flag that signals that no level is being loaded */
 void clearPlaystateLevelFlag() {
-    playstate.flags &= ~PF_TEL_LEVEL;
+    playstate.pNextLevel = 0;
 }
 
 /**
@@ -411,7 +599,7 @@ err updatePlaystate() {
     int i;
 
     playstate.flags &= ~(PF_TEL_SWORDY | PF_TEL_GUNNY);
-    playstate.flags |= PF_TEL_LEVEL;
+    playstate.pNextLevel = 0;
 
     rv = gfmQuadtree_initRoot(collision.pQt, -16/*x*/, -16/*y*/, playstate.width
             , playstate.height, 8/*depth*/, 16/*nodes*/);
@@ -472,12 +660,8 @@ err updatePlaystate() {
     /** Check if a loadzone was triggered by both players */
     if ((playstate.flags & (PF_TEL_SWORDY | PF_TEL_GUNNY))
             == (PF_TEL_SWORDY | PF_TEL_GUNNY)) {
-        int curLevel;
-
-        curLevel = _getLevelIndex(playstate.flags);
-
         /* Setup & trigger level transition/loading */
-        switchToLevelTransition(curLevel);
+        switchToLevelTransition(playstate.pNextLevel);
     }
 
     /* This may result in a few 1-frame display bugs for the target... */
