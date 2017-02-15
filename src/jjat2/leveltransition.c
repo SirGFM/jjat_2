@@ -99,8 +99,8 @@ static void _tweenPlayers(int cx, int cy, int initTime) {
     int dstX, dstY, srcX, srcY, tgtX, tgtY;
 
     /* Adjust the target position to be within the current camera */
-    tgtX = lvltransition.cachedTargetX;
-    tgtY = lvltransition.cachedTargetY;
+    tgtX = ((int)lvltransition.cachedTargetX) + cx;
+    tgtY = ((int)lvltransition.cachedTargetY) + cy;
 
     srcX = lvltransition.swordyX;
     srcY = lvltransition.swordyY;
