@@ -248,7 +248,7 @@ err preUpdateEntity(entityCtx *entity) {
     gfmRV rv;
     err erv;
 
-    entity->flags &= ~(EF_HAS_CARRIER | EF_LOADZONE);
+    entity->flags &= ~(EF_HAS_CARRIER);
     entity->pCarrying = 0;
 
     rv = gfmSprite_getVerticalVelocity(&vy, entity->pSelf);

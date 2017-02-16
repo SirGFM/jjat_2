@@ -9,8 +9,7 @@
 
 #include <base/error.h>
 
-#include <GFraMe/gfmObject.h>
-#include <GFraMe/gfmParser.h>
+#include <GFraMe/gfmHitbox.h>
 #include <GFraMe/gfmTilemap.h>
 
 #include <stdint.h>
@@ -19,17 +18,10 @@
 
 /** Packed teleport/loadzone data that is stored within the type */
 enum enLevelTransitionFlags {
-    TEL_UP                   = 0x00000000
-  , TEL_DOWN                 = 0x10000000
-  , TEL_LEFT                 = 0x20000000
-  , TEL_RIGHT                = 0x30000000
-
-  , TEL_CHECKPOINT_TRIGGERED = 0x10000000
-
-  , TEL_DIR_MASK             = 0x30000000
-  , TEL_DIR_BITS             = 24
-  , TEL_INDEX_MASK           = 0x0ff00000
-  , TEL_INDEX_BITS           = 20
+    TEL_UP                   = 0x01
+  , TEL_DOWN                 = 0x02
+  , TEL_LEFT                 = 0x04
+  , TEL_RIGHT                = 0x08
 };
 typedef enum enLevelTransitionFlags levelTransitionFlags;
 
@@ -38,38 +30,34 @@ enum {
   , LT_CHECKPOINT = 0x02
 };
 
-struct stLeveltransitionGeometryCtx {
-    /** Maps connected to the current one */
-    char *pNames[MAX_AREAS];
-    /** Teleports (and their walls) on the current map */
-    gfmObject *pAreas[MAX_AREAS];
-    /** Target position for the player, after teleporting to a new map */
-    uint32_t teleportPosition[MAX_AREAS];
-    /** How many areas were used on the current level */
-    uint8_t areasCount;
-    /** Index of the level to be loaded */
-    uint8_t index;
+struct stLeveltransitionData {
+    /** Level that will be transitioned to */
+    char *pName;
+    /** Target position within the teleported level */
+    uint16_t x;
+    uint16_t y;
+    /** Direction of the transition */
+    uint8_t dir;
 };
-typedef struct stLeveltransitionGeometryCtx leveltransitionGeometryCtx;
+typedef struct stLeveltransitionData leveltransitionData;
 
 struct stLeveltransitionCtx {
-    /** Pointer to the level name */
-    char *pCachedName;
+    /** The next level to be loaded */
+    leveltransitionData *pNextLevel;
     /** Foreground layer used to simulate a transition effect */
     gfmTilemap *pTransition;
     /** Target position for the current transition. X is packed into the lower
      * 16 and Y is packed into the higher 16 bits */
-    uint32_t cachedTargetPosition;
+    uint16_t cachedTargetX;
+    uint16_t cachedTargetY;
     /** Initial position of gunny's tween */
-    uint32_t gunnyPos;
+    uint16_t gunnyX;
+    uint16_t gunnyY;
     /** Initial position of swordy's tween */
-    uint32_t swordyPos;
+    uint16_t swordyX;
+    uint16_t swordyY;
     /** Controls the transition animation */
     int32_t timer;
-    /** Padding to keep everything nicely packed into 64 bits */
-    int32_t padding_0;
-    /** Padding to keep everything nicely packed into 32 bits */
-    uint16_t padding_1;
     /**
      * Generic flags:
      *  - LT_LOADED - whether the level was loaded
@@ -78,8 +66,6 @@ struct stLeveltransitionCtx {
     uint8_t flags;
     /** Direction of the current transition (shifted 24 bits) */
     uint8_t dir;
-    /** Geometry data loaded from the parser */
-    leveltransitionGeometryCtx geometry;
 };
 typedef struct stLeveltransitionCtx leveltransitionCtx;
 
@@ -87,75 +73,17 @@ typedef struct stLeveltransitionCtx leveltransitionCtx;
 extern leveltransitionCtx lvltransition;
 
 /**
- * Retrieves the index of a level given its type
- *
- * @param  [ in]levelType The type of the loadzone object
- */
-int getLoadzoneIndex(int levelType);
-
-/**
  * Prepare switching to a level transition
  *
- * @param  [ in]index Index of the loadzone
+ * @param  [ in]pNextLevel Next level data
  */
-void switchToLevelTransition(int index);
-
-/** Retrieve the name of the level to be loaded */
-char* getNextLevelName();
-
-/**
- * Retrieve the transition data for a given level
- *
- * @param  [out]ppName Name of the target level
- * @param  [out]pTgtX  Target position within the level
- * @param  [out]pTgtY  Target position within the level
- * @param  [ in]index  Level's index
- */
-err getLevelTransitionData(char **ppName, int *pTgtX, int *pTgtY, int index);
+void switchToLevelTransition(leveltransitionData *pNextLevel);
 
 /** Alloc all required resources */
 err initLeveltransition();
 
 /** Releases all previously alloc'ed resources */
 void freeLeveltransition();
-
-/** Reset all objects parsed on the previous level */
-void resetLeveltransition();
-
-/** Setup static collision against all level transition objects */
-err calculateStaticLeveltransition();
-
-/**
- * Parse a loadzone
- *
- * @param  [ in]pParser The parser pointing at a loadzone
- */
-err parseLoadzone(gfmParser *pParser);
-
-/**
- * Parse a invisible wall
- *
- * @param  [ in]pParser The parser pointing at a invisible wall
- */
-err parseInvisibleWall(gfmParser *pParser);
-
-/**
- * Parse a checkpoint
- *
- * @param  [ in]pParser The parser pointing at a checkpoint
- */
-err parseCheckpoint(gfmParser *pParser);
-
-/**
- * Prepare level transition into a generic level
- *
- * @param  [ in]levelName Level's name
- * @param  [ in]tgtX      Starting position of players
- * @param  [ in]tgtY      Starting position of players
- * @param  [ in]dir       Movement direction of the transition overlay
- */
-err setupGenericLeveltransition(char *levelName, int tgtX, int tgtY
-        , levelTransitionFlags dir);
 
 /** Prepare the transition animation */
 err setupLeveltransition();

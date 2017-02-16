@@ -143,17 +143,15 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 /*== CHANGE MAP ==============================================================*/
             CASE(T_LOADZONE, T_GUNNY)
             CASE(T_LOADZONE, T_SWORDY) {
-                entityCtx *pEnt;
+                /* Setup level transition for the playstate */
                 if (isFirstCase) {
-                    pEnt = (entityCtx*)node2.pChild;
-                    onHitLoadzone(node2.type, node1.type);
+                    onHitLoadzone(node2.type,
+                            (leveltransitionData*)node1.pChild);
                 }
                 else {
-                    pEnt = (entityCtx*)node1.pChild;
-                    onHitLoadzone(node1.type, node2.type);
+                    onHitLoadzone(node1.type,
+                            (leveltransitionData*)node2.pChild);
                 }
-
-                pEnt->flags |= EF_LOADZONE;
             } break;
 /*== ENVIRONMENT'S COLLISION =================================================*/
             CASE(T_FLOOR, T_EN_SPIKY)
@@ -304,6 +302,9 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             CASE(T_CHECKPOINT, T_GUNNY)
             CASE(T_CHECKPOINT, T_SWORDY) {
                 collisionNode *checkpoint;
+                gfmSprite *pSpr;
+                int h, w, x, y;
+                err erv;
 
                 if (isFirstCase) {
                     checkpoint = &node1;
@@ -312,30 +313,18 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                     checkpoint = &node2;
                 }
 
-                if ((checkpoint->type & TEL_CHECKPOINT_TRIGGERED) == 0) {
-                    char *pName;
-                    gfmSprite *pSpr;
-                    int i, h, tgtX, tgtY, w, x, y;
-                    err erv;
+                gfmObject_getPosition(&x, &y, checkpoint->pObject);
+                gfmObject_getDimensions(&w, &h, checkpoint->pObject);
 
-                    gfmObject_getPosition(&x, &y, checkpoint->pObject);
-                    gfmObject_getDimensions(&w, &h, checkpoint->pObject);
+                /* Set the checkpoint */
+                erv = setCheckpoint((leveltransitionData*)checkpoint->pChild);
+                ASSERT(erv == ERR_OK, erv);
 
+                pSpr = spawnFx(x, y, w, h, 0/*dir*/, checkpointSavedDuration
+                        , FX_CHECKPOINT_SAVED, T_FX);
+                ASSERT(pSpr != 0, ERR_BUFFERTOOSMALL);
 
-                    /* Set the checkpoint */
-                    i = getLoadzoneIndex(checkpoint->type);
-                    erv = getLevelTransitionData(&pName, &tgtX, &tgtY, i);
-                    ASSERT(erv == ERR_OK, erv);
-                    erv = setCheckpoint(pName, tgtX, tgtY);
-                    ASSERT(erv == ERR_OK, erv);
-
-                    pSpr = spawnFx(x, y, w, h, 0/*dir*/, checkpointSavedDuration
-                            , FX_CHECKPOINT_SAVED, T_FX);
-                    ASSERT(pSpr != 0, ERR_BUFFERTOOSMALL);
-
-                    gfmObject_setType(checkpoint->pObject
-                            , (T_CHECKPOINT | TEL_CHECKPOINT_TRIGGERED));
-                }
+                gfmObject_setType(checkpoint->pObject, T_FX);
             } break;
 /*== ENTITIES'S COLLISION ====================================================*/
             SELFCASE(T_EN_SPIKY)
