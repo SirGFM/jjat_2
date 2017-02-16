@@ -10,13 +10,19 @@
 #include <jjat2/playstate.h>
 #include <string.h>
 
+static char _stCheckpointName[MAX_VALID_LEN + 1];
+
 /**
  * Assign a new checkpoint, overwritting the previous one
  *
  * @param  [ in]pData Data for the level transition
  */
 err setCheckpoint(leveltransitionData *pData) {
-    memcpy(&checkpoint.data, pData, sizeof(leveltransitionData));
+    checkpoint.data.pName = _stCheckpointName;
+
+    strcpy(checkpoint.data.pName, pData->pName);
+    checkpoint.data.x = pData->x;
+    checkpoint.data.y = pData->y;
 
     return ERR_OK;
 }

@@ -10,9 +10,18 @@
 
 #include <jjat2/entity.h>
 #include <jjat2/fx_group.h>
+#include <jjat2/hitbox.h>
 
 #include <GFraMe/gfmParser.h>
 #include <GFraMe/gfmSprite.h>
+
+#include <string.h>
+
+/** Eye-of-sight attributes when facing right */
+#define g_walky_view_offx   (-8)
+#define g_walky_view_offy   (-8)
+#define g_walky_view_width  80
+#define g_walky_view_height 24
 
 #define g_walky_width     6
 #define g_walky_height    6
@@ -24,7 +33,8 @@
 #define G_WALKY_FALL_GRAV   JUMP_ACCELERATION(G_WALKY_FALL_TIME, G_WALKY_FALL_HEIGHT)
 
 enum {
-      GWALKY_DIDATTACK = (EF_AVAILABLEF_FLAG << 0)
+      GWALKY_DIDATTACK     = (EF_AVAILABLEF_FLAG << 0)
+    , GWALKY_TRIGGERATTACK = (EF_AVAILABLEF_FLAG << 1)
 };
 
 /** List of animations */
@@ -55,10 +65,28 @@ static int pGWalkyAnimData[] = {
 err initGreenWalky(entityCtx *pEnt, gfmParser *pParser) {
     gfmRV rv;
     err erv;
-    int x, y;
+    int flip, i, l, x, y;
 
+    flip = 0;
     rv = gfmParser_getPos(&x, &y, pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmParser_getNumProperties(&l, pParser);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    i = 0;
+    while (i < l) {
+        char *pKey, *pVal;
+
+        rv = gfmParser_getProperty(&pKey, &pVal, pParser, i);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        if (strcmp(pKey, "flipped") == 0) {
+            if (strcmp(pVal, "true") == 0) {
+                flip = 1;
+            }
+        }
+
+        i++;
+    }
 
     y -= g_walky_height;
     rv = gfmSprite_init(pEnt->pSelf, x, y, g_walky_width, g_walky_height
@@ -66,6 +94,23 @@ err initGreenWalky(entityCtx *pEnt, gfmParser *pParser) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     rv = gfmSprite_addAnimationsStatic(pEnt->pSelf, pGWalkyAnimData);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmSprite_setDirection(pEnt->pSelf, flip);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    /* Spawn an "eye-of-sight" */
+    if (flip) {
+        /* Facing left */
+        x = x + g_walky_width - g_walky_view_offx - g_walky_view_width;
+        y = y + g_walky_height - g_walky_view_offy - g_walky_view_height;
+    }
+    else {
+        /* Facing right */
+        x += g_walky_view_offx;
+        y += g_walky_view_offy;
+    }
+    pEnt->pSight = spawnFixedHitbox(pEnt, x, y, g_walky_view_width
+            , g_walky_view_height, T_EN_G_WALKY_VIEW);
+    ASSERT(pEnt->pSight, ERR_GFMERR);
 
     /* Play its default animation */
     pEnt->maxAnimation = G_WALKY_ANIM_COUNT;
@@ -88,6 +133,7 @@ err initGreenWalky(entityCtx *pEnt, gfmParser *pParser) {
 err preUpdateGreenWalky(entityCtx *pEnt) {
     gfmRV rv;
     err erv;
+    int flip, x, y;
 
     if (pEnt->flags & EF_DEACTIVATE) {
         return ERR_OK;
@@ -99,9 +145,31 @@ err preUpdateGreenWalky(entityCtx *pEnt) {
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     }
 
+    gfmSprite_getDirection(&flip, pEnt->pSelf);
+    gfmSprite_getPosition(&x, &y, pEnt->pSelf);
+    if (flip) {
+        /* Facing left */
+        x = x + g_walky_width - g_walky_view_offx - g_walky_view_width;
+        y = y + g_walky_height - g_walky_view_offy - g_walky_view_height;
+    }
+    else {
+        /* Facing right */
+        x += g_walky_view_offx;
+        y += g_walky_view_offy;
+    }
+    gfmObject_setPosition((gfmObject*)pEnt->pSight, x, y);
+
     /* Collide only if still alive */
     if (!(pEnt->flags & EF_ALIVE)) {
         pEnt->flags |= EF_SKIP_COLLISION;
+    }
+
+    if (pEnt->currentAnimation != ATTACK) {
+        if (pEnt->flags & GWALKY_TRIGGERATTACK) {
+            setEntityAnimation(pEnt, ATTACK, 0/*force*/);
+            pEnt->flags &= ~GWALKY_TRIGGERATTACK;
+        }
+        pEnt->flags &= ~GWALKY_DIDATTACK;
     }
 
     erv = preUpdateEntity(pEnt);
@@ -237,8 +305,16 @@ err onGreenWalkyAttacked(entityCtx *pEnt, gfmObject *pAttacker) {
         gfmSprite_setDirection(pEnt->pSelf, 0/*not-flipped*/);
     }
     setEntityAnimation(pEnt, DEFEND, 1/*force*/);
-    pEnt->flags &= ~GWALKY_DIDATTACK;
 
     return ERR_NOHIT;
+}
+
+/**
+ * Triggers g_walky's attack
+ *
+ * @param  [ in]pEnt The enemy
+ */
+void triggerGreenWalkyAttack(entityCtx *pEnt) {
+    pEnt->flags |= GWALKY_TRIGGERATTACK;
 }
 

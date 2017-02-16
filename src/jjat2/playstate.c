@@ -20,6 +20,7 @@
 #include <jjat2/fx_group.h>
 #include <jjat2/enemy.h>
 #include <jjat2/gunny.h>
+#include <jjat2/hitbox.h>
 #include <jjat2/leveltransition.h>
 #include <jjat2/playstate.h>
 #include <jjat2/swordy.h>
@@ -447,6 +448,7 @@ static err _loadLevel(char *levelName, int setPlayer) {
 
     playstate.entityCount = 0;
     playstate.areasCount = 0;
+    resetHitboxes();
     while (1) {
         char *type;
         err erv;
@@ -600,6 +602,7 @@ err updatePlaystate() {
 
     playstate.flags &= ~(PF_TEL_SWORDY | PF_TEL_GUNNY);
     playstate.pNextLevel = 0;
+    resetTmpHitboxes();
 
     rv = gfmQuadtree_initRoot(collision.pQt, -16/*x*/, -16/*y*/, playstate.width
             , playstate.height, 8/*depth*/, 16/*nodes*/);
@@ -629,6 +632,9 @@ err updatePlaystate() {
     /* FX-group should be the last step of pre-update (so it runs after
      * everyting was spawned this frame) */
     erv = updateFxGroup();
+    ASSERT(erv == ERR_OK, erv);
+
+    erv = collideHitbox();
     ASSERT(erv == ERR_OK, erv);
 
     /* Fix the collision between both players, if only one is active */

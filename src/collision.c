@@ -381,6 +381,15 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 }
                 rv = GFMRV_OK;
             } break;
+            CASE(T_EN_G_WALKY_VIEW, T_SWORDY)
+            CASE(T_EN_G_WALKY_VIEW, T_GUNNY) {
+                if (isFirstCase) {
+                    triggerGreenWalkyAttack((entityCtx*)node1.pChild);
+                }
+                else {
+                    triggerGreenWalkyAttack((entityCtx*)node2.pChild);
+                }
+            } break;
 /*== SWORDY'S ATTACK =========================================================*/
             CASE(T_ATK_SWORD, T_EN_G_WALKY_ATK)
             CASE(T_ATK_SWORD, T_TEL_BULLET) {
@@ -645,6 +654,17 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORESELF(T_SWORD_FX)
             break;
 /*== COLLISION-LESS EFFECTS ==================================================*/
+            IGNORE(T_EN_G_WALKY_VIEW, T_FX)
+            IGNORE(T_EN_G_WALKY_VIEW, T_SWORD_FX)
+            IGNORE(T_EN_G_WALKY_VIEW, T_ATK_SWORD)
+            IGNORE(T_EN_G_WALKY_VIEW, T_TEL_BULLET)
+            IGNORE(T_EN_G_WALKY_VIEW, T_EN_G_WALKY_ATK)
+            IGNORE(T_EN_G_WALKY_VIEW, T_EN_G_WALKY)
+            IGNORE(T_EN_G_WALKY_VIEW, T_EN_WALKY)
+            IGNORE(T_EN_G_WALKY_VIEW, T_EN_SPIKY)
+            IGNORE(T_EN_G_WALKY_VIEW, T_FLOOR)
+            IGNORE(T_EN_G_WALKY_VIEW, T_FLOOR_NOTP)
+            IGNORE(T_EN_G_WALKY_VIEW, T_SPIKE)
             IGNORE(T_CHECKPOINT, T_FLOOR)
             IGNORE(T_CHECKPOINT, T_FLOOR_NOTP)
             IGNORE(T_CHECKPOINT, T_TEL_BULLET)
