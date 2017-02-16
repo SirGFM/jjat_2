@@ -33,6 +33,7 @@
          jjat2/entity.o \
          jjat2/fx_group.o \
          jjat2/gunny.o \
+         jjat2/hitbox.o \
          jjat2/leveltransition.o \
          jjat2/playstate.o \
          jjat2/static.o \

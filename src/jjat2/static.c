@@ -6,6 +6,7 @@
 #include <jjat2/checkpoint.h>
 #include <jjat2/fx_group.h>
 #include <jjat2/leveltransition.h>
+#include <jjat2/hitbox.h>
 #include <jjat2/playstate.h>
 #include <jjat2/teleport.h>
 #include <jjat2/ui.h>
@@ -17,6 +18,9 @@ checkpointCtx checkpoint;
 
 /** The UI context */
 uiCtx ui;
+
+/** The hitbox context */
+hitboxesCtx hitboxes;
 
 /** Animation for the level transition */
 leveltransitionCtx lvltransition;
@@ -36,6 +40,7 @@ void zeroizeGameGlobalCtx() {
     memset(&playstate, 0x0, sizeof(playstateCtx));
     memset(&fx, 0x0, sizeof(gfmGroup*));
     memset(&teleport, 0x0, sizeof(teleportCtx));
+    memset(&hitboxes, 0x0, sizeof(hitboxesCtx));
     memset(&lvltransition, 0x0, sizeof(leveltransitionCtx));
     memset(&ui, 0x0, sizeof(uiCtx));
     memset(&checkpoint, 0x0, sizeof(checkpointCtx));
