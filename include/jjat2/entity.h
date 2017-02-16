@@ -8,6 +8,7 @@
 
 #include <base/error.h>
 
+#include <GFraMe/gfmHitbox.h>
 #include <GFraMe/gfmSprite.h>
 
 #include <stdint.h>
@@ -70,6 +71,8 @@ struct stEntityCtx {
     gfmSprite *pSelf;
     /** Sprite (if any) that is carrying this entity */
     struct stEntityCtx *pCarrying;
+    /** Entity's sight, if any */
+    gfmHitbox *pSight;
     /** Generic entity flags */
     entityFlag flags;
     /** Time, in milliseconds, while jump may be pressed after leaving the

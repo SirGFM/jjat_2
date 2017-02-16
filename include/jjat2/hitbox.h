@@ -39,7 +39,8 @@ void resetHitboxes();
 void resetTmpHitboxes();
 
 /**
- * Spawn a hitbox that should last until changing the level
+ * Spawn a hitbox that should last until changing the level. It returns the
+ * spawned object.
  *
  * @param  [ in]pCtx   Context associated with the hitbox
  * @param  [ in]x      The hitbox position
@@ -48,10 +49,11 @@ void resetTmpHitboxes();
  * @param  [ in]height The hitbox dimensions
  * @param  [ in]type   The hitbox type
  */
-err spawnFixedHitbox(void *pCtx, int x, int y, int width, int height, int type);
+gfmHitbox* spawnFixedHitbox(void *pCtx, int x, int y, int width, int height, int type);
 
 /**
- * Spawn a hitbox that should last until the next frame
+ * Spawn a hitbox that should last until the next frame. It returns the
+ * spawned object.
  *
  * @param  [ in]pCtx   Context associated with the hitbox
  * @param  [ in]x      The hitbox position
@@ -60,7 +62,7 @@ err spawnFixedHitbox(void *pCtx, int x, int y, int width, int height, int type);
  * @param  [ in]height The hitbox dimensions
  * @param  [ in]type   The hitbox type
  */
-err spawnTmpHitbox(void *pCtx, int x, int y, int width, int height, int type);
+gfmHitbox* spawnTmpHitbox(void *pCtx, int x, int y, int width, int height, int type);
 
 /** Collide every hitbox */
 err collideHitbox();

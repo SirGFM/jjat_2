@@ -50,5 +50,12 @@ err drawGreenWalky(entityCtx *pEnt);
  */
 err onGreenWalkyAttacked(entityCtx *pEnt, gfmObject *pAttacker);
 
+/**
+ * Triggers g_walky's attack
+ *
+ * @param  [ in]pEnt The enemy
+ */
+void triggerGreenWalkyAttack(entityCtx *pEnt);
+
 #endif /* __JJAT2_G_WALKY_H__ */
 

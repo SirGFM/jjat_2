@@ -3,8 +3,8 @@ area invisible_wall 480 0 32 240
 obj walky 256 224 8 8
 obj walky 416 88 8 8
 obj walky 320 40 8 8
-obj g_walky 112 80 8 8
-obj g_walky 112 128 8 8
+obj g_walky 120 80 8 8 [ flipped , true ]
+obj g_walky 120 128 8 8 [ flipped , true ]
 obj g_walky 16 176 8 8
 obj g_walky 64 216 8 8
 area invisible_wall -32 0 32 240

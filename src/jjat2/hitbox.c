@@ -50,18 +50,22 @@ void resetTmpHitboxes() {
  * @param  [ in]type   The hitbox type
  * @param  [ in]i      The index within the list
  */
-static err _spawnHitboxAt(void *pCtx, int x, int y, int width, int height
+static gfmHitbox* _spawnHitboxAt(void *pCtx, int x, int y, int width, int height
         , int type, int i) {
+    gfmHitbox* pHitbox;
     gfmRV rv;
 
     rv = gfmHitbox_initItem(hitboxes.pList, pCtx, x, y, width, height, type, i);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    ASSERT(rv == GFMRV_OK, 0);
+    rv = gfmHitbox_getItem(&pHitbox, hitboxes.pList, i);
+    ASSERT(rv == GFMRV_OK, 0);
 
-    return ERR_OK;
+    return pHitbox;
 }
 
 /**
- * Spawn a hitbox that should last until changing the level
+ * Spawn a hitbox that should last until changing the level. It returns the
+ * spawned object.
  *
  * @param  [ in]pCtx   Context associated with the hitbox
  * @param  [ in]x      The hitbox position
@@ -70,19 +74,20 @@ static err _spawnHitboxAt(void *pCtx, int x, int y, int width, int height
  * @param  [ in]height The hitbox dimensions
  * @param  [ in]type   The hitbox type
  */
-err spawnFixedHitbox(void *pCtx, int x, int y, int width, int height, int type) {
-    err erv;
+gfmHitbox* spawnFixedHitbox(void *pCtx, int x, int y, int width, int height, int type) {
+    gfmHitbox* pHitbox;
 
-    ASSERT(hitboxes.used + hitboxes.tmpUsed < MAX_HITBOXES, ERR_INDEXOOB);
+    ASSERT(hitboxes.used + hitboxes.tmpUsed < MAX_HITBOXES, 0);
 
-    erv = _spawnHitboxAt(pCtx, x, y, width, height, type, hitboxes.used);
+    pHitbox = _spawnHitboxAt(pCtx, x, y, width, height, type, hitboxes.used);
 
     hitboxes.used++;
-    return erv;
+    return pHitbox;
 }
 
 /**
- * Spawn a hitbox that should last until the next frame
+ * Spawn a hitbox that should last until the next frame. It returns the
+ * spawned object.
  *
  * @param  [ in]pCtx   Context associated with the hitbox
  * @param  [ in]x      The hitbox position
@@ -91,16 +96,16 @@ err spawnFixedHitbox(void *pCtx, int x, int y, int width, int height, int type) 
  * @param  [ in]height The hitbox dimensions
  * @param  [ in]type   The hitbox type
  */
-err spawnTmpHitbox(void *pCtx, int x, int y, int width, int height, int type) {
-    err erv;
+gfmHitbox* spawnTmpHitbox(void *pCtx, int x, int y, int width, int height, int type) {
+    gfmHitbox* pHitbox;
 
-    ASSERT(hitboxes.used + hitboxes.tmpUsed < MAX_HITBOXES, ERR_INDEXOOB);
+    ASSERT(hitboxes.used + hitboxes.tmpUsed < MAX_HITBOXES, 0);
 
-    erv = _spawnHitboxAt(pCtx, x, y, width, height, type
+    pHitbox = _spawnHitboxAt(pCtx, x, y, width, height, type
             , MAX_HITBOXES - hitboxes.tmpUsed - 1);
 
     hitboxes.tmpUsed++;
-    return erv;
+    return pHitbox;
 }
 
 /** Collide every hitbox */
