@@ -382,7 +382,8 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 rv = GFMRV_OK;
             } break;
             CASE(T_EN_G_WALKY_VIEW, T_SWORDY)
-            CASE(T_EN_G_WALKY_VIEW, T_GUNNY) {
+            CASE(T_EN_G_WALKY_VIEW, T_GUNNY)
+            CASE(T_EN_G_WALKY_VIEW, T_EN_WALKY) {
                 if (isFirstCase) {
                     triggerGreenWalkyAttack((entityCtx*)node1.pChild);
                 }
@@ -660,11 +661,11 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_EN_G_WALKY_VIEW, T_TEL_BULLET)
             IGNORE(T_EN_G_WALKY_VIEW, T_EN_G_WALKY_ATK)
             IGNORE(T_EN_G_WALKY_VIEW, T_EN_G_WALKY)
-            IGNORE(T_EN_G_WALKY_VIEW, T_EN_WALKY)
             IGNORE(T_EN_G_WALKY_VIEW, T_EN_SPIKY)
             IGNORE(T_EN_G_WALKY_VIEW, T_FLOOR)
             IGNORE(T_EN_G_WALKY_VIEW, T_FLOOR_NOTP)
             IGNORE(T_EN_G_WALKY_VIEW, T_SPIKE)
+            IGNORESELF(T_EN_G_WALKY_VIEW)
             IGNORE(T_CHECKPOINT, T_FLOOR)
             IGNORE(T_CHECKPOINT, T_FLOOR_NOTP)
             IGNORE(T_CHECKPOINT, T_TEL_BULLET)
