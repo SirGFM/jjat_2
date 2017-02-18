@@ -1,0 +1,7 @@
+area invisible_wall -32 0 32 320
+obj loadzone -16 264 32 32 [ dest , basic_steps ] [ dir , left ] [ tgt_x , 36 ] [ tgt_y , 17 ]
+obj walky 144 248 8 8
+obj walky 392 176 8 8
+obj walky 432 136 8 8
+obj walky 280 88 8 8
+obj loadzone -16 88 32 32 [ dest , blinking_momentum ] [ dir , right ] [ tgt_x , 36 ] [ tgt_y , 25 ]
