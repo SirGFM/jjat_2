@@ -164,7 +164,7 @@ err preUpdateGreenWalky(entityCtx *pEnt) {
         pEnt->flags |= EF_SKIP_COLLISION;
     }
 
-    if (pEnt->currentAnimation != ATTACK) {
+    if (pEnt->currentAnimation != ATTACK && pEnt->currentAnimation != DEATH) {
         if (pEnt->flags & GWALKY_TRIGGERATTACK) {
             setEntityAnimation(pEnt, ATTACK, 0/*force*/);
             pEnt->flags &= ~GWALKY_TRIGGERATTACK;
