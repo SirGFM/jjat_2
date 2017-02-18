@@ -331,7 +331,6 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             SELFCASE(T_EN_WALKY)
             SELFCASE(T_EN_G_WALKY)
             CASE(T_EN_G_WALKY, T_EN_SPIKY)
-            CASE(T_EN_WALKY, T_EN_SPIKY)
             CASE(T_EN_WALKY, T_EN_G_WALKY)
             CASE(T_SWORDY, T_EN_G_WALKY)
             CASE(T_GUNNY, T_EN_G_WALKY)
@@ -349,6 +348,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 }
                 rv = GFMRV_OK;
             } break;
+            CASE(T_EN_WALKY, T_EN_SPIKY)
             CASE(T_SWORDY, T_EN_SPIKY)
             CASE(T_GUNNY, T_EN_SPIKY) {
                 entityCtx *pPlayer, *pEnemy;

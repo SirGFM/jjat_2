@@ -16,9 +16,9 @@
 #include <GFraMe/gfmSprite.h>
 
 #define spiky_width     4
-#define spiky_height    4
+#define spiky_height    6
 #define spiky_offx      -2
-#define spiky_offy      -3
+#define spiky_offy      -2
 
 #define SPIKY_DAMAGE      1
 #define SPIKY_SPEED       TILES_TO_PX(4)
