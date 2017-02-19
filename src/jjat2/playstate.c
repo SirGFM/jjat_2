@@ -418,6 +418,10 @@ static err _loadLevel(char *levelName, int setPlayer) {
     len = strlen(levelName);
     ASSERT(len <= MAX_LEVEL_NAME, ERR_INVALIDLEVELNAME);
 
+    /* Setup the level name before it may be overwritten */
+    setMapTitle(levelName);
+    showUI();
+
     pos = 0;
     APPEND_POS("levels/");
     /* TODO Check if levelName is actually a valid path */
@@ -519,9 +523,6 @@ static err _loadLevel(char *levelName, int setPlayer) {
     rv = gfmGroup_killAll(fx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     resetTeleporterTarget();
-
-    setMapTitle(levelName);
-    showUI();
 
     if (setPlayer) {
         leveltransitionData data;
