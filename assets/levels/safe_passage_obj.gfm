@@ -2,4 +2,4 @@ obj checkpoint 152 120 16 24 [ dest , safe_passage ] [ tgt_x , 19 ] [ tgt_y , 18
 area invisible_wall 320 0 32 240
 area invisible_wall -32 0 32 240
 obj loadzone 304 96 32 48 [ dest , beware_the_spikes ] [ dir , right ] [ tgt_x , 3 ] [ tgt_y , 7 ]
-obj loadzone -16 96 32 48 [ dest , safe_passage ] [ dir , right ] [ tgt_x , 3 ] [ tgt_y , 18 ]
+obj loadzone -16 112 32 32 [ dest , danger_on_sight ] [ dir , left ] [ tgt_x , 36 ] [ tgt_y , 25 ]
