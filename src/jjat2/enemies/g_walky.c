@@ -205,6 +205,12 @@ err preUpdateGreenWalky(entityCtx *pEnt) {
                     x += g_walky_width;
                     vx = 120;
                 }
+                else {
+                    /* Should never happen, but avoids a warning and triggers if
+                     * gfmSprite_getDirection ever gets modified and breaks
+                     * compatibility */
+                    ASSERT(0, ERR_UNEXPECTEDBEHAVIOUR);
+                }
 
                 /* TODO Set damage within the type */
                 /* If changed into the last attack frame, spawn the bullet */

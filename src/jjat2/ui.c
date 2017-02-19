@@ -271,6 +271,9 @@ err drawUI() {
             start = y + V_HEIGHT;
             ds = -TM_HEIGHT * 8;
         }
+        else {
+            ASSERT(0, ERR_UNEXPECTEDBEHAVIOUR);
+        }
 
         y = start + ds * (int)time / UI_DISPLAY;
     }
@@ -290,6 +293,9 @@ err drawUI() {
         else if (ui.control & UI_BOTTOM) {
             start = y + V_HEIGHT - TM_HEIGHT * 8;
             ds = TM_HEIGHT * 8;
+        }
+        else {
+            ASSERT(0, ERR_UNEXPECTEDBEHAVIOUR);
         }
 
         y = start + ds * (int)time / (UI_HIDE - UI_WAIT);

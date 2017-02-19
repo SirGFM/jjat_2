@@ -282,6 +282,12 @@ err configureInput(char *pMap, int len) {
                 i++;
             }
 
+            /* Dumb copiler says that port may be used unitialized here. That
+             * would only happen if iface were less than gfmController_left.
+             * However, port is only used within updateKeyMapping if iface is
+             * greater or equal gfmController_left, case which it's also set on
+             * this call...
+             * Therefore, ignore that warning! */
             erv = updateKeyMapping(handle, iface, port);
             ASSERT(erv == ERR_OK, erv);
         } /* while (i < len && pMap[i] != ';') */

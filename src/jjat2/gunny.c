@@ -228,6 +228,12 @@ err preUpdateGunny(entityCtx *gunny) {
                 x -= 4;
                 vx = -BULLET_SPEED;
             }
+            else {
+                /* Should never happen, but avoids a warning and triggers if
+                 * gfmSprite_getDirection ever gets modified and breaks
+                 * compatibility */
+                ASSERT(0, ERR_UNEXPECTEDBEHAVIOUR);
+            }
 
             pBullet = spawnFx(x, y, BULLET_WIDTH, 2/*h*/, dir, 6000/*ttl*/
                     , FX_GUNNY_BULLET, T_TEL_BULLET);
