@@ -14,6 +14,9 @@
 
 #include <stdint.h>
 
+/** Border at the edge of the screen where switching sides my happen */
+#define UI_BORDER_DIMENSION 40
+
 /** Enumeration for the UI control bitfield */
 enum enUIControl {
     /* UI position */

@@ -9,6 +9,7 @@
 #include <conf/game.h>
 #include <jjat2/camera.h>
 #include <jjat2/entity.h>
+#include <jjat2/ui.h>
 #include <GFraMe/gfmCamera.h>
 
 #define CAMERA_W    8
@@ -52,13 +53,24 @@ static inline int _tweenValue(int a, int b, int tween) {
  */
 static inline err _centerCamera(entityCtx *pSwordy, entityCtx *pGunny
         , int tween) {
-    int gx, gy, sx, sy, x, y;
+    int cx, cy, gx, gy, sx, sy, x, y;
 
     gfmSprite_getCenter(&sx, &sy, pSwordy->pSelf);
     gfmSprite_getCenter(&gx, &gy, pGunny->pSelf);
     x = _tweenValue(sx, gx, tween);
     y = _tweenValue(sy, gy, tween);
     gfmCamera_centerAtPoint(game.pCamera, x, y);
+
+    /* Update the UI position */
+    gfmCamera_getPosition(&cx, &cy, game.pCamera);
+    if ((y - cy) < UI_BORDER_DIMENSION) {
+        /* Center is within the upper part of the screen */
+        setUIPosition(UI_BOTTOM);
+    }
+    else if (V_HEIGHT - (y - cy) < UI_BORDER_DIMENSION) {
+        /* Center is within the lower part of the screen */
+        setUIPosition(UI_TOP);
+    }
 
     return ERR_OK;
 }
