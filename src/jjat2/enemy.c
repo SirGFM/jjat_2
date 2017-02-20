@@ -14,6 +14,7 @@
 #include <jjat2/enemies/walky.h>
 #include <jjat2/enemies/g_walky.h>
 #include <jjat2/enemies/spiky.h>
+#include <jjat2/enemies/turret.h>
 
 #include <GFraMe/gfmSprite.h>
 #include <GFraMe/gfmParser.h>
@@ -32,6 +33,7 @@ err parseEnemy(entityCtx *pEnt, gfmParser *pParser, type t) {
         case T_EN_SPIKY:   erv = initSpiky(pEnt, pParser); break;
         case T_EN_WALKY:   erv = initWalky(pEnt, pParser); break;
         case T_EN_G_WALKY: erv = initGreenWalky(pEnt, pParser); break;
+        case T_EN_TURRET: erv = initTurret(pEnt, pParser); break;
         default: {
             ASSERT(0, ERR_INVALIDTYPE);
         }
@@ -58,6 +60,7 @@ err preUpdateEnemy(entityCtx *pEnt) {
         case T_EN_SPIKY:   return preUpdateSpiky(pEnt);
         case T_EN_WALKY:   return preUpdateWalky(pEnt);
         case T_EN_G_WALKY: return preUpdateGreenWalky(pEnt);
+        case T_EN_TURRET: return preUpdateTurret(pEnt);
         default: {
             return ERR_INVALIDTYPE;
         }
@@ -81,6 +84,7 @@ err postUpdateEnemy(entityCtx *pEnt) {
         case T_EN_SPIKY:   return postUpdateSpiky(pEnt);
         case T_EN_WALKY:   return postUpdateWalky(pEnt);
         case T_EN_G_WALKY: return postUpdateGreenWalky(pEnt);
+        case T_EN_TURRET: return postUpdateTurret(pEnt);
         default: {
             return ERR_INVALIDTYPE;
         }
@@ -104,6 +108,7 @@ err drawEnemy(entityCtx *pEnt) {
         case T_EN_SPIKY:   return drawSpiky(pEnt);
         case T_EN_WALKY:   return drawWalky(pEnt);
         case T_EN_G_WALKY: return drawGreenWalky(pEnt);
+        case T_EN_TURRET: return drawTurret(pEnt);
         default: {
             return ERR_INVALIDTYPE;
         }

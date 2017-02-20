@@ -42,6 +42,7 @@
          jjat2/ui.o \
          jjat2/enemies/g_walky.o \
          jjat2/enemies/spiky.o \
+         jjat2/enemies/turret.o \
          jjat2/enemies/walky.o
 
 # Define the target name

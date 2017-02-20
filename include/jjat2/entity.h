@@ -26,6 +26,8 @@ enum enEntityFlag {
   , EF_SKIP_COLLISION  = 0x00004
   , EF_HAS_CARRIER     = 0x00008
   , EF_AVAILABLEF_FLAG = 0x10000
+
+  , EF_AVAILABLE_BIT   = 16
 };
 typedef enum enEntityFlag entityFlag;
 

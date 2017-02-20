@@ -509,6 +509,12 @@ static err _loadLevel(char *levelName, int setPlayer) {
             ASSERT(erv == ERR_OK, erv);
             playstate.entityCount++;
         }
+        else if (strcmp(type, "turret") == 0) {
+            entityCtx *pEnt = &playstate.entities[playstate.entityCount];
+            erv = parseEnemy(pEnt, playstate.pParser, T_EN_TURRET);
+            ASSERT(erv == ERR_OK, erv);
+            playstate.entityCount++;
+        }
     }
 
     rv = gfmParser_reset(playstate.pParser);

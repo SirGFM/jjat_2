@@ -42,6 +42,7 @@ enum enType {
     , T_EN_G_WALKY_ATK  = (3 << T_BASE_NBITS) | T_ENEMY
     , T_EN_G_WALKY_VIEW = (4 << T_BASE_NBITS) | T_ENEMY
     , T_EN_SPIKY        = (5 << T_BASE_NBITS) | T_ENEMY
+    , T_EN_TURRET       = (6 << T_BASE_NBITS) | T_ENEMY
     , T_SWORD_FX        = (1 << T_BASE_NBITS) | T_FX
 };
 typedef enum enType type;

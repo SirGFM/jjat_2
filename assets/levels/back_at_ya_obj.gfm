@@ -7,3 +7,6 @@ obj spiky 176 144 8 8
 obj spiky 88 200 8 8
 obj g_walky 264 88 8 8
 obj g_walky 240 88 8 8 [ flipped , true ]
+obj turret 448 168 8 8 [ flipped , true ]
+obj turret 440 88 8 8 [ flipped , true ]
+obj turret 32 112 8 8

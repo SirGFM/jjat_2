@@ -154,13 +154,16 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 }
             } break;
 /*== ENVIRONMENT'S COLLISION =================================================*/
+            CASE(T_SPIKE, T_EN_TURRET)
             CASE(T_FLOOR, T_EN_SPIKY)
             CASE(T_FLOOR, T_EN_WALKY)
+            CASE(T_FLOOR, T_EN_TURRET)
             CASE(T_FLOOR, T_EN_G_WALKY)
             CASE(T_FLOOR, T_GUNNY)
             CASE(T_FLOOR, T_SWORDY)
             CASE(T_FLOOR_NOTP, T_EN_SPIKY)
             CASE(T_FLOOR_NOTP, T_EN_WALKY)
+            CASE(T_FLOOR_NOTP, T_EN_TURRET)
             CASE(T_FLOOR_NOTP, T_EN_G_WALKY)
             CASE(T_FLOOR_NOTP, T_GUNNY)
             CASE(T_FLOOR_NOTP, T_SWORDY) {
@@ -330,6 +333,12 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             SELFCASE(T_EN_SPIKY)
             SELFCASE(T_EN_WALKY)
             SELFCASE(T_EN_G_WALKY)
+            SELFCASE(T_EN_TURRET)
+            CASE(T_EN_SPIKY, T_EN_TURRET)
+            CASE(T_EN_G_WALKY, T_EN_TURRET)
+            CASE(T_EN_WALKY, T_EN_TURRET)
+            CASE(T_SWORDY, T_EN_TURRET)
+            CASE(T_GUNNY, T_EN_TURRET)
             CASE(T_EN_G_WALKY, T_EN_SPIKY)
             CASE(T_EN_WALKY, T_EN_G_WALKY)
             CASE(T_SWORDY, T_EN_G_WALKY)
@@ -459,6 +468,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_ATK_SWORD, T_FLOOR)
             IGNORE(T_ATK_SWORD, T_FLOOR_NOTP)
             IGNORE(T_ATK_SWORD, T_FX)
+            IGNORE(T_ATK_SWORD, T_EN_TURRET)
             IGNORE(T_ATK_SWORD, T_SPIKE)
             IGNORESELF(T_ATK_SWORD)
             break;
@@ -570,6 +580,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 ASSERT(rv == GFMRV_OK, ERR_GFMERR);
                 collision.flags |= CF_SKIP;
             } break;
+            CASE(T_TEL_BULLET, T_EN_TURRET)
             CASE(T_TEL_BULLET, T_SPIKE)
             CASE(T_TEL_BULLET, T_FLOOR_NOTP) {
                 gfmGroupNode *pNode;
@@ -640,6 +651,14 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                     hitEntity(pEnt, damage);
                 }
             } break;
+            CASE(T_EN_TURRET, T_EN_G_WALKY_ATK) {
+                if (isFirstCase) {
+                    _explodeStar(&node2);
+                }
+                else {
+                    _explodeStar(&node1);
+                }
+            } break;
 /*== SWORDY'S ATTACK TRAIL (AFTER HITTING ANYTHING) ==========================*/
             IGNORE(T_SWORD_FX, T_EN_SPIKY)
             IGNORE(T_SWORD_FX, T_EN_WALKY)
@@ -652,6 +671,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_SWORD_FX, T_ATK_SWORD)
             IGNORE(T_SWORD_FX, T_TEL_BULLET)
             IGNORE(T_SWORD_FX, T_SPIKE)
+            IGNORE(T_SWORD_FX, T_EN_TURRET)
             IGNORESELF(T_SWORD_FX)
             break;
 /*== COLLISION-LESS EFFECTS ==================================================*/
@@ -693,6 +713,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_FX, T_EN_G_WALKY)
             IGNORE(T_FX, T_EN_WALKY)
             IGNORE(T_FX, T_EN_SPIKY)
+            IGNORE(T_FX, T_EN_TURRET)
             IGNORE(T_FX, T_SWORDY)
             IGNORE(T_FX, T_GUNNY)
             IGNORE(T_FX, T_FLOOR)
