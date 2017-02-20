@@ -663,6 +663,9 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_SWORD_FX, T_EN_SPIKY)
             IGNORE(T_SWORD_FX, T_EN_WALKY)
             IGNORE(T_SWORD_FX, T_EN_G_WALKY)
+            IGNORE(T_SWORD_FX, T_EN_G_WALKY_ATK)
+            IGNORE(T_SWORD_FX, T_EN_G_WALKY_VIEW)
+            IGNORE(T_SWORD_FX, T_EN_TURRET)
             IGNORE(T_SWORD_FX, T_SWORDY)
             IGNORE(T_SWORD_FX, T_GUNNY)
             IGNORE(T_SWORD_FX, T_FLOOR)
@@ -671,12 +674,10 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_SWORD_FX, T_ATK_SWORD)
             IGNORE(T_SWORD_FX, T_TEL_BULLET)
             IGNORE(T_SWORD_FX, T_SPIKE)
-            IGNORE(T_SWORD_FX, T_EN_TURRET)
             IGNORESELF(T_SWORD_FX)
             break;
 /*== COLLISION-LESS EFFECTS ==================================================*/
             IGNORE(T_EN_G_WALKY_VIEW, T_FX)
-            IGNORE(T_EN_G_WALKY_VIEW, T_SWORD_FX)
             IGNORE(T_EN_G_WALKY_VIEW, T_ATK_SWORD)
             IGNORE(T_EN_G_WALKY_VIEW, T_TEL_BULLET)
             IGNORE(T_EN_G_WALKY_VIEW, T_EN_G_WALKY_ATK)
