@@ -16,4 +16,4 @@ obj spiky 184 408 8 8
 obj spiky 160 408 8 8
 obj spiky 160 336 8 8
 obj loadzone 304 96 32 32 [ dest , back_at_ya ] [ dir , right ] [ tgt_x , 3 ] [ tgt_y , 24 ]
-obj loadzone 304 232 32 64 [ dest , the_fall ] [ dir , left ] [ tgt_x , 36 ] [ tgt_y , 37 ]
+obj loadzone 304 232 32 64 [ dest , before_the_trial ] [ dir , right ] [ tgt_x , 3 ] [ tgt_y , 11 ]
