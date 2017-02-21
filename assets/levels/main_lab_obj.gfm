@@ -4,8 +4,8 @@ area invisible_wall 320 0 32 240
 area invisible_wall -32 0 32 240
 area invisible_wall -32 -32 152 32
 area invisible_wall 200 -32 152 32
-obj loadzone 120 -16 80 32 [ dest , the_failed_experiment ] [ dir , up ] [ tgt_x , 10 ] [ tgt_y , 10 ]
+obj loadzone 120 -16 80 32 [ dest , the_failed_experiment ] [ dir , up ] [ tgt_x , 15 ] [ tgt_y , 26 ]
 obj loadzone 304 144 32 32 [ dest , basic_steps ] [ dir , right ] [ tgt_x , 3 ] [ tgt_y , 25 ]
-obj loadzone -16 144 32 32 [ dest , lab_entrance ] [ dir , right ] [ tgt_x , 10 ] [ tgt_y , 10 ]
+obj loadzone -16 144 32 32 [ dest , lab_entrance ] [ dir , left ] [ tgt_x , 10 ] [ tgt_y , 10 ]
 obj swordy_pos 104 176 16 16
 obj gunny_pos 160 176 16 16
