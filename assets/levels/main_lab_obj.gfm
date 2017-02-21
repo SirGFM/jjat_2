@@ -9,4 +9,3 @@ obj loadzone 304 144 32 32 [ dest , basic_steps ] [ dir , left ] [ tgt_x , 3 ] [
 obj loadzone -16 144 32 32 [ dest , lab_entrance ] [ dir , right ] [ tgt_x , 10 ] [ tgt_y , 10 ]
 obj swordy_pos 104 176 16 16
 obj gunny_pos 160 176 16 16
-area invisible_wall 120 -48 80 32
