@@ -278,6 +278,22 @@ err setupLeveltransition() {
 /** Update the transition animation */
 err updateLeveltransition() {
     gfmRV rv;
+    err erv;
+
+    setSwordyPositionFromParser(&playstate.swordy, lvltransition.cachedTargetX, lvltransition.cachedTargetY);
+    setGunnyPositionFromParser(&playstate.gunny,lvltransition.cachedTargetX, lvltransition.cachedTargetY);
+
+    erv = loadPlaystate();
+    ASSERT(erv == ERR_OK, erv);
+    rv = gfm_resetFPS(game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    lvltransition.flags |= LT_LOADED;
+
+    game.currentState = ST_PLAYSTATE;
+
+    return ERR_OK;
+#if 0
+    gfmRV rv;
     int x, y;
 
     /* TODO Check that the operation was started */
@@ -321,6 +337,7 @@ err updateLeveltransition() {
     }
 
     return ERR_OK;
+#endif
 }
 
 /** Render the transition animation */
