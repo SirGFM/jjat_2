@@ -214,9 +214,29 @@ static err _parseLevelInfo(gfmParser *pParser, leveltransitionData *pInfo
     rv = gfmParser_getNumProperties(&l, pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+    do {
+        int x, y;
+
+        rv = gfmParser_getPos(&x, &y, pParser);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+        if (x > 0) {
+            pInfo->srcX = (uint16_t)x;
+        }
+        else {
+            pInfo->srcX = 0;
+        }
+        if (y > 0) {
+            pInfo->srcY = (uint16_t)y;
+        }
+        else {
+            pInfo->srcY = 0;
+        }
+    } while (0);
+
     pInfo->dir = -1;
-    pInfo->x = 0xffff;
-    pInfo->y = 0xffff;
+    pInfo->tgtX = 0xffff;
+    pInfo->tgtY = 0xffff;
     pInfo->pName[0] = '\0';
 
     i = 0;
@@ -231,14 +251,14 @@ static err _parseLevelInfo(gfmParser *pParser, leveltransitionData *pInfo
 
             val = _getInt(pVal);
             ASSERT(val >= 0 && val < 0x2000, ERR_PARSINGERR);
-            pInfo->x = (uint16_t)val * 8;
+            pInfo->tgtX = (uint16_t)val * 8;
         }
         else if (strcmp(pKey, "tgt_y") == 0) {
             int val;
 
             val = _getInt(pVal);
             ASSERT(val >= 0 && val < 0x2000, ERR_PARSINGERR);
-            pInfo->y = (uint16_t)val * 8;
+            pInfo->tgtY = (uint16_t)val * 8;
         }
         else if (strcmp(pKey, "dest") == 0) {
             ASSERT(strlen(pVal) < MAX_VALID_LEN, ERR_PARSINGERR);
@@ -266,8 +286,8 @@ static err _parseLevelInfo(gfmParser *pParser, leveltransitionData *pInfo
     }
 
     ASSERT(!(required & LIF_DIR) || pInfo->dir != -1, ERR_PARSINGERR);
-    ASSERT(!(required & LIF_TGTX) || pInfo->x != 0xffff, ERR_PARSINGERR);
-    ASSERT(!(required & LIF_TGTY) || pInfo->y != 0xffff, ERR_PARSINGERR);
+    ASSERT(!(required & LIF_TGTX) || pInfo->tgtX != 0xffff, ERR_PARSINGERR);
+    ASSERT(!(required & LIF_TGTY) || pInfo->tgtY != 0xffff, ERR_PARSINGERR);
     ASSERT(!(required & LIF_NAME) || pInfo->pName[0] != '\0', ERR_PARSINGERR);
             
 
@@ -543,8 +563,8 @@ static err _loadLevel(char *levelName, int setPlayer) {
          * this playthrough (either a new game or a loaded one). Therefore,
          * setup the checkpoint */
         strcpy(data.pName, levelName);
-        data.x = (uint16_t)tgtX;
-        data.y = (uint16_t)tgtY;
+        data.tgtX = (uint16_t)tgtX;
+        data.tgtY = (uint16_t)tgtY;
         erv = setCheckpoint(&data);
         ASSERT(erv == ERR_OK, erv);
     }
