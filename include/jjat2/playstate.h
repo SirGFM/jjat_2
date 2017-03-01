@@ -47,8 +47,6 @@ struct stPlaystateCtx {
     entityCtx swordy;
     /** Gunny character */
     entityCtx gunny;
-    /** Dummy object used to represent the inactive object */
-    entityCtx asyncDummy;
     /** List of enemies and interactables */
     entityCtx entities[MAX_ENTITIES];
     /** Map's height, in pixels */

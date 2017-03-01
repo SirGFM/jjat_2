@@ -116,6 +116,17 @@ err collideHitbox() {
 
     i = 0;
     while (i < hitboxes.used) {
+        rv = gfmHitbox_collideSubList(&i, hitboxes.pList, collision.pStaticQt
+                , hitboxes.used);
+        if (rv == GFMRV_QUADTREE_OVERLAPED) {
+            erv = doCollide(collision.pStaticQt);
+            ASSERT(erv == ERR_OK, erv);
+            rv = GFMRV_QUADTREE_DONE;
+        }
+        ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
+    }
+    i = 0;
+    while (i < hitboxes.used) {
         rv = gfmHitbox_collideSubList(&i, hitboxes.pList, collision.pQt
                 , hitboxes.used);
         if (rv == GFMRV_QUADTREE_OVERLAPED) {
@@ -128,8 +139,19 @@ err collideHitbox() {
 
     i = MAX_HITBOXES - hitboxes.tmpUsed;
     while (i < MAX_HITBOXES) {
+        rv = gfmHitbox_collideSubList(&i, hitboxes.pList, collision.pStaticQt
+                , MAX_HITBOXES - 1);
+        if (rv == GFMRV_QUADTREE_OVERLAPED) {
+            erv = doCollide(collision.pStaticQt);
+            ASSERT(erv == ERR_OK, erv);
+            rv = GFMRV_QUADTREE_DONE;
+        }
+        ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
+    }
+    i = MAX_HITBOXES - hitboxes.tmpUsed;
+    while (i < MAX_HITBOXES) {
         rv = gfmHitbox_collideSubList(&i, hitboxes.pList, collision.pQt
-                , MAX_HITBOXES);
+                , MAX_HITBOXES - 1);
         if (rv == GFMRV_QUADTREE_OVERLAPED) {
             erv = doCollide(collision.pQt);
             ASSERT(erv == ERR_OK, erv);

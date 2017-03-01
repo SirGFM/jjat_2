@@ -75,13 +75,6 @@ err initPlaystate() {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 #endif /* JJAT_ENABLE_BACKGROUND */
 
-    rv = gfmSprite_getNew(&playstate.asyncDummy.pSelf);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    rv = gfmSprite_init(playstate.asyncDummy.pSelf, 0, 0, 2/*w*/, 2/*h*/
-            , gfx.pSset8x8, 0/*offx*/, 0/*offy*/, &playstate.asyncDummy
-            , T_PLAYER);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-
     i = 0;
     while (i < MAX_ENTITIES) {
         rv = gfmSprite_getNew(&playstate.entities[i].pSelf);
@@ -119,7 +112,6 @@ void freePlaystate() {
     if (playstate.pParser != 0) {
         gfmParser_free(&playstate.pParser);
     }
-    gfmSprite_free(&playstate.asyncDummy.pSelf);
     freeSwordy(&playstate.swordy);
     freeGunny(&playstate.gunny);
 
@@ -143,10 +135,10 @@ void onHitLoadzone(int type, leveltransitionData *pData) {
         return;
     }
 
-    if (type == T_SWORDY) {
+    if (type == T_SWORDY || type == T_DUMMY_SWORDY) {
         playstate.flags |= PF_TEL_SWORDY;
     }
-    else if (type == T_GUNNY) {
+    else if (type == T_GUNNY || type == T_DUMMY_GUNNY) {
         playstate.flags |= PF_TEL_GUNNY;
     }
 
@@ -587,18 +579,21 @@ void clearPlaystateLevelFlag() {
  *
  * @param  [ in]pActive   The active player
  * @param  [ in]pInactive The inactive player
- * @param  [ in]pDummy    The dummy
  */
 inline static void _handleAsyncCollision(entityCtx *pActive
-        , entityCtx *pInactive, entityCtx *pDummy) {
-    int x, y;
-    gfmSprite_getDimensions(&x, &y, pInactive->pSelf);
-    gfmSprite_setDimensions(pDummy->pSelf, x, y);
+        , entityCtx *pInactive) {
+    void *pVoid;
+    int type, h, w, x, y;
+    gfmSprite_getDimensions(&w, &h, pInactive->pSelf);
     gfmSprite_getPosition(&x, &y, pInactive->pSelf);
-    gfmSprite_setPosition(pDummy->pSelf, x, y);
-    gfmSprite_update(pDummy->pSelf, game.pCtx);
-
-    collideTwoEntities(pActive, pDummy);
+    gfmSprite_getChild(&pVoid, &type, pInactive->pSelf);
+    if ((type & T_SWORDY) == T_SWORDY) {
+        type = T_DUMMY_SWORDY;
+    }
+    else if ((type & T_GUNNY) == T_GUNNY) {
+        type = T_DUMMY_GUNNY;
+    }
+    spawnTmpHitbox(0/*pCtx*/, x, y, w, h, type);
 }
 
 /** Update the playstate */
@@ -636,6 +631,17 @@ err updatePlaystate() {
     erv = preUpdateGunny(&playstate.gunny);
     ASSERT(erv == ERR_OK, erv);
 
+    /* Fix the collision between both players, if only one is active */
+    if ((game.flags & AC_BOTH) == AC_BOTH) {
+        /* Ignore this on synchronous mode */
+    }
+    else if ((game.flags & AC_BOTH) == AC_SWORDY) {
+        _handleAsyncCollision(&playstate.swordy, &playstate.gunny);
+    }
+    else if ((game.flags & AC_BOTH) == AC_GUNNY) {
+        _handleAsyncCollision(&playstate.gunny, &playstate.swordy);
+    }
+
     /* FX-group should be the last step of pre-update (so it runs after
      * everyting was spawned this frame) */
     erv = updateFxGroup();
@@ -644,26 +650,12 @@ err updatePlaystate() {
     erv = collideHitbox();
     ASSERT(erv == ERR_OK, erv);
 
-    /* Fix the collision between both players, if only one is active */
-    if ((game.flags & AC_BOTH) == AC_BOTH) {
-        /* Ignore this on synchronous mode */
-    }
-    else if ((game.flags & AC_BOTH) == AC_SWORDY) {
-        _handleAsyncCollision(&playstate.swordy, &playstate.gunny
-                , &playstate.asyncDummy);
-    }
-    else if ((game.flags & AC_BOTH) == AC_GUNNY) {
-        _handleAsyncCollision(&playstate.gunny, &playstate.swordy
-                , &playstate.asyncDummy);
-    }
-
     i = 0;
     while (i < playstate.entityCount) {
         erv = postUpdateEnemy(&playstate.entities[i]);
         ASSERT(erv == ERR_OK, erv);
         i++;
     }
-
 
     erv = postUpdateSwordy(&playstate.swordy);
     ASSERT(erv == ERR_OK, erv);

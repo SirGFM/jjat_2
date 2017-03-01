@@ -140,7 +140,38 @@ err doCollide(gfmQuadtreeRoot *pQt) {
         isFirstCase = 0;
         fallthrough = 0;
         switch (MERGE_TYPES(node1.type, node2.type)) {
+/*== COLLISION AGAINST DUMMY =================================================*/
+            CASE(T_SWORDY, T_DUMMY_GUNNY)
+            CASE(T_GUNNY, T_DUMMY_SWORDY) {
+                gfmObject *pPlayer, *pDummy;
+                int playerY, dummyY;
+
+                if (isFirstCase) {
+                    pPlayer = node1.pObject;
+                    pDummy = node2.pObject;
+                }
+                else {
+                    pPlayer = node2.pObject;
+                    pDummy = node1.pObject;
+                }
+                gfmObject_getVerticalPosition(&playerY, pPlayer);
+                gfmObject_getVerticalPosition(&dummyY, pDummy);
+
+                gfmObject_justOverlaped(node1.pObject, node2.pObject);
+                if (playerY < dummyY) {
+                    gfmCollision dir;
+
+                    /* Only separate the player if it's above the dummy */
+                    gfmObject_separateVertical(node1.pObject, node2.pObject);
+                    gfmObject_getCurrentCollision(&dir, pPlayer);
+                    if (dir & gfmCollision_down) {
+                        gfmObject_setVerticalVelocity(pPlayer, 0);
+                    }
+                }
+            } break;
 /*== CHANGE MAP ==============================================================*/
+            CASE(T_LOADZONE, T_DUMMY_SWORDY)
+            CASE(T_LOADZONE, T_DUMMY_GUNNY)
             CASE(T_LOADZONE, T_GUNNY)
             CASE(T_LOADZONE, T_SWORDY) {
                 /* Setup level transition for the playstate */
@@ -722,6 +753,43 @@ err doCollide(gfmQuadtreeRoot *pQt) {
             IGNORE(T_FX, T_SPIKE)
             IGNORESELF(T_FX)
             IGNORESELF(T_EN_G_WALKY_ATK)
+
+            IGNORE(T_HAZARD, T_DUMMY_SWORDY)
+            IGNORE(T_PLAYER, T_DUMMY_SWORDY)
+            IGNORE(T_FLOOR, T_DUMMY_SWORDY)
+            IGNORE(T_ENEMY, T_DUMMY_SWORDY)
+            IGNORE(T_FX, T_DUMMY_SWORDY)
+            IGNORE(T_FLOOR_NOTP, T_DUMMY_SWORDY)
+            IGNORE(T_ATK_SWORD, T_DUMMY_SWORDY)
+            IGNORE(T_TEL_BULLET, T_DUMMY_SWORDY)
+            IGNORE(T_CHECKPOINT, T_DUMMY_SWORDY)
+            IGNORE(T_SPIKE, T_DUMMY_SWORDY)
+            IGNORE(T_EN_WALKY, T_DUMMY_SWORDY)
+            IGNORE(T_EN_G_WALKY, T_DUMMY_SWORDY)
+            IGNORE(T_EN_G_WALKY_ATK, T_DUMMY_SWORDY)
+            IGNORE(T_EN_G_WALKY_VIEW, T_DUMMY_SWORDY)
+            IGNORE(T_EN_SPIKY, T_DUMMY_SWORDY)
+            IGNORE(T_EN_TURRET, T_DUMMY_SWORDY)
+            IGNORE(T_SWORD_FX, T_DUMMY_SWORDY)
+
+            IGNORE(T_HAZARD, T_DUMMY_GUNNY)
+            IGNORE(T_PLAYER, T_DUMMY_GUNNY)
+            IGNORE(T_FLOOR, T_DUMMY_GUNNY)
+            IGNORE(T_ENEMY, T_DUMMY_GUNNY)
+            IGNORE(T_FX, T_DUMMY_GUNNY)
+            IGNORE(T_FLOOR_NOTP, T_DUMMY_GUNNY)
+            IGNORE(T_ATK_SWORD, T_DUMMY_GUNNY)
+            IGNORE(T_TEL_BULLET, T_DUMMY_GUNNY)
+            IGNORE(T_CHECKPOINT, T_DUMMY_GUNNY)
+            IGNORE(T_SPIKE, T_DUMMY_GUNNY)
+            IGNORE(T_EN_WALKY, T_DUMMY_GUNNY)
+            IGNORE(T_EN_G_WALKY, T_DUMMY_GUNNY)
+            IGNORE(T_EN_G_WALKY_ATK, T_DUMMY_GUNNY)
+            IGNORE(T_EN_G_WALKY_VIEW, T_DUMMY_GUNNY)
+            IGNORE(T_EN_SPIKY, T_DUMMY_GUNNY)
+            IGNORE(T_EN_TURRET, T_DUMMY_GUNNY)
+            IGNORE(T_SWORD_FX, T_DUMMY_GUNNY)
+
             break;
             /* On Linux, a SIGINT is raised any time a unhandled collision
              * happens. When debugging, GDB will stop here and allow the user to

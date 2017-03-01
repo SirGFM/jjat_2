@@ -36,6 +36,8 @@ enum enType {
     , T_ATK_SWORD       = (3 << T_BASE_NBITS) | T_PLAYER
     , T_TEL_BULLET      = (4 << T_BASE_NBITS) | T_PLAYER
     , T_CHECKPOINT      = (5 << T_BASE_NBITS) | T_PLAYER
+    , T_DUMMY_SWORDY    = (6 << T_BASE_NBITS) | T_PLAYER
+    , T_DUMMY_GUNNY     = (7 << T_BASE_NBITS) | T_PLAYER
     , T_SPIKE           = (1 << T_BASE_NBITS) | T_HAZARD
     , T_EN_WALKY        = (1 << T_BASE_NBITS) | T_ENEMY
     , T_EN_G_WALKY      = (2 << T_BASE_NBITS) | T_ENEMY
