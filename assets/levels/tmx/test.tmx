@@ -330,15 +330,15 @@
     <property name="dest" value="the_failed_experiment"/>
     <property name="dir" value="up"/>
     <property name="tgt_x" value="15"/>
-    <property name="tgt_y" value="26"/>
+    <property name="tgt_y" value="29"/>
    </properties>
   </object>
   <object id="50" name="to_basic_steps" type="loadzone" x="304" y="144" width="32" height="32">
    <properties>
     <property name="dest" value="basic_steps"/>
     <property name="dir" value="right"/>
-    <property name="tgt_x" value="3"/>
-    <property name="tgt_y" value="25"/>
+    <property name="tgt_x" value="0"/>
+    <property name="tgt_y" value="21"/>
    </properties>
   </object>
   <object id="51" name="todo_lab_entrance" type="loadzone" x="-16" y="144" width="32" height="32">
@@ -515,16 +515,16 @@
    <properties>
     <property name="dest" value="main_lab"/>
     <property name="dir" value="left"/>
-    <property name="tgt_x" value="35"/>
-    <property name="tgt_y" value="22"/>
+    <property name="tgt_x" value="39"/>
+    <property name="tgt_y" value="18"/>
    </properties>
   </object>
   <object id="133" name="to_safe_jumps" type="loadzone" x="304" y="104" width="32" height="32">
    <properties>
     <property name="dest" value="safe_jumps"/>
     <property name="dir" value="right"/>
-    <property name="tgt_x" value="3"/>
-    <property name="tgt_y" value="37"/>
+    <property name="tgt_x" value="0"/>
+    <property name="tgt_y" value="33"/>
    </properties>
   </object>
   <object id="136" name="w_001" type="walky" gid="1537" x="136" y="200" width="8" height="8"/>
@@ -692,8 +692,8 @@
    <properties>
     <property name="dest" value="basic_steps"/>
     <property name="dir" value="left"/>
-    <property name="tgt_x" value="36"/>
-    <property name="tgt_y" value="17"/>
+    <property name="tgt_x" value="39"/>
+    <property name="tgt_y" value="13"/>
    </properties>
   </object>
   <object id="142" name="w_001" type="walky" gid="1537" x="144" y="248" width="8" height="8"/>
