@@ -21,8 +21,8 @@ err setCheckpoint(leveltransitionData *pData) {
     checkpoint.data.pName = _stCheckpointName;
 
     strcpy(checkpoint.data.pName, pData->pName);
-    checkpoint.data.x = pData->x;
-    checkpoint.data.y = pData->y;
+    checkpoint.data.tgtX = pData->tgtX;
+    checkpoint.data.tgtY = pData->tgtY;
 
     return ERR_OK;
 }
