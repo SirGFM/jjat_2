@@ -196,6 +196,7 @@ static void _tweenTilemapOut(int cx, int cy) {
  * @param  [ in]pNextLevel Next level data
  */
 void switchToLevelTransition(leveltransitionData *pNextLevel) {
+    lvltransition.flags = 0;
     lvltransition.pNextLevel = pNextLevel;
     game.nextState = ST_LEVELTRANSITION;
 }
@@ -271,7 +272,6 @@ err setupLeveltransition() {
     lvltransition.gunnyX = (uint16_t)x;
     lvltransition.gunnyY = (uint16_t)y;
 
-    lvltransition.flags = 0;
     lvltransition.timer = 0;
 
     return ERR_OK;
@@ -279,32 +279,42 @@ err setupLeveltransition() {
 
 /** Update the transition animation */
 err updateLeveltransition() {
-    int dx, dy, x, y;
     gfmRV rv;
     err erv;
 
-    dx = (int)lvltransition.tgtX - (int)lvltransition.srcX;
-    dy = (int)lvltransition.tgtY - (int)lvltransition.srcY;
-
-    switch (lvltransition.dir) {
-        case TEL_UP: {
-            dy -= 32;
-        } break;
-        case TEL_DOWN: {
-            dy += 32;
-        } break;
-        case TEL_LEFT: {
-            dx -= 32;
-        } break;
-        case TEL_RIGHT: {
-            dx += 32;
-        } break;
+    if (lvltransition.flags & LT_CHECKPOINT) {
+        gfmSprite_setPosition(playstate.swordy.pSelf, (int)lvltransition.tgtX,
+                (int)lvltransition.tgtY);
+        gfmSprite_setPosition(playstate.gunny.pSelf, (int)lvltransition.tgtX,
+                (int)lvltransition.tgtY);
     }
+    else {
+        int dx, dy;
 
-    gfmSprite_setPosition(playstate.swordy.pSelf
-            , dx + (int)lvltransition.swordyX, dy + (int)lvltransition.swordyY);
-    gfmSprite_setPosition(playstate.gunny.pSelf
-            , dx + (int)lvltransition.gunnyX, dy + (int)lvltransition.gunnyY);
+        dx = (int)lvltransition.tgtX - (int)lvltransition.srcX;
+        dy = (int)lvltransition.tgtY - (int)lvltransition.srcY;
+
+        switch (lvltransition.dir) {
+            case TEL_UP: {
+                             dy -= 32;
+                         } break;
+            case TEL_DOWN: {
+                               dy += 32;
+                           } break;
+            case TEL_LEFT: {
+                               dx -= 32;
+                           } break;
+            case TEL_RIGHT: {
+                                dx += 32;
+                            } break;
+        }
+
+        gfmSprite_setPosition(playstate.swordy.pSelf
+                , dx + (int)lvltransition.swordyX, dy + (int)lvltransition.swordyY);
+        gfmSprite_setPosition(playstate.gunny.pSelf
+                , dx + (int)lvltransition.gunnyX, dy + (int)lvltransition.gunnyY);
+
+    }
 
     erv = loadPlaystate();
     ASSERT(erv == ERR_OK, erv);

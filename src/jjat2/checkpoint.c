@@ -33,6 +33,7 @@ err loadCheckpoint() {
     checkpoint.data.dir = TEL_UP;
     switchToLevelTransition(&checkpoint.data);
     /* TODO Properly set this */
+    lvltransition.flags |= LT_CHECKPOINT;
     playstate.pNextLevel = &checkpoint.data;
     /* TODO Reset player life */
 
