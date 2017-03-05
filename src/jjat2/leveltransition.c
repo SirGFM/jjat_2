@@ -27,7 +27,7 @@
 
 #include <string.h>
 
-#define TRANSITION_TIME 750
+#define TRANSITION_TIME 500
 #define WIDTH_IN_TILES  (V_WIDTH / 8 + 4)
 #define HEIGHT_IN_TILES (V_HEIGHT / 8 + 4)
 #define TM_DEFAULT_TILE -1
@@ -353,17 +353,38 @@ err updateLeveltransition() {
             _getRelativePosition(&dx, &dy);
 
             _tweenPlayer(playstate.swordy.pSelf, srcX, srcY
-                    , dx + lvltransition.swordyX, dy + lvltransition.swordyY, 2 * TRANSITION_TIME);
+                    , dx + lvltransition.swordyX, dy + lvltransition.swordyY
+                    , 2 * TRANSITION_TIME);
             _tweenPlayer(playstate.gunny.pSelf, srcX, srcY
-                    , dx + lvltransition.gunnyX, dy + lvltransition.gunnyY, 2 * TRANSITION_TIME);
+                    , dx + lvltransition.gunnyX, dy + lvltransition.gunnyY
+                    , 2 * TRANSITION_TIME);
         }
     }
     else if (lvltransition.timer < 4 * TRANSITION_TIME) {
         _tweenTilemapOut(cx, cy, 3 * TRANSITION_TIME);
     }
     else {
-        /** Manually set the state so it doesn't get reloaded */
+        /* Manually set the state so it doesn't get reloaded */
         game.currentState = ST_PLAYSTATE;
+
+        /* Also, ensure the players are on the correct position (and not off by
+         * one pixel) */
+        if (lvltransition.flags & LT_CHECKPOINT) {
+            gfmSprite_setPosition(playstate.swordy.pSelf, lvltransition.tgtX
+                    , lvltransition.tgtY);
+            gfmSprite_setPosition(playstate.gunny.pSelf, lvltransition.tgtX
+                    , lvltransition.tgtY);
+        }
+        else {
+            int dx, dy;
+
+            _getRelativePosition(&dx, &dy);
+
+            gfmSprite_setPosition(playstate.swordy.pSelf
+                    , dx + lvltransition.swordyX, dy + lvltransition.swordyY);
+            gfmSprite_setPosition(playstate.gunny.pSelf
+                    , dx + lvltransition.gunnyX, dy + lvltransition.gunnyY);
+        }
     }
 
     return ERR_OK;
