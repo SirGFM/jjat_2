@@ -35,13 +35,23 @@
 /** Forward declaration of the transition tilemap */
 static int _tilemap[WIDTH_IN_TILES * HEIGHT_IN_TILES];
 
-#define TWEEN(var_op, init_time) \
-    do { \
-        var_op ( ((TRANSITION_TIME - (lvltransition.timer - (init_time))) \
-                * (START_POS)) / TRANSITION_TIME) \
-            + ( ((lvltransition.timer - (init_time)) * (END_POS)) \
-                / TRANSITION_TIME); \
-    } while (0)
+/**
+ * Linearly Interpolate between two points A and B. The interpolation is
+ * calculated for the time lvltransition.timer.
+ *
+ * @param  [ in]a        The starting position
+ * @param  [ in]b        The ending position
+ * @param  [ in]initTime Time the interpolation started
+ * @return               The interpolated position
+ */
+static inline int _tween(int a, int b, int initTime) {
+    int dt;
+
+    /* TODO Use a better interpolation algorithm */
+    dt = lvltransition.timer - initTime;
+    return (a * (TRANSITION_TIME - dt) / TRANSITION_TIME)
+            + (b * dt / TRANSITION_TIME);
+}
 
 /**
  * Tween the tilemap INTO the screen
@@ -53,35 +63,19 @@ static void _tweenTilemapIn(int cx, int cy) {
     switch (lvltransition.dir) {
         case TEL_UP: {
             cx -= 16;
-#define START_POS (V_HEIGHT)
-#define END_POS   (-16)
-            TWEEN(cy +=, 0);
-#undef START_POS
-#undef END_POS
+            cy += _tween(V_HEIGHT, -16, 0);
         } break;
         case TEL_DOWN: {
             cx -= 16;
-#define START_POS (-HEIGHT_IN_TILES * 8)
-#define END_POS   (-16)
-            TWEEN(cy +=, 0);
-#undef START_POS
-#undef END_POS
+            cy += _tween(-HEIGHT_IN_TILES * 8, -16, 0);
         } break;
         case TEL_LEFT: {
             cy -= 16;
-#define START_POS (V_WIDTH)
-#define END_POS   (-16)
-            TWEEN(cx +=, 0);
-#undef START_POS
-#undef END_POS
+            cx += _tween(V_WIDTH, -16, 0);
         } break;
         case TEL_RIGHT: {
             cy -= 16;
-#define START_POS (-WIDTH_IN_TILES * 8)
-#define END_POS   (-16)
-            TWEEN(cx +=, 0);
-#undef START_POS
-#undef END_POS
+            cx += _tween(-WIDTH_IN_TILES * 8, -16, 0);
         } break;
     }
 
@@ -106,16 +100,8 @@ static void _tweenPlayer(gfmSprite *pSpr, int srcX, int srcY, int tgtX, int tgtY
         , int initTime) {
     int dstX, dstY;
 
-#define START_POS (srcX)
-#define END_POS   (tgtX)
-            TWEEN(dstX =, initTime);
-#undef START_POS
-#undef END_POS
-#define START_POS (srcY)
-#define END_POS   (tgtY)
-            TWEEN(dstY =, initTime);
-#undef START_POS
-#undef END_POS
+    dstX =_tween(srcX, tgtX, initTime);
+    dstY =_tween(srcY, tgtY, initTime);
     gfmSprite_setPosition(pSpr, dstX, dstY);
 }
 
@@ -130,42 +116,24 @@ static void _tweenTilemapOut(int cx, int cy, int initTime) {
     switch (lvltransition.dir) {
         case TEL_UP: {
             cx -= 16;
-#define START_POS (-16)
-#define END_POS   (-HEIGHT_IN_TILES * 8)
-            TWEEN(cy +=, initTime);
-#undef START_POS
-#undef END_POS
+            cy += _tween(-16, -HEIGHT_IN_TILES * 8, initTime);
         } break;
         case TEL_DOWN: {
             cx -= 16;
-#define START_POS (-16)
-#define END_POS   (V_HEIGHT)
-            TWEEN(cy +=, initTime);
-#undef START_POS
-#undef END_POS
+            cy += _tween(-16, V_HEIGHT, initTime);
         } break;
         case TEL_LEFT: {
             cy -= 16;
-#define START_POS (-16)
-#define END_POS   (-WIDTH_IN_TILES * 8)
-            TWEEN(cx +=, initTime);
-#undef START_POS
-#undef END_POS
+            cx += _tween(-16, -WIDTH_IN_TILES * 8, initTime);
         } break;
         case TEL_RIGHT: {
             cy -= 16;
-#define START_POS (-16)
-#define END_POS   (V_WIDTH)
-            TWEEN(cx +=, initTime);
-#undef START_POS
-#undef END_POS
+            cx += _tween(-16, V_WIDTH, initTime);
         } break;
     }
 
     gfmTilemap_setPosition(lvltransition.pTransition, cx, cy);
 }
-
-#undef TWEEN
 
 /**
  * Prepare switching to a level transition
