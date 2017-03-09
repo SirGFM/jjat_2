@@ -2771,12 +2771,7 @@
     <property name="tgt_y" value="3"/>
    </properties>
   </object>
-  <object id="253" name="checkpoint" type="checkpoint" x="152" y="104" width="16" height="24">
-   <properties>
-    <property name="tgt_x" value="19"/>
-    <property name="tgt_y" value="14"/>
-   </properties>
-  </object>
+  <object id="253" name="checkpoint" type="checkpoint" x="152" y="104" width="16" height="24"/>
   <object id="254" name="wall_e" type="invisible_wall" x="320" y="0" width="32" height="240"/>
   <object id="255" name="to_beware_the_spikes" type="loadzone" x="304" y="80" width="32" height="48">
    <properties>
@@ -2973,12 +2968,7 @@
    </properties>
   </object>
   <object id="266" name="wall_w" type="invisible_wall" x="-32" y="0" width="32" height="240"/>
-  <object id="267" name="checkpoint" type="checkpoint" x="48" y="32" width="16" height="24">
-   <properties>
-    <property name="tgt_x" value="6"/>
-    <property name="tgt_y" value="4"/>
-   </properties>
-  </object>
+  <object id="267" name="checkpoint" type="checkpoint" x="48" y="32" width="16" height="24"/>
   <object id="271" name="to_harmless_baddies" type="loadzone" x="-16" y="24" width="32" height="32">
    <properties>
     <property name="dest" value="harmless_baddies"/>
@@ -3295,12 +3285,7 @@
     <property name="tgt_y" value="0"/>
    </properties>
   </object>
-  <object id="296" name="checkpoint" type="checkpoint" x="48" y="56" width="16" height="24">
-   <properties>
-    <property name="tgt_x" value="6"/>
-    <property name="tgt_y" value="8"/>
-   </properties>
-  </object>
+  <object id="296" name="checkpoint" type="checkpoint" x="48" y="56" width="16" height="24"/>
   <object id="297" name="wall_w" type="invisible_wall" x="-32" y="0" width="32" height="240"/>
  </objectgroup>
  <layer name="real_lab_passage_fg_tm" width="120" height="70" offsetx="0" offsety="-240">

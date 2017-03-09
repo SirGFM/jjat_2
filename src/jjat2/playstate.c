@@ -358,7 +358,6 @@ static err _parseInvisibleWall(gfmParser *pParser) {
 static err _parseCheckpoint(gfmParser *pParser, const char *pLevelName) {
     leveltransitionData *pData;
     gfmRV rv;
-    err erv;
     int h, w, x, y;
 
     ASSERT(playstate.areasCount < MAX_AREAS, ERR_BUFFERTOOSMALL);
@@ -369,11 +368,12 @@ static err _parseCheckpoint(gfmParser *pParser, const char *pLevelName) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     pData = playstate.data + playstate.areasCount;
-    erv = _parseLevelInfo(pParser, pData, (LIF_TGTX | LIF_TGTY));
-    ASSERT(erv == ERR_OK, erv);
     /* pLevelName should be the name of the loaded file. Therefore, it must have
      * a valid length and terminator (unless it got corrupted...) */
     strcpy(pData->pName, pLevelName);
+    /* Set the target position based on the checkpoint's position */
+    pData->tgtX = (uint16_t)(x + w / 2);
+    pData->tgtY = (uint16_t)(y + h - TILES_TO_PX(2));
 
     rv = gfmHitbox_initItem(playstate.pAreas, pData, x, y, w, h, T_CHECKPOINT
             , playstate.areasCount);
