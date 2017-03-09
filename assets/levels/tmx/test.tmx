@@ -2773,7 +2773,6 @@
   </object>
   <object id="253" name="checkpoint" type="checkpoint" x="152" y="104" width="16" height="24">
    <properties>
-    <property name="dest" value="safe_passage"/>
     <property name="tgt_x" value="19"/>
     <property name="tgt_y" value="14"/>
    </properties>
@@ -2976,7 +2975,6 @@
   <object id="266" name="wall_w" type="invisible_wall" x="-32" y="0" width="32" height="240"/>
   <object id="267" name="checkpoint" type="checkpoint" x="48" y="32" width="16" height="24">
    <properties>
-    <property name="dest" value="blink_wisely"/>
     <property name="tgt_x" value="6"/>
     <property name="tgt_y" value="4"/>
    </properties>
@@ -3299,7 +3297,6 @@
   </object>
   <object id="296" name="checkpoint" type="checkpoint" x="48" y="56" width="16" height="24">
    <properties>
-    <property name="dest" value="real_lab_passage"/>
     <property name="tgt_x" value="6"/>
     <property name="tgt_y" value="8"/>
    </properties>

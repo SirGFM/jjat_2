@@ -352,9 +352,10 @@ static err _parseInvisibleWall(gfmParser *pParser) {
 /**
  * Parse a checkpoint
  *
- * @param  [ in]pParser The parser pointing at a checkpoint
+ * @param  [ in]pParser    The parser pointing at a checkpoint
+ * @param  [ in]pLevelName Name of the current level
  */
-static err _parseCheckpoint(gfmParser *pParser) {
+static err _parseCheckpoint(gfmParser *pParser, const char *pLevelName) {
     leveltransitionData *pData;
     gfmRV rv;
     err erv;
@@ -368,8 +369,11 @@ static err _parseCheckpoint(gfmParser *pParser) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     pData = playstate.data + playstate.areasCount;
-    erv = _parseLevelInfo(pParser, pData, (LIF_NAME | LIF_TGTX | LIF_TGTY));
+    erv = _parseLevelInfo(pParser, pData, (LIF_TGTX | LIF_TGTY));
     ASSERT(erv == ERR_OK, erv);
+    /* pLevelName should be the name of the loaded file. Therefore, it must have
+     * a valid length and terminator (unless it got corrupted...) */
+    strcpy(pData->pName, pLevelName);
 
     rv = gfmHitbox_initItem(playstate.pAreas, pData, x, y, w, h, T_CHECKPOINT
             , playstate.areasCount);
@@ -391,12 +395,15 @@ static err _parseCheckpoint(gfmParser *pParser) {
  *                        to load the level with layers on
  *                        "levels/map_test_tm.gfm" and "levels/map_test_obj.gfm"
  *                        one should call this function with "map_test" as its
- *                        argument.
+ *                        argument. Note that this parameter may come from a
+ *                        previous loaded loadzone. Therefore, as soon as
+ *                        objects start to get parsed, this may be overwritten
  * @param  [ in]setPlayer Whether the player position should be set from the map
  */
 static err _loadLevel(char *levelName, int setPlayer) {
+    char *pValidName;
     char stLevelName[MAX_LEVEL_NAME];
-    int len, pos;
+    int nameLen, pos;
     gfmRV rv;
     err erv;
 
@@ -427,17 +434,15 @@ static err _loadLevel(char *levelName, int setPlayer) {
      *     MAX_LEVEL_NAME - (sizeof("levels/") - 1) - (sizeof("_obj.gfm") - 1) - 1
      * The last "- 1" is for the '\0'
      */
-    len = strlen(levelName);
-    ASSERT(len <= MAX_LEVEL_NAME, ERR_INVALIDLEVELNAME);
-
-    /* Setup the level name before it may be overwritten */
-    setMapTitle(levelName);
-    showUI();
+    nameLen = strlen(levelName);
+    ASSERT(nameLen <= MAX_LEVEL_NAME, ERR_INVALIDLEVELNAME);
 
     pos = 0;
     APPEND_POS("levels/");
+    /* Store this position as the one with a valid (i.e., immutable name) */
+    pValidName = stLevelName + pos;
     /* TODO Check if levelName is actually a valid path */
-    APPEND_DYN(levelName, len);
+    APPEND_DYN(levelName, nameLen);
 
     /* Load the tilemap */
     APPEND("_fg_tm.gfm");
@@ -461,6 +466,9 @@ static err _loadLevel(char *levelName, int setPlayer) {
     rv = gfmParser_init(playstate.pParser, game.pCtx, stLevelName
             , pos + LEN("_obj.gfm"));
     ASSERT(erv == ERR_OK, erv);
+
+    /* Since no other filed is opened after this, clamp the level name */
+    pValidName[nameLen] = '\0';
 
     playstate.entityCount = 0;
     playstate.areasCount = 0;
@@ -488,7 +496,7 @@ static err _loadLevel(char *levelName, int setPlayer) {
             ASSERT(erv == ERR_OK, erv);
         }
         else if (strcmp(type, "checkpoint") == 0) {
-            erv = _parseCheckpoint(playstate.pParser);
+            erv = _parseCheckpoint(playstate.pParser, pValidName);
             ASSERT(erv == ERR_OK, erv);
         }
         else if (strcmp(type, "swordy_pos") == 0) {
@@ -542,6 +550,9 @@ static err _loadLevel(char *levelName, int setPlayer) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     resetTeleporterTarget();
 
+    setMapTitle(pValidName);
+    showUI();
+
     if (setPlayer) {
         leveltransitionData data;
         int h, tgtX, tgtY, w;
@@ -562,7 +573,7 @@ static err _loadLevel(char *levelName, int setPlayer) {
         /* Setting the player position implies that this is the first level on
          * this playthrough (either a new game or a loaded one). Therefore,
          * setup the checkpoint */
-        strcpy(data.pName, levelName);
+        strcpy(data.pName, pValidName);
         data.tgtX = (uint16_t)tgtX;
         data.tgtY = (uint16_t)tgtY;
         erv = setCheckpoint(&data);
