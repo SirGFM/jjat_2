@@ -59,6 +59,59 @@
                 "function": "_environmentalHarmEntity"
             }
         ]
+    },
+    "checkpoint_collision": {
+        "type_a": ["T_CHECKPOINT"],
+        "cases": [
+            {
+                "type_b": ["T_GUNNY", "T_SWORDY"],
+                "function": "_checkpointCollision"
+            }
+        ]
+    },
+    "entity_collision": {
+        "type_a": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_G_WALKY", "T_EN_TURRET", "T_SWORDY", "T_GUNNY"],
+        "cases": [
+            {
+                "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_G_WALKY", "T_EN_TURRET", "T_SWORDY", "T_GUNNY"],
+                "function": "_entityCollision"
+            }
+        ]
+    },
+    "gwalky_view": {
+        "type_a": ["T_EN_G_WALKY_VIEW"],
+        "cases": [
+            {
+                "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_TURRET", "T_SWORDY", "T_GUNNY"],
+                "function": "_gWalkyViewEntityCollision"
+            }
+        ]
+    },
+    "sword_attack": {
+        "type_a": ["T_ATK_SWORD"],
+        "cases": [
+            {
+                "type_b": ["T_EN_G_WALKY_ATK", "T_TEL_BULLET"],
+                "function": "_swordReflectProjectile"
+            },
+            {
+                "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_G_WALKY"],
+                "function": "_attackEntity"
+            }
+        ]
+    },
+    "common_attacks": {
+        "type_a": ["T_EN_G_WALKY_ATK"],
+        "cases": [
+            {
+                "type_b": ["T_SWORDY", "T_GUNNY", "T_EN_SPIKY", "T_EN_WALKY", "T_EN_G_WALKY"],
+                "function": "_attackEntity"
+            },
+            {
+                "type_b": ["T_EN_TURRET"],
+                "function": "_denyProjectile"
+            }
+        ]
     }
 }
 

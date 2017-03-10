@@ -211,7 +211,7 @@ static inline err _setTeleportEntity(collisionNode *bullet
 
     /* Check if visible */
     if (gfm_isSpriteInsideCamera(game.pCtx, pEntity->pSelf) == GFMRV_TRUE ) {
-        if (other->type != T_EN_G_WALKY
+        if (TYPE(other->type) != T_EN_G_WALKY
                 || onGreenWalkyAttacked(pEntity, bullet->pObject) == ERR_OK) {
             erv = teleporterTargetEntity(pEntity);
             ASSERT(erv == ERR_OK, erv);
@@ -275,13 +275,22 @@ static inline err _setTeleportFloor(collisionNode *bullet
     return ERR_OK;
 }
 
-/**
- * Handle collision between a floor object and a particle
- */
+/** Handle collision between a floor object and a particle */
 static inline err _floorProjectileCollision(collisionNode *floor
         , collisionNode *particle) {
-    if (particle->type == T_EN_G_WALKY_ATK) {
+    if (TYPE(particle->type) == T_EN_G_WALKY_ATK) {
         _explodeStar(particle);
+    }
+
+    collision.flags |= CF_SKIP;
+    return ERR_OK;
+}
+
+/** Deny a single projectile, when it collides against something else */
+static inline err _denyProjectile(collisionNode *projectile
+        , collisionNode *other) {
+    if (TYPE(projectile->type) == T_EN_G_WALKY_ATK) {
+        _explodeStar(projectile);
     }
 
     collision.flags |= CF_SKIP;
@@ -344,6 +353,130 @@ static inline err _environmentalHarmEntity(collisionNode *harm
         killEntity((entityCtx*)entity->pChild);
     }
 
+    return ERR_OK;
+}
+
+/** Collision between a checkpoint and a player */
+static inline err _checkpointCollision(collisionNode *checkpoint
+        , collisionNode *player) {
+    gfmSprite *pSpr;
+    int h, w, x, y;
+    err erv;
+
+    gfmObject_getPosition(&x, &y, checkpoint->pObject);
+    gfmObject_getDimensions(&w, &h, checkpoint->pObject);
+
+    /* Set the checkpoint */
+    erv = setCheckpoint((leveltransitionData*)checkpoint->pChild);
+    ASSERT(erv == ERR_OK, erv);
+
+    pSpr = spawnFx(x, y, w, h, 0/*dir*/, checkpointSavedDuration
+            , FX_CHECKPOINT_SAVED, T_FX);
+    ASSERT(pSpr != 0, ERR_BUFFERTOOSMALL);
+
+    gfmObject_setType(checkpoint->pObject, T_FX);
+
+    return ERR_OK;
+}
+
+/** Collision between an spiky and another entity */
+static inline err _spikyEntityCollision(collisionNode *spiky
+        , collisionNode *ent) {
+    if (gfmObject_justOverlaped(spiky->pObject, ent->pObject) == GFMRV_TRUE) {
+        gfmCollision col;
+        int dir;
+
+        gfmSprite_getCollision(&col, ((entityCtx*)spiky->pChild)->pSelf);
+        gfmSprite_getDirection(&dir, ((entityCtx*)spiky->pChild)->pSelf);
+
+        if ((dir == DIR_RIGHT && (col & gfmCollision_right))
+                || (dir == DIR_LEFT && (col & gfmCollision_left))) {
+            int damage;
+
+            damage = spiky->type >> T_BITS;
+            hitEntity((entityCtx*)ent->pChild, damage);
+            collision.flags |= CF_SKIP;
+        }
+    }
+
+    return ERR_OK;
+}
+
+/** Collision between two entities */
+static inline err _entityCollision(collisionNode *entA, collisionNode *entB) {
+    if (TYPE(entA->type) == T_EN_SPIKY && TYPE(entB->type) != T_EN_SPIKY) {
+        return _spikyEntityCollision(entA, entB);
+    }
+    else if (TYPE(entB->type) == T_EN_SPIKY && TYPE(entA->type) != T_EN_SPIKY) {
+        return _spikyEntityCollision(entB, entA);
+    }
+    else {
+        if (entA != entB) {
+            collideTwoEntities((entityCtx*)entA->pChild
+                    , (entityCtx*)entB->pChild);
+        }
+
+        return ERR_OK;
+    }
+}
+
+/** Collision between a g_walky's view and an entity */
+static inline err _gWalkyViewEntityCollision(collisionNode *view
+        , collisionNode *entity) {
+    triggerGreenWalkyAttack((entityCtx*)view->pChild);
+
+    return ERR_OK;
+}
+
+/** Collision between a sword attack and a projectile */
+static inline err _swordReflectProjectile(collisionNode *sword
+        , collisionNode *projectile) {
+    double vx;
+    int dir;
+
+    gfmSprite_getHorizontalVelocity(&vx, projectile->pSprite);
+    gfmSprite_getDirection(&dir, projectile->pSprite);
+    gfmSprite_setHorizontalVelocity(projectile->pSprite, -vx);
+    gfmSprite_setDirection(projectile->pSprite, !dir);
+
+    gfmSprite_setType(sword->pSprite, T_SWORD_FX);
+    collision.flags |= CF_SKIP;
+    return ERR_OK;
+}
+
+/** Collision between an attack and an entity */
+static inline err _attackEntity(collisionNode *attack
+        , collisionNode *entity) {
+    int damage;
+
+    damage = attack->type >> T_BITS;
+    if (TYPE(attack->type) == T_ATK_SWORD) {
+        /* TODO Make this damage based */
+        damage = 1000;
+    }
+
+    if (TYPE(entity->type) == T_EN_G_WALKY) {
+        gfmObject_justOverlaped(attack->pObject, entity->pObject);
+        if (onGreenWalkyAttacked((entityCtx*)entity->pChild, attack->pObject)
+                == ERR_OK) {
+            hitEntity((entityCtx*)entity->pChild, damage);
+        }
+    }
+    else {
+        hitEntity((entityCtx*)entity->pChild, damage);
+    }
+
+    /* De-activate the attack */
+    switch (TYPE(attack->type)) {
+        case T_ATK_SWORD: {
+            gfmSprite_setType(attack->pSprite, T_SWORD_FX);
+        } break;
+        case T_EN_G_WALKY_ATK: {
+            _explodeStar(attack);
+        } break;
+    }
+
+    collision.flags |= CF_SKIP;
     return ERR_OK;
 }
 

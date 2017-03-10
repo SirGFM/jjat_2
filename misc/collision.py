@@ -20,6 +20,7 @@ def main(json_filename, out_file):
             fp.close()
 
     # Iterate through every collision group, generating its code
+    tuples = []
     for k, v in decoded.iteritems():
         out_file.write('/* Collision group \'{}\' */ \n'.format(k))
 
@@ -41,11 +42,23 @@ def main(json_filename, out_file):
             # After retrieving both lists, setup the collision code
             for a in typeAList:
                 for b in typeBList:
-                    if a != b:
+                    if (b, a) in tuples:
+                        # Ignore since case is already handled
+                        # Do add it to the tuples, to catch any error
+                        tuples.append((a, b))
+                        continue
+                    elif (a, b) in tuples:
+                        print "Found repeated case ({}, {}) in {}"
+                        return 6
+                    elif a != b:
                         out_file.write('CASE({}, {})\n'.format(a, b))
                     else:
                         out_file.write('SELFCASE({})\n'.format(a))
-            out_file.write('    if (isFirstCase) {\n')
+                    tuples.append((a, b))
+            out_file.write('    if (node1.pChild == node2.pChild) {\n')
+            out_file.write('        /* Filter out self collision */\n')
+            out_file.write('    }\n')
+            out_file.write('    else if (isFirstCase) {\n')
             out_file.write('        erv = {}(&node1, &node2);\n'.format(function))
             out_file.write('    }\n')
             out_file.write('    else {\n')
