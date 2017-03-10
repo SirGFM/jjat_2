@@ -2,6 +2,11 @@
  * @file src/collision.c
  *
  * Declare only the collision function.
+ *
+ * In a way to try and keep this saner, collision "sets" (e.g., if types 'a',
+ * 'b' and and 'c' collide against 'a', 'd' or 'f') are described on a separated
+ * json file, which automatically (i.e., from the Makefile) generates the
+ * described switch-case code.
  */
 #include <base/collision.h>
 #include <base/error.h>
@@ -108,6 +113,182 @@ static void _explodeStar(collisionNode *bullet) {
 }
 
 /**
+ * Handle collision between a floor object and an entity
+ */
+static inline err _defaultFloorCollision(collisionNode *floor
+        , collisionNode *entity) {
+    gfmRV rv;
+
+    rv = gfmObject_justOverlaped(floor->pObject, entity->pObject);
+    if (rv == GFMRV_TRUE) {
+        gfmCollision dir;
+
+        gfmObject_getCurrentCollision(&dir, entity->pObject);
+
+        if (!((dir & gfmCollision_up) && (dir & gfmCollision_hor))) {
+            gfmObject_collide(floor->pObject, entity->pObject);
+        }
+        else {
+            /* Fix colliding against corners when there are two
+             * separated objects in a wall */
+            gfmObject_separateHorizontal(floor->pObject, entity->pObject);
+        }
+
+        if (dir & gfmCollision_down) {
+            gfmObject_setVerticalVelocity(entity->pObject, 0);
+            /* Corner case!! If the entity would get stuck on a
+             * corner, push 'em toward the platform */
+            if (dir & gfmCollision_left) {
+                int x, y;
+                gfmObject_getPosition(&x, &y, entity->pObject);
+                gfmObject_setPosition(entity->pObject, x - 1, y - 1);
+            }
+            else if (dir & gfmCollision_right) {
+                int x, y;
+                gfmObject_getPosition(&x, &y, entity->pObject);
+                gfmObject_setPosition(entity->pObject, x + 1, y - 1);
+            }
+        }
+        else if ((dir & gfmCollision_up) && !(dir & gfmCollision_hor)) {
+            int y;
+            gfmObject_setVerticalVelocity(entity->pObject, 0);
+            gfmObject_getVerticalPosition(&y, entity->pObject);
+            gfmObject_setVerticalPosition(entity->pObject, y + 1);
+
+        }
+    } /* if (rv == GFMRV_TRUE) */
+#if  defined(JJATENGINE)
+    else if (collision.flags & CF_FIXTELEPORT) {
+        /* Entity was (possibly) just teleported into the ground.
+         * Manually check and fix it */
+        if (gfmObject_isOverlaping(floor->pObject, entity->pObject)
+                == GFMRV_TRUE) {
+            int fh, fy, ph, py;
+
+            gfmObject_getVerticalPosition(&fy, floor->pObject);
+            gfmObject_getHeight(&fh, floor->pObject);
+            gfmObject_getVerticalPosition(&py, entity->pObject);
+            gfmObject_getHeight(&ph, entity->pObject);
+
+            if (py >= fy) {
+                gfmObject_setVerticalPosition(entity->pObject, fy + fh);
+            }
+            else if (py + ph <= fy + fh) {
+                gfmObject_setVerticalPosition(entity->pObject, fy - ph);
+            }
+        }
+    }
+#endif  /* JJATENGINE */
+
+    return ERR_OK;
+}
+
+/** Collision when a teleport bullet should be ignored */
+static inline err _ignoreTeleportBullet(collisionNode *bullet
+        , collisionNode *other) {
+    gfmGroupNode *pNode;
+    gfmRV rv;
+
+    pNode = (gfmGroupNode*)bullet->pChild;
+    /* TODO Play vanish animation */
+    rv = gfmGroup_removeNode(pNode);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    collision.flags |= CF_SKIP;
+    return ERR_OK;
+}
+
+/** Collision between any entity and a teleport bullet */
+static inline err _setTeleportEntity(collisionNode *bullet
+        , collisionNode *other) {
+    gfmGroupNode *pNode;
+    entityCtx *pEntity;
+    err erv;
+    gfmRV rv;
+
+    pNode = (gfmGroupNode*)bullet->pChild;
+    pEntity = (entityCtx*)other->pChild;
+
+    /* Check if visible */
+    if (gfm_isSpriteInsideCamera(game.pCtx, pEntity->pSelf) == GFMRV_TRUE ) {
+        if (other->type != T_EN_G_WALKY
+                || onGreenWalkyAttacked(pEntity, bullet->pObject) == ERR_OK) {
+            erv = teleporterTargetEntity(pEntity);
+            ASSERT(erv == ERR_OK, erv);
+        }
+    }
+    rv = gfmGroup_removeNode(pNode);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    collision.flags |= CF_SKIP;
+    return ERR_OK;
+}
+
+/** Collision between a floor and a teleport bullet */
+static inline err _setTeleportFloor(collisionNode *bullet
+        , collisionNode *floor) {
+    gfmGroupNode *pNode;
+    gfmObject *pBullet, *pFloor;
+    err erv;
+    gfmRV rv;
+
+    pBullet = bullet->pObject;
+    pNode = (gfmGroupNode*)bullet->pChild;
+    pFloor = floor->pObject;
+
+    /* Check if visible */
+    if (GFMRV_TRUE == gfm_isObjectInsideCamera(game.pCtx, pFloor)) {
+        int cx, x, y;
+        teleportPosition pos;
+
+        /* Since the bullet only moves horizontally, use the floor's
+         * horizontal position and the bullet's vertical */
+        rv = gfmObject_getLastCenter(&cx, &y, pBullet);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        rv = gfmObject_getHorizontalPosition(&x, pFloor);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+        /* Ugly, hacky assumption: if the center - half the width is
+         * to the right of the floor's left side, then it's to the
+         * floor's right */
+        if (cx - BULLET_WIDTH / 2 >= x) {
+            int w;
+            /* The bullet collided to the left, so adjust its position */
+            rv = gfmObject_getWidth(&w, pFloor);
+            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+            x += w;
+            x += BULLET_WIDTH / 2;
+            pos = TP_LEFT;
+        }
+        else {
+            x -= BULLET_WIDTH / 2;
+            pos = TP_RIGHT;
+        }
+
+        erv = teleporterTargetPosition(x, y, pos);
+        ASSERT(erv == ERR_OK, erv);
+    }
+    rv = gfmGroup_removeNode(pNode);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    collision.flags |= CF_SKIP;
+    return ERR_OK;
+}
+
+/**
+ * Handle collision between a floor object and a particle
+ */
+static inline err _floorProjectileCollision(collisionNode *floor
+        , collisionNode *particle) {
+    if (particle->type == T_EN_G_WALKY_ATK) {
+        _explodeStar(particle);
+    }
+
+    collision.flags |= CF_SKIP;
+    return ERR_OK;
+}
+
+/**
  * Continue handling collision.
  * 
  * Different from the other functions on this module, this one is declared on
@@ -126,6 +307,7 @@ err doCollide(gfmQuadtreeRoot *pQt) {
     collision.flags  &= ~CF_SKIP;
     while (rv != GFMRV_QUADTREE_DONE && !(collision.flags & CF_SKIP)) {
         collisionNode node1, node2;
+        err erv;
         int isFirstCase;
         int fallthrough;
 

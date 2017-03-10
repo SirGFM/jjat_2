@@ -90,7 +90,7 @@
   ifneq (, $(GFRAME_INCLUDES))
     CFLAGS := $(CFLAGS) -I$(GFRAME_INCLUDES)
   endif
-  CFLAGS := $(CFLAGS) -I"./include/" -Wall
+  CFLAGS := $(CFLAGS) -I"./include/" -I"./misc" -Wall
 
   # TODO Uncomment to enable the background
   #CFLAGS := $(CFLAGS) -DJJAT_ENABLE_BACKGROUND
@@ -181,12 +181,17 @@ obj/$(OS)_debug/%.o: %.c
 # Include every rule from a depency (properly tracks header dependency)
 -include $(OBJLIST:%.o=%.d)
 
+misc/auto/collisioncases.c: misc/collision.json
+	@ echo '[OFF] Generating collision switch-case'
+	@ mkdir -p misc/auto/
+	@ python misc/collision.py $< $@
+
 # Create the dependency files from their source
 obj/$(OS)_$(MODE)/%.d: %.c
 	@ # Hack required so this won't run when clean or mkdirs is run
 	@ if [ ! -z "$(IGNORE_DEP)" ]; then exit 1; fi
 	@ echo '[DEP] $< -> $@'
-	@ gcc $(CFLAGS) -MM -MG -MT "$@ $(@:%.d=%.o)" $< > $@
+	gcc $(CFLAGS) -MM -MG -MT "$@ $(@:%.d=%.o)" $< > $@
 
 # Rule for generating the icon
 $(WINICON):

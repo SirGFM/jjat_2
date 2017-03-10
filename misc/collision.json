@@ -1,0 +1,34 @@
+{
+    "floor_collision": {
+        "type_a": ["T_FLOOR", "T_FLOOR_NOTP"],
+        "cases": [
+            {
+                "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_TURRET",
+                    "T_EN_G_WALKY", "T_GUNNY", "T_SWORDY"],
+                "function": "_defaultFloorCollision"
+            },
+            {
+                "type_b": ["T_EN_G_WALKY_ATK"],
+                "function": "_floorProjectileCollision"
+            }
+        ]
+    },
+    "teleport_bullet": {
+        "type_a": ["T_TEL_BULLET"],
+        "cases": [
+            {
+                "type_b": ["T_EN_TURRET", "T_SPIKE", "T_FLOOR_NOTP"],
+                "function": "_ignoreTeleportBullet"
+            },
+            {
+                "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_SWORDY", "T_EN_G_WALKY"],
+                "function": "_setTeleportEntity"
+            },
+            {
+                "type_b": ["T_FLOOR"],
+                "function": "_setTeleportFloor"
+            }
+        ]
+    }
+}
+
