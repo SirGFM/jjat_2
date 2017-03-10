@@ -36,7 +36,52 @@ CASE(T_FLOOR_NOTP, T_EN_G_WALKY_ATK)
         erv = _floorProjectileCollision(&node2, &node1);
     }
 break;
-/* Collision group 'teleport_bullet' */ 
+/* Collision group 'loadzone_collision' */ 
+CASE(T_LOADZONE, T_SWORDY)
+CASE(T_LOADZONE, T_GUNNY)
+CASE(T_LOADZONE, T_DUMMY_GUNNY)
+CASE(T_LOADZONE, T_DUMMY_SWORDY)
+    if (isFirstCase) {
+        erv = _collideLoadzonePlayer(&node1, &node2);
+    }
+    else {
+        erv = _collideLoadzonePlayer(&node2, &node1);
+    }
+break;
+/* Collision group 'environmental_harm' */ 
+CASE(T_SPIKE, T_EN_TURRET)
+    if (isFirstCase) {
+        erv = _defaultFloorCollision(&node1, &node2);
+    }
+    else {
+        erv = _defaultFloorCollision(&node2, &node1);
+    }
+break;
+CASE(T_SPIKE, T_EN_SPIKY)
+CASE(T_SPIKE, T_EN_WALKY)
+CASE(T_SPIKE, T_EN_G_WALKY)
+CASE(T_SPIKE, T_GUNNY)
+CASE(T_SPIKE, T_SWORDY)
+    if (isFirstCase) {
+        erv = _environmentalHarmEntity(&node1, &node2);
+    }
+    else {
+        erv = _environmentalHarmEntity(&node2, &node1);
+    }
+break;
+/* Collision group 'dummy_collision' */ 
+CASE(T_SWORDY, T_DUMMY_GUNNY)
+CASE(T_SWORDY, T_DUMMY_SWORDY)
+CASE(T_GUNNY, T_DUMMY_GUNNY)
+CASE(T_GUNNY, T_DUMMY_SWORDY)
+    if (isFirstCase) {
+        erv = _collidePlayerDummy(&node1, &node2);
+    }
+    else {
+        erv = _collidePlayerDummy(&node2, &node1);
+    }
+break;
+/* Collision group 'teleport_collision' */ 
 CASE(T_TEL_BULLET, T_EN_TURRET)
 CASE(T_TEL_BULLET, T_SPIKE)
 CASE(T_TEL_BULLET, T_FLOOR_NOTP)

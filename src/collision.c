@@ -288,6 +288,65 @@ static inline err _floorProjectileCollision(collisionNode *floor
     return ERR_OK;
 }
 
+/** Collide a player against another player's dummy */
+static inline err _collidePlayerDummy(collisionNode *player
+        , collisionNode *dummy) {
+    int playerY, dummyY;
+
+    gfmObject_getVerticalPosition(&playerY, player->pObject);
+    gfmObject_getVerticalPosition(&dummyY, dummy->pObject);
+
+    gfmObject_justOverlaped(player->pObject, dummy->pObject);
+    if (playerY < dummyY) {
+        gfmCollision dir;
+
+        /* Only separate the player if it's above the dummy */
+        gfmObject_separateVertical(player->pObject, dummy->pObject);
+        gfmObject_getCurrentCollision(&dir, player->pObject);
+        if (dir & gfmCollision_down) {
+            gfmObject_setVerticalVelocity(player->pObject, 0);
+        }
+    }
+
+    return ERR_OK;
+}
+
+/** Collide a loadzone against a player */
+static inline err _collideLoadzonePlayer(collisionNode *loadzone
+        , collisionNode *player) {
+    onHitLoadzone(player->type, (leveltransitionData*)loadzone->pChild);
+
+    return ERR_OK;
+}
+
+/** Collide an environmental harm (spikes, lava(?) etc) against an entity */
+static inline err _environmentalHarmEntity(collisionNode *harm
+        , collisionNode *entity) {
+    gfmCollision dir;
+    int py, sy, ph;
+
+    gfmObject_justOverlaped(harm->pObject, entity->pObject);
+    gfmObject_getCurrentCollision(&dir, entity->pObject);
+
+    gfmObject_getVerticalPosition(&py, entity->pObject);
+    gfmObject_getHeight(&ph, entity->pObject);
+    gfmObject_getVerticalPosition(&sy, harm->pObject);
+
+    if (py + ph < sy + SPIKE_OFFSET) {
+        /* Does nothing unless within the collideable aread */
+    }
+    else if (dir & gfmCollision_hor) {
+        /* Collide horizontally to avoid clipping */
+        gfmObject_separateHorizontal(harm->pObject, entity->pObject);
+    }
+    else {
+        /* Kill the entity */
+        killEntity((entityCtx*)entity->pChild);
+    }
+
+    return ERR_OK;
+}
+
 /**
  * Continue handling collision.
  * 

@@ -3,8 +3,7 @@
         "type_a": ["T_FLOOR", "T_FLOOR_NOTP"],
         "cases": [
             {
-                "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_TURRET",
-                    "T_EN_G_WALKY", "T_GUNNY", "T_SWORDY"],
+                "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_TURRET", "T_EN_G_WALKY", "T_GUNNY", "T_SWORDY"],
                 "function": "_defaultFloorCollision"
             },
             {
@@ -13,7 +12,7 @@
             }
         ]
     },
-    "teleport_bullet": {
+    "teleport_collision": {
         "type_a": ["T_TEL_BULLET"],
         "cases": [
             {
@@ -27,6 +26,37 @@
             {
                 "type_b": ["T_FLOOR"],
                 "function": "_setTeleportFloor"
+            }
+        ]
+    },
+    "dummy_collision": {
+        "type_a": ["T_SWORDY", "T_GUNNY"],
+        "cases": [
+            {
+                "type_b": ["T_DUMMY_GUNNY", "T_DUMMY_SWORDY"],
+                "function": "_collidePlayerDummy"
+            }
+        ]
+    },
+    "loadzone_collision": {
+        "type_a": ["T_LOADZONE"],
+        "cases": [
+            {
+                "type_b": ["T_SWORDY", "T_GUNNY", "T_DUMMY_GUNNY", "T_DUMMY_SWORDY"],
+                "function": "_collideLoadzonePlayer"
+            }
+        ]
+    },
+    "environmental_harm": {
+        "type_a": ["T_SPIKE"],
+        "cases": [
+            {
+                "type_b": ["T_EN_TURRET"],
+                "function": "_defaultFloorCollision"
+            },
+            {
+                "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_G_WALKY", "T_GUNNY", "T_SWORDY"],
+                "function": "_environmentalHarmEntity"
             }
         ]
     }
