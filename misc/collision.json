@@ -57,6 +57,10 @@
             {
                 "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_G_WALKY", "T_GUNNY", "T_SWORDY"],
                 "function": "_environmentalHarmEntity"
+            },
+            {
+                "type_b": ["T_EN_G_WALKY_ATK"],
+                "function": "_floorProjectileCollision"
             }
         ]
     },
@@ -110,6 +114,86 @@
             {
                 "type_b": ["T_EN_TURRET"],
                 "function": "_denyProjectile"
+            }
+        ]
+    },
+    "collision_less": {
+        "type_a": ["T_SWORD_FX", "T_FX"],
+        "cases": [
+            {
+                "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_G_WALKY", "T_EN_G_WALKY_ATK",
+                    "T_EN_G_WALKY_VIEW", "T_EN_TURRET", "T_SWORDY", "T_GUNNY", "T_FLOOR",
+                    "T_FLOOR_NOTP", "T_SPIKE", "T_ATK_SWORD", "T_TEL_BULLET", "T_SWORD_FX", "T_FX"],
+                "function": null
+            }
+        ]
+    },
+    "ignore_001": {
+        "type_a": ["T_ATK_SWORD"],
+        "cases": [
+            {
+                "type_b": ["T_ATK_SWORD", "T_CHECKPOINT", "T_SWORDY", "T_GUNNY", "T_FLOOR",
+                    "T_FLOOR_NOTP", "T_EN_TURRET", "T_SPIKE", "T_LOADZONE", "T_EN_G_WALKY_VIEW"],
+                "function": null
+            }
+        ]
+    },
+    "ignore_002": {
+        "type_a": ["T_TEL_BULLET"],
+        "cases": [
+            {
+                "type_b": ["T_TEL_BULLET", "T_GUNNY", "T_EN_G_WALKY_ATK", "T_CHECKPOINT",
+                    "T_LOADZONE", "T_EN_G_WALKY_VIEW"],
+                "function": null
+            }
+        ]
+    },
+    "ignore_003": {
+        "type_a": ["T_EN_G_WALKY_VIEW", "T_CHECKPOINT", "T_LOADZONE"],
+        "cases": [
+            {
+                "type_b": ["T_EN_G_WALKY_VIEW", "T_CHECKPOINT", "T_LOADZONE", "T_FLOOR",
+                    "T_FLOOR_NOTP", "T_EN_G_WALKY_ATK", "T_EN_G_WALKY", "T_SPIKE"],
+                "function": null
+            }
+        ]
+    },
+    "ignore_004": {
+        "type_a": ["T_CHECKPOINT", "T_LOADZONE"],
+        "cases": [
+            {
+                "type_b": ["T_EN_SPIKY"],
+                "function": null
+            }
+        ]
+    },
+    "ignore_005": {
+        "type_a": ["T_EN_G_WALKY_ATK"],
+        "cases": [
+            {
+                "type_b": ["T_EN_G_WALKY_ATK"],
+                "function": null
+            }
+        ]
+    },
+    "ignore_006": {
+        "type_a": ["T_EN_WALKY"],
+        "cases": [
+            {
+                "type_b": ["T_CHECKPOINT", "T_LOADZONE"],
+                "function": null
+            }
+        ]
+    },
+    "ignore_007": {
+        "type_a": ["T_DUMMY_SWORDY", "T_DUMMY_GUNNY"],
+        "cases": [
+            {
+                "type_b": ["T_DUMMY_SWORDY", "T_DUMMY_GUNNY", "T_HAZARD", "T_PLAYER",
+                    "T_FLOOR", "T_ENEMY", "T_FX", "T_FLOOR_NOTP", "T_ATK_SWORD", "T_TEL_BULLET",
+                    "T_CHECKPOINT", "T_SPIKE", "T_EN_WALKY", "T_EN_G_WALKY", "T_EN_G_WALKY_ATK",
+                    "T_EN_G_WALKY_VIEW", "T_EN_SPIKY", "T_EN_TURRET", "T_SWORD_FX"],
+                "function": null
             }
         ]
     }

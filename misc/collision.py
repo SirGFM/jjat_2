@@ -39,6 +39,12 @@ def main(json_filename, out_file):
                 print "Error generating code for case {} in {}: {}".format(c, k, e)
                 return 5
 
+            # Select the handler ('CASE' handles being triggered by the first or second case differently)
+            if function is not None:
+                handler = 'CASE'
+            else:
+                handler = 'IGNORE'
+
             # After retrieving both lists, setup the collision code
             for a in typeAList:
                 for b in typeBList:
@@ -48,22 +54,25 @@ def main(json_filename, out_file):
                         tuples.append((a, b))
                         continue
                     elif (a, b) in tuples:
-                        print "Found repeated case ({}, {}) in {}"
+                        print "Found repeated case ({}, {}) in {}".format(a, b, k)
                         return 6
                     elif a != b:
-                        out_file.write('CASE({}, {})\n'.format(a, b))
+                        out_file.write('{}({}, {})\n'.format(handler, a, b))
                     else:
                         out_file.write('SELFCASE({})\n'.format(a))
                     tuples.append((a, b))
-            out_file.write('    if (node1.pChild == node2.pChild) {\n')
-            out_file.write('        /* Filter out self collision */\n')
-            out_file.write('    }\n')
-            out_file.write('    else if (isFirstCase) {\n')
-            out_file.write('        erv = {}(&node1, &node2);\n'.format(function))
-            out_file.write('    }\n')
-            out_file.write('    else {\n')
-            out_file.write('        erv = {}(&node2, &node1);\n'.format(function))
-            out_file.write('    }\n')
+            if function is not None:
+                out_file.write('    if (node1.pChild == node2.pChild) {\n')
+                out_file.write('        /* Filter out self collision */\n')
+                out_file.write('    }\n')
+                out_file.write('    else if (isFirstCase) {\n')
+                out_file.write('        erv = {}(&node1, &node2);\n'.format(function))
+                out_file.write('    }\n')
+                out_file.write('    else {\n')
+                out_file.write('        erv = {}(&node2, &node1);\n'.format(function))
+                out_file.write('    }\n')
+            else:
+                out_file.write('    erv = ERR_OK;\n')
             out_file.write('break;\n')
 
 if __name__ == '__main__':
@@ -93,6 +102,17 @@ if __name__ == '__main__':
 
     rv = main(sys.argv[1], fp)
 
+    # Setup a default case on linux & debug, so unhandled collisions may be easily detected
+    fp.write('    /* On Linux, a SIGINT is raised any time a unhandled collision\n' +
+             '     * happens. When debugging, GDB will stop here and allow the user to\n' +
+             '     * check which types weren\'t handled */\n' +
+             '    default: {\n' +
+             '#  if defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__))\n' +
+             '        /* Unfiltered collision, do something about it */\n' +
+             '        raise(SIGINT);\n' +
+             '        erv = GFMRV_INTERNAL_ERROR;\n' +
+             '#  endif\n' +
+             '    }\n')
     fp.write('} /* switch (MERGE_TYPES(node1.type, node2.type)) */\n')
     fp.write('ASSERT(erv == ERR_OK, erv);\n')
     fp.close()
