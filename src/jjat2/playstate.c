@@ -48,6 +48,9 @@ enum {
   , PF_TEL_GUNNY  = 0x02
 };
 
+/** Distance between the actual tile and its inactive counter-part */
+#define UNACTIVE_TILE_OFFSET 6
+
 /** Initialize the playstate so a level may be later loaded and played */
 err initPlaystate() {
     gfmRV rv;
@@ -90,6 +93,9 @@ err initPlaystate() {
         playstate.data[i].pName = _stMapsName + (MAX_VALID_LEN + 1) * i;
         i++;
     }
+
+    /* TODO Load session flags */
+    game.sessionFlags = 0;
 
     return ERR_OK;
 }
@@ -159,6 +165,54 @@ static err _updateWorldSize() {
     /** Make the quadtree 4 tiles larger than the actual map */
     playstate.width = width + 32;
     playstate.height = height + 32;
+
+    return ERR_OK;
+}
+
+/** Check the tilemap for any tile that has to have its graphics modified
+ * (because of session flags) */
+static err _updateActivableTiles() {
+    int *pData;
+    gfmRV rv;
+    int i, height, width;
+
+    /* TODO Add other flags */
+    if (game.sessionFlags & (SF_BLUE_ACTIVE)) {
+        /* If all switches were activated, no need to modify the tilemap */
+        return ERR_OK;
+    }
+
+    rv = gfmTilemap_getData(&pData, playstate.pMap);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmTilemap_getDimension(&width, &height, playstate.pMap);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    /* TODO Optmize this, if necessary */
+    i = 0;
+    while (i < height * width) {
+        switch (pData[i]) {
+            /* Blue tiles */
+            case 1344:
+            case 1345:
+            case 1346:
+            case 1347:
+            case 1348:
+            case 1349:
+            case 1408:
+            case 1409:
+            case 1410:
+            case 1411:
+            case 1472:
+            case 1473:
+            case 1474: {
+                if (!(game.sessionFlags & SF_BLUE_ACTIVE)) {
+                    pData[i] += UNACTIVE_TILE_OFFSET;
+                }
+            } break;
+            default: { /* Do nothing */ }
+        }
+        i++;
+    }
 
     return ERR_OK;
 }
@@ -450,6 +504,9 @@ static err _loadLevel(char *levelName, int setPlayer) {
             , pos + LEN("_fg_tm.gfm"), pDictNames, pDictTypes, dictLen);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     erv = _updateWorldSize();
+    ASSERT(erv == ERR_OK, erv);
+
+    erv = _updateActivableTiles();
     ASSERT(erv == ERR_OK, erv);
 
 #if defined(JJAT_ENABLE_BACKGROUND)
