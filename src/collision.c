@@ -115,6 +115,14 @@ static inline err _defaultFloorCollision(collisionNode *floor
         , collisionNode *entity) {
     gfmRV rv;
 
+#if defined(JJATENGINE)
+    /* Ignore collision if against a platform that hasn't been activated */
+    if (TYPE(floor->type) == T_BLUE_PLATFORM
+            && !(game.sessionFlags & SF_BLUE_ACTIVE)) {
+        return ERR_OK;
+    }
+#endif /* JJATENGINE */
+
     rv = gfmObject_justOverlaped(floor->pObject, entity->pObject);
     if (rv == GFMRV_TRUE) {
         gfmCollision dir;
@@ -227,6 +235,14 @@ static inline err _setTeleportFloor(collisionNode *bullet
     gfmObject *pBullet, *pFloor;
     err erv;
     gfmRV rv;
+
+#if defined(JJATENGINE)
+    /* Ignore collision if against a platform that hasn't been activated */
+    if (TYPE(floor->type) == T_BLUE_PLATFORM
+            && !(game.sessionFlags & SF_BLUE_ACTIVE)) {
+        return ERR_OK;
+    }
+#endif /* JJATENGINE */
 
     pBullet = bullet->pObject;
     pNode = (gfmGroupNode*)bullet->pChild;

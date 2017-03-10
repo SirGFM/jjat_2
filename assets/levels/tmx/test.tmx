@@ -6,6 +6,7 @@
    <terrain name="floor" tile="1088"/>
    <terrain name="floor_notp" tile="1094"/>
    <terrain name="spike" tile="1092"/>
+   <terrain name="blue_platform" tile="-1"/>
   </terraintypes>
   <tile id="103">
    <properties>
@@ -81,6 +82,31 @@
   <tile id="1205" terrain="0,0,0,0"/>
   <tile id="1206" terrain="0,0,0,0"/>
   <tile id="1207" terrain="0,0,0,0"/>
+  <tile id="1344" terrain="3,3,3,3"/>
+  <tile id="1345" terrain="3,3,3,3"/>
+  <tile id="1346" terrain="3,3,3,3"/>
+  <tile id="1347" terrain="3,3,3,3"/>
+  <tile id="1348" terrain="3,3,3,3"/>
+  <tile id="1349" terrain="3,3,3,3"/>
+  <tile id="1350" terrain="3,3,3,3"/>
+  <tile id="1351" terrain="3,3,3,3"/>
+  <tile id="1352" terrain="3,3,3,3"/>
+  <tile id="1353" terrain="3,3,3,3"/>
+  <tile id="1354" terrain="3,3,3,3"/>
+  <tile id="1355" terrain="3,3,3,3"/>
+  <tile id="1408" terrain="3,3,3,3"/>
+  <tile id="1409" terrain="3,3,3,3"/>
+  <tile id="1410" terrain="3,3,3,3"/>
+  <tile id="1411" terrain="3,3,3,3"/>
+  <tile id="1414" terrain="3,3,3,3"/>
+  <tile id="1415" terrain="3,3,3,3"/>
+  <tile id="1416" terrain="3,3,3,3"/>
+  <tile id="1472" terrain="3,3,3,3"/>
+  <tile id="1473" terrain="3,3,3,3"/>
+  <tile id="1474" terrain="3,3,3,3"/>
+  <tile id="1478" terrain="3,3,3,3"/>
+  <tile id="1479" terrain="3,3,3,3"/>
+  <tile id="1480" terrain="3,3,3,3"/>
  </tileset>
  <tileset firstgid="4097" name="atlas 16x16" tilewidth="16" tileheight="16" tilecount="1024" columns="32">
   <image source="../../gfx/atlas.bmp" trans="ff00ff" width="512" height="512"/>
