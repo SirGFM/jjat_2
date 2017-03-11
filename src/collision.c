@@ -47,25 +47,9 @@ typedef struct stCollisionNode collisionNode;
 #define MERGE_TYPES(type1, type2) \
     (TYPE(type1) | (TYPE(type2) << T_BITS))
 
-/**
- * Check if two entities of the specified type collided.
- *
- * It requires two integers:
- *   - isFirstCase: Set if collision triggered for the first case. If 0, it was
- *                  triggered by the second case (and, therefore, the objects
- *                  must be swapped).
- *   - fallthrough: Set to fallthrough the following cases without modifying
- *                  isFirstCase. Only required if multiples CASEs are handled by
- *                  a single block.
- */
+/** Check if two entities of the specified type collided */
 #define CASE(type1, type2) \
-    case (MERGE_TYPES(type1, type2)): \
-        if (!fallthrough) { \
-            isFirstCase = 1; \
-        } \
-        fallthrough = 1; \
-    case (MERGE_TYPES(type2, type1)): \
-        fallthrough = 1;
+    case (MERGE_TYPES(type1, type2)):
 
 /** Collide against self type */
 #define SELFCASE(type) \
@@ -73,8 +57,7 @@ typedef struct stCollisionNode collisionNode;
 
 /** Ignore collision between entities of different types */
 #define IGNORE(type1, type2) \
-    case (MERGE_TYPES(type1, type2)): \
-    case (MERGE_TYPES(type2, type1)):
+    case (MERGE_TYPES(type1, type2)):
 
 /**
  * Retrieve the type and all the children for a given object.
@@ -433,8 +416,13 @@ static inline err _entityCollision(collisionNode *entA, collisionNode *entB) {
 }
 
 /** Collision between a g_walky's view and an entity */
-static inline err _gWalkyViewEntityCollision(collisionNode *view
-        , collisionNode *entity) {
+static inline err _gWalkyViewEntityCollision(collisionNode *entity
+        , collisionNode *view) {
+    if (entity->pChild == view->pChild) {
+        /* Avoid triggering for the viewing entity */
+        return ERR_OK;
+    }
+
     triggerGreenWalkyAttack((entityCtx*)view->pChild);
 
     return ERR_OK;
@@ -512,8 +500,6 @@ err doCollide(gfmQuadtreeRoot *pQt) {
     while (rv != GFMRV_QUADTREE_DONE && !(collision.flags & CF_SKIP)) {
         collisionNode node1, node2;
         err erv;
-        int isFirstCase;
-        int fallthrough;
 
         /* Retrieve the two overlaping objects and their types */
         rv = gfmQuadtree_getOverlaping(&node1.pObject, &node2.pObject
@@ -521,10 +507,6 @@ err doCollide(gfmQuadtreeRoot *pQt) {
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
         _getSubtype(&node1);
         _getSubtype(&node2);
-
-        /* Merge both types into a single one, so it's easier to compare */
-        isFirstCase = 0;
-        fallthrough = 0;
 
         /* Import the filtered collision tuples */
         #include <auto/collisioncases.c>
