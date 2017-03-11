@@ -22,6 +22,7 @@
 #define TM_DEFAULT_TILE -1
 #define MAX_ENTITIES    32
 #define MAX_AREAS       16
+#define TILE_DIMENSION  8
 
 /** Maximum number of characters for the path to any given level */
 #define MAX_LEVEL_NAME  128

@@ -189,7 +189,7 @@ static err _updateActivableTiles() {
 
     /* TODO Optmize this, if necessary */
     i = 0;
-    while (i < height * width) {
+    while (i < height * width / TILE_DIMENSION / TILE_DIMENSION) {
         switch (pData[i]) {
             /* Blue tiles */
             case 1344:
