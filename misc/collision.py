@@ -2,7 +2,10 @@
 """
 
 import json
+import os
+import shutil
 import sys
+import tempfile
 
 def main(json_filename, out_file):
     fp = None
@@ -74,6 +77,7 @@ def main(json_filename, out_file):
             else:
                 out_file.write('    erv = ERR_OK;\n')
             out_file.write('break;\n')
+    return 0
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
@@ -81,10 +85,10 @@ if __name__ == '__main__':
         print 'Usage: {} json_filename output_filename'.format(sys.argv[0])
         sys.exit(1)
 
-    fp = None
     if sys.argv[2] != 'stdout':
         try:
-            fp = open(sys.argv[2], 'wt')
+            fp = tempfile.NamedTemporaryFile(mode='wt', delete=False)
+            filepath = fp.name
         except Exception as e:
             print 'Failed to open output file: {}'.format(e)
             sys.exit(2)
@@ -116,6 +120,20 @@ if __name__ == '__main__':
     fp.write('} /* switch (MERGE_TYPES(node1.type, node2.type)) */\n')
     fp.write('ASSERT(erv == ERR_OK, erv);\n')
     fp.close()
+
+    # Move the file to its final destination
+    if rv == 0 and sys.argv[2] != 'stdout':
+        try:
+            os.remove(sys.argv[2])
+        except:
+            pass
+        try:
+            shutil.move(filepath, sys.argv[2])
+        except Exception as e:
+            print 'Failed to create the output file: {}'.format(e)
+            rv = 7
+    elif sys.argv[2] != 'stdout':
+        os.remove(filepath)
 
     sys.exit(rv)
 
