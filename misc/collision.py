@@ -18,21 +18,21 @@ def output_collision(case, list_a, list_b, handler, function, out_file, tuples, 
                 print "Found repeated case ({}, {}) in {}".format(a, b, case)
                 return 6
             elif a != b:
-                out_file.write('{}({}, {})\n'.format(handler, a, b))
+                out_file.write('    {}({}, {})\n'.format(handler, a, b))
             else:
-                out_file.write('SELFCASE({})\n'.format(a))
+                out_file.write('    SELFCASE({})\n'.format(a))
             tuples.append((a, b))
     if function is not None:
-        out_file.write('    if (node1.pChild != node2.pChild) {\n')
-        out_file.write('        /* Filter out self collision */\n')
+        out_file.write('        if (node1.pChild != node2.pChild) {\n')
+        out_file.write('            /* Filter out self collision */\n')
         if not reverse:
-            out_file.write('        erv = {}(&node1, &node2);\n'.format(function))
+            out_file.write('            erv = {}(&node1, &node2);\n'.format(function))
         else:
-            out_file.write('        erv = {}(&node2, &node1);\n'.format(function))
-        out_file.write('    }\n')
+            out_file.write('            erv = {}(&node2, &node1);\n'.format(function))
+        out_file.write('        }\n')
     else:
-        out_file.write('    erv = ERR_OK;\n')
-    out_file.write('break;\n')
+        out_file.write('        erv = ERR_OK;\n')
+    out_file.write('    break;\n')
 
     # Remove ignored cases from the release version, since it's useless
     if function is None:
@@ -57,7 +57,7 @@ def main(json_filename, out_file):
     # Iterate through every collision group, generating its code
     tuples = []
     for k, v in decoded.iteritems():
-        out_file.write('/* Collision group \'{}\' */ \n'.format(k))
+        out_file.write('    /* Collision group \'{}\' */ \n'.format(k))
 
         try:
             typeAList = v['type_a']
