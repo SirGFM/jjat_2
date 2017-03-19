@@ -95,10 +95,6 @@ err preUpdateWalky(entityCtx *pEnt) {
     rv = gfmSprite_getCollision(&col, pEnt->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    if (col & gfmCollision_down) {
-        flipEntityOnEdge(pEnt, WALKY_SPEED);
-    }
-
     if (!(pEnt->flags & EF_ALIVE)) {
         /* Hold position if dead */
         rv = gfmSprite_setVelocity(pEnt->pSelf, 0, 0);
@@ -146,10 +142,16 @@ err preUpdateWalky(entityCtx *pEnt) {
  */
 err postUpdateWalky(entityCtx *pEnt) {
     double vx, vy;
+    gfmCollision col;
     err erv;
 
     if (pEnt->flags & EF_DEACTIVATE) {
         return ERR_OK;
+    }
+
+    gfmSprite_getCollision(&col, pEnt->pSelf);
+    if ((col & gfmCollision_down) && !pEnt->pCarrying) {
+        flipEntityOnEdge(pEnt, WALKY_SPEED);
     }
 
     erv = postUpdateEntity(pEnt);
