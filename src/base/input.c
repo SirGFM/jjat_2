@@ -80,6 +80,10 @@ void handleInput() {
  * loop to be paused/resumed or even stepped.
  */
 void handleDebugInput() {
+    if (DID_JUST_RELEASE(dbgResetFps)) {
+        gfm_resetFPS(game.pCtx);
+    }
+
     if (DID_JUST_RELEASE(dbgPause)) {
         /* Toggle pause/resume update loop */
         if (game.debugRunState == DBG_PAUSED) {
