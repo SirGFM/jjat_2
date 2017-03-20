@@ -8,3 +8,4 @@ obj walky 96 184 8 8
 obj walky 288 160 8 8
 obj walky 288 152 8 8
 obj loadzone -16 112 32 32 [ dest , not_so_harmless ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 21 ]
+area checkpoint 48 120 16 24
