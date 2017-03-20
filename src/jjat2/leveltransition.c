@@ -279,8 +279,6 @@ err updateLeveltransition() {
         gfmTilemap_setPosition(lvltransition.pTransition, cx - 16, cy - 16);
     }
     else if (!(lvltransition.flags & LT_LOADED)) {
-        int x, y;
-
         erv = loadPlaystate();
         ASSERT(erv == ERR_OK, erv);
         rv = gfm_resetFPS(game.pCtx);
@@ -289,11 +287,23 @@ err updateLeveltransition() {
 
         /* After loading the stage, adjust the camera position and center the
          * players (and the transition effect) within it */
-        _getRelativePosition(&x, &y);
-        gfmSprite_setPosition(playstate.swordy.pSelf
-                , x + (int)lvltransition.swordyX, y + (int)lvltransition.swordyY);
-        gfmSprite_setPosition(playstate.gunny.pSelf
-                , x + (int)lvltransition.gunnyX, y + (int)lvltransition.gunnyY);
+        if (lvltransition.flags & LT_CHECKPOINT) {
+            gfmSprite_setPosition(playstate.swordy.pSelf, lvltransition.tgtX
+                    , lvltransition.tgtY);
+            gfmSprite_setPosition(playstate.gunny.pSelf, lvltransition.tgtX
+                    , lvltransition.tgtY);
+        }
+        else {
+            int dx, dy;
+
+            _getRelativePosition(&dx, &dy);
+
+            gfmSprite_setPosition(playstate.swordy.pSelf
+                    , dx + lvltransition.swordyX, dy + lvltransition.swordyY);
+            gfmSprite_setPosition(playstate.gunny.pSelf
+                    , dx + lvltransition.gunnyX, dy + lvltransition.gunnyY);
+        }
+
         erv = resetCameraPosition(&playstate.swordy, &playstate.gunny);
         ASSERT(erv == ERR_OK, erv);
 
