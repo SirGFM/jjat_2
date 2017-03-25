@@ -630,7 +630,7 @@ static err _loadLevel(char *levelName, int setPlayer) {
         /* Setting the player position implies that this is the first level on
          * this playthrough (either a new game or a loaded one). Therefore,
          * setup the checkpoint */
-        strcpy(data.pName, pValidName);
+        data.pName = pValidName;
         data.tgtX = (uint16_t)tgtX;
         data.tgtY = (uint16_t)tgtY;
         erv = setCheckpoint(&data);
