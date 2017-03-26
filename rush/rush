@@ -1,0 +1,114 @@
+#!/bin/bash
+#===============================================================================
+# Shell script for deploying builds
+#-------------------------------------------------------------------------------
+# Since I name my chroots after Mega Man boss masters, this one is named after
+# Mega Man's dog, Rush.
+#===============================================================================
+
+VERBOSE=true
+function my_print() {
+    if ${VERBOSE}; then
+        echo $*
+    fi
+}
+
+function check_error() {
+    if [ $1 -ne 0 ]; then
+        echo "'$2' failed with exit code $1"
+        exit $1
+    fi
+}
+
+if [ $# -ne 2 ]; then
+    echo "Usage: ${0} chroot_name arch_name"
+    echo "  chroot_name -- Name of the chroot environment to be used"
+    echo "  arch_name -- Name of the build target; Compiled binary shall be found on" \
+         "build/\${arch_name}"
+    exit 0
+fi
+
+CHROOT=${1}
+ARCH=${2}
+my_print "Building for ${ARCH} on ${CHROOT}"
+
+BASE_DIR=/run/ramdisk
+
+# Work directory within the temporary environment
+#
+# !!! WARNING !!! This is called as the argument for a `rm -rf`
+WORK_DIR=${BASE_DIR}/jjat_2
+
+# Work directory inside the chroot
+CHROOT_WORK_DIR=/mnt/ramdisk/jjat_2
+
+# Path to the local clone of the repo
+LOCAL_REPO=/media/data/ubuntu/github/jjat_2
+# How much RAM the temp env requires
+REQ_RAM=128m
+
+# Create a temporary environment
+if [ ! -d ${BASE_DIR} ]; then
+    my_print "Creating ramdisk work directory (on ${BASE_DIR})..."
+    sudo mkdir -p ${BASE_DIR}
+    sudo chown gfm:gfm ${BASE_DIR}
+    sudo mount -t tmpfs -o size=${REQ_RAM} tmpfs ${BASE_DIR}
+    check_error $? "Mount ramdisk"
+fi
+
+# Copy the local repo to the temp-env and clean it from all modifications
+if [ -d ${WORK_DIR} ]; then
+    # !!! DANGER !!!
+    my_print "Cleaning up work dir..."
+    rm -rf ${WORK_DIR}
+fi
+my_print "Copying local repository (${LOCAL_REPO}) into work dir..."
+cp -r ${LOCAL_REPO} ${WORK_DIR}
+cd ${WORK_DIR}
+check_error $? "Switching to work_dir"
+
+# This is hacky, but it gets the job done...
+my_print "Cleaning up local modifications..."
+git stash
+while [ "$(git stash list)" != "" ]; do
+    git stash drop
+done
+
+cd -
+
+# Ensure the output directory exists
+mkdir -p deploy/${ARCH}/
+
+# Enable access to the workdir in the chroot
+if [ "$(mount | grep ${CHROOT%-*})" == "" ]; then
+    my_print "Binding work directory into chroot (${BASE_DIR} -> /mnt/linools/env/${CHROOT}/mnt/ramdisk)"
+    if [ ! -d /mnt/linools/env/${CHROOT}/mnt/ramdisk ]; then
+        sudo mkdir /mnt/linools/env/${CHROOT}/mnt/ramdisk
+    fi
+    sudo mount --bind ${BASE_DIR} /mnt/linools/env/${CHROOT}/mnt/ramdisk
+    check_error $? "Bind work_dir into chroot"
+fi
+
+# Actually build it
+my_print "Cleaning build (on chroot: ${CHROOT_WORK_DIR})..."
+/mnt/linools/env/run ${CHROOT} make clean -C ${CHROOT_WORK_DIR}
+check_error $? "Clean chroot work dir"
+# TODO Build the release
+my_print "Building (on chroot: ${CHROOT_WORK_DIR})..."
+/mnt/linools/env/run ${CHROOT} make -j 7 -C ${CHROOT_WORK_DIR}
+check_error $? "Deploy for chroot"
+
+# Copy it to the output dir
+my_print "Copying everything to the destination"
+find ${WORK_DIR}/bin -name game -exec cp {} deploy/${ARCH}/ \;
+check_error $? "Copy built bin into destination"
+# Update the assets
+find assets -exec rush/update_asset {} deploy/${ARCH} \;
+
+# Remove any ligering built file (since chroot runs as uid 0)
+my_print "Final cleaning (on chroot: ${CHROOT_WORK_DIR})..."
+/mnt/linools/env/run ${CHROOT} make __clean -C ${CHROOT_WORK_DIR}
+check_error $? "Final clean chroot work dir"
+
+exit 0
+
