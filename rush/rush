@@ -106,6 +106,12 @@ check_error $? "Copy built bin into destination"
 # Update the assets
 find assets -exec ${RUSH_DIR}/update_asset {} deploy/${ARCH} \;
 
+# Check if a win 32/64 build and add the extension
+FILE_TYPE=`file deploy/${ARCH}/game`
+if [ "`echo ${FILE_TYPE} | grep -o PE32+`" == "PE32+" ] || [ "`echo ${FILE_TYPE} | grep -o PE32`" == "PE32" ]; then
+    mv deploy/${ARCH}/game deploy/${ARCH}/game.exe
+fi
+
 # Remove any ligering built file (since chroot runs as uid 0)
 my_print "Final cleaning (on chroot: ${CHROOT_WORK_DIR})..."
 /mnt/linools/env/run ${CHROOT} make __clean -C ${CHROOT_WORK_DIR}
