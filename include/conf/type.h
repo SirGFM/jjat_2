@@ -23,15 +23,29 @@
     (type & T_MASK)
 
 enum enType {
-      T_FLOOR     = gfmType_reserved_5  /* purple */
-    , T_PLAYER    = gfmType_reserved_7  /* light red */
-    , T_FX        = gfmType_reserved_10 /* dirty yellow/green */
+      T_HAZARD    = gfmType_reserved_2  /* ( 5) pink */
+    , T_PLAYER    = gfmType_reserved_3  /* ( 6) light blue */
+    , T_FLOOR     = gfmType_reserved_5  /* ( 8) purple */
+    , T_ENEMY     = gfmType_reserved_7  /* (10) light red */
+    , T_FX        = gfmType_reserved_10 /* (13) dirty yellow/green */
 
-    , T_SWORDY     = (1 << T_BASE_NBITS) | T_PLAYER
-    , T_GUNNY      = (2 << T_BASE_NBITS) | T_PLAYER
-    , T_ATK_SWORD  = (3 << T_BASE_NBITS) | T_PLAYER
-    , T_SWORD_FX   = (3 << T_BASE_NBITS) | T_FX
-    , T_TEL_BULLET = (4 << T_BASE_NBITS) | T_PLAYER
+    , T_FLOOR_NOTP      = (1 << T_BASE_NBITS) | T_FLOOR
+    , T_LOADZONE        = (2 << T_BASE_NBITS) | T_FLOOR
+    , T_SWORDY          = (1 << T_BASE_NBITS) | T_PLAYER
+    , T_GUNNY           = (2 << T_BASE_NBITS) | T_PLAYER
+    , T_ATK_SWORD       = (3 << T_BASE_NBITS) | T_PLAYER
+    , T_TEL_BULLET      = (4 << T_BASE_NBITS) | T_PLAYER
+    , T_CHECKPOINT      = (5 << T_BASE_NBITS) | T_PLAYER
+    , T_DUMMY_SWORDY    = (6 << T_BASE_NBITS) | T_PLAYER
+    , T_DUMMY_GUNNY     = (7 << T_BASE_NBITS) | T_PLAYER
+    , T_SPIKE           = (1 << T_BASE_NBITS) | T_HAZARD
+    , T_EN_WALKY        = (1 << T_BASE_NBITS) | T_ENEMY
+    , T_EN_G_WALKY      = (2 << T_BASE_NBITS) | T_ENEMY
+    , T_EN_G_WALKY_ATK  = (3 << T_BASE_NBITS) | T_ENEMY
+    , T_EN_G_WALKY_VIEW = (4 << T_BASE_NBITS) | T_ENEMY
+    , T_EN_SPIKY        = (5 << T_BASE_NBITS) | T_ENEMY
+    , T_EN_TURRET       = (6 << T_BASE_NBITS) | T_ENEMY
+    , T_SWORD_FX        = (1 << T_BASE_NBITS) | T_FX
 };
 typedef enum enType type;
 

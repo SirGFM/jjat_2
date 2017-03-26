@@ -8,29 +8,28 @@
 
 #include <GFraMe/gfmParser.h>
 
-struct stSwordyCtx {
-    /** Base object */
-    entityCtx entity;
-    /** Number of times swordy has already jumped */
-    int jumpCount;
-    /** Flags used to control the attack animation/state */
-    int attackFlags;
-};
-typedef struct stSwordyCtx swordyCtx;
-
 /**
  * Initialize the swordy character
  *
  * @param  [ in]swordy The player to be initialized
  */
-err initSwordy(swordyCtx *swordy);
+err initSwordy(entityCtx *swordy);
 
 /**
  * Release all memory alloc'ed by the structure.
  *
  * @param  [ in]swordy The player to be freed
  */
-void freeSwordy(swordyCtx *swordy);
+void freeSwordy(entityCtx *swordy);
+
+/**
+ * Set swordy's position based on a value retrieved from the parser
+ *
+ * @param  [ in]swordy The player
+ * @param  [ in]x      The position
+ * @param  [ in]y      The position
+ */
+void setSwordyPositionFromParser(entityCtx *swordy, int x, int y);
 
 /**
  * Parse swordy into its position
@@ -38,28 +37,28 @@ void freeSwordy(swordyCtx *swordy);
  * @param  [ in]swordy  The player
  * @param  [ in]pParser Parser that has just parsed a "swordy_pos"
  */
-err parseSwordy(swordyCtx *swordy, gfmParser *pParser);
+err parseSwordy(entityCtx *swordy, gfmParser *pParser);
 
 /**
  * Render a swordy
  *
  * @param  [ in]swordy The player
  */
-err drawSwordy(swordyCtx *swordy);
+err drawSwordy(entityCtx *swordy);
 
 /**
  * Update the object's physics.
  *
  * @param  [ in]swordy The player to be updated
  */
-err preUpdateSwordy(swordyCtx *swordy);
+err preUpdateSwordy(entityCtx *swordy);
 
 /**
  * Set swordy's animation and fix its entity's collision.
  *
  * @param  [ in]swordy The player to be updated
  */
-err postUpdateSwordy(swordyCtx *swordy);
+err postUpdateSwordy(entityCtx *swordy);
 
 #endif /* __JJAT2_SWORDY_H__ */
 

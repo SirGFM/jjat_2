@@ -1,0 +1,10 @@
+area invisible_wall -32 0 32 240
+area invisible_wall 480 0 32 240
+obj checkpoint 424 128 16 24 [ dest , before_the_trial ] [ tgt_x , 53 ] [ tgt_y , 19 ]
+obj loadzone -16 24 32 64 [ dest , the_fall ] [ dir , left ] [ tgt_x , 36 ] [ tgt_y , 37 ]
+obj loadzone 464 120 32 32 [ dest , the_failed_experiment ] [ dir , right ] [ tgt_x , 3 ] [ tgt_y , 9 ]
+obj walky 72 216 8 8
+obj walky 168 216 8 8
+obj walky 256 184 8 8
+obj walky 304 184 8 8
+obj walky 352 184 8 8

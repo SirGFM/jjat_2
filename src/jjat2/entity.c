@@ -6,9 +6,11 @@
 #include <base/collision.h>
 #include <base/error.h>
 #include <base/game.h>
+#include <base/gfx.h>
 #include <base/input.h>
 
 #include <jjat2/entity.h>
+#include <jjat2/playstate.h>
 
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gfmInput.h>
@@ -21,6 +23,7 @@
  */
 void initEntity(entityCtx *entity) {
     gfmSprite_setVerticalAcceleration(entity->pSelf, entity->standGravity);
+    entity->flags = EF_ALIVE;
 }
 
 /**
@@ -110,18 +113,6 @@ err updateEntityJump(entityCtx *entity, gfmInputState jumpBt) {
 
     entity->jumpGrace -= game.elapsed;
 
-    if (vy > 0) {
-        /* Set fall gravity */
-        rv = gfmSprite_setVerticalAcceleration(entity->pSelf,
-                entity->fallGravity);
-    }
-    else if (vy < 0) {
-        /* Set jump gravity */
-        rv = gfmSprite_setVerticalAcceleration(entity->pSelf,
-                entity->standGravity);
-    }
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-
     return erv;
 }
 
@@ -133,6 +124,9 @@ err updateEntityJump(entityCtx *entity, gfmInputState jumpBt) {
 err collideEntityStatic(entityCtx *entity) {
     err erv;
     gfmRV rv;
+    if (entity->flags & EF_SKIP_COLLISION) {
+        return ERR_OK;
+    }
     rv = gfmQuadtree_collideSprite(collision.pStaticQt, entity->pSelf);
     if (rv == GFMRV_QUADTREE_OVERLAPED) {
         erv = doCollide(collision.pStaticQt);
@@ -151,6 +145,9 @@ err collideEntityStatic(entityCtx *entity) {
 err collideEntity(entityCtx *entity) {
     err erv;
     gfmRV rv;
+    if (entity->flags & EF_SKIP_COLLISION) {
+        return ERR_OK;
+    }
     rv = gfmQuadtree_collideSprite(collision.pStaticQt, entity->pSelf);
     if (rv == GFMRV_QUADTREE_OVERLAPED) {
         erv = doCollide(collision.pStaticQt);
@@ -169,48 +166,113 @@ err collideEntity(entityCtx *entity) {
 }
 
 /**
- * Make an entity be carried by another,
- *
- * NOTE: To avoid collision issues with the environment, any entity that is
- * being carried should run a second collision against all static objects. This
- * solves potential zipping through platforms.
+ * Handle fixing an entity's position based on its carrier
  *
  * @param  [ in]entity   The entity
- * @param  [ in]carrying The sprite carrying the entity
  */
-void carryEntity(entityCtx *entity, gfmSprite *carrying) {
-    int dx, x, tmp;
-    gfmCollision beforeDir, afterDir;
+static err handleCarrying(entityCtx *entity) {
+    gfmSprite *pCarrierSpr;
+    double vy;
+    err erv;
+    gfmRV rv;
 
-    /* Retrieve the movement from carrying since the previous frame (into dx) */
-    gfmSprite_getCenter(&dx, &tmp, carrying);
-    gfmSprite_getLastCenter(&x, &tmp, carrying);
-    dx -= x;
-    /* Get entity's horizontal position (into x) */
-    gfmSprite_getHorizontalPosition(&x, entity->pSelf);
+    /* Ensure the bottom-most entity and handled first. This makes horizontal
+     * movement be correctly propagated through the entities */
+    if (!entity->pCarrying || (entity->flags & EF_HAS_CARRIER)) {
+        return ERR_OK;
+    }
+    else if (entity->pCarrying->pCarrying) {
+        erv = handleCarrying(entity->pCarrying);
+        ASSERT(erv == ERR_OK, erv);
+    }
+
+    pCarrierSpr = entity->pCarrying->pSelf;
 
     /* Get the collision flags as this started, update the entity's position and
      * check the collision flags again to check for position adjustments */
-    gfmSprite_getCurrentCollision(&beforeDir, entity->pSelf);
-    gfmSprite_setHorizontalPosition(entity->pSelf, x + dx);
-    gfmSprite_justOverlaped(entity->pSelf, carrying);
-    gfmSprite_getCurrentCollision(&afterDir, entity->pSelf);
+    gfmSprite_applyDeltaX(entity->pSelf, pCarrierSpr);
 
-    /* Adjustments happens on both corners, to ensure the entity doesn't get
-     * stuck on carrying's edge */
-    if ((beforeDir & gfmCollision_left) && !(afterDir & gfmCollision_left)) {
-        gfmSprite_setHorizontalPosition(entity->pSelf, x + dx + 1);
+    /* Get carrying's VY (into vy) */
+    gfmSprite_getVerticalVelocity(&vy, pCarrierSpr);
+
+    /* Collide to actually set the vertical position */
+    gfmSprite_setFixed(pCarrierSpr);
+    gfmSprite_justOverlaped(entity->pSelf, pCarrierSpr);
+    gfmSprite_separateVertical(entity->pSelf, pCarrierSpr);
+    gfmSprite_setMovable(pCarrierSpr);
+
+    /* Update the entity vertical velocity (make it fall slightly faster and
+     * avoid getting separated from the object) */
+    if (vy >= TILES_TO_PX(2)) {
+        double ay;
+        gfmSprite_getVerticalAcceleration(&ay, pCarrierSpr);
+        vy = 1.06125 * (vy + ay * (game.elapsed * 0.001));
     }
-    else if ((beforeDir & gfmCollision_right)
-            && !(afterDir & gfmCollision_right)) {
-        gfmSprite_setHorizontalPosition(entity->pSelf, x + dx - 1);
+    else if (vy >= -TILES_TO_PX(5)) {
+        vy = TILES_TO_PX(5);
+    }
+    else if (vy < 0) {
+        vy *= 0.125;
+        if (vy >= -TILES_TO_PX(2)) {
+            vy = TILES_TO_PX(1);
+        }
+    }
+    if (vy < MAX_FALL_SPEED) {
+        gfmSprite_setVerticalVelocity(entity->pSelf, vy);
     }
     else {
-        /* Set flag so the entity may collide again against every static
-         * object (which will fix collision against the map) */
-        entity->pCarrying = carrying;
+        gfmSprite_setVerticalVelocity(entity->pSelf, MAX_FALL_SPEED);
     }
 
+    /* Collide against static objects */
+    rv = gfmQuadtree_collideSprite(collision.pStaticQt, entity->pSelf);
+    if (rv == GFMRV_QUADTREE_OVERLAPED) {
+        erv = doCollide(collision.pStaticQt);
+        ASSERT(erv == ERR_OK, erv);
+        rv = GFMRV_QUADTREE_DONE;
+    }
+    ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
+
+    entity->flags |= EF_HAS_CARRIER;
+
+    return ERR_OK;
+}
+
+/**
+ * Finalize updating the entity's physics
+ *
+ * @param  [ in]entity   The entity
+ */
+err preUpdateEntity(entityCtx *entity) {
+    double vy;
+    gfmRV rv;
+    err erv;
+
+    entity->flags &= ~(EF_HAS_CARRIER);
+    entity->pCarrying = 0;
+
+    rv = gfmSprite_getVerticalVelocity(&vy, entity->pSelf);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    if (vy > 0) {
+        /* Set fall gravity */
+        gfmSprite_setVerticalAcceleration(entity->pSelf, entity->fallGravity);
+    }
+    else if (vy < 0) {
+        /* Set jump gravity */
+        gfmSprite_setVerticalAcceleration(entity->pSelf, entity->standGravity);
+    }
+
+    if (vy >= MAX_FALL_SPEED) {
+        gfmSprite_setVerticalVelocity(entity->pSelf, MAX_FALL_SPEED);
+    }
+
+    rv = gfmSprite_update(entity->pSelf, game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    erv = collideEntity(entity);
+    ASSERT(erv == ERR_OK, erv);
+
+    return ERR_OK;
 }
 
 /**
@@ -225,47 +287,75 @@ err postUpdateEntity(entityCtx *entity) {
     /* If the entity is being carried, collide against every static object and
      * then adjust its velocity */
     if (entity->pCarrying) {
-        double vy;
-        gfmRV rv;
-
-        /* Get carrying's VY (into vy) */
-        gfmSprite_getVerticalVelocity(&vy, entity->pCarrying);
-
-        /* TODO Potential bug: If the carrying sprite is also being carried, its
-         * collision must be resolved before this entity's collision */
-
-        /* Collide to actually set the vertical position */
-        gfmSprite_setFixed(entity->pCarrying);
-        gfmSprite_separateVertical(entity->pSelf, entity->pCarrying);
-        gfmSprite_setMovable(entity->pCarrying);
-
-        /* Update the entity vertical velocity (make it fall slightly faster and
-         * avoid getting separated from the object) */
-        if (vy >= TILES_TO_PX(2)) {
-            double ay;
-            gfmSprite_getVerticalAcceleration(&ay, entity->pCarrying);
-            vy = 1.06125 * (vy + ay * (game.elapsed * 0.001));
-        }
-        else if (vy >= -TILES_TO_PX(5)) {
-            vy = TILES_TO_PX(5);
-        }
-        else if (vy < 0) {
-            vy *= 0.125;
-            if (vy >= -TILES_TO_PX(2)) {
-                vy = TILES_TO_PX(1);
-            }
-        }
-        gfmSprite_setVerticalVelocity(entity->pSelf, vy);
-
-        /* Collide against static objects */
-        rv = gfmQuadtree_collideSprite(collision.pStaticQt, entity->pSelf);
-        if (rv == GFMRV_QUADTREE_OVERLAPED) {
-            return doCollide(collision.pStaticQt);
-        }
-        ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
-
-        entity->pCarrying = 0;
+        return handleCarrying(entity);
     }
+
+    return ERR_OK;
+}
+
+/**
+ * Draw the entity
+ *
+ * @param  [ in]entity   The entity
+ */
+err drawEntity(entityCtx *entity) {
+    gfmRV rv;
+    err erv;
+
+    rv = gfmSprite_draw(entity->pSelf, game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    if ((game.flags & FX_PRETTYRENDER) && entity->pCarrying) {
+        erv = drawEntity(entity->pCarrying);
+        ASSERT(erv == ERR_OK, erv);
+    }
+
+    return ERR_OK;
+}
+
+/**
+ * If the entity is offscreen, draw an 8x8 icon on its edge
+ *
+ * @param [ in]entity The entity
+ * @param [ in]tile   The index/tile of the entity's icon
+ */
+err drawEntityIcon(entityCtx *entity, int tile) {
+    gfmRV rv;
+    int ch, cw, cx, cy, flip, x, y;
+
+    if (gfmCamera_isSpriteInside(game.pCamera, entity->pSelf) == GFMRV_TRUE) {
+        return ERR_OK;
+    }
+
+    gfmCamera_getPosition(&cx, &cy, game.pCamera);
+    gfmCamera_getDimensions(&cw, &ch, game.pCamera);
+    gfmSprite_getCenter(&x, &y, entity->pSelf);
+    gfmSprite_getDirection(&flip, entity->pSelf);
+
+    /* Convert the sprite's position from world space to "clamped screen
+     * space" */
+    if (x < cx) {
+        x = 0;
+    }
+    else if (x > cx + cw) {
+        x = cw - 8;
+    }
+    else {
+        x -= cx;
+    }
+
+    if (y < cy) {
+        y = 0;
+    }
+    else if (y > cy + ch) {
+        y = ch - 8;
+    }
+    else {
+        y -= cy;
+    }
+
+    rv = gfm_drawTile(game.pCtx, gfx.pSset8x8, x, y, tile, flip);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     return ERR_OK;
 }
@@ -282,10 +372,10 @@ void setEntityDirection(entityCtx *entity) {
 
     gfmSprite_getHorizontalVelocity(&vx, entity->pSelf);
     if (vx > 0) {
-        gfmSprite_setDirection(entity->pSelf, 0);
+        gfmSprite_setDirection(entity->pSelf, DIR_RIGHT);
     }
     else if (vx < 0) {
-        gfmSprite_setDirection(entity->pSelf, 1);
+        gfmSprite_setDirection(entity->pSelf, DIR_LEFT);
     }
 }
 
@@ -308,12 +398,74 @@ void collideTwoEntities(entityCtx *entA, entityCtx *entB) {
         gfmSprite_getCurrentCollision(&bdir, entB->pSelf);
         if (adir & gfmCollision_down) {
             /* entA is above entB */
-            carryEntity(entA, entB->pSelf);
+            entA->pCarrying = entB;
         }
         else if (bdir & gfmCollision_down) {
             /* entB is above entA */
-            carryEntity(entB, entA->pSelf);
+            entB->pCarrying = entA;
         }
     }
 }
 
+/**
+ * Do some damage to the entity
+ *
+ * @param  [ in]entity The entity
+ * @param  [ in]damage How much damage was dealt
+ */
+void hitEntity(entityCtx *entity, int damage) {
+    /* TODO Accumulate damage before killing the entity */
+    entity->flags &= ~EF_ALIVE;
+}
+
+/**
+ * Kill the entity
+ *
+ * @param  [ in]entity The entity
+ */
+void killEntity(entityCtx *entity) {
+    entity->flags &= ~EF_ALIVE;
+}
+
+/**
+ * Flip the entity if it reaches an edge
+ *
+ * @param  [ in]entity The entity
+ * @param  [ in]vx     The entity's velocity
+ */
+void flipEntityOnEdge(entityCtx *entity, double vx) {
+    gfmRV rv;
+    int dir, h, type, w, x, y;
+
+    gfmSprite_getDimensions(&w, &h, entity->pSelf);
+    gfmSprite_getDirection(&dir, entity->pSelf);
+    gfmSprite_getPosition(&x, &y, entity->pSelf);
+    y += h;
+    if (dir == DIR_LEFT) {
+        x--;
+    }
+    else if (dir == DIR_RIGHT) {
+        x += w + 1;
+    }
+
+    rv = gfmTilemap_getTypeAt(&type, playstate.pMap, x, y);
+    if (rv == GFMRV_TILEMAP_NO_TILETYPE) {
+        if (dir == DIR_LEFT) {
+            /* Flip to move right */
+            gfmSprite_setHorizontalVelocity(entity->pSelf, vx);
+        }
+        else if (dir == DIR_RIGHT){
+            /* Flip to move left */
+            gfmSprite_setHorizontalVelocity(entity->pSelf, -vx);
+        }
+    }
+    else {
+        double curVx;
+
+        /* Otherwise, guarantee that it is moving */
+        gfmSprite_getHorizontalVelocity(&curVx, entity->pSelf);
+        if (curVx == 0) {
+            gfmSprite_setHorizontalVelocity(entity->pSelf, vx);
+        }
+    }
+}

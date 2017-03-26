@@ -1,0 +1,6 @@
+area invisible_wall 320 0 32 240
+area invisible_wall -32 0 32 240
+obj loadzone -16 168 32 32 [ dest , main_lab ] [ dir , left ] [ tgt_x , 35 ] [ tgt_y , 22 ]
+obj loadzone 304 104 32 32 [ dest , safe_jumps ] [ dir , right ] [ tgt_x , 3 ] [ tgt_y , 37 ]
+obj walky 136 200 8 8
+obj walky 112 96 8 8

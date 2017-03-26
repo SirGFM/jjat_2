@@ -8,12 +8,33 @@
 
 #include <base/error.h>
 
+#include <GFraMe/gfmHitbox.h>
 #include <GFraMe/gfmSprite.h>
 
 #include <stdint.h>
 
+/** Every sprite is facing right, by default. This enumeration reflects that to
+ * make the code mode readable */
+enum {
+    DIR_RIGHT = 0
+  , DIR_LEFT  = 1
+};
+
+enum enEntityFlag {
+    EF_ALIVE           = 0x00001
+  , EF_DEACTIVATE      = 0x00002
+  , EF_SKIP_COLLISION  = 0x00004
+  , EF_HAS_CARRIER     = 0x00008
+  , EF_AVAILABLEF_FLAG = 0x10000
+
+  , EF_AVAILABLE_BIT   = 16
+};
+typedef enum enEntityFlag entityFlag;
+
 /** Absolute speed when airborne sprites are set as 'floating' */
 #define FLOAT_SPEED     32
+/** Maximum speed at which entities may fall */
+#define MAX_FALL_SPEED  410
 
 /** Default grace time to while jumping is possible after leaving the ground */
 #define DEF_JUMP_GRACE  FRAMES_TO_MS(5)
@@ -51,7 +72,11 @@ struct stEntityCtx {
     /** The internal sprite */
     gfmSprite *pSelf;
     /** Sprite (if any) that is carrying this entity */
-    gfmSprite *pCarrying;
+    struct stEntityCtx *pCarrying;
+    /** Entity's sight, if any */
+    gfmHitbox *pSight;
+    /** Generic entity flags */
+    entityFlag flags;
     /** Time, in milliseconds, while jump may be pressed after leaving the
      * ground */
     int16_t jumpGrace;
@@ -131,9 +156,16 @@ err collideEntity(entityCtx *entity);
  * solves potential zipping through platforms.
  *
  * @param  [ in]entity   The entity
- * @param  [ in]carrying The sprite carrying the entity
+ * @param  [ in]carrying The carrying the entity
  */
-void carryEntity(entityCtx *entity, gfmSprite *carrying);
+void carryEntity(entityCtx *entity, entityCtx *carrying);
+
+/**
+ * Finalize updating the entity's physics
+ *
+ * @param  [ in]entity   The entity
+ */
+err preUpdateEntity(entityCtx *entity);
 
 /**
  * Post update an entity
@@ -144,6 +176,21 @@ void carryEntity(entityCtx *entity, gfmSprite *carrying);
  * @param  [ in]entity   The entity
  */
 err postUpdateEntity(entityCtx *entity);
+
+/**
+ * Draw the entity
+ *
+ * @param  [ in]entity   The entity
+ */
+err drawEntity(entityCtx *entity);
+
+/**
+ * If the entity is offscreen, draw an 8x8 icon on its edge
+ *
+ * @param [ in]entity The entity
+ * @param [ in]tile   The index/tile of the entity's icon
+ */
+err drawEntityIcon(entityCtx *entity, int tile);
 
 /**
  * Updates an entity's direction according to its velocity.
@@ -162,6 +209,29 @@ void setEntityDirection(entityCtx *entity);
  * @param  [ in]entB The other entity
  */
 void collideTwoEntities(entityCtx *entA, entityCtx *entB);
+
+/**
+ * Do some damage to the entity
+ *
+ * @param  [ in]entity The entity
+ * @param  [ in]damage How much damage was dealt
+ */
+void hitEntity(entityCtx *entity, int damage);
+
+/**
+ * Kill the entity
+ *
+ * @param  [ in]entity The entity
+ */
+void killEntity(entityCtx *entity);
+
+/**
+ * Flip the entity if it reaches an edge
+ *
+ * @param  [ in]entity The entity
+ * @param  [ in]vx     The entity's velocity
+ */
+void flipEntityOnEdge(entityCtx *entity, double vx);
 
 #endif /* __JJAT2_ENTITY_H__ */
 

@@ -101,6 +101,10 @@ err setupGame(int argc, char *argv[]) {
         game.flags |= AC_BOTH;
     }
 
+    if (!(config.flags & CFG_SIMPLEDRAW)) {
+        game.flags |= FX_PRETTYRENDER;
+    }
+
     if (config.pKeyMap) {
         erv = configureInput(config.pKeyMap, strlen(config.pKeyMap));
         ASSERT(erv == ERR_OK, erv);

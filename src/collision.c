@@ -8,10 +8,14 @@
 #include <base/game.h>
 #include <conf/type.h>
 
+#include <jjat2/checkpoint.h>
 #include <jjat2/entity.h>
+#include <jjat2/fx_group.h>
 #include <jjat2/gunny.h>
-#include <jjat2/swordy.h>
+#include <jjat2/leveltransition.h>
+#include <jjat2/playstate.h>
 #include <jjat2/teleport.h>
+#include <jjat2/enemies/g_walky.h>
 
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gfmObject.h>
@@ -31,6 +35,8 @@ struct stCollisionNode {
     int type;
 };
 typedef struct stCollisionNode collisionNode;
+
+#define SPIKE_OFFSET    4
 
 /** Merge two types into a single one */
 #define MERGE_TYPES(type1, type2) \
@@ -56,6 +62,10 @@ typedef struct stCollisionNode collisionNode;
     case (MERGE_TYPES(type2, type1)): \
         fallthrough = 1;
 
+/** Collide against self type */
+#define SELFCASE(type) \
+    case (MERGE_TYPES(type, type)):
+
 /** Ignore collision with entities of the same type */
 #define IGNORESELF(type) \
     case (MERGE_TYPES(type, type)):
@@ -76,6 +86,24 @@ static void _getSubtype(collisionNode *pNode) {
     if (pNode->type == gfmType_sprite && pNode->pChild) {
         pNode->pSprite = (gfmSprite*)pNode->pChild;
         gfmSprite_getChild(&pNode->pChild, &pNode->type, pNode->pSprite);
+    }
+}
+
+/**
+ * Remove the bullet and spawn an explosion in its place
+ *
+ * @param  [ in]bullet The bullet that collided
+ */
+static void _explodeStar(collisionNode *bullet) {
+    gfmSprite *pSpr;
+    int x, y;
+
+    gfmSprite_getPosition(&x, &y, bullet->pSprite);
+    gfmGroup_removeNode((gfmGroupNode*)bullet->pChild);
+    pSpr = spawnFx(x, y, 4/*w*/, 4/*h*/, 0/*dir*/, 250/*ttl*/, FX_STAR_EXPLOSION
+            , T_FX);
+    if (pSpr) {
+        gfmSprite_setOffset(pSpr, -1, -1);
     }
 }
 
@@ -112,21 +140,76 @@ err doCollide(gfmQuadtreeRoot *pQt) {
         isFirstCase = 0;
         fallthrough = 0;
         switch (MERGE_TYPES(node1.type, node2.type)) {
-/*== PLAYER'S COLLISION ======================================================*/
-            CASE(T_FLOOR, T_GUNNY)
-            CASE(T_FLOOR, T_SWORDY) {
-                collisionNode *player;
+/*== COLLISION AGAINST DUMMY =================================================*/
+            CASE(T_SWORDY, T_DUMMY_GUNNY)
+            CASE(T_GUNNY, T_DUMMY_SWORDY) {
+                gfmObject *pPlayer, *pDummy;
+                int playerY, dummyY;
+
                 if (isFirstCase) {
-                    player = &node2;
+                    pPlayer = node1.pObject;
+                    pDummy = node2.pObject;
                 }
                 else {
-                    player = &node1;
+                    pPlayer = node2.pObject;
+                    pDummy = node1.pObject;
+                }
+                gfmObject_getVerticalPosition(&playerY, pPlayer);
+                gfmObject_getVerticalPosition(&dummyY, pDummy);
+
+                gfmObject_justOverlaped(node1.pObject, node2.pObject);
+                if (playerY < dummyY) {
+                    gfmCollision dir;
+
+                    /* Only separate the player if it's above the dummy */
+                    gfmObject_separateVertical(node1.pObject, node2.pObject);
+                    gfmObject_getCurrentCollision(&dir, pPlayer);
+                    if (dir & gfmCollision_down) {
+                        gfmObject_setVerticalVelocity(pPlayer, 0);
+                    }
+                }
+            } break;
+/*== CHANGE MAP ==============================================================*/
+            CASE(T_LOADZONE, T_DUMMY_SWORDY)
+            CASE(T_LOADZONE, T_DUMMY_GUNNY)
+            CASE(T_LOADZONE, T_GUNNY)
+            CASE(T_LOADZONE, T_SWORDY) {
+                /* Setup level transition for the playstate */
+                if (isFirstCase) {
+                    onHitLoadzone(node2.type,
+                            (leveltransitionData*)node1.pChild);
+                }
+                else {
+                    onHitLoadzone(node1.type,
+                            (leveltransitionData*)node2.pChild);
+                }
+            } break;
+/*== ENVIRONMENT'S COLLISION =================================================*/
+            CASE(T_SPIKE, T_EN_TURRET)
+            CASE(T_FLOOR, T_EN_SPIKY)
+            CASE(T_FLOOR, T_EN_WALKY)
+            CASE(T_FLOOR, T_EN_TURRET)
+            CASE(T_FLOOR, T_EN_G_WALKY)
+            CASE(T_FLOOR, T_GUNNY)
+            CASE(T_FLOOR, T_SWORDY)
+            CASE(T_FLOOR_NOTP, T_EN_SPIKY)
+            CASE(T_FLOOR_NOTP, T_EN_WALKY)
+            CASE(T_FLOOR_NOTP, T_EN_TURRET)
+            CASE(T_FLOOR_NOTP, T_EN_G_WALKY)
+            CASE(T_FLOOR_NOTP, T_GUNNY)
+            CASE(T_FLOOR_NOTP, T_SWORDY) {
+                collisionNode *entity;
+                if (isFirstCase) {
+                    entity = &node2;
+                }
+                else {
+                    entity = &node1;
                 }
                 rv = gfmObject_justOverlaped(node1.pObject, node2.pObject);
                 if (rv == GFMRV_TRUE) {
                     gfmCollision dir;
 
-                    gfmObject_getCurrentCollision(&dir, player->pObject);
+                    gfmObject_getCurrentCollision(&dir, entity->pObject);
 
                     if (!((dir & gfmCollision_up) && (dir & gfmCollision_hor))) {
                         gfmObject_collide(node1.pObject, node2.pObject);
@@ -134,75 +217,222 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                     else {
                         /* Fix colliding against corners when there are two
                          * separated objects in a wall */
-                        gfmObject_separateHorizontal(node1.pObject, node2.pObject);
+                        gfmObject_separateHorizontal(node1.pObject
+                                , node2.pObject);
                     }
 
                     if (dir & gfmCollision_down) {
-                        gfmObject_setVerticalVelocity(player->pObject, 0);
-                        /* Corner case!! If the player would get stuck on a
+                        gfmObject_setVerticalVelocity(entity->pObject, 0);
+                        /* Corner case!! If the entity would get stuck on a
                          * corner, push 'em toward the platform */
                         if (dir & gfmCollision_left) {
                             int x, y;
-                            gfmObject_getPosition(&x, &y, player->pObject);
-                            gfmObject_setPosition(player->pObject, x - 1
+                            gfmObject_getPosition(&x, &y, entity->pObject);
+                            gfmObject_setPosition(entity->pObject, x - 1
                                     , y - 1);
                         }
                         else if (dir & gfmCollision_right) {
                             int x, y;
-                            gfmObject_getPosition(&x, &y, player->pObject);
-                            gfmObject_setPosition(player->pObject, x + 1
+                            gfmObject_getPosition(&x, &y, entity->pObject);
+                            gfmObject_setPosition(entity->pObject, x + 1
                                     , y - 1);
                         }
                     }
                     else if ((dir & gfmCollision_up) && !(dir & gfmCollision_hor)) {
                         int y;
-                        gfmObject_setVerticalVelocity(player->pObject, 0);
-                        gfmObject_getVerticalPosition(&y, player->pObject);
-                        gfmObject_setVerticalPosition(player->pObject, y + 1);
+                        gfmObject_setVerticalVelocity(entity->pObject, 0);
+                        gfmObject_getVerticalPosition(&y, entity->pObject);
+                        gfmObject_setVerticalPosition(entity->pObject, y + 1);
 
                     }
                 } /* if (rv == GFMRV_TRUE) */
 #if  defined(JJATENGINE)
                 else if (collision.flags & CF_FIXTELEPORT) {
-                    collisionNode *floor;
-                    int fy, py, h;
-
                     /* Entity was (possibly) just teleported into the ground.
                      * Manually check and fix it */
-                    if (isFirstCase) {
-                        floor = &node1;
-                    }
-                    else {
-                        floor = &node2;
-                    }
+                    if (gfmObject_isOverlaping(node1.pObject, node2.pObject)
+                            == GFMRV_TRUE) {
+                        collisionNode *floor;
+                        int fh, fy, ph, py;
 
-                    gfmObject_getVerticalPosition(&fy, floor->pObject);
-                    gfmObject_getVerticalPosition(&py, player->pObject);
-                    gfmObject_getHeight(&h, player->pObject);
+                        if (isFirstCase) {
+                            floor = &node1;
+                        }
+                        else {
+                            floor = &node2;
+                        }
 
-                    if (py + h >= fy) {
-                        gfmObject_setVerticalPosition(player->pObject, fy - h);
+                        gfmObject_getVerticalPosition(&fy, floor->pObject);
+                        gfmObject_getHeight(&fh, floor->pObject);
+                        gfmObject_getVerticalPosition(&py, entity->pObject);
+                        gfmObject_getHeight(&ph, entity->pObject);
+
+                        if (py >= fy) {
+                            gfmObject_setVerticalPosition(entity->pObject, fy + fh);
+                        }
+                        else if (py + ph <= fy + fh) {
+                            gfmObject_setVerticalPosition(entity->pObject, fy - ph);
+                        }
                     }
                 }
 #endif  /* JJATENGINE */
                 rv = GFMRV_OK;
             } break;
-            CASE(T_SWORDY, T_GUNNY) {
-                swordyCtx *swordy;
-                gunnyCtx *gunny;
+            CASE(T_SPIKE, T_EN_SPIKY)
+            CASE(T_SPIKE, T_EN_WALKY)
+            CASE(T_SPIKE, T_EN_G_WALKY)
+            CASE(T_SPIKE, T_GUNNY)
+            CASE(T_SPIKE, T_SWORDY) {
+                collisionNode *entity;
+                collisionNode *spike;
+                gfmCollision hdir, vdir;
+                int py, sy, ph;
+
                 if (isFirstCase) {
-                    swordy = (swordyCtx*)node1.pChild;
-                    gunny = (gunnyCtx*)node2.pChild;
+                    entity = &node2;
+                    spike = &node1;
                 }
                 else {
-                    gunny = (gunnyCtx*)node1.pChild;
-                    swordy = (swordyCtx*)node2.pChild;
+                    entity = &node1;
+                    spike = &node2;
                 }
 
-                collideTwoEntities(&swordy->entity, &gunny->entity);
+                gfmObject_isOverlaping(node1.pObject, node2.pObject);
+                gfmObject_getCurrentCollision(&vdir, entity->pObject);
+                gfmObject_justOverlaped(node1.pObject, node2.pObject);
+                gfmObject_getCurrentCollision(&hdir, entity->pObject);
+
+                gfmObject_getVerticalPosition(&py, entity->pObject);
+                gfmObject_getHeight(&ph, entity->pObject);
+                gfmObject_getVerticalPosition(&sy, spike->pObject);
+
+
+                if (py + ph < sy + SPIKE_OFFSET) {
+                    /* Does nothing unless within the collideable aread */
+                }
+                else if (hdir & gfmCollision_hor) {
+                    /* Collide horizontally to avoid clipping */
+                    gfmObject_separateHorizontal(node1.pObject
+                            , node2.pObject);
+                }
+                else if (vdir & gfmCollision_down) {
+                    /* Kill the entity */
+                    killEntity((entityCtx*)entity->pChild);
+                }
+
                 rv = GFMRV_OK;
             } break;
+            CASE(T_FLOOR_NOTP, T_EN_G_WALKY_ATK)
+            CASE(T_FLOOR, T_EN_G_WALKY_ATK) {
+                if (isFirstCase) {
+                    _explodeStar(&node2);
+                }
+                else {
+                    _explodeStar(&node1);
+                }
+                rv = GFMRV_OK;
+                collision.flags |= CF_SKIP;
+            } break;
+            CASE(T_CHECKPOINT, T_GUNNY)
+            CASE(T_CHECKPOINT, T_SWORDY) {
+                collisionNode *checkpoint;
+                gfmSprite *pSpr;
+                int h, w, x, y;
+                err erv;
+
+                if (isFirstCase) {
+                    checkpoint = &node1;
+                }
+                else {
+                    checkpoint = &node2;
+                }
+
+                gfmObject_getPosition(&x, &y, checkpoint->pObject);
+                gfmObject_getDimensions(&w, &h, checkpoint->pObject);
+
+                /* Set the checkpoint */
+                erv = setCheckpoint((leveltransitionData*)checkpoint->pChild);
+                ASSERT(erv == ERR_OK, erv);
+
+                pSpr = spawnFx(x, y, w, h, 0/*dir*/, checkpointSavedDuration
+                        , FX_CHECKPOINT_SAVED, T_FX);
+                ASSERT(pSpr != 0, ERR_BUFFERTOOSMALL);
+
+                gfmObject_setType(checkpoint->pObject, T_FX);
+            } break;
+/*== ENTITIES'S COLLISION ====================================================*/
+            SELFCASE(T_EN_SPIKY)
+            SELFCASE(T_EN_WALKY)
+            SELFCASE(T_EN_G_WALKY)
+            SELFCASE(T_EN_TURRET)
+            CASE(T_EN_SPIKY, T_EN_TURRET)
+            CASE(T_EN_G_WALKY, T_EN_TURRET)
+            CASE(T_EN_WALKY, T_EN_TURRET)
+            CASE(T_SWORDY, T_EN_TURRET)
+            CASE(T_GUNNY, T_EN_TURRET)
+            CASE(T_EN_G_WALKY, T_EN_SPIKY)
+            CASE(T_EN_WALKY, T_EN_G_WALKY)
+            CASE(T_SWORDY, T_EN_G_WALKY)
+            CASE(T_GUNNY, T_EN_G_WALKY)
+            CASE(T_SWORDY, T_EN_WALKY)
+            CASE(T_GUNNY, T_EN_WALKY)
+            CASE(T_SWORDY, T_GUNNY) {
+                entityCtx *entA;
+                entityCtx *entB;
+
+                entA = (entityCtx*)node1.pChild;
+                entB = (entityCtx*)node2.pChild;
+
+                if (entA != entB) {
+                    collideTwoEntities(entA, entB);
+                }
+                rv = GFMRV_OK;
+            } break;
+            CASE(T_EN_WALKY, T_EN_SPIKY)
+            CASE(T_SWORDY, T_EN_SPIKY)
+            CASE(T_GUNNY, T_EN_SPIKY) {
+                entityCtx *pPlayer, *pEnemy;
+                int damage;
+
+                if (isFirstCase) {
+                    pPlayer = (entityCtx*)node1.pChild;
+                    pEnemy = (entityCtx*)node2.pChild;
+                    damage = (node2.type >> T_BITS);
+                }
+                else {
+                    pPlayer = (entityCtx*)node2.pChild;
+                    pEnemy = (entityCtx*)node1.pChild;
+                    damage = (node1.type >> T_BITS);
+                }
+
+                rv = gfmObject_justOverlaped(node1.pObject, node2.pObject);
+                if (rv == GFMRV_TRUE) {
+                    gfmCollision col;
+                    int dir;
+
+                    gfmSprite_getCollision(&col, pEnemy->pSelf);
+                    gfmSprite_getDirection(&dir, pEnemy->pSelf);
+
+                    if ((dir == DIR_RIGHT && (col & gfmCollision_right))
+                            || (dir == DIR_LEFT && (col & gfmCollision_left))) {
+                        hitEntity(pPlayer, damage);
+                        collision.flags |= CF_SKIP;
+                    }
+                }
+                rv = GFMRV_OK;
+            } break;
+            CASE(T_EN_G_WALKY_VIEW, T_SWORDY)
+            CASE(T_EN_G_WALKY_VIEW, T_GUNNY)
+            CASE(T_EN_G_WALKY_VIEW, T_EN_WALKY) {
+                if (isFirstCase) {
+                    triggerGreenWalkyAttack((entityCtx*)node1.pChild);
+                }
+                else {
+                    triggerGreenWalkyAttack((entityCtx*)node2.pChild);
+                }
+            } break;
 /*== SWORDY'S ATTACK =========================================================*/
+            CASE(T_ATK_SWORD, T_EN_G_WALKY_ATK)
             CASE(T_ATK_SWORD, T_TEL_BULLET) {
                 /* Reflect the bullet */
                 gfmSprite *pBullet;
@@ -224,13 +454,58 @@ err doCollide(gfmQuadtreeRoot *pQt) {
 
                 collision.flags |= CF_SKIP;
             } break;
+            CASE(T_ATK_SWORD, T_EN_SPIKY)
+            CASE(T_ATK_SWORD, T_EN_WALKY) {
+                gfmSprite *pSword;
+                entityCtx *walky;
+
+                if (isFirstCase) {
+                    walky = (entityCtx*)node2.pChild;
+                    pSword = node1.pSprite;
+                }
+                else {
+                    walky = (entityCtx*)node1.pChild;
+                    pSword = node2.pSprite;
+                }
+
+                killEntity(walky);
+                gfmSprite_setType(pSword, T_SWORD_FX);
+
+                collision.flags |= CF_SKIP;
+            } break;
+            CASE(T_ATK_SWORD, T_EN_G_WALKY) {
+                collisionNode *pSword;
+                entityCtx *gWalky;
+
+                if (isFirstCase) {
+                    gWalky = (entityCtx*)node2.pChild;
+                    pSword = &node1;
+                }
+                else {
+                    gWalky = (entityCtx*)node1.pChild;
+                    pSword = &node2;
+                }
+
+                gfmObject_justOverlaped(node1.pObject, node2.pObject);
+                if (onGreenWalkyAttacked(gWalky, pSword->pObject) == ERR_OK) {
+                    killEntity(gWalky);
+                    gfmSprite_setType(pSword->pSprite, T_SWORD_FX);
+
+                    collision.flags |= CF_SKIP;
+                }
+            } break;
             IGNORE(T_ATK_SWORD, T_SWORDY)
             IGNORE(T_ATK_SWORD, T_GUNNY)
             IGNORE(T_ATK_SWORD, T_FLOOR)
+            IGNORE(T_ATK_SWORD, T_FLOOR_NOTP)
             IGNORE(T_ATK_SWORD, T_FX)
+            IGNORE(T_ATK_SWORD, T_EN_TURRET)
+            IGNORE(T_ATK_SWORD, T_SPIKE)
             IGNORESELF(T_ATK_SWORD)
             break;
 /*== GUNNY'S BULLET ==========================================================*/
+            CASE(T_TEL_BULLET, T_EN_SPIKY)
+            CASE(T_TEL_BULLET, T_EN_WALKY)
             CASE(T_TEL_BULLET, T_SWORDY) {
                 gfmGroupNode *pNode;
                 entityCtx *pEntity;
@@ -246,12 +521,41 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 }
 
                 /* Check if visible */
-                if (GFMRV_TRUE == gfm_isSpriteInsideCamera(game.pCtx, pEntity->pSelf)) {
+                if (GFMRV_TRUE == gfm_isSpriteInsideCamera(game.pCtx
+                            , pEntity->pSelf)) {
                     erv = teleporterTargetEntity(pEntity);
                     ASSERT(erv == ERR_OK, erv);
                 }
                 rv = gfmGroup_removeNode(pNode);
                 ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+                collision.flags |= CF_SKIP;
+            } break;
+            CASE(T_TEL_BULLET, T_EN_G_WALKY) {
+                collisionNode *pNode;
+                entityCtx *pGWalky;
+                err erv;
+
+                if (isFirstCase) {
+                    pNode = &node1;
+                    pGWalky = (entityCtx*)node2.pChild;
+                }
+                else {
+                    pNode = &node2;
+                    pGWalky = (entityCtx*)node1.pChild;
+                }
+
+                gfmObject_justOverlaped(node1.pObject, node2.pObject);
+                if (onGreenWalkyAttacked(pGWalky, pNode->pObject) == ERR_OK) {
+                    /* Check if visible */
+                    if (GFMRV_TRUE == gfm_isSpriteInsideCamera(game.pCtx
+                                , pGWalky->pSelf)) {
+                        erv = teleporterTargetEntity(pGWalky);
+                        ASSERT(erv == ERR_OK, erv);
+                    }
+                    rv = gfmGroup_removeNode((gfmGroupNode*)pNode->pChild);
+                    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+                }
 
                 collision.flags |= CF_SKIP;
             } break;
@@ -307,24 +611,185 @@ err doCollide(gfmQuadtreeRoot *pQt) {
                 ASSERT(rv == GFMRV_OK, ERR_GFMERR);
                 collision.flags |= CF_SKIP;
             } break;
+            CASE(T_TEL_BULLET, T_EN_TURRET)
+            CASE(T_TEL_BULLET, T_SPIKE)
+            CASE(T_TEL_BULLET, T_FLOOR_NOTP) {
+                gfmGroupNode *pNode;
+
+                if (isFirstCase) {
+                    pNode = (gfmGroupNode*)node1.pChild;
+                }
+                else {
+                    pNode = (gfmGroupNode*)node2.pChild;
+                }
+
+                /* TODO Play vanish animation */
+
+                rv = gfmGroup_removeNode(pNode);
+                ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+                collision.flags |= CF_SKIP;
+            } break;
             IGNORE(T_TEL_BULLET, T_GUNNY)
             IGNORE(T_TEL_BULLET, T_FX)
             IGNORESELF(T_TEL_BULLET)
             break;
+/*== DAMAGE TO ENTITY ========================================================*/
+            CASE(T_SWORDY, T_EN_G_WALKY_ATK)
+            CASE(T_GUNNY, T_EN_G_WALKY_ATK)
+            CASE(T_EN_SPIKY, T_EN_G_WALKY_ATK)
+            CASE(T_EN_WALKY, T_EN_G_WALKY_ATK) {
+                entityCtx *pEnt;
+                int damage;
+
+                /* Ugly hack: the damage should be stored on the unused part of
+                 * the type */
+                if (isFirstCase) {
+                    pEnt = (entityCtx*)node1.pChild;
+                    damage = node2.type;
+                    _explodeStar(&node2);
+                }
+                else {
+                    pEnt = (entityCtx*)node2.pChild;
+                    damage = node1.type;
+                    _explodeStar(&node1);
+                }
+
+                damage >>= T_BITS;
+                hitEntity(pEnt, damage);
+            } break;
+            CASE(T_EN_G_WALKY, T_EN_G_WALKY_ATK) {
+                entityCtx *pEnt;
+                gfmObject *pObject;
+                int damage;
+
+                /* Ugly hack: the damage should be stored on the unused part of
+                 * the type */
+                if (isFirstCase) {
+                    pEnt = (entityCtx*)node1.pChild;
+                    pObject = node2.pObject;
+                    damage = node2.type;
+                    _explodeStar(&node2);
+                }
+                else {
+                    pEnt = (entityCtx*)node2.pChild;
+                    pObject = node1.pObject;
+                    damage = node1.type;
+                    _explodeStar(&node1);
+                }
+
+                if (onGreenWalkyAttacked(pEnt, pObject) == ERR_OK) {
+                    damage >>= T_BITS;
+                    hitEntity(pEnt, damage);
+                }
+            } break;
+            CASE(T_EN_TURRET, T_EN_G_WALKY_ATK) {
+                if (isFirstCase) {
+                    _explodeStar(&node2);
+                }
+                else {
+                    _explodeStar(&node1);
+                }
+            } break;
 /*== SWORDY'S ATTACK TRAIL (AFTER HITTING ANYTHING) ==========================*/
+            IGNORE(T_SWORD_FX, T_EN_SPIKY)
+            IGNORE(T_SWORD_FX, T_EN_WALKY)
+            IGNORE(T_SWORD_FX, T_EN_G_WALKY)
+            IGNORE(T_SWORD_FX, T_EN_G_WALKY_ATK)
+            IGNORE(T_SWORD_FX, T_EN_G_WALKY_VIEW)
+            IGNORE(T_SWORD_FX, T_EN_TURRET)
             IGNORE(T_SWORD_FX, T_SWORDY)
             IGNORE(T_SWORD_FX, T_GUNNY)
             IGNORE(T_SWORD_FX, T_FLOOR)
+            IGNORE(T_SWORD_FX, T_FLOOR_NOTP)
             IGNORE(T_SWORD_FX, T_FX)
             IGNORE(T_SWORD_FX, T_ATK_SWORD)
             IGNORE(T_SWORD_FX, T_TEL_BULLET)
+            IGNORE(T_SWORD_FX, T_SPIKE)
             IGNORESELF(T_SWORD_FX)
             break;
 /*== COLLISION-LESS EFFECTS ==================================================*/
+            IGNORE(T_EN_G_WALKY_VIEW, T_FX)
+            IGNORE(T_EN_G_WALKY_VIEW, T_ATK_SWORD)
+            IGNORE(T_EN_G_WALKY_VIEW, T_TEL_BULLET)
+            IGNORE(T_EN_G_WALKY_VIEW, T_EN_G_WALKY_ATK)
+            IGNORE(T_EN_G_WALKY_VIEW, T_EN_G_WALKY)
+            IGNORE(T_EN_G_WALKY_VIEW, T_EN_SPIKY)
+            IGNORE(T_EN_G_WALKY_VIEW, T_FLOOR)
+            IGNORE(T_EN_G_WALKY_VIEW, T_FLOOR_NOTP)
+            IGNORE(T_EN_G_WALKY_VIEW, T_SPIKE)
+            IGNORESELF(T_EN_G_WALKY_VIEW)
+            IGNORE(T_CHECKPOINT, T_FLOOR)
+            IGNORE(T_CHECKPOINT, T_FLOOR_NOTP)
+            IGNORE(T_CHECKPOINT, T_TEL_BULLET)
+            IGNORE(T_CHECKPOINT, T_ATK_SWORD)
+            IGNORE(T_CHECKPOINT, T_SWORD_FX)
+            IGNORE(T_CHECKPOINT, T_FX)
+            IGNORE(T_CHECKPOINT, T_EN_G_WALKY_ATK)
+            IGNORE(T_CHECKPOINT, T_EN_G_WALKY)
+            IGNORE(T_CHECKPOINT, T_EN_WALKY)
+            IGNORE(T_CHECKPOINT, T_EN_SPIKY)
+            IGNORE(T_EN_G_WALKY_ATK, T_SPIKE)
+            IGNORE(T_EN_G_WALKY_ATK, T_TEL_BULLET)
+            IGNORE(T_LOADZONE, T_FX)
+            IGNORE(T_LOADZONE, T_SWORD_FX)
+            IGNORE(T_LOADZONE, T_ATK_SWORD)
+            IGNORE(T_LOADZONE, T_TEL_BULLET)
+            IGNORE(T_LOADZONE, T_EN_G_WALKY_ATK)
+            IGNORE(T_LOADZONE, T_EN_G_WALKY)
+            IGNORE(T_LOADZONE, T_EN_WALKY)
+            IGNORE(T_LOADZONE, T_EN_SPIKY)
+            IGNORE(T_LOADZONE, T_FLOOR)
+            IGNORE(T_LOADZONE, T_FLOOR_NOTP)
+            IGNORE(T_LOADZONE, T_SPIKE)
+            IGNORE(T_FX, T_EN_G_WALKY_ATK)
+            IGNORE(T_FX, T_EN_G_WALKY)
+            IGNORE(T_FX, T_EN_WALKY)
+            IGNORE(T_FX, T_EN_SPIKY)
+            IGNORE(T_FX, T_EN_TURRET)
             IGNORE(T_FX, T_SWORDY)
             IGNORE(T_FX, T_GUNNY)
             IGNORE(T_FX, T_FLOOR)
+            IGNORE(T_FX, T_FLOOR_NOTP)
+            IGNORE(T_FX, T_SPIKE)
             IGNORESELF(T_FX)
+            IGNORESELF(T_EN_G_WALKY_ATK)
+
+            IGNORE(T_HAZARD, T_DUMMY_SWORDY)
+            IGNORE(T_PLAYER, T_DUMMY_SWORDY)
+            IGNORE(T_FLOOR, T_DUMMY_SWORDY)
+            IGNORE(T_ENEMY, T_DUMMY_SWORDY)
+            IGNORE(T_FX, T_DUMMY_SWORDY)
+            IGNORE(T_FLOOR_NOTP, T_DUMMY_SWORDY)
+            IGNORE(T_ATK_SWORD, T_DUMMY_SWORDY)
+            IGNORE(T_TEL_BULLET, T_DUMMY_SWORDY)
+            IGNORE(T_CHECKPOINT, T_DUMMY_SWORDY)
+            IGNORE(T_SPIKE, T_DUMMY_SWORDY)
+            IGNORE(T_EN_WALKY, T_DUMMY_SWORDY)
+            IGNORE(T_EN_G_WALKY, T_DUMMY_SWORDY)
+            IGNORE(T_EN_G_WALKY_ATK, T_DUMMY_SWORDY)
+            IGNORE(T_EN_G_WALKY_VIEW, T_DUMMY_SWORDY)
+            IGNORE(T_EN_SPIKY, T_DUMMY_SWORDY)
+            IGNORE(T_EN_TURRET, T_DUMMY_SWORDY)
+            IGNORE(T_SWORD_FX, T_DUMMY_SWORDY)
+
+            IGNORE(T_HAZARD, T_DUMMY_GUNNY)
+            IGNORE(T_PLAYER, T_DUMMY_GUNNY)
+            IGNORE(T_FLOOR, T_DUMMY_GUNNY)
+            IGNORE(T_ENEMY, T_DUMMY_GUNNY)
+            IGNORE(T_FX, T_DUMMY_GUNNY)
+            IGNORE(T_FLOOR_NOTP, T_DUMMY_GUNNY)
+            IGNORE(T_ATK_SWORD, T_DUMMY_GUNNY)
+            IGNORE(T_TEL_BULLET, T_DUMMY_GUNNY)
+            IGNORE(T_CHECKPOINT, T_DUMMY_GUNNY)
+            IGNORE(T_SPIKE, T_DUMMY_GUNNY)
+            IGNORE(T_EN_WALKY, T_DUMMY_GUNNY)
+            IGNORE(T_EN_G_WALKY, T_DUMMY_GUNNY)
+            IGNORE(T_EN_G_WALKY_ATK, T_DUMMY_GUNNY)
+            IGNORE(T_EN_G_WALKY_VIEW, T_DUMMY_GUNNY)
+            IGNORE(T_EN_SPIKY, T_DUMMY_GUNNY)
+            IGNORE(T_EN_TURRET, T_DUMMY_GUNNY)
+            IGNORE(T_SWORD_FX, T_DUMMY_GUNNY)
+
             break;
             /* On Linux, a SIGINT is raised any time a unhandled collision
              * happens. When debugging, GDB will stop here and allow the user to

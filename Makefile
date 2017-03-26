@@ -13,7 +13,7 @@
 # CONFIGURABLE VARIABLES
 #=======================================================================
 # Define the list of subdirectories (which exist within src/)
-  SUBDIRLIST := base jjat2
+  SUBDIRLIST := base jjat2 jjat2/enemies
 
 # Define every object required by compilation
   OBJS := \
@@ -27,14 +27,23 @@
          base/static.o \
          base/setup.o \
          jjat2/camera.o \
+         jjat2/checkpoint.o \
          jjat2/dictionary.o \
+         jjat2/enemy.o \
          jjat2/entity.o \
          jjat2/fx_group.o \
          jjat2/gunny.o \
+         jjat2/hitbox.o \
+         jjat2/leveltransition.o \
          jjat2/playstate.o \
          jjat2/static.o \
          jjat2/swordy.o \
-         jjat2/teleport.o
+         jjat2/teleport.o \
+         jjat2/ui.o \
+         jjat2/enemies/g_walky.o \
+         jjat2/enemies/spiky.o \
+         jjat2/enemies/turret.o \
+         jjat2/enemies/walky.o
 
 # Define the target name
   TARGET := game
@@ -82,6 +91,9 @@
     CFLAGS := $(CFLAGS) -I$(GFRAME_INCLUDES)
   endif
   CFLAGS := $(CFLAGS) -I"./include/" -Wall
+
+  # TODO Uncomment to enable the background
+  #CFLAGS := $(CFLAGS) -DJJAT_ENABLE_BACKGROUND
 
   # Ugly hack: I'll put everything specific to the JJAT engine within these #ifdefs
   CFLAGS := $(CFLAGS) -DJJATENGINE

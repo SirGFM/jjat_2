@@ -16,8 +16,9 @@
 #if defined(JJATENGINE)
  *  --syncctr | -c: Set character control as synchronous (i.e., move a single character at a time)
  *  --keymap | -k : Remap all keys to the specified configuration
+ *  --simpledraw | -s: Slightly speed up drawing on some parts
 #endif JJATENGINE
- *  --save | -s: *TODO* Save the current configuration
+ *  --save | -S: *TODO* Save the current configuration
  */
 #include <base/cmdParse.h>
 #include <base/error.h>
@@ -46,9 +47,10 @@ static void usage() {
 #if defined(JJATENGINE)
     LOG("  --syncctr | -c: Set character control as synchronous\n"
             "                  (i.e., move a single character at a time)\n");
-    LOG("  --keymap | -k : Remap all keys to the specified configuration\n");
+    LOG("  --keymap | -k: Remap all keys to the specified configuration\n");
+    LOG("  --simpledraw | -s: Slightly speed up drawing on some parts\n");
 #endif /* JJATENGINE */
-    LOG("  --save | -s: *TODO* Save the current configuration\n");
+    LOG("  --save | -S: *TODO* Save the current configuration\n");
     LOG("  --help | -h: Print usage\n");
 }
 
@@ -169,8 +171,11 @@ err cmdParse(configCtx *pConfig, int argc, char *argv[]) {
 
             pConfig->pKeyMap = GET_PARAM();
         }
+        IS_FLAG("--simpledraw ", "-s") {
+            pConfig->flags |= CFG_SIMPLEDRAW;
+        }
 #endif /* JJATENGINE */
-        IS_FLAG("--save", "-s") {
+        IS_FLAG("--save", "-S") {
             doSave = 1;
         }
         IS_FLAG("--list", "-l") {
