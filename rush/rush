@@ -32,6 +32,7 @@ CHROOT=${1}
 ARCH=${2}
 my_print "Building for ${ARCH} on ${CHROOT}"
 
+RUSH_DIR=`dirname ${0}`
 BASE_DIR=/run/ramdisk
 
 # Work directory within the temporary environment
@@ -103,7 +104,7 @@ my_print "Copying everything to the destination"
 find ${WORK_DIR}/bin -name game -exec cp {} deploy/${ARCH}/ \;
 check_error $? "Copy built bin into destination"
 # Update the assets
-find assets -exec rush/update_asset {} deploy/${ARCH} \;
+find assets -exec ${RUSH_DIR}/update_asset {} deploy/${ARCH} \;
 
 # Remove any ligering built file (since chroot runs as uid 0)
 my_print "Final cleaning (on chroot: ${CHROOT_WORK_DIR})..."
