@@ -194,7 +194,7 @@ obj/$(OS)_$(MODE)/%.d: %.c
 
 # Rule for generating the icon
 $(WINICON): assets/icon.rc
-	windres assets/icon.rc $(WINICON)
+	$(WINDRES) assets/icon.rc $(WINICON)
 
 clean: __clean mkdirs
 
