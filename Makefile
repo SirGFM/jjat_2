@@ -49,11 +49,10 @@
   TARGET := game
 
 # Define the generated icon
-#      Required files:
-#        - assets/icon.ico
-#        - assets/icon.rc
-# TODO Uncomment this to add an icon to the game
-#  WINICON := assets/icon.o
+  WINICON := assets/icon.o
+  ifeq ($(OS), Win)
+    ICON := $(WINICON)
+  endif
 
 # List every header file
   HEADERS := $(shell find include/ -name *.h)
@@ -191,10 +190,10 @@ obj/$(OS)_$(MODE)/%.d: %.c
 	@ # Hack required so this won't run when clean or mkdirs is run
 	@ if [ ! -z "$(IGNORE_DEP)" ]; then exit 1; fi
 	@ echo '[DEP] $< -> $@'
-	gcc $(CFLAGS) -MM -MG -MT "$@ $(@:%.d=%.o)" $< > $@
+	@ gcc $(CFLAGS) -MM -MG -MT "$@ $(@:%.d=%.o)" $< > $@
 
 # Rule for generating the icon
-$(WINICON):
+$(WINICON): assets/icon.rc
 	windres assets/icon.rc $(WINICON)
 
 clean: __clean mkdirs
