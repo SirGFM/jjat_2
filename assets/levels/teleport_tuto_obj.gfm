@@ -1,3 +1,0 @@
-obj loadzone -16 264 32 32 [ dest , platform_tuto ] [ dir , right ] [ tgt_x , 55 ] [ tgt_y , 6 ]
-area invisible_wall -32 0 32 320
-obj loadzone -16 24 32 32 [ dest , checkpoint_tuto ] [ dir , right ] [ tgt_x , 36 ] [ tgt_y , 21 ]

@@ -1,5 +1,0 @@
-obj spiky 224 184 8 8
-obj walky 288 152 8 8
-area invisible_wall -32 0 32 240
-obj loadzone -16 152 32 48 [ dest , beware_the_spikes ] [ dir , left ] [ tgt_x , 36 ] [ tgt_y , 23 ]
-obj loadzone -16 32 32 40 [ dest , beware_the_spikes ] [ dir , left ] [ tgt_x , 36 ] [ tgt_y , 7 ]

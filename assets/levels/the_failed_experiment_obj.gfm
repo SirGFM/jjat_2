@@ -1,4 +1,0 @@
-area invisible_wall -32 0 32 240
-area invisible_wall 0 240 320 32
-obj loadzone 120 224 80 32 [ dest , main_lab ] [ dir , down ] [ tgt_x , 19 ] [ tgt_y , 4 ]
-obj loadzone -16 40 32 32 [ dest , before_the_trial ] [ dir , left ] [ tgt_x , 56 ] [ tgt_y , 19 ]
