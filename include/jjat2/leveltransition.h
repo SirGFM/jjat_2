@@ -33,9 +33,13 @@ enum {
 struct stLeveltransitionData {
     /** Level that will be transitioned to */
     char *pName;
+    /** Source position within the teleported level (and clamped to the edge of
+     * the screen) */
+    uint16_t srcX;
+    uint16_t srcY;
     /** Target position within the teleported level */
-    uint16_t x;
-    uint16_t y;
+    uint16_t tgtX;
+    uint16_t tgtY;
     /** Direction of the transition */
     uint8_t dir;
 };
@@ -46,10 +50,14 @@ struct stLeveltransitionCtx {
     leveltransitionData *pNextLevel;
     /** Foreground layer used to simulate a transition effect */
     gfmTilemap *pTransition;
-    /** Target position for the current transition. X is packed into the lower
-     * 16 and Y is packed into the higher 16 bits */
-    uint16_t cachedTargetX;
-    uint16_t cachedTargetY;
+    /** Source position as the edge of the screen (anchored to the top-left
+     * corner, whenever possible) */
+    uint16_t srcX;
+    uint16_t srcY;
+    /** Target position as the edge of the screen (anchored to the top-left
+     * corner, whenever possible) */
+    uint16_t tgtX;
+    uint16_t tgtY;
     /** Initial position of gunny's tween */
     uint16_t gunnyX;
     uint16_t gunnyY;

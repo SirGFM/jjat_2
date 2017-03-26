@@ -1,0 +1,11 @@
+area invisible_wall 480 0 32 240
+obj loadzone 464 32 32 32 [ dest , blink_wisely ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 3 ]
+area invisible_wall -32 0 32 240
+obj walky 416 176 8 8
+obj walky 288 176 8 8
+obj walky 288 168 8 8
+obj walky 96 184 8 8
+obj walky 288 160 8 8
+obj walky 288 152 8 8
+obj loadzone -16 112 32 32 [ dest , not_so_harmless ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 21 ]
+area checkpoint 48 120 16 24

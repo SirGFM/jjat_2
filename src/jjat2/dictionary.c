@@ -13,7 +13,8 @@
 #define DICTIONARY_LIST \
     X("floor", T_FLOOR) \
     X("floor_notp", T_FLOOR_NOTP) \
-    X("spike", T_SPIKE)
+    X("spike", T_SPIKE) \
+    X("blue_platform", T_BLUE_PLATFORM)
 
 /** Names (i.e., labels) that identifies types. Label position must match type
  * position in pDictTypes. */

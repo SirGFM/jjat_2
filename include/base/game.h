@@ -27,6 +27,10 @@ enum enGameFlags {
   , FX_PRETTYRENDER = 0x08
 };
 typedef enum enGameFlags gameFlags;
+
+enum enSessionFlags {
+    SF_BLUE_ACTIVE = 0x01
+};
 #endif /* JJATENGINE */
 
 struct stGameCtx {
@@ -37,6 +41,8 @@ struct stGameCtx {
 #if defined(JJATENGINE)
     /** Lots of flags to control the game */
     gameFlags flags;
+    /** Flags recovered/saved for a given session/save file */
+    enum enSessionFlags sessionFlags;
 #endif /* JJATENGINE */
     /** Fixed time elapsed since the last frame, in milliseconds. Note that even
      * though this should store a 'fixed' value, it may vary in a pre-determined

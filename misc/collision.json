@@ -1,0 +1,230 @@
+{
+    "floor_collision": {
+        "type_a": ["T_BLUE_PLATFORM", "T_FLOOR", "T_FLOOR_NOTP"],
+        "cases": [
+            {
+                "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_TURRET", "T_EN_G_WALKY", "T_GUNNY", "T_SWORDY"],
+                "function": "_defaultFloorCollision"
+            },
+            {
+                "type_b": ["T_EN_G_WALKY_ATK"],
+                "function": "_floorProjectileCollision"
+            },
+            {
+                "type_b": ["T_ATK_SWORD", "T_CHECKPOINT", "T_LOADZONE", "T_DUMMY_SWORDY",
+                    "T_DUMMY_GUNNY", "T_SPIKE", "T_BLUE_PLATFORM", "T_FLOOR", "T_FLOOR_NOTP",
+                    "T_EN_G_WALKY_VIEW"],
+                "function": null,
+                "auto_swap": false
+            }
+        ]
+    },
+    "teleport_collision": {
+        "type_a": ["T_TEL_BULLET"],
+        "cases": [
+            {
+                "type_b": ["T_EN_TURRET", "T_SPIKE", "T_FLOOR_NOTP"],
+                "function": "_ignoreTeleportBullet"
+            },
+            {
+                "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_SWORDY", "T_EN_G_WALKY"],
+                "function": "_setTeleportEntity"
+            },
+            {
+                "type_b": ["T_BLUE_PLATFORM", "T_FLOOR"],
+                "function": "_setTeleportFloor"
+            },
+            {
+                "type_b": ["T_TEL_BULLET", "T_EN_G_WALKY_ATK", "T_CHECKPOINT", "T_LOADZONE",
+                    "T_EN_G_WALKY_VIEW", "T_DUMMY_SWORDY", "T_DUMMY_GUNNY"],
+                "function": null,
+                "auto_swap": false
+            },
+            {
+                "type_b": ["T_GUNNY"],
+                "function": null,
+                "auto_swap": true
+            }
+        ]
+    },
+    "dummy_collision": {
+        "type_a": ["T_DUMMY_GUNNY", "T_DUMMY_SWORDY"],
+        "cases": [
+            {
+                "type_b": ["T_SWORDY", "T_GUNNY"],
+                "function": "_collidePlayerDummy"
+            },
+            {
+                "type_b": ["T_DUMMY_SWORDY", "T_DUMMY_GUNNY", "T_HAZARD", "T_PLAYER",
+                    "T_FLOOR", "T_ENEMY", "T_FLOOR_NOTP", "T_ATK_SWORD", "T_TEL_BULLET",
+                    "T_CHECKPOINT", "T_SPIKE", "T_EN_WALKY", "T_EN_G_WALKY", "T_EN_G_WALKY_ATK",
+                    "T_EN_G_WALKY_VIEW", "T_EN_SPIKY", "T_EN_TURRET",
+                    "T_BLUE_PLATFORM"],
+                "function": null,
+                "auto_swap": false
+            }
+        ]
+    },
+    "loadzone_collision": {
+        "type_a": ["T_LOADZONE"],
+        "cases": [
+            {
+                "type_b": ["T_SWORDY", "T_GUNNY", "T_DUMMY_GUNNY", "T_DUMMY_SWORDY"],
+                "function": "_collideLoadzonePlayer"
+            },
+            {
+                "type_b": ["T_FLOOR", "T_FLOOR_NOTP", "T_LOADZONE", "T_BLUE_PLATFORM",
+                    "T_ATK_SWORD", "T_TEL_BULLET", "T_CHECKPOINT", "T_SPIKE", "T_EN_WALKY",
+                    "T_EN_G_WALKY", "T_EN_G_WALKY_ATK", "T_EN_G_WALKY_VIEW", "T_EN_SPIKY",
+                    "T_EN_TURRET"],
+                "function": null,
+                "auto_swap": false
+            }
+        ]
+    },
+    "environmental_harm": {
+        "type_a": ["T_SPIKE"],
+        "cases": [
+            {
+                "type_b": ["T_EN_TURRET"],
+                "function": "_defaultFloorCollision"
+            },
+            {
+                "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_G_WALKY", "T_GUNNY", "T_SWORDY"],
+                "function": "_environmentalHarmEntity"
+            },
+            {
+                "type_b": ["T_EN_G_WALKY_ATK"],
+                "function": "_floorProjectileCollision"
+            },
+            {
+                "type_b": ["T_FLOOR", "T_FLOOR_NOTP", "T_LOADZONE", "T_BLUE_PLATFORM",
+                    "T_ATK_SWORD", "T_CHECKPOINT", "T_DUMMY_SWORDY", "T_DUMMY_GUNNY",
+                    "T_SPIKE", "T_EN_G_WALKY_VIEW"],
+                "function": null,
+                "auto_swap": false
+            }
+        ]
+    },
+    "checkpoint_collision": {
+        "type_a": ["T_CHECKPOINT"],
+        "cases": [
+            {
+                "type_b": ["T_GUNNY", "T_SWORDY"],
+                "function": "_checkpointCollision"
+            },
+            {
+                "type_b": ["T_FLOOR", "T_FLOOR_NOTP", "T_LOADZONE", "T_BLUE_PLATFORM",
+                    "T_ATK_SWORD", "T_TEL_BULLET", "T_CHECKPOINT", "T_DUMMY_SWORDY",
+                    "T_DUMMY_GUNNY", "T_SPIKE", "T_EN_WALKY", "T_EN_G_WALKY",
+                    "T_EN_G_WALKY_ATK", "T_EN_G_WALKY_VIEW", "T_EN_SPIKY", "T_EN_TURRET"],
+                "function": null,
+                "auto_swap": false
+            }
+        ]
+    },
+    "entity_collision": {
+        "type_a": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_G_WALKY", "T_EN_TURRET", "T_SWORDY", "T_GUNNY"],
+        "cases": [
+            {
+                "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_G_WALKY", "T_EN_TURRET", "T_SWORDY", "T_GUNNY"],
+                "function": "_entityCollision",
+                "auto_swap": false
+            },
+            {
+                "type_b": ["T_EN_G_WALKY_VIEW"],
+                "function": "_gWalkyViewEntityCollision",
+                "auto_swap": true
+            }
+        ]
+    },
+    "non_player_entity_collision": {
+        "type_a": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_G_WALKY", "T_EN_TURRET"],
+        "cases": [
+            {
+                "type_b": ["T_LOADZONE", "T_CHECKPOINT", "T_DUMMY_SWORDY", "T_DUMMY_GUNNY"],
+                "function": null,
+                "auto_swap": false
+            }
+        ]
+    },
+    "sword_attack": {
+        "type_a": ["T_ATK_SWORD"],
+        "cases": [
+            {
+                "type_b": ["T_EN_G_WALKY_ATK", "T_TEL_BULLET"],
+                "function": "_swordReflectProjectile"
+            },
+            {
+                "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_G_WALKY"],
+                "function": "_attackEntity"
+            },
+            {
+                "type_b": ["T_EN_TURRET"],
+                "function": null,
+                "commented": "This 'ignored' is only handled here so it may be ready if I ever add some effect on collision"
+            },
+            {
+                "type_b": ["T_SWORDY", "T_GUNNY"],
+                "function": null
+            },
+            {
+                "type_b": ["T_ATK_SWORD", "T_CHECKPOINT", "T_FLOOR",
+                    "T_FLOOR_NOTP", "T_SPIKE", "T_LOADZONE", "T_EN_G_WALKY_VIEW",
+                    "T_BLUE_PLATFORM", "T_DUMMY_SWORDY", "T_DUMMY_GUNNY"],
+                "function": null,
+                "auto_swap": false
+            }
+        ]
+    },
+    "common_attacks": {
+        "type_a": ["T_EN_G_WALKY_ATK"],
+        "cases": [
+            {
+                "type_b": ["T_SWORDY", "T_GUNNY", "T_EN_SPIKY", "T_EN_WALKY", "T_EN_G_WALKY"],
+                "function": "_attackEntity"
+            },
+            {
+                "type_b": ["T_EN_TURRET"],
+                "function": "_denyProjectile"
+            },
+            {
+                "type_b": ["T_LOADZONE", "T_TEL_BULLET", "T_CHECKPOINT", "T_DUMMY_SWORDY",
+                    "T_DUMMY_GUNNY", "T_EN_G_WALKY_ATK", "T_EN_G_WALKY_VIEW"],
+                "function": null,
+                "auto_swap": false
+            }
+        ]
+    },
+    "collision_less": {
+        "type_a": ["T_SWORD_FX", "T_FX"],
+        "cases": [
+            {
+                "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_G_WALKY", "T_EN_G_WALKY_ATK",
+                    "T_EN_G_WALKY_VIEW", "T_EN_TURRET", "T_SWORDY", "T_GUNNY", "T_FLOOR",
+                    "T_FLOOR_NOTP", "T_SPIKE", "T_ATK_SWORD", "T_TEL_BULLET", "T_LOADZONE",
+                    "T_BLUE_PLATFORM", "T_DUMMY_GUNNY", "T_DUMMY_SWORDY", "T_CHECKPOINT"],
+                "function": null,
+                "auto_swap": true
+            },
+            {
+                "type_b": ["T_SWORD_FX", "T_FX"],
+                "function": null,
+                "auto_swap": false
+            }
+        ]
+    },
+    "g_walky_view": {
+        "type_a": ["T_EN_G_WALKY_VIEW"],
+        "cases": [
+            {
+                "type_b": ["T_FLOOR", "T_FLOOR_NOTP", "T_LOADZONE", "T_BLUE_PLATFORM",
+                    "T_ATK_SWORD", "T_TEL_BULLET", "T_CHECKPOINT", "T_DUMMY_SWORDY",
+                    "T_DUMMY_GUNNY", "T_SPIKE", "T_EN_G_WALKY_ATK", "T_EN_G_WALKY_VIEW"],
+                "function": null,
+                "auto_swap": false
+            }
+        ]
+    }
+}
+

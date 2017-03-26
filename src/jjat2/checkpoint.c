@@ -21,8 +21,8 @@ err setCheckpoint(leveltransitionData *pData) {
     checkpoint.data.pName = _stCheckpointName;
 
     strcpy(checkpoint.data.pName, pData->pName);
-    checkpoint.data.x = pData->x;
-    checkpoint.data.y = pData->y;
+    checkpoint.data.tgtX = pData->tgtX;
+    checkpoint.data.tgtY = pData->tgtY;
 
     return ERR_OK;
 }
@@ -33,6 +33,7 @@ err loadCheckpoint() {
     checkpoint.data.dir = TEL_UP;
     switchToLevelTransition(&checkpoint.data);
     /* TODO Properly set this */
+    lvltransition.flags |= LT_CHECKPOINT;
     playstate.pNextLevel = &checkpoint.data;
     /* TODO Reset player life */
 

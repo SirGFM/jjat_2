@@ -104,6 +104,8 @@
         , gfmKey_f11) \
      X_KEY(gif \
         , gfmKey_f10) \
+     X_KEY(dbgResetFps \
+        , gfmKey_f7) \
      X_KEY(dbgStep \
         , gfmKey_f6) \
      X_KEY(dbgPause \

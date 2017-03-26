@@ -1,0 +1,5 @@
+area invisible_wall 320 0 32 240
+obj loadzone 304 192 32 32 [ dest , beware_the_spikes ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 4 ]
+area invisible_wall -32 0 32 240
+area checkpoint 48 32 16 24
+obj loadzone -16 24 32 32 [ dest , harmless_baddies ] [ dir , left ] [ tgt_x , 59 ] [ tgt_y , 4 ]

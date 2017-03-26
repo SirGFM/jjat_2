@@ -1,3 +1,0 @@
-area invisible_wall 320 0 32 240
-obj loadzone 304 168 32 32 [ dest , safe_jumps ] [ dir , right ] [ tgt_x , 3 ] [ tgt_y , 15 ]
-obj loadzone 304 40 32 32 [ dest , beware_the_spikes ] [ dir , right ] [ tgt_x , 3 ] [ tgt_y , 29 ]
