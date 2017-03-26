@@ -92,11 +92,10 @@ fi
 
 # Actually build it
 my_print "Cleaning build (on chroot: ${CHROOT_WORK_DIR})..."
-/mnt/linools/env/run ${CHROOT} make clean -C ${CHROOT_WORK_DIR}
+/mnt/linools/env/run ${CHROOT} make clean -C ${CHROOT_WORK_DIR}  RELEASE=yes
 check_error $? "Clean chroot work dir"
-# TODO Build the release
 my_print "Building (on chroot: ${CHROOT_WORK_DIR})..."
-/mnt/linools/env/run ${CHROOT} make -j 7 -C ${CHROOT_WORK_DIR}
+/mnt/linools/env/run ${CHROOT} make -j 7 -C ${CHROOT_WORK_DIR} RELEASE=yes
 check_error $? "Deploy for chroot"
 
 # Copy it to the output dir
