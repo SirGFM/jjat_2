@@ -4,7 +4,6 @@
 #include <base/error.h>
 #include <base/game.h>
 #include <conf/state.h>
-#include <GFraMe/gfmUtils.h>
 #include <jjat2/checkpoint.h>
 #include <jjat2/leveltransition.h>
 #include <jjat2/playstate.h>
