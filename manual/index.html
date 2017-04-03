@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title> JJAT+ User Manual </title>
+        <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="keywords" content="game,manual" />
+        <meta name="description" content="JJAT+ User Manual" />
+        <meta name="author" content="Gabriel Francisco Mandaji" />
+        <link rel="shortcut icon" href="favicon.ico?" />
+
+        <style>
+            /* NOTE:
+             *  text-shadow: x_pos y_pos blur_size color
+             */
+            h1 {
+                text-shadow: 0 0 1.25em #ffffff;
+                text-align: center;
+                font-size: 4em;
+                margin: auto;
+            }
+            h1.subtitle {
+                text-shadow: 0 0 0 #000000;
+                text-align: center;
+                font-size: smaller;
+                margin: 0;
+            }
+            h2 {
+                text-shadow: 0 0 1em #ffffff;
+                font-size: 2em;
+                margin: 0.5em;
+                margin-top: 2em;
+                margin-left: 2em;
+            }
+            h3 {
+                text-shadow: 0 0 1em #ffffff;
+                font-size: 1.25em;
+                margin: 0.5em;
+                margin-left: 2em;
+            }
+            body {
+                background: #222034;
+                color: #cbdbfc;
+            }
+            p {
+                font-size: 1em;
+                margin-left: 2em;
+            }
+            p.subtitle {
+                font-size: smaller;
+                text-align: center;
+                margin: auto;
+                margin-bottom: 0;
+                margin-top: 2px;
+            }
+            div.image-list {
+                width: auto;
+                height: auto;
+                display: table;
+                margin-left: 4em;
+            }
+            div.image-box {
+                border-style: solid;
+                border-width: 1px;
+                max-width: 700px;
+                max-height: 520px;
+                margin: auto;
+                display: table;
+                float: left;
+                padding: 4px;
+                margin: 4px;
+            }
+            img.centered {
+                margin: auto;
+                display: block;
+            }
+            .nearest-neighbor {
+                /** Source: http://stackoverflow.com/questions/14068103/disable-antialising-when-scaling-images */
+                image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
+                image-rendering: -moz-crisp-edges;          /* Firefox                        */
+                image-rendering: -o-crisp-edges;            /* Opera                          */
+                image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
+                image-rendering: pixelated;                 /* Chrome                         */
+                image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
+                -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+            }
+        </style>
+
+        <script type="text/javascript">
+            // TODO Scroll navbar
+        </script>
+    </head>
+    <body>
+        <h1> JJAT+ </h1>
+        <h1 class="subtitle"> WIP title. It shall be changed until the game's release. </h1>
+
+
+        <h2> About the game </h2>
+
+        <p> "JJAT+" is a co-op game in which two robots must help each other
+        through their adventure. Play it with a friend or try to control both
+        characters at once. </p>
+
+
+        <h2> How to play (and characters) </h2>
+
+        <h3> The red robot </h3>
+
+        <p> The red robot is an offensive unit. It has more mobility and may use
+        its sword to attack enemies or reflect energy projectiles. </p>
+
+        <p> Although the unit's official name is "CRL-000", it's usually simply
+        referred as "Red". </p>
+
+        <div class="image-list">
+            <div class="image-box">
+                <img class="nearest-neighbor centered" src="img/swordy_run.gif"> </img>
+                <p class="subtitle"> "Red" is quite fast! </p>
+            </div>
+            <div class="image-box">
+                <img class="nearest-neighbor centered" src="img/swordy_jump.gif"> </img>
+                <p class="subtitle"> It also may jump really high! </p>
+            </div>
+        </div>
+
+        <h3> The blue robot (RFS-000) </h3>
+
+        <p> The blue robot is a technical unit. It has a teleport gun, which may
+        target either other entities (switching places with them) or surfaces,
+        teleporting the robot to the targeted place. </p>
+
+        <p> Although the unit's official name is "RFS-000", it's usually simply
+        referred as "Blue". </p>
+
+        <div class="image-list">
+            <div class="image-box">
+                <img class="nearest-neighbor centered" src="img/gunny_run.gif"> </img>
+                <p class="subtitle"> "Blue" is quite slower than "Red" </p>
+            </div>
+            <div class="image-box">
+                <img class="nearest-neighbor centered" src="img/gunny_jump.gif"> </img>
+                <p class="subtitle"> Its jump is also lower... </p>
+            </div>
+        </div>
+
+        <h3> Entities interaction </h3>
+
+        <p> Entities in this world are usually able to carry each other
+        effortlessly, regardless of their apparent weights. </p>
+
+        <p> However, some may be armed with spikes, or even weapons. Pay
+        attention! </p>
+
+
+        <h2> About the current title </h2>
+
+        <p> Back in 2015, I took part of the Global Game Jam and made a small
+        prototype in which a player must control two characters at once. </p>
+
+        <p> That prototype was the starting point for a game I made on that
+        same year called <a href="https://gfm.itch.io/jjat">JJAT</a>.
+        However, that game feels incomplete, and is too harsh. </p>
+
+        <p> This game is meant to be a "spiritual sucessor" for JJAT. Hence why
+        it's currently being called "JJAT+". </p>
+
+        <p> Eventually, the game will be given a proper title. But, until then,
+        I'll keep calling it "JJAT+" (or, sometime "JJAT 2"). </p>
+    </body>
+</html>
+
