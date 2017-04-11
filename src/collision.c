@@ -293,8 +293,8 @@ static inline err _denyProjectile(collisionNode *projectile
 }
 
 /** Collide a player against another player's dummy */
-static inline err _collidePlayerDummy(collisionNode *player
-        , collisionNode *dummy) {
+static inline err _collidePlayerDummy(collisionNode *dummy
+        , collisionNode *player) {
     int playerY, dummyY;
 
     gfmObject_getVerticalPosition(&playerY, player->pObject);
