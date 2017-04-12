@@ -141,7 +141,7 @@
 .SUFFIXES:
 
 # Define all targets that doesn't match its generated file
-.PHONY: all clean mkdirs __clean
+.PHONY: all clean mkdirs __clean deploy
 #=======================================================================
 
 
@@ -205,5 +205,15 @@ mkdirs:
 __clean:
 	@ echo "Cleaning..."
 	@ rm -rf $(DIRLIST) bin/ obj/
+
+deploy:
+	@ echo 'Deploying Linux 64 version...'
+	@ ./rush/rush protoman linux64
+	@ echo 'Deploying Linux 32 version...'
+	@ ./rush/rush megaman linux32
+	@ echo 'Deploying Windows 64 version...'
+	@ ./rush/rush crashman-64 win64
+	@ echo 'Deploying Windows 32 version...'
+	@ ./rush/rush crashman-32 win32
 #=======================================================================
 

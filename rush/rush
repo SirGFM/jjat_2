@@ -123,12 +123,17 @@ if [ "`echo ${FILE_TYPE} | grep -o PE32+`" == "PE32+" ] || [ "`echo ${FILE_TYPE}
 else
     sed s/BINARY/launch.sh/g ${WORK_DIR}/misc/itch.manifest > deploy/${ARCH}/.itch.toml
     cp ${WORK_DIR}/misc/launch.sh deploy/${ARCH}/
+    chmod 755 deploy/${ARCH}/launch deploy/${ARCH}/game
 fi
 
 # Remove any ligering built file (since chroot runs as uid 0)
 my_print "Final cleaning (on chroot: ${CHROOT_WORK_DIR})..."
 /mnt/linools/env/run ${CHROOT} make __clean -C ${CHROOT_WORK_DIR}
 check_error $? "Final clean chroot work dir"
+
+# Push it to itch.io
+my_print "Pushing the deploy..."
+butler push deploy/${ARCH}/ "GFM/jjat-2:${ARCH}"
 
 exit 0
 
