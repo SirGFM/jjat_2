@@ -1,0 +1,20 @@
+
+[[actions]]
+name = "Play in Single Player Mode"
+path = "BINARY"
+args = ["-k", "SL:6005200b01;SR:6105300d;SJ:5a00214;SA:5b00c;GL:64047;GR:65048;GJ:5d049;GA:5e04a;P:68042;SW:6904344;"]
+
+[[actions]]
+name = "Play in Two Players Mode"
+path = "BINARY"
+args = ["-k", "SL:600520;SR:610530;SJ:560;SA:570580;GL:60152147;GR:61153148;GJ:56115;GA:57158116;P:68068142;SW:5905914344;"]
+
+[[actions]]
+name = "Play in Synchronous Single Player Mode"
+path = "BINARY"
+args = ["-c", "-k", "SL:60052047;SR:61053048;SJ:56015;SA:57058016;P:68042;SW:5904344;"]
+
+[[actions]]
+name = "manual"
+path = "manual/index.html"
+
