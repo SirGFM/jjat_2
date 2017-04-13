@@ -120,10 +120,14 @@ cp -r ${WORK_DIR}/manual/ deploy/${ARCH}/
 rm -f deploy/${ARCH}/.itch.toml
 if [ "`echo ${FILE_TYPE} | grep -o PE32+`" == "PE32+" ] || [ "`echo ${FILE_TYPE} | grep -o PE32`" == "PE32" ]; then
     sed s/BINARY/game.exe/g ${WORK_DIR}/misc/itch.manifest > deploy/${ARCH}/.itch.toml
+    sed -i s/BROWSER/manual.bat/g deploy/${ARCH}/.itch.toml
+    cp ${WORK_DIR}/misc/manual.bat deploy/${ARCH}/
 else
     sed s/BINARY/launch.sh/g ${WORK_DIR}/misc/itch.manifest > deploy/${ARCH}/.itch.toml
+    sed -i s/BROWSER/manual.sh/g deploy/${ARCH}/.itch.toml
     cp ${WORK_DIR}/misc/launch.sh deploy/${ARCH}/
-    chmod 755 deploy/${ARCH}/launch deploy/${ARCH}/game
+    cp ${WORK_DIR}/misc/manual deploy/${ARCH}/
+    chmod 755 deploy/${ARCH}/launch deploy/${ARCH}/game deploy/${ARCH}/manual.sh
 fi
 
 # Remove any ligering built file (since chroot runs as uid 0)
