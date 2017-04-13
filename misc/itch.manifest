@@ -17,5 +17,5 @@ args = ["-c", "-k", "SL:60052047;SR:61053048;SJ:56015;SA:57058016;P:68042;SW:590
 [[actions]]
 name = "manual"
 path = "BROWSER"
-args = "manual/index.html"
+args = ["manual/index.html"]
 
