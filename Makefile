@@ -49,11 +49,10 @@
   TARGET := game
 
 # Define the generated icon
-#      Required files:
-#        - assets/icon.ico
-#        - assets/icon.rc
-# TODO Uncomment this to add an icon to the game
-#  WINICON := assets/icon.o
+  WINICON := assets/icon.o
+  ifeq ($(OS), Win)
+    ICON := $(WINICON)
+  endif
 
 # List every header file
   HEADERS := $(shell find include/ -name *.h)
@@ -142,7 +141,7 @@
 .SUFFIXES:
 
 # Define all targets that doesn't match its generated file
-.PHONY: all clean mkdirs __clean
+.PHONY: all clean mkdirs __clean deploy
 #=======================================================================
 
 
@@ -191,11 +190,11 @@ obj/$(OS)_$(MODE)/%.d: %.c
 	@ # Hack required so this won't run when clean or mkdirs is run
 	@ if [ ! -z "$(IGNORE_DEP)" ]; then exit 1; fi
 	@ echo '[DEP] $< -> $@'
-	gcc $(CFLAGS) -MM -MG -MT "$@ $(@:%.d=%.o)" $< > $@
+	@ gcc $(CFLAGS) -MM -MG -MT "$@ $(@:%.d=%.o)" $< > $@
 
 # Rule for generating the icon
-$(WINICON):
-	windres assets/icon.rc $(WINICON)
+$(WINICON): assets/icon.rc
+	$(WINDRES) assets/icon.rc $(WINICON)
 
 clean: __clean mkdirs
 
@@ -206,5 +205,15 @@ mkdirs:
 __clean:
 	@ echo "Cleaning..."
 	@ rm -rf $(DIRLIST) bin/ obj/
+
+deploy:
+	@ echo 'Deploying Linux 64 version...'
+	@ ./rush/rush protoman linux64
+	@ echo 'Deploying Linux 32 version...'
+	@ ./rush/rush megaman linux32
+	@ echo 'Deploying Windows 64 version...'
+	@ ./rush/rush crashman-64 win64
+	@ echo 'Deploying Windows 32 version...'
+	@ ./rush/rush crashman-32 win32
 #=======================================================================
 

@@ -1,0 +1,52 @@
+#!/bin/bash
+#===============================================================================
+# Update a single asset file only if the source is younger than the one on the
+# destination (or if the destination doesn't exist yet).
+#
+# Called by find [path...] -exec.
+#-------------------------------------------------------------------------------
+# Args:
+#   1 - asset file
+#   2 - base destination directory
+#===============================================================================
+
+SRC_FILE=${1}
+BASE_DEST_DIR=${2}
+
+# List of extensions accepted as asset file
+VALID_EXTENSIONS="bmp gfm mml"
+
+# Extract the path, name and externsion
+FILE_PATH=`dirname ${SRC_FILE}`
+FILE_NAME=`basename ${SRC_FILE}`
+FILE_EXT=${FILE_NAME##*.}
+
+# Check if it's a valid asset
+NOT_VALID=true
+for type in ${VALID_EXTENSIONS}; do
+    if [ ${type} == ${FILE_EXT} ]; then
+        NOT_VALID=false
+        break
+    fi
+done
+if ${NOT_VALID}; then
+    exit 0
+fi
+
+# Check if the file should be updated
+if [ -f ${BASE_DEST_DIR}/${SRC_FILE} ]; then
+    DEST_LAST_CHANGE=`stat -c %Y ${BASE_DEST_DIR}/${SRC_FILE}`
+    SRC_LAST_CHANGE=`stat -c %Y ${SRC_FILE}`
+
+    if [ ${DEST_LAST_CHANGE} -gt ${SRC_LAST_CHANGE} ]; then
+        # Destination file is more recent, do nothing
+        exit 0
+    fi
+fi
+
+# Create the destination directory and copy the file
+mkdir -p ${BASE_DEST_DIR}/${FILE_PATH}
+cp -f ${SRC_FILE} ${BASE_DEST_DIR}/${SRC_FILE}
+
+exit 0
+
