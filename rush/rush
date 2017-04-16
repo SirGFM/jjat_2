@@ -130,7 +130,7 @@ else
     sed -i s/BROWSER/manual.sh/g deploy/${ARCH}/.itch.toml
     cp ${WORK_DIR}/misc/deploy/launch.sh deploy/${ARCH}/
     cp ${WORK_DIR}/misc/deploy/manual.sh deploy/${ARCH}/
-    chmod 755 deploy/${ARCH}/launch deploy/${ARCH}/game deploy/${ARCH}/manual.sh
+    chmod 755 deploy/${ARCH}/launch.sh deploy/${ARCH}/game deploy/${ARCH}/manual.sh
 fi
 
 # Remove any ligering built file (since chroot runs as uid 0)
