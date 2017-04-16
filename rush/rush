@@ -116,18 +116,21 @@ my_print "Updating the manual..."
 rm -rf deploy/${ARCH}/manual/
 cp -r ${WORK_DIR}/manual/ deploy/${ARCH}/
 
-# Set up the manifest and launch script (if necessary)
+# Set up the manifest and launch script
 rm -f deploy/${ARCH}/.itch.toml
 if [ "`echo ${FILE_TYPE} | grep -o PE32+`" == "PE32+" ] || [ "`echo ${FILE_TYPE} | grep -o PE32`" == "PE32" ]; then
-    sed s/BINARY/game.exe/g ${WORK_DIR}/misc/itch.manifest > deploy/${ARCH}/.itch.toml
+    sed s/BINARY/game.exe/g ${WORK_DIR}/misc/deploy/itch.manifest > deploy/${ARCH}/.itch.toml
     sed -i s/BROWSER/manual.bat/g deploy/${ARCH}/.itch.toml
-    cp ${WORK_DIR}/misc/manual.bat deploy/${ARCH}/
+    cp ${WORK_DIR}/misc/deploy/manual.bat deploy/${ARCH}/
+    cp ${WORK_DIR}/misc/deploy/Single_Player_Mode.bat deploy/${ARCH}
+    cp ${WORK_DIR}/misc/deploy/Synchronous_Single_Player_Mode.bat deploy/${ARCH}
+    cp ${WORK_DIR}/misc/deploy/Two_Players_Mode.bat deploy/${ARCH}
 else
-    sed s/BINARY/launch.sh/g ${WORK_DIR}/misc/itch.manifest > deploy/${ARCH}/.itch.toml
+    sed s/BINARY/launch.sh/g ${WORK_DIR}/misc/deploy/itch.manifest > deploy/${ARCH}/.itch.toml
     sed -i s/BROWSER/manual.sh/g deploy/${ARCH}/.itch.toml
-    cp ${WORK_DIR}/misc/launch.sh deploy/${ARCH}/
-    cp ${WORK_DIR}/misc/manual.sh deploy/${ARCH}/
-    chmod 755 deploy/${ARCH}/launch deploy/${ARCH}/game deploy/${ARCH}/manual.sh
+    cp ${WORK_DIR}/misc/deploy/launch.sh deploy/${ARCH}/
+    cp ${WORK_DIR}/misc/deploy/manual.sh deploy/${ARCH}/
+    chmod 755 deploy/${ARCH}/launch.sh deploy/${ARCH}/game deploy/${ARCH}/manual.sh
 fi
 
 # Remove any ligering built file (since chroot runs as uid 0)

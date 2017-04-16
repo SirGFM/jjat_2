@@ -79,6 +79,9 @@
                 margin: auto;
                 display: block;
             }
+            table.centered {
+                margin: auto;
+            }
             .nearest-neighbor {
                 /** Source: http://stackoverflow.com/questions/14068103/disable-antialising-when-scaling-images */
                 image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
@@ -107,6 +110,48 @@
         characters at once. </p>
 
 
+        <h2> Launching the game </h2>
+
+        <p> The preferred way to download and launch the game is through
+        <a href="https://itch.io/app">itch</a>, the itch.io app.</p>
+
+        <p> The app automatically manages <strong>updating</strong> the game and
+        has built-in <strong>launch options</strong>. </p>
+
+        <p> If you manually downloaded the game, there are a few ways to easily
+        launch the game in one of the specified modes: </p>
+
+        <h3> Windows </h3>
+
+        <p> There are three batch scripts that handle launching the game: </p>
+
+        <ul>
+            <li> Single_Player_Mode.bat: Launch the game in single player mode.
+                </li>
+            <li> Two_Players_Mode.bat: Launch the game in two players mode.
+                </li>
+            <li> Synchronous_Single_Player_Mode.bat: Launch the game in
+            synchronous single player mode. </li>
+        </ul>
+
+        <p> Simply double-click the desired script. </p>
+
+        <h3> Linux </h3>
+
+        <p> There's a single script used to launch the game,
+        <tt>launch.sh</tt>. Execute that script with one of the following
+        arguments: </p>
+
+        <ul>
+            <li> --single-player-mode | -1p: Launch the game in single player
+            mode. </li>
+            <li> --two-player-mode | -2p: Launch the game in two players mode.
+                </li>
+            <li> --synchronous-single-player-mode | -s1p: Launch the game in
+            synchronous single player mode. </li>
+        </ul>
+
+
         <h2> How to play </h2>
 
         <h3> Controls </h3>
@@ -130,7 +175,7 @@
         <p> On the keyboard, Red is controlled with the WASD (or ZQSD) keys and
         Blue is controlled with the arrow keys </p>
 
-        <table>
+        <table class="centered">
             <tr>
                 <th> Action </th>
                 <th> Mapped keys </th>
@@ -202,7 +247,7 @@
         <p> Red is bound to the first connected gamepad while Blue is mapped
         either to the keyboard or to the second connected gamepad. </p>
 
-        <table>
+        <table class="centered">
             <tr>
                 <th> Action </th>
                 <th> Mapped keys </th>
@@ -272,7 +317,7 @@
         Only one character is active at a time and you may switch between them
         whenever desired. </p>
 
-        <table>
+        <table class="centered">
             <tr>
                 <th> Action </th>
                 <th> Mapped keys </th>
