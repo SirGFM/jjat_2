@@ -8,38 +8,37 @@ type floor 902
 type floor 903
 type floor 904
 type floor 905
-type floor_notp 948
-type floor_notp 949
-type floor_notp 950
-type floor_notp 951
+type floor 948
+type floor 949
+type floor 950
+type floor 951
 type floor 960
 type floor 961
-type floor 962
 type floor 963
 type floor 964
 type floor 965
 type floor 966
-type floor 967
+type spike 967
 type floor 968
 type floor 969
 type floor 1024
-type floor 1025
+type spike 1025
 type floor 1026
-type floor 1027
+type spike 1027
 type floor 1028
 type floor 1029
-type floor 1030
+type spike 1030
 type floor 1031
-type floor 1032
+type spike 1032
 type floor 1033
 type floor 1088
 type floor 1089
-type floor 1090
+type spike 1090
 type floor 1091
 type floor 1092
 type floor 1093
 type floor 1094
-type floor 1095
+type spike 1095
 type floor 1096
 type floor 1097
 type floor 1152
@@ -52,10 +51,10 @@ type floor 1158
 type floor 1159
 type floor 1160
 type floor 1161
-type floor_notp 1204
-type floor_notp 1205
-type floor_notp 1206
-type floor_notp 1207
+type floor 1204
+type floor 1205
+type floor 1206
+type floor 1207
 type blue_platform 1344
 type blue_platform 1345
 type blue_platform 1346
@@ -87,7 +86,7 @@ map 40 30
   1026 1092 1039 -1 -1 1099 1157 1158 1160 1153 1154 1155 1158 1159 1160 1153 1154 1155 1158 1159 1160 1153 1154 1155 1158 1159 1160 1153 1154 1155 1158 1159 1160 1153 1154 1155 1158 1159 1160 1161 
   1026 969 1039 -1 -1 913 1167 1167 977 975 975 975 975 975 975 975 975 975 975 975 975 975 975 975 975 975 975 975 975 975 975 975 975 975 975 975 975 975 975 975 
   1026 1033 1039 -1 -1 1099 901 900 1039 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 
-  1026 1097 1039 908 1035 1165 1030 964 1039 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 
+  1026 1097 1039 908 1035 1165 1094 964 1039 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 
   1026 964 1039 1099 901 966 1161 1092 1039 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 908 1035 1035 1035 1035 1035 
   1026 1028 1039 1099 1152 1153 1155 1156 1039 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 1099 901 902 903 904 905 
   1026 1092 1163 1036 1167 1167 1167 1167 912 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 1099 965 1026 1026 1026 1026 
