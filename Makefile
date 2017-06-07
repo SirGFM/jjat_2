@@ -92,7 +92,7 @@
   CFLAGS := $(CFLAGS) -I"./include/" -I"./misc" -Wall
 
   # TODO Uncomment to enable the background
-  #CFLAGS := $(CFLAGS) -DJJAT_ENABLE_BACKGROUND
+  CFLAGS := $(CFLAGS) -DJJAT_ENABLE_BACKGROUND
 
   # Ugly hack: I'll put everything specific to the JJAT engine within these #ifdefs
   CFLAGS := $(CFLAGS) -DJJATENGINE
