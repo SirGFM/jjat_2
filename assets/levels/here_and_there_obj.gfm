@@ -1,0 +1,4 @@
+area invisible_wall -32 0 32 240
+area invisible_wall 320 0 32 240
+obj loadzone -16 32 32 88 [ dest , awakening_passage ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 4 ]
+obj loadzone 304 16 32 200 [ dest , getting_tricky ] [ dir , left ] [ tgt_x , 0 ] [ tgt_y , 4 ]
