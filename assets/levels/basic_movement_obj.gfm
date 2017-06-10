@@ -1,4 +1,0 @@
-area invisible_wall -32 0 32 280
-obj loadzone -16 64 32 200 [ dest , main_lab ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 3 ]
-area invisible_wall 480 0 32 280
-obj loadzone 464 64 32 176 [ dest , getting_tricky ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 4 ]

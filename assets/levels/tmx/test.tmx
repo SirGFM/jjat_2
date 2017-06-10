@@ -1874,11 +1874,11 @@
    </properties>
   </object>
   <object id="293" name="wall_s" type="invisible_wall" x="0" y="240" width="344" height="32"/>
-  <object id="294" name="to_main_lab" type="loadzone" x="16" y="224" width="32" height="32">
+  <object id="294" name="to_awakening_passage" type="loadzone" x="16" y="224" width="32" height="32">
    <properties>
-    <property name="dest" value="main_lab"/>
+    <property name="dest" value="awakening_passage"/>
     <property name="dir" value="down"/>
-    <property name="tgt_x" value="2"/>
+    <property name="tgt_x" value="22"/>
     <property name="tgt_y" value="0"/>
    </properties>
   </object>
