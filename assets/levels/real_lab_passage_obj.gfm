@@ -1,6 +1,0 @@
-area invisible_wall 320 0 32 240
-obj loadzone 304 48 32 32 [ dest , not_so_harmless ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 23 ]
-area invisible_wall 0 240 344 32
-obj loadzone 16 224 32 32 [ dest , awakening_passage ] [ dir , down ] [ tgt_x , 22 ] [ tgt_y , 0 ]
-area checkpoint 48 56 16 24
-area invisible_wall -32 0 32 240
