@@ -592,6 +592,10 @@ static err _loadLevel(char *levelName, int setPlayer) {
             ASSERT(erv == ERR_OK, erv);
             playstate.entityCount++;
         }
+        else if (strcmp(type, "door") == 0) {
+        }
+        else if (strcmp(type, "pressure_pad") == 0) {
+        }
     }
 
     rv = gfmParser_reset(playstate.pParser);

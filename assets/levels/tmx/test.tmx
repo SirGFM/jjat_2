@@ -640,27 +640,27 @@
   </object>
   <object id="336" name="pad_A0" type="pressure_pad" gid="5711" x="80" y="224" width="32" height="8">
    <properties>
-    <property name="target_0" value="A"/>
+    <property name="set_0" value="A"/>
    </properties>
   </object>
   <object id="338" name="pad_A1" type="pressure_pad" gid="5711" x="248" y="104" width="32" height="8">
    <properties>
-    <property name="target_0" value="A"/>
+    <property name="set_0" value="A"/>
    </properties>
   </object>
   <object id="339" name="pad_B" type="pressure_pad" gid="5711" x="112" y="128" width="32" height="8">
    <properties>
-    <property name="target_0" value="B"/>
+    <property name="set_0" value="B"/>
    </properties>
   </object>
   <object id="340" name="door_A" type="door" gid="6714" x="216" y="48" width="8" height="32">
    <properties>
-    <property name="lock" value="A"/>
+    <property name="lock_0" value="A"/>
    </properties>
   </object>
   <object id="341" name="door_B" type="door" gid="6714" x="208" y="168" width="8" height="32">
    <properties>
-    <property name="lock" value="B"/>
+    <property name="lock_0" value="B"/>
    </properties>
   </object>
  </objectgroup>
