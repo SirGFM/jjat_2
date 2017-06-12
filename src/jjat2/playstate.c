@@ -17,8 +17,9 @@
 #include <jjat2/camera.h>
 #include <jjat2/checkpoint.h>
 #include <jjat2/dictionary.h>
-#include <jjat2/fx_group.h>
 #include <jjat2/enemy.h>
+#include <jjat2/event.h>
+#include <jjat2/fx_group.h>
 #include <jjat2/gunny.h>
 #include <jjat2/hitbox.h>
 #include <jjat2/leveltransition.h>
@@ -593,8 +594,16 @@ static err _loadLevel(char *levelName, int setPlayer) {
             playstate.entityCount++;
         }
         else if (strcmp(type, "door") == 0) {
+            entityCtx *pEnt = &playstate.entities[playstate.entityCount];
+            erv = parseEvent(pEnt, playstate.pParser, T_DOOR);
+            ASSERT(erv == ERR_OK, erv);
+            playstate.entityCount++;
         }
         else if (strcmp(type, "pressure_pad") == 0) {
+            entityCtx *pEnt = &playstate.entities[playstate.entityCount];
+            erv = parseEvent(pEnt, playstate.pParser, T_PRESSURE_PAD);
+            ASSERT(erv == ERR_OK, erv);
+            playstate.entityCount++;
         }
     }
 
@@ -714,9 +723,8 @@ err updatePlaystate() {
     i = 0;
     while (i < playstate.entityCount) {
         switch (playstate.entities[i].baseType) {
-            case T_ENEMY: {
-                erv = preUpdateEnemy(&playstate.entities[i]);
-            } break;
+            case T_ENEMY: erv = preUpdateEnemy(&playstate.entities[i]); break;
+            case T_EVENT: erv = preUpdateEvent(&playstate.entities[i]); break;
         }
         ASSERT(erv == ERR_OK, erv);
         i++;
@@ -749,9 +757,8 @@ err updatePlaystate() {
     i = 0;
     while (i < playstate.entityCount) {
         switch (playstate.entities[i].baseType) {
-            case T_ENEMY: {
-                erv = postUpdateEnemy(&playstate.entities[i]);
-            } break;
+            case T_ENEMY: erv = postUpdateEnemy(&playstate.entities[i]); break;
+            case T_EVENT: erv = postUpdateEvent(&playstate.entities[i]); break;
         }
         ASSERT(erv == ERR_OK, erv);
         i++;
@@ -857,9 +864,8 @@ err drawPlaystate() {
     i = 0;
     while (i < playstate.entityCount) {
         switch (playstate.entities[i].baseType) {
-            case T_ENEMY: {
-                erv = drawEnemy(&playstate.entities[i]);
-            } break;
+            case T_ENEMY: erv = drawEnemy(&playstate.entities[i]); break;
+            case T_EVENT: erv = drawEvent(&playstate.entities[i]); break;
         }
         ASSERT(erv == ERR_OK, erv);
         i++;

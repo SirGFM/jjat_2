@@ -31,6 +31,7 @@
          jjat2/dictionary.o \
          jjat2/enemy.o \
          jjat2/entity.o \
+         jjat2/event.o \
          jjat2/fx_group.o \
          jjat2/gunny.o \
          jjat2/hitbox.o \
