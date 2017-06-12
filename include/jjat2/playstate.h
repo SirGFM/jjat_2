@@ -48,7 +48,8 @@ struct stPlaystateCtx {
     entityCtx swordy;
     /** Gunny character */
     entityCtx gunny;
-    /** List of enemies and interactables */
+    /** List of enemies and interactables. Note that some interactibles (like
+     * doors) only use the entity's sprite */
     entityCtx entities[MAX_ENTITIES];
     /** Map's height, in pixels */
     uint16_t height;

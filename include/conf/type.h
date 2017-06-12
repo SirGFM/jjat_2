@@ -17,6 +17,8 @@
  * the same base one will be rendered within the quadtree with the same color.
  */
 #define T_BASE_NBITS 5
+/** Mask that returns the type's base type */
+#define T_BASE_MASK  0x0000001f
 
 /** Retrieve an object's type (mask out all non-type bits) */
 #define TYPE(type) \

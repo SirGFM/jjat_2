@@ -713,7 +713,11 @@ err updatePlaystate() {
 
     i = 0;
     while (i < playstate.entityCount) {
-        erv = preUpdateEnemy(&playstate.entities[i]);
+        switch (playstate.entities[i].baseType) {
+            case T_ENEMY: {
+                erv = preUpdateEnemy(&playstate.entities[i]);
+            } break;
+        }
         ASSERT(erv == ERR_OK, erv);
         i++;
     }
@@ -744,7 +748,11 @@ err updatePlaystate() {
 
     i = 0;
     while (i < playstate.entityCount) {
-        erv = postUpdateEnemy(&playstate.entities[i]);
+        switch (playstate.entities[i].baseType) {
+            case T_ENEMY: {
+                erv = postUpdateEnemy(&playstate.entities[i]);
+            } break;
+        }
         ASSERT(erv == ERR_OK, erv);
         i++;
     }
@@ -848,7 +856,11 @@ err drawPlaystate() {
 
     i = 0;
     while (i < playstate.entityCount) {
-        erv = drawEnemy(&playstate.entities[i]);
+        switch (playstate.entities[i].baseType) {
+            case T_ENEMY: {
+                erv = drawEnemy(&playstate.entities[i]);
+            } break;
+        }
         ASSERT(erv == ERR_OK, erv);
         i++;
     }
