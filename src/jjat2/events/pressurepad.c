@@ -8,16 +8,18 @@
 #include <jjat2/events/common.h>
 #include <jjat2/events/pressurepad.h>
 #include <jjat2/entity.h>
+#include <GFraMe/gframe.h>
 #include <GFraMe/gfmSprite.h>
 #include <GFraMe/gfmParser.h>
 #include <string.h>
 #include <stdint.h>
 
-#define pressurepad_offx    0
-#define pressurepad_offy    0
-#define pressurepad_width   8
-#define pressurepad_height  32
-#define pressurepad_frame   334
+#define pressurepad_offx        0
+#define pressurepad_offy        0
+#define pressurepad_width       32
+#define pressurepad_height      8
+#define pressurepad_objheight   (pressurepad_height + 2)
+#define pressurepad_frame       334
 
 /**
  * Parse a pressure pad into the entity
@@ -53,9 +55,9 @@ err initPressurePad(entityCtx *pEnt, gfmParser *pParser) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     y -= pressurepad_height;
 
-    rv = gfmSprite_init(pEnt->pSelf, x, y, pressurepad_width, pressurepad_height
-            , gfx.pSset32x8, pressurepad_offx, pressurepad_offy, pEnt
-            , T_PRESSURE_PAD);
+    rv = gfmSprite_init(pEnt->pSelf, x, y, pressurepad_width
+            , pressurepad_objheight, gfx.pSset32x8, pressurepad_offx
+            , pressurepad_offy, pEnt, T_PRESSURE_PAD);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     /* Set its only frame */
@@ -64,6 +66,26 @@ err initPressurePad(entityCtx *pEnt, gfmParser *pParser) {
 
     /* Store the pressure pad's lock on the entity's flags */
     pEnt->flags = lock;
+
+    return ERR_OK;
+}
+
+/**
+ * Draw a pressure pad
+ *
+ * @param  [ in]pEnt    The entity
+ */
+err drawPressurePad(entityCtx *pEnt) {
+    gfmRV rv;
+    int x, y;
+
+    rv = gfmSprite_getPosition(&x, &y, pEnt->pSelf);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    rv = gfm_drawTile(game.pCtx, gfx.pSset32x8, x, y, 317/*tile*/, 0/*flip*/);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmSprite_draw(pEnt->pSelf, game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     return ERR_OK;
 }

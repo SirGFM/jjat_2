@@ -102,15 +102,23 @@ err postUpdateEvent(entityCtx *pEnt) {
  */
 err drawEvent(entityCtx *pEnt) {
     void *pChild;
+    err erv;
     int type;
     gfmRV rv;
 
     rv = gfmSprite_getChild(&pChild, &type, pEnt->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    /* TODO Implement specific */
-    rv = gfmSprite_draw(pEnt->pSelf, game.pCtx);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    switch (type) {
+        case T_PRESSURE_PAD: {
+            erv = drawPressurePad(pEnt);
+            ASSERT(erv == ERR_OK, erv);
+        } break;
+        default: {
+            rv = gfmSprite_draw(pEnt->pSelf, game.pCtx);
+            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        }
+    }
 
     return ERR_OK;
 }

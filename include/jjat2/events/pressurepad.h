@@ -16,5 +16,12 @@
  */
 err initPressurePad(entityCtx *pEnt, gfmParser *pParser);
 
+/**
+ * Draw a pressure pad
+ *
+ * @param  [ in]pEnt    The entity
+ */
+err drawPressurePad(entityCtx *pEnt);
+
 #endif /* __EVENTS_PRESSURE_PAD_H__ */
 
