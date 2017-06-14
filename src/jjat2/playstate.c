@@ -650,6 +650,8 @@ static err _loadLevel(char *levelName, int setPlayer) {
         ASSERT(erv == ERR_OK, erv);
     }
 
+    clearLocalVariables();
+
 #undef LEN
 #undef APPEND_DYN
 #undef APPEND_POS

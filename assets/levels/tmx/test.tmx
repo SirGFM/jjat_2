@@ -655,11 +655,13 @@
   </object>
   <object id="340" name="door_A" type="door" gid="6714" x="216" y="48" width="8" height="32">
    <properties>
+    <property name="init_state" value="closed"/>
     <property name="lock_0" value="A"/>
    </properties>
   </object>
   <object id="341" name="door_B" type="door" gid="6714" x="208" y="168" width="8" height="32">
    <properties>
+    <property name="init_state" value="closed"/>
     <property name="lock_0" value="B"/>
    </properties>
   </object>

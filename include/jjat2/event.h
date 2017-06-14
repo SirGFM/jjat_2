@@ -12,6 +12,14 @@
 #include <jjat2/entity.h>
 
 /**
+ * Clear the local variables common to all events.
+ *
+ * These variables are "local" because they should get cleared on screen
+ * transition.
+ */
+void clearLocalVariables();
+
+/**
  * Parse an event into the entity
  *
  * @param  [ in]pEnt    The entity

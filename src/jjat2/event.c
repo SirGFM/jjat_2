@@ -10,9 +10,28 @@
 
 #include <jjat2/event.h>
 #include <jjat2/entity.h>
+#include <jjat2/events/common.h>
+#include <jjat2/events/door.h>
+#include <jjat2/events/pressurepad.h>
 
 #include <GFraMe/gfmSprite.h>
 #include <GFraMe/gfmParser.h>
+
+#include <stdint.h>
+#include <string.h>
+
+/** Local variables that events may modify/check */
+uint32_t _localVars;
+
+/**
+ * Clear the local variables common to all events.
+ *
+ * These variables are "local" because they should get cleared on screen
+ * transition.
+ */
+void clearLocalVariables() {
+    _localVars = 0;
+}
 
 /**
  * Parse an event into the entity
@@ -24,14 +43,14 @@
 err parseEvent(entityCtx *pEnt, gfmParser *pParser, type t) {
     err erv;
 
-    //switch (t & T_MASK) {
-    //    case T_DOOR: erv = initDoor(pEnt, pParser); break;
-    //    case T_PRESSURE_PAD: erv = initPressurePad(pEnt, pParser); break;
-    //    default: {
-    //        ASSERT(0, ERR_INVALIDTYPE);
-    //    }
-    //}
-    //ASSERT(erv == ERR_OK, erv);
+    switch (t & T_MASK) {
+        case T_DOOR: erv = initDoor(pEnt, pParser); break;
+        case T_PRESSURE_PAD: erv = initPressurePad(pEnt, pParser); break;
+        default: {
+            ASSERT(0, ERR_INVALIDTYPE);
+        }
+    }
+    ASSERT(erv == ERR_OK, erv);
 
     pEnt->baseType = (t & T_BASE_MASK);
 
@@ -89,8 +108,30 @@ err drawEvent(entityCtx *pEnt) {
     rv = gfmSprite_getChild(&pChild, &type, pEnt->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    /* TODO Implement */
+    /* TODO Implement specific */
+    rv = gfmSprite_draw(pEnt->pSelf, game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     return ERR_OK;
+}
+
+/**
+ * Convert a local variable into its value
+ *
+ * @param  [ in]pVal The value
+ * @return The variable's value or 0, on failure
+ */
+uint8_t _getLocalVar(char *pVal) {
+#define TEST(val) \
+    if (memcmp(pVal, #val , 2) == 0) { \
+        return EV_LOCAL_ ## val; \
+    } \
+
+    TEST(A)
+    else TEST(B)
+    else TEST(C)
+    else TEST(D)
+
+    return 0;
 }
 
