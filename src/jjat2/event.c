@@ -3,6 +3,7 @@
  *
  * Initialize and update every event
  */
+#include <base/collision.h>
 #include <base/error.h>
 #include <base/game.h>
 
@@ -66,13 +67,32 @@ err parseEvent(entityCtx *pEnt, gfmParser *pParser, type t) {
  */
 err preUpdateEvent(entityCtx *pEnt) {
     void *pChild;
+    err erv;
     int type;
     gfmRV rv;
 
     rv = gfmSprite_getChild(&pChild, &type, pEnt->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    /* TODO Implement */
+    switch (type) {
+        case T_DOOR: {
+            erv = preUpdateDoor(pEnt);
+            ASSERT(erv == ERR_OK, erv);
+        } break;
+        default: {
+            rv = gfmSprite_update(pEnt->pSelf, game.pCtx);
+            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+            /* Collide against stuff */
+            rv = gfmQuadtree_collideSprite(collision.pQt, pEnt->pSelf);
+            if (rv == GFMRV_QUADTREE_OVERLAPED) {
+                erv = doCollide(collision.pQt);
+                ASSERT(erv == ERR_OK, erv);
+                rv = GFMRV_QUADTREE_DONE;
+            }
+            ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
+        }
+    }
 
     return ERR_OK;
 }

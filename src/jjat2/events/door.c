@@ -1,6 +1,7 @@
 /**
  * @file src/jjat2/events/door.c
  */
+#include <base/collision.h>
 #include <base/error.h>
 #include <base/game.h>
 #include <base/gfx.h>
@@ -87,6 +88,9 @@ err initDoor(entityCtx *pEnt, gfmParser *pParser) {
             , gfx.pSset8x32, door_offx, door_offy, pEnt, T_DOOR);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+    rv = gfmSprite_setFixed(pEnt->pSelf);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
     rv = gfmSprite_addAnimationsStatic(pEnt->pSelf, pDoorAnimData);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
@@ -97,6 +101,50 @@ err initDoor(entityCtx *pEnt, gfmParser *pParser) {
 
     /* Store the door's lock on the entity's flags */
     pEnt->flags = lock;
+
+    return ERR_OK;
+}
+
+/**
+ * Add a door to the quadtree depending on its state
+ *
+ * @param  [ in]pEnt    The entity
+ */
+err preUpdateDoor(entityCtx *pEnt) {
+    gfmRV rv;
+    err erv;
+    uint8_t curAnim;
+
+    rv = gfmSprite_update(pEnt->pSelf, game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    rv = gfmSprite_didAnimationFinish(pEnt->pSelf);
+    if (rv == GFMRV_TRUE) {
+        curAnim = pEnt->currentAnimation;
+    }
+    else {
+        /* Defaults to closed, if the animation is still running */
+        curAnim = CLOSED;
+    }
+
+    switch (curAnim) {
+        case OPENED:
+        case OPENING: {
+            /* Do nothing, since the door is open */
+        } break;
+        case CLOSED:
+        case CLOSING:
+        default: {
+            /* Collide against stuff */
+            rv = gfmQuadtree_collideSprite(collision.pQt, pEnt->pSelf);
+            if (rv == GFMRV_QUADTREE_OVERLAPED) {
+                erv = doCollide(collision.pQt);
+                ASSERT(erv == ERR_OK, erv);
+                rv = GFMRV_QUADTREE_DONE;
+            }
+            ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
+        }
+    }
 
     return ERR_OK;
 }
