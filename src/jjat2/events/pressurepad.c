@@ -130,12 +130,14 @@ err postUpdatePressurePad(entityCtx *pEnt) {
  */
 err drawPressurePad(entityCtx *pEnt) {
     gfmRV rv;
-    int x, y;
+    int cx, cy, x, y;
 
     rv = gfmSprite_getPosition(&x, &y, pEnt->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmCamera_getPosition(&cx, &cy, game.pCamera);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    rv = gfm_drawTile(game.pCtx, gfx.pSset32x8, x, y, 317/*tile*/, 0/*flip*/);
+    rv = gfm_drawTile(game.pCtx, gfx.pSset32x8, x - cx, y - cy, 317/*tile*/, 0/*flip*/);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     rv = gfmSprite_draw(pEnt->pSelf, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
