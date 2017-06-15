@@ -106,11 +106,18 @@ err postUpdateEvent(entityCtx *pEnt) {
     void *pChild;
     int type;
     gfmRV rv;
+    err erv;
 
     rv = gfmSprite_getChild(&pChild, &type, pEnt->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    /* TODO Implement */
+    switch (type) {
+        case T_PRESSURE_PAD: {
+            erv = postUpdatePressurePad(pEnt);
+            ASSERT(erv == ERR_OK, erv);
+        } break;
+        default: {}
+    }
 
     return ERR_OK;
 }

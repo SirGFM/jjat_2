@@ -21,6 +21,7 @@
 #include <jjat2/playstate.h>
 #include <jjat2/teleport.h>
 #include <jjat2/enemies/g_walky.h>
+#include <jjat2/events/pressurepad.h>
 
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gfmObject.h>
@@ -477,6 +478,18 @@ static inline err _attackEntity(collisionNode *attack
     }
 
     collision.flags |= CF_SKIP;
+    return ERR_OK;
+}
+
+/** Collision between an entity (of any kind) and a pressure pad */
+static inline err _onPressurePad(collisionNode *entity
+        , collisionNode *pressurePad) {
+
+    if (GFMRV_TRUE ==
+            gfmObject_isOverlaping(entity->pObject, pressurePad->pObject)) {
+        pressPressurePad((entityCtx*)pressurePad->pChild);
+    }
+
     return ERR_OK;
 }
 

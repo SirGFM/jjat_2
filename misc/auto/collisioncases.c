@@ -28,6 +28,12 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     CASE(T_FLOOR_NOTP, T_EN_G_WALKY)
     CASE(T_FLOOR_NOTP, T_GUNNY)
     CASE(T_FLOOR_NOTP, T_SWORDY)
+    CASE(T_DOOR, T_EN_SPIKY)
+    CASE(T_DOOR, T_EN_WALKY)
+    CASE(T_DOOR, T_EN_TURRET)
+    CASE(T_DOOR, T_EN_G_WALKY)
+    CASE(T_DOOR, T_GUNNY)
+    CASE(T_DOOR, T_SWORDY)
         if (node1.pChild != node2.pChild) {
             /* Filter out self collision */
             erv = _defaultFloorCollision(&node1, &node2);
@@ -36,21 +42,27 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     CASE(T_EN_SPIKY, T_BLUE_PLATFORM)
     CASE(T_EN_SPIKY, T_FLOOR)
     CASE(T_EN_SPIKY, T_FLOOR_NOTP)
+    CASE(T_EN_SPIKY, T_DOOR)
     CASE(T_EN_WALKY, T_BLUE_PLATFORM)
     CASE(T_EN_WALKY, T_FLOOR)
     CASE(T_EN_WALKY, T_FLOOR_NOTP)
+    CASE(T_EN_WALKY, T_DOOR)
     CASE(T_EN_TURRET, T_BLUE_PLATFORM)
     CASE(T_EN_TURRET, T_FLOOR)
     CASE(T_EN_TURRET, T_FLOOR_NOTP)
+    CASE(T_EN_TURRET, T_DOOR)
     CASE(T_EN_G_WALKY, T_BLUE_PLATFORM)
     CASE(T_EN_G_WALKY, T_FLOOR)
     CASE(T_EN_G_WALKY, T_FLOOR_NOTP)
+    CASE(T_EN_G_WALKY, T_DOOR)
     CASE(T_GUNNY, T_BLUE_PLATFORM)
     CASE(T_GUNNY, T_FLOOR)
     CASE(T_GUNNY, T_FLOOR_NOTP)
+    CASE(T_GUNNY, T_DOOR)
     CASE(T_SWORDY, T_BLUE_PLATFORM)
     CASE(T_SWORDY, T_FLOOR)
     CASE(T_SWORDY, T_FLOOR_NOTP)
+    CASE(T_SWORDY, T_DOOR)
         if (node1.pChild != node2.pChild) {
             /* Filter out self collision */
             erv = _defaultFloorCollision(&node2, &node1);
@@ -59,6 +71,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     CASE(T_BLUE_PLATFORM, T_EN_G_WALKY_ATK)
     CASE(T_FLOOR, T_EN_G_WALKY_ATK)
     CASE(T_FLOOR_NOTP, T_EN_G_WALKY_ATK)
+    CASE(T_DOOR, T_EN_G_WALKY_ATK)
         if (node1.pChild != node2.pChild) {
             /* Filter out self collision */
             erv = _floorProjectileCollision(&node1, &node2);
@@ -67,6 +80,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     CASE(T_EN_G_WALKY_ATK, T_BLUE_PLATFORM)
     CASE(T_EN_G_WALKY_ATK, T_FLOOR)
     CASE(T_EN_G_WALKY_ATK, T_FLOOR_NOTP)
+    CASE(T_EN_G_WALKY_ATK, T_DOOR)
         if (node1.pChild != node2.pChild) {
             /* Filter out self collision */
             erv = _floorProjectileCollision(&node2, &node1);
@@ -83,7 +97,6 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_BLUE_PLATFORM, T_FLOOR)
     IGNORE(T_BLUE_PLATFORM, T_FLOOR_NOTP)
     IGNORE(T_BLUE_PLATFORM, T_EN_G_WALKY_VIEW)
-    IGNORE(T_BLUE_PLATFORM, T_DOOR)
     IGNORE(T_BLUE_PLATFORM, T_PRESSURE_PAD)
     IGNORE(T_FLOOR, T_ATK_SWORD)
     IGNORE(T_FLOOR, T_CHECKPOINT)
@@ -95,7 +108,6 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     SELFCASE(T_FLOOR)
     IGNORE(T_FLOOR, T_FLOOR_NOTP)
     IGNORE(T_FLOOR, T_EN_G_WALKY_VIEW)
-    IGNORE(T_FLOOR, T_DOOR)
     IGNORE(T_FLOOR, T_PRESSURE_PAD)
     IGNORE(T_FLOOR_NOTP, T_ATK_SWORD)
     IGNORE(T_FLOOR_NOTP, T_CHECKPOINT)
@@ -107,8 +119,18 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_FLOOR_NOTP, T_FLOOR)
     SELFCASE(T_FLOOR_NOTP)
     IGNORE(T_FLOOR_NOTP, T_EN_G_WALKY_VIEW)
-    IGNORE(T_FLOOR_NOTP, T_DOOR)
     IGNORE(T_FLOOR_NOTP, T_PRESSURE_PAD)
+    IGNORE(T_DOOR, T_ATK_SWORD)
+    IGNORE(T_DOOR, T_CHECKPOINT)
+    IGNORE(T_DOOR, T_LOADZONE)
+    IGNORE(T_DOOR, T_DUMMY_SWORDY)
+    IGNORE(T_DOOR, T_DUMMY_GUNNY)
+    IGNORE(T_DOOR, T_SPIKE)
+    IGNORE(T_DOOR, T_BLUE_PLATFORM)
+    IGNORE(T_DOOR, T_FLOOR)
+    IGNORE(T_DOOR, T_FLOOR_NOTP)
+    IGNORE(T_DOOR, T_EN_G_WALKY_VIEW)
+    IGNORE(T_DOOR, T_PRESSURE_PAD)
         erv = ERR_OK;
     break;
 #  endif /* defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__)) */
@@ -153,7 +175,6 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_EN_G_WALKY_ATK, T_DUMMY_GUNNY)
     SELFCASE(T_EN_G_WALKY_ATK)
     IGNORE(T_EN_G_WALKY_ATK, T_EN_G_WALKY_VIEW)
-    IGNORE(T_EN_G_WALKY_ATK, T_DOOR)
     IGNORE(T_EN_G_WALKY_ATK, T_PRESSURE_PAD)
         erv = ERR_OK;
     break;
@@ -319,7 +340,6 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_ATK_SWORD, T_BLUE_PLATFORM)
     IGNORE(T_ATK_SWORD, T_DUMMY_SWORDY)
     IGNORE(T_ATK_SWORD, T_DUMMY_GUNNY)
-    IGNORE(T_ATK_SWORD, T_DOOR)
     IGNORE(T_ATK_SWORD, T_PRESSURE_PAD)
         erv = ERR_OK;
     break;
@@ -380,7 +400,6 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_SPIKE, T_DUMMY_GUNNY)
     SELFCASE(T_SPIKE)
     IGNORE(T_SPIKE, T_EN_G_WALKY_VIEW)
-    IGNORE(T_SPIKE, T_DOOR)
     IGNORE(T_SPIKE, T_PRESSURE_PAD)
         erv = ERR_OK;
     break;
@@ -425,6 +444,17 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
         if (node1.pChild != node2.pChild) {
             /* Filter out self collision */
             erv = _entityCollision(&node1, &node2);
+        }
+    break;
+    CASE(T_EN_SPIKY, T_PRESSURE_PAD)
+    CASE(T_EN_WALKY, T_PRESSURE_PAD)
+    CASE(T_EN_G_WALKY, T_PRESSURE_PAD)
+    CASE(T_EN_TURRET, T_PRESSURE_PAD)
+    CASE(T_SWORDY, T_PRESSURE_PAD)
+    CASE(T_GUNNY, T_PRESSURE_PAD)
+        if (node1.pChild != node2.pChild) {
+            /* Filter out self collision */
+            erv = _onPressurePad(&node1, &node2);
         }
     break;
     CASE(T_EN_SPIKY, T_EN_G_WALKY_VIEW)
@@ -487,7 +517,6 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_DUMMY_GUNNY, T_EN_SPIKY)
     IGNORE(T_DUMMY_GUNNY, T_EN_TURRET)
     IGNORE(T_DUMMY_GUNNY, T_BLUE_PLATFORM)
-    IGNORE(T_DUMMY_GUNNY, T_DOOR)
     IGNORE(T_DUMMY_GUNNY, T_PRESSURE_PAD)
     SELFCASE(T_DUMMY_SWORDY)
     IGNORE(T_DUMMY_SWORDY, T_DUMMY_GUNNY)
@@ -507,7 +536,6 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_DUMMY_SWORDY, T_EN_SPIKY)
     IGNORE(T_DUMMY_SWORDY, T_EN_TURRET)
     IGNORE(T_DUMMY_SWORDY, T_BLUE_PLATFORM)
-    IGNORE(T_DUMMY_SWORDY, T_DOOR)
     IGNORE(T_DUMMY_SWORDY, T_PRESSURE_PAD)
         erv = ERR_OK;
     break;
@@ -563,7 +591,6 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_CHECKPOINT, T_EN_G_WALKY_VIEW)
     IGNORE(T_CHECKPOINT, T_EN_SPIKY)
     IGNORE(T_CHECKPOINT, T_EN_TURRET)
-    IGNORE(T_CHECKPOINT, T_DOOR)
     IGNORE(T_CHECKPOINT, T_PRESSURE_PAD)
         erv = ERR_OK;
     break;
@@ -572,6 +599,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     CASE(T_TEL_BULLET, T_EN_TURRET)
     CASE(T_TEL_BULLET, T_SPIKE)
     CASE(T_TEL_BULLET, T_FLOOR_NOTP)
+    CASE(T_TEL_BULLET, T_DOOR)
         if (node1.pChild != node2.pChild) {
             /* Filter out self collision */
             erv = _ignoreTeleportBullet(&node1, &node2);
@@ -580,6 +608,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     CASE(T_EN_TURRET, T_TEL_BULLET)
     CASE(T_SPIKE, T_TEL_BULLET)
     CASE(T_FLOOR_NOTP, T_TEL_BULLET)
+    CASE(T_DOOR, T_TEL_BULLET)
         if (node1.pChild != node2.pChild) {
             /* Filter out self collision */
             erv = _ignoreTeleportBullet(&node2, &node1);
@@ -625,7 +654,6 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_TEL_BULLET, T_EN_G_WALKY_VIEW)
     IGNORE(T_TEL_BULLET, T_DUMMY_SWORDY)
     IGNORE(T_TEL_BULLET, T_DUMMY_GUNNY)
-    IGNORE(T_TEL_BULLET, T_DOOR)
     IGNORE(T_TEL_BULLET, T_PRESSURE_PAD)
         erv = ERR_OK;
     break;
@@ -674,7 +702,6 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_LOADZONE, T_EN_G_WALKY_VIEW)
     IGNORE(T_LOADZONE, T_EN_SPIKY)
     IGNORE(T_LOADZONE, T_EN_TURRET)
-    IGNORE(T_LOADZONE, T_DOOR)
     IGNORE(T_LOADZONE, T_PRESSURE_PAD)
         erv = ERR_OK;
     break;

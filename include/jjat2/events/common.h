@@ -7,10 +7,12 @@
 #include <stdint.h>
 
 enum enLocalVar {
-    EV_LOCAL_A = 0x00000001
-  , EV_LOCAL_B = 0x00000002
-  , EV_LOCAL_C = 0x00000004
-  , EV_LOCAL_D = 0x00000008
+    EV_LOCAL_A     = 0x00000001
+  , EV_LOCAL_B     = 0x00000002
+  , EV_LOCAL_C     = 0x00000004
+  , EV_LOCAL_D     = 0x00000008
+  , EV_LOCAL_MASK  = 0x0000000F
+  , EV_LOCAL_SHIFT = 4
 };
 
 /** Local variables that events may modify/check */

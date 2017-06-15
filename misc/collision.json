@@ -1,6 +1,6 @@
 {
     "floor_collision": {
-        "type_a": ["T_BLUE_PLATFORM", "T_FLOOR", "T_FLOOR_NOTP"],
+        "type_a": ["T_BLUE_PLATFORM", "T_FLOOR", "T_FLOOR_NOTP", "T_DOOR"],
         "cases": [
             {
                 "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_TURRET", "T_EN_G_WALKY", "T_GUNNY", "T_SWORDY"],
@@ -13,7 +13,7 @@
             {
                 "type_b": ["T_ATK_SWORD", "T_CHECKPOINT", "T_LOADZONE", "T_DUMMY_SWORDY",
                     "T_DUMMY_GUNNY", "T_SPIKE", "T_BLUE_PLATFORM", "T_FLOOR", "T_FLOOR_NOTP",
-                    "T_EN_G_WALKY_VIEW", "T_DOOR", "T_PRESSURE_PAD"],
+                    "T_EN_G_WALKY_VIEW", "T_PRESSURE_PAD"],
                 "function": null,
                 "auto_swap": false
             }
@@ -23,7 +23,7 @@
         "type_a": ["T_TEL_BULLET"],
         "cases": [
             {
-                "type_b": ["T_EN_TURRET", "T_SPIKE", "T_FLOOR_NOTP"],
+                "type_b": ["T_EN_TURRET", "T_SPIKE", "T_FLOOR_NOTP", "T_DOOR"],
                 "function": "_ignoreTeleportBullet"
             },
             {
@@ -36,8 +36,7 @@
             },
             {
                 "type_b": ["T_TEL_BULLET", "T_EN_G_WALKY_ATK", "T_CHECKPOINT", "T_LOADZONE",
-                    "T_EN_G_WALKY_VIEW", "T_DUMMY_SWORDY", "T_DUMMY_GUNNY", "T_DOOR",
-                    "T_PRESSURE_PAD"],
+                    "T_EN_G_WALKY_VIEW", "T_DUMMY_SWORDY", "T_DUMMY_GUNNY", "T_PRESSURE_PAD"],
                 "function": null,
                 "auto_swap": false
             },
@@ -60,7 +59,7 @@
                     "T_FLOOR", "T_ENEMY", "T_FLOOR_NOTP", "T_ATK_SWORD", "T_TEL_BULLET",
                     "T_CHECKPOINT", "T_SPIKE", "T_EN_WALKY", "T_EN_G_WALKY", "T_EN_G_WALKY_ATK",
                     "T_EN_G_WALKY_VIEW", "T_EN_SPIKY", "T_EN_TURRET",
-                    "T_BLUE_PLATFORM", "T_DOOR", "T_PRESSURE_PAD"],
+                    "T_BLUE_PLATFORM", "T_PRESSURE_PAD"],
                 "function": null,
                 "auto_swap": false
             }
@@ -77,7 +76,7 @@
                 "type_b": ["T_FLOOR", "T_FLOOR_NOTP", "T_LOADZONE", "T_BLUE_PLATFORM",
                     "T_ATK_SWORD", "T_TEL_BULLET", "T_CHECKPOINT", "T_SPIKE", "T_EN_WALKY",
                     "T_EN_G_WALKY", "T_EN_G_WALKY_ATK", "T_EN_G_WALKY_VIEW", "T_EN_SPIKY",
-                    "T_EN_TURRET", "T_DOOR", "T_PRESSURE_PAD"],
+                    "T_EN_TURRET", "T_PRESSURE_PAD"],
                 "function": null,
                 "auto_swap": false
             }
@@ -101,7 +100,7 @@
             {
                 "type_b": ["T_FLOOR", "T_FLOOR_NOTP", "T_LOADZONE", "T_BLUE_PLATFORM",
                     "T_ATK_SWORD", "T_CHECKPOINT", "T_DUMMY_SWORDY", "T_DUMMY_GUNNY",
-                    "T_SPIKE", "T_EN_G_WALKY_VIEW", "T_DOOR", "T_PRESSURE_PAD"],
+                    "T_SPIKE", "T_EN_G_WALKY_VIEW", "T_PRESSURE_PAD"],
                 "function": null,
                 "auto_swap": false
             }
@@ -119,7 +118,7 @@
                     "T_ATK_SWORD", "T_TEL_BULLET", "T_CHECKPOINT", "T_DUMMY_SWORDY",
                     "T_DUMMY_GUNNY", "T_SPIKE", "T_EN_WALKY", "T_EN_G_WALKY",
                     "T_EN_G_WALKY_ATK", "T_EN_G_WALKY_VIEW", "T_EN_SPIKY", "T_EN_TURRET",
-                    "T_DOOR", "T_PRESSURE_PAD"],
+                    "T_PRESSURE_PAD"],
                 "function": null,
                 "auto_swap": false
             }
@@ -131,6 +130,11 @@
             {
                 "type_b": ["T_EN_SPIKY", "T_EN_WALKY", "T_EN_G_WALKY", "T_EN_TURRET", "T_SWORDY", "T_GUNNY"],
                 "function": "_entityCollision",
+                "auto_swap": false
+            },
+            {
+                "type_b": ["T_PRESSURE_PAD"],
+                "function": "_onPressurePad",
                 "auto_swap": false
             },
             {
@@ -173,8 +177,7 @@
             {
                 "type_b": ["T_ATK_SWORD", "T_CHECKPOINT", "T_FLOOR",
                     "T_FLOOR_NOTP", "T_SPIKE", "T_LOADZONE", "T_EN_G_WALKY_VIEW",
-                    "T_BLUE_PLATFORM", "T_DUMMY_SWORDY", "T_DUMMY_GUNNY", "T_DOOR",
-                    "T_PRESSURE_PAD"],
+                    "T_BLUE_PLATFORM", "T_DUMMY_SWORDY", "T_DUMMY_GUNNY", "T_PRESSURE_PAD"],
                 "function": null,
                 "auto_swap": false
             }
@@ -193,8 +196,7 @@
             },
             {
                 "type_b": ["T_LOADZONE", "T_TEL_BULLET", "T_CHECKPOINT", "T_DUMMY_SWORDY",
-                    "T_DUMMY_GUNNY", "T_EN_G_WALKY_ATK", "T_EN_G_WALKY_VIEW", "T_DOOR",
-                    "T_PRESSURE_PAD"],
+                    "T_DUMMY_GUNNY", "T_EN_G_WALKY_ATK", "T_EN_G_WALKY_VIEW", "T_PRESSURE_PAD"],
                 "function": null,
                 "auto_swap": false
             }
