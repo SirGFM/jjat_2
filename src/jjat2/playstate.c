@@ -650,8 +650,6 @@ static err _loadLevel(char *levelName, int setPlayer) {
         ASSERT(erv == ERR_OK, erv);
     }
 
-    clearLocalVariables();
-
 #undef LEN
 #undef APPEND_DYN
 #undef APPEND_POS
@@ -704,6 +702,10 @@ err updatePlaystate() {
     gfmRV rv;
     err erv;
     int i;
+
+    /* Local variables are cleared on the start of every frame, since they shall
+     * be later set on event's pre-update */
+    clearLocalVariables();
 
     playstate.flags &= ~(PF_TEL_SWORDY | PF_TEL_GUNNY);
     playstate.pNextLevel = 0;

@@ -17,7 +17,7 @@
 err initPressurePad(entityCtx *pEnt, gfmParser *pParser);
 
 /**
- * Update the pressure pad's state (and set any local var if activated)
+ * Update the pressure pad's state
  *
  * @param  [ in]pEnt    The entity
  */
@@ -31,7 +31,7 @@ err postUpdatePressurePad(entityCtx *pEnt);
 err drawPressurePad(entityCtx *pEnt);
 
 /**
- * Activate the pressure pad
+ * Activate the pressure pad (and set any local var if fully pressed)
  *
  * @param  [ in]pEnt    The entity
  */

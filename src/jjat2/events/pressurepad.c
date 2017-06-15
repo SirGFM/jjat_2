@@ -82,7 +82,7 @@ err initPressurePad(entityCtx *pEnt, gfmParser *pParser) {
 }
 
 /**
- * Update the pressure pad's state (and set any local var if activated)
+ * Update the pressure pad's state
  *
  * @param  [ in]pEnt    The entity
  */
@@ -99,11 +99,6 @@ err postUpdatePressurePad(entityCtx *pEnt) {
         rv = gfmSprite_setOffset(pEnt->pSelf, pressurepad_offx
                 , pressurepad_offy + curState);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-
-        /* Set the local var */
-        if (curState == PRESSED) {
-            _localVars |= (pEnt->flags & EV_LOCAL_MASK);
-        }
     }
     else if (!(pEnt->flags & DID_COLLIDE) && curState != DISABLED) {
         curState--;
@@ -111,9 +106,6 @@ err postUpdatePressurePad(entityCtx *pEnt) {
         rv = gfmSprite_setOffset(pEnt->pSelf, pressurepad_offx
                 , pressurepad_offy + curState);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-
-        /* Clear the flag */
-        _localVars &= ~(pEnt->flags & EV_LOCAL_MASK);
     }
 
     pEnt->flags = (pEnt->flags & ~STATE_MASK);
@@ -146,11 +138,16 @@ err drawPressurePad(entityCtx *pEnt) {
 }
 
 /**
- * Activate the pressure pad
+ * Activate the pressure pad (and set any local var if fully pressed)
  *
  * @param  [ in]pEnt    The entity
  */
 void pressPressurePad(entityCtx *pEnt) {
     pEnt->flags |= DID_COLLIDE;
+
+    /* Set the local var if pressed */
+    if ((pEnt->flags & STATE_MASK) >> EV_LOCAL_SHIFT == PRESSED) {
+        _localVars |= (pEnt->flags & EV_LOCAL_MASK);
+    }
 }
 
