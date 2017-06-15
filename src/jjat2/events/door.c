@@ -68,7 +68,8 @@ err initDoor(entityCtx *pEnt, gfmParser *pParser) {
                 anim = CLOSED;
             }
             else if (memcmp(pVal, "opened", 7) == 0) {
-                anim = OPENED;
+                /* TODO Implement initial state 'opened' */
+                ASSERT(0, ERR_NOTIMPLEMENTED);
             }
         }
         else if (memcmp(pKey, "lock_", 5) == 0) {
@@ -144,6 +145,32 @@ err preUpdateDoor(entityCtx *pEnt) {
             }
             ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
         }
+    }
+
+    return ERR_OK;
+}
+
+/**
+ * Change the door's animation depending on the local variables
+ *
+ * @param  [ in]pEnt    The entity
+ */
+err postUpdateDoor(entityCtx *pEnt) {
+    gfmRV rv;
+
+    rv = gfmSprite_didAnimationFinish(pEnt->pSelf);
+    if (rv == GFMRV_FALSE) {
+        /* Exit early */
+        return ERR_OK;
+    }
+
+    if ((pEnt->flags & _localVars) == pEnt->flags
+            && pEnt->currentAnimation != OPENED) {
+        return setEntityAnimation(pEnt, OPENING, 0/*force*/);
+    }
+    else if ((pEnt->flags & _localVars) != pEnt->flags
+            && pEnt->currentAnimation != CLOSED) {
+        return setEntityAnimation(pEnt, CLOSING, 0/*force*/);
     }
 
     return ERR_OK;

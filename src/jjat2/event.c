@@ -112,6 +112,10 @@ err postUpdateEvent(entityCtx *pEnt) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     switch (type) {
+        case T_DOOR: {
+            erv = postUpdateDoor(pEnt);
+            ASSERT(erv == ERR_OK, erv);
+        } break;
         case T_PRESSURE_PAD: {
             erv = postUpdatePressurePad(pEnt);
             ASSERT(erv == ERR_OK, erv);

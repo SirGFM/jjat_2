@@ -23,5 +23,12 @@ err initDoor(entityCtx *pEnt, gfmParser *pParser);
  */
 err preUpdateDoor(entityCtx *pEnt);
 
+/**
+ * Change the door's animation depending on the local variables
+ *
+ * @param  [ in]pEnt    The entity
+ */
+err postUpdateDoor(entityCtx *pEnt);
+
 #endif /* __EVENTS_DOOR_H__ */
 
