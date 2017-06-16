@@ -40,6 +40,8 @@ err parseEnemy(entityCtx *pEnt, gfmParser *pParser, type t) {
     }
     ASSERT(erv == ERR_OK, erv);
 
+    pEnt->baseType = (t & T_BASE_MASK);
+
     return ERR_OK;
 }
 

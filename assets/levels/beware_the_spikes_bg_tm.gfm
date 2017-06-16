@@ -14,6 +14,7 @@ type floor 950
 type floor 951
 type floor 960
 type floor 961
+type floor 962
 type floor 963
 type floor 964
 type floor 965
@@ -55,6 +56,14 @@ type floor 1204
 type floor 1205
 type floor 1206
 type floor 1207
+type floor 1268
+type floor 1269
+type floor 1270
+type floor 1271
+type floor 1332
+type floor 1333
+type floor 1334
+type floor 1335
 type blue_platform 1344
 type blue_platform 1345
 type blue_platform 1346
