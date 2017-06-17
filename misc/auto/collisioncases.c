@@ -517,7 +517,6 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_DUMMY_GUNNY, T_EN_SPIKY)
     IGNORE(T_DUMMY_GUNNY, T_EN_TURRET)
     IGNORE(T_DUMMY_GUNNY, T_BLUE_PLATFORM)
-    IGNORE(T_DUMMY_GUNNY, T_PRESSURE_PAD)
     SELFCASE(T_DUMMY_SWORDY)
     IGNORE(T_DUMMY_SWORDY, T_DUMMY_GUNNY)
     IGNORE(T_DUMMY_SWORDY, T_HAZARD)
@@ -536,10 +535,16 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_DUMMY_SWORDY, T_EN_SPIKY)
     IGNORE(T_DUMMY_SWORDY, T_EN_TURRET)
     IGNORE(T_DUMMY_SWORDY, T_BLUE_PLATFORM)
-    IGNORE(T_DUMMY_SWORDY, T_PRESSURE_PAD)
         erv = ERR_OK;
     break;
 #  endif /* defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__)) */
+    CASE(T_DUMMY_GUNNY, T_PRESSURE_PAD)
+    CASE(T_DUMMY_SWORDY, T_PRESSURE_PAD)
+        if (node1.pChild != node2.pChild) {
+            /* Filter out self collision */
+            erv = _onPressurePad(&node1, &node2);
+        }
+    break;
     /* Collision group 'g_walky_view' */ 
 #  if defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__))
     IGNORE(T_EN_G_WALKY_VIEW, T_FLOOR)

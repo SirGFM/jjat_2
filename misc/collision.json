@@ -59,8 +59,13 @@
                     "T_FLOOR", "T_ENEMY", "T_FLOOR_NOTP", "T_ATK_SWORD", "T_TEL_BULLET",
                     "T_CHECKPOINT", "T_SPIKE", "T_EN_WALKY", "T_EN_G_WALKY", "T_EN_G_WALKY_ATK",
                     "T_EN_G_WALKY_VIEW", "T_EN_SPIKY", "T_EN_TURRET",
-                    "T_BLUE_PLATFORM", "T_PRESSURE_PAD"],
+                    "T_BLUE_PLATFORM"],
                 "function": null,
+                "auto_swap": false
+            },
+            {
+                "type_b": ["T_PRESSURE_PAD"],
+                "function": "_onPressurePad",
                 "auto_swap": false
             }
         ]
