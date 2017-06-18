@@ -49,3 +49,5 @@ promo/*
 *.swp
 *~
 
+# Deployed builds
+deploy/*

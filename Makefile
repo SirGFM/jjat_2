@@ -13,7 +13,7 @@
 # CONFIGURABLE VARIABLES
 #=======================================================================
 # Define the list of subdirectories (which exist within src/)
-  SUBDIRLIST := base jjat2 jjat2/enemies
+  SUBDIRLIST := base jjat2 jjat2/enemies jjat2/events
 
 # Define every object required by compilation
   OBJS := \
@@ -31,6 +31,7 @@
          jjat2/dictionary.o \
          jjat2/enemy.o \
          jjat2/entity.o \
+         jjat2/event.o \
          jjat2/fx_group.o \
          jjat2/gunny.o \
          jjat2/hitbox.o \
@@ -43,17 +44,18 @@
          jjat2/enemies/g_walky.o \
          jjat2/enemies/spiky.o \
          jjat2/enemies/turret.o \
-         jjat2/enemies/walky.o
+         jjat2/enemies/walky.o \
+         jjat2/events/door.o \
+         jjat2/events/pressurepad.o
 
 # Define the target name
   TARGET := game
 
 # Define the generated icon
-#      Required files:
-#        - assets/icon.ico
-#        - assets/icon.rc
-# TODO Uncomment this to add an icon to the game
-#  WINICON := assets/icon.o
+  WINICON := assets/icon.o
+  ifeq ($(OS), Win)
+    ICON := $(WINICON)
+  endif
 
 # List every header file
   HEADERS := $(shell find include/ -name *.h)
@@ -93,7 +95,7 @@
   CFLAGS := $(CFLAGS) -I"./include/" -I"./misc" -Wall
 
   # TODO Uncomment to enable the background
-  #CFLAGS := $(CFLAGS) -DJJAT_ENABLE_BACKGROUND
+  CFLAGS := $(CFLAGS) -DJJAT_ENABLE_BACKGROUND
 
   # Ugly hack: I'll put everything specific to the JJAT engine within these #ifdefs
   CFLAGS := $(CFLAGS) -DJJATENGINE
@@ -142,7 +144,7 @@
 .SUFFIXES:
 
 # Define all targets that doesn't match its generated file
-.PHONY: all clean mkdirs __clean
+.PHONY: all clean mkdirs __clean deploy
 #=======================================================================
 
 
@@ -191,11 +193,11 @@ obj/$(OS)_$(MODE)/%.d: %.c
 	@ # Hack required so this won't run when clean or mkdirs is run
 	@ if [ ! -z "$(IGNORE_DEP)" ]; then exit 1; fi
 	@ echo '[DEP] $< -> $@'
-	gcc $(CFLAGS) -MM -MG -MT "$@ $(@:%.d=%.o)" $< > $@
+	@ gcc $(CFLAGS) -MM -MG -MT "$@ $(@:%.d=%.o)" $< > $@
 
 # Rule for generating the icon
-$(WINICON):
-	windres assets/icon.rc $(WINICON)
+$(WINICON): assets/icon.rc
+	$(WINDRES) assets/icon.rc $(WINICON)
 
 clean: __clean mkdirs
 
@@ -206,5 +208,15 @@ mkdirs:
 __clean:
 	@ echo "Cleaning..."
 	@ rm -rf $(DIRLIST) bin/ obj/
+
+deploy:
+	@ echo 'Deploying Linux 64 version...'
+	@ ./rush/rush protoman linux64
+	@ echo 'Deploying Linux 32 version...'
+	@ ./rush/rush megaman linux32
+	@ echo 'Deploying Windows 64 version...'
+	@ ./rush/rush crashman-64 win64
+	@ echo 'Deploying Windows 32 version...'
+	@ ./rush/rush crashman-32 win32
 #=======================================================================
 

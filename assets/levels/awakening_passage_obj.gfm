@@ -1,0 +1,7 @@
+area invisible_wall 320 0 32 240
+obj loadzone 304 32 32 96 [ dest , here_and_there ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 4 ]
+obj swordy_pos 152 224 16 16
+obj gunny_pos 208 224 16 16
+area invisible_wall 0 -32 320 32
+obj loadzone 176 -16 32 32 [ dest , game_start ] [ dir , up ] [ tgt_x , 10 ] [ tgt_y , 29 ]
+area invisible_wall 0 240 320 32

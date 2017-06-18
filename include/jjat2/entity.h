@@ -99,6 +99,8 @@ struct stEntityCtx {
     uint8_t currentAnimation;
     /** Number of animations */
     uint8_t maxAnimation;
+    /** Base type for the given entity */
+    uint8_t baseType;
 };
 typedef struct stEntityCtx entityCtx;
 

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title> JJAT+ User Manual </title>
+        <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="keywords" content="game,manual" />
+        <meta name="description" content="JJAT+ User Manual" />
+        <meta name="author" content="Gabriel Francisco Mandaji" />
+        <link rel="shortcut icon" href="favicon.ico?" />
+
+        <style>
+            /* NOTE:
+             *  text-shadow: x_pos y_pos blur_size color
+             */
+            h1 {
+                text-shadow: 0 0 1.25em #ffffff;
+                text-align: center;
+                font-size: 4em;
+                margin: auto;
+            }
+            h1.subtitle {
+                text-shadow: 0 0 0 #000000;
+                text-align: center;
+                font-size: smaller;
+                margin: 0;
+            }
+            h2 {
+                text-shadow: 0 0 1em #ffffff;
+                font-size: 2em;
+                margin: 0.5em;
+                margin-top: 2em;
+                margin-left: 2em;
+            }
+            h3 {
+                text-shadow: 0 0 1em #ffffff;
+                font-size: 1.25em;
+                margin: 0.5em;
+                margin-left: 2em;
+            }
+            h4 {
+                text-shadow: 0 0 1em #ffffff;
+                font-size: 1.125em;
+                margin: 0.5em;
+                margin-left: 2.25em;
+            }
+            body {
+                background: #222034;
+                color: #cbdbfc;
+            }
+            p {
+                font-size: 1em;
+                margin-left: 2em;
+            }
+            p.subtitle {
+                font-size: smaller;
+                text-align: center;
+                margin: auto;
+                margin-bottom: 0;
+                margin-top: 2px;
+            }
+            div.image-list {
+                width: auto;
+                height: auto;
+                display: table;
+                margin-left: 4em;
+            }
+            div.image-box {
+                border-style: solid;
+                border-width: 1px;
+                max-width: 700px;
+                max-height: 520px;
+                margin: auto;
+                display: table;
+                float: left;
+                padding: 4px;
+                margin: 4px;
+            }
+            img.centered {
+                margin: auto;
+                display: block;
+            }
+            table.centered {
+                margin: auto;
+            }
+            .nearest-neighbor {
+                /** Source: http://stackoverflow.com/questions/14068103/disable-antialising-when-scaling-images */
+                image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
+                image-rendering: -moz-crisp-edges;          /* Firefox                        */
+                image-rendering: -o-crisp-edges;            /* Opera                          */
+                image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
+                image-rendering: pixelated;                 /* Chrome                         */
+                image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
+                -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+            }
+        </style>
+
+        <script type="text/javascript">
+            // TODO Scroll navbar
+        </script>
+    </head>
+    <body>
+        <h1> JJAT+ </h1>
+        <h1 class="subtitle"> WIP title. It shall be changed until the game's release. </h1>
+
+
+        <h2> About the game </h2>
+
+        <p> "JJAT+" is a co-op game in which two robots must help each other
+        through their adventure. Play it with a friend or try to control both
+        characters at once. </p>
+
+
+        <h2> Launching the game </h2>
+
+        <p> The preferred way to download and launch the game is through
+        <a href="https://itch.io/app">itch</a>, the itch.io app.</p>
+
+        <p> The app automatically manages <strong>updating</strong> the game and
+        has built-in <strong>launch options</strong>. </p>
+
+        <p> If you manually downloaded the game, there are a few ways to easily
+        launch the game in one of the specified modes: </p>
+
+        <h3> Windows </h3>
+
+        <p> There are three batch scripts that handle launching the game: </p>
+
+        <ul>
+            <li> Single_Player_Mode.bat: Launch the game in single player mode.
+                </li>
+            <li> Two_Players_Mode.bat: Launch the game in two players mode.
+                </li>
+            <li> Synchronous_Single_Player_Mode.bat: Launch the game in
+            synchronous single player mode. </li>
+        </ul>
+
+        <p> Simply double-click the desired script. </p>
+
+        <h3> Linux </h3>
+
+        <p> There's a single script used to launch the game,
+        <tt>launch.sh</tt>. Execute that script with one of the following
+        arguments: </p>
+
+        <ul>
+            <li> --single-player-mode | -1p: Launch the game in single player
+            mode. </li>
+            <li> --two-player-mode | -2p: Launch the game in two players mode.
+                </li>
+            <li> --synchronous-single-player-mode | -s1p: Launch the game in
+            synchronous single player mode. </li>
+        </ul>
+
+
+        <h2> How to play </h2>
+
+        <h3> Controls </h3>
+
+        <p> Currently, each character is assigned four actions: move left, move
+        right, jump and action. </p>
+
+        <p> The following schemes are present, and accessible from the launch
+        game menu (if launching from the itch.io app): </p>
+
+        <p> Although not yet implemented, the pause action is mapped to the
+        first two gamepad's pause button (if connected) and to the Escape key.
+            </p>
+
+        <h4> Single player mode </h4>
+
+        <p> Control both characters at once. If using a keyboard (it must have
+        two analog sticks and four should buttons), the left half of the
+        controller controls Red, while the right half controls Blue. </p>
+
+        <p> On the keyboard, Red is controlled with the WASD (or ZQSD) keys and
+        Blue is controlled with the arrow keys </p>
+
+        <table class="centered">
+            <tr>
+                <th> Action </th>
+                <th> Mapped keys </th>
+            </tr>
+            <tr>
+                <td> Red's Movement </td>
+                <td>
+                    <ul>
+                        <li> Left: A, Q keys </li>
+                        <li> Right: D key </li>
+                        <li> Gamepad: Left analog stick </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td> Red's Jump </td>
+                <td>
+                    <ul>
+                        <li> Keyboard: W, Z keys </li>
+                        <li> Gamepad: Left shoulder button </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td> Red's Action </td>
+                <td>
+                    <ul>
+                        <li> Keyboard: S key </li>
+                        <li> Gamepad: Left shoulder trigger </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td> Blue's Movement </td>
+                <td>
+                    <ul>
+                        <li> Left: Left arrow key </li>
+                        <li> Right: Right arrow key </li>
+                        <li> Gamepad: Right analog stick </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td> Blue's Jump </td>
+                <td>
+                    <ul>
+                        <li> Keyboard: Up arrow key </li>
+                        <li> Gamepad: Right shoulder button </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td> Blue's Action </td>
+                <td>
+                    <ul>
+                        <li> Keyboard: Down arrow key </li>
+                        <li> Gamepad: Right shoulder trigger </li>
+                    </ul>
+                </td>
+            </tr>
+        </table>
+
+        <h4> Two players mode </h4>
+
+        <p> Co-op mode expects at least one gamepad to be connected. If both
+        players will use the keyboard, simply select <strong> Single player mode
+        </strong> </p>
+
+        <p> Red is bound to the first connected gamepad while Blue is mapped
+        either to the keyboard or to the second connected gamepad. </p>
+
+        <table class="centered">
+            <tr>
+                <th> Action </th>
+                <th> Mapped keys </th>
+            </tr>
+            <tr>
+                <td> Red's Movement </td>
+                <td>
+                    <ul> <li> Gamepad: Left analog stick </li> </ul>
+                </td>
+            </tr>
+            <tr>
+                <td> Red's Jump </td>
+                <td>
+                    <ul> <li> Gamepad: A button (bottom face button) </li> </ul>
+                </td>
+            </tr>
+            <tr>
+                <td> Red's Action </td>
+                <td>
+                    <ul> <li> Gamepad: B, X button (face button next to "A")
+                        </li> </ul>
+                </td>
+            </tr>
+            <tr>
+                <td> Blue's Movement </td>
+                <td>
+                    <ul>
+                        <li> Left: Left arrow key </li>
+                        <li> Right: Right arrow key </li>
+                        <li> Gamepad: Left analog stick </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td> Blue's Jump </td>
+                <td>
+                    <ul>
+                        <li> Keyboard: X key </li>
+                        <li> Gamepad: A button (bottom face button) </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td> Blue's Action </td>
+                <td>
+                    <ul>
+                        <li> Keyboard: C key </li>
+                        <li> Gamepad: B, X button (face button next to "A")
+                            </li>
+                    </ul>
+                </td>
+            </tr>
+        </table>
+
+        <h4> Synchronous single player mode </h4>
+
+        <div class="image-list">
+            <div class="image-box">
+                <img class="nearest-neighbor centered" src="img/sync_mode.gif"
+                    title="This may be broken... Intentionally so, though!">
+                </img>
+                <p class="subtitle"> Instantaneous floating platforms anywhere! </p>
+            </div>
+        </div>
+
+        <p> This mode is a less demanding alternative to single player mode.
+        Only one character is active at a time and you may switch between them
+        whenever desired. </p>
+
+        <table class="centered">
+            <tr>
+                <th> Action </th>
+                <th> Mapped keys </th>
+            </tr>
+            <tr>
+                <td> Movement </td>
+                <td>
+                    <ul>
+                        <li> Left: Left arrow key </li>
+                        <li> Right: Right arrow key </li>
+                        <li> Gamepad: Left analog stick </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td> Jump </td>
+                <td>
+                    <ul>
+                        <li> Keyboard: X key </li>
+                        <li> Gamepad: A button (bottom face button) </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td> Action </td>
+                <td>
+                    <ul>
+                        <li> Keyboard: C key </li>
+                        <li> Gamepad: B, X button (face button next to "A")
+                            </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td> Switch Active Character </td>
+                <td>
+                    <ul>
+                        <li> Keyboard: TAB, Spacebar keys </li>
+                        <li> Gamepad: Y button (top face button) </li>
+                    </ul>
+                </td>
+            </tr>
+        </table>
+
+        <h4> About custom controls </h4>
+
+        <p> The game already supports rebind-able controls. Each of the modes
+        described above simply start the game with a different mapping. However,
+        there's still no in-game interface for configuring it. Also, creating a
+        new mapping is quite cumbersome. </p>
+
+        <p> If none of the default configurations work for you, do get in
+        contact and we will figure something out! </p>
+
+        <h3> The red robot </h3>
+
+        <p> The red robot is an offensive unit. It has more mobility and may use
+        its sword to attack enemies or reflect energy projectiles. </p>
+
+        <p> Although the unit's official name is "CRL-000", it's usually simply
+        referred as "Red". </p>
+
+        <div class="image-list">
+            <div class="image-box">
+                <img class="nearest-neighbor centered" src="img/swordy_run.gif"
+                    title="Technical details: Red runs at 100 px/s (or 12.5 tiles/s).">
+                </img>
+                <p class="subtitle"> Red is quite fast! </p>
+            </div>
+            <div class="image-box">
+                <img class="nearest-neighbor centered" src="img/swordy_jump.gif"
+                    title="For the tallest jump, Red reaches 4.5 tiles (36 pixels) in 0.32s. It falls in 0.24s, though...">
+                </img>
+                <p class="subtitle"> It also may jump really high! </p>
+            </div>
+            <div class="image-box">
+                <img class="nearest-neighbor centered"
+                    src="img/swordy_doublejump.gif"
+                    title="Fun fact: the second jump has the same properties as the first one. That means that a perfect double jump can almost reach 9 tiles (72 pixels).">
+                </img>
+                <p class="subtitle"> Somehow, it's also able to jump once while
+                in midair! </p>
+            </div>
+            <div class="image-box">
+                <img class="nearest-neighbor centered"
+                    src="img/swordy_reflect.gif"
+                    title="Yeah, this enemy can block... for now, at least...">
+                </img>
+                <p class="subtitle"> Some enemy attacks can even be reflected by
+                Red's sword! </p>
+            </div>
+        </div>
+
+        <h3> The blue robot </h3>
+
+        <p> The blue robot is a technical unit. It has a teleport gun, which may
+        target either other entities (switching places with them) or surfaces,
+        teleporting the robot to the targeted place. </p>
+
+        <p> Although the unit's official name is "RFS-001", it's usually simply
+        referred as "Blue". </p>
+
+        <div class="image-list">
+            <div class="image-box">
+                <img class="nearest-neighbor centered" src="img/gunny_run.gif"
+                    title="Blue's speed: 76 px/s (9.5 tiles/s).">
+                </img>
+                <p class="subtitle"> Blue is quite slower than Red... </p>
+            </div>
+            <div class="image-box">
+                <img class="nearest-neighbor centered" src="img/gunny_jump.gif"
+                    title="Tallest jump: 3.25 tiles (26 pixels). It takes 0.256s to reach the appex, and 0.224s to fall.">
+                </img>
+                <p class="subtitle"> Its jump is also lower... </p>
+            </div>
+            <div class="image-box">
+                <img class="nearest-neighbor centered"
+                    src="img/gunny_teleport.gif"
+                    title="Although one still can't intentionally un-target something, targets vanish when moved off-screen.">
+                </img>
+                <p class="subtitle"> But Blue's teleport gun make up for all
+                that! </p>
+            </div>
+        </div>
+
+        <h3> Entities interaction </h3>
+
+        <p> Entities in this world are usually able to carry each other
+        effortlessly, regardless of their apparent weights. </p>
+
+        <p> However, some may be armed with horns, or even weapons. Pay
+        attention! </p>
+
+        <div class="image-list">
+            <div class="image-box">
+                <img class="nearest-neighbor centered"
+                    src="img/entity_interaction.gif"
+                    title="Nothing to see here, just a stack of enemies...">
+                </img>
+                <p class="subtitle"> This kind of interaction should be fun and
+                not broken at all.</p>
+            </div>
+        </div>
+
+
+        <h2> About the current title </h2>
+
+        <p> Back in 2015, I took part of the Global Game Jam and made a small
+        prototype in which a player must control two characters at once. </p>
+
+        <p> That prototype was the starting point for a game I made on that
+        same year called <a href="https://gfm.itch.io/jjat">JJAT</a>.
+        However, that game feels incomplete, and is too harsh. </p>
+
+        <p> This game is meant to be a "spiritual successor" for JJAT. Hence why
+        it's currently being called "JJAT+". </p>
+
+        <p> Eventually, the game will be given a proper title. But, until then,
+        I'll keep calling it "JJAT+" (or, sometime "JJAT 2"). </p>
+    </body>
+</html>
+
