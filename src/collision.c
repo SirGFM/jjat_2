@@ -456,8 +456,12 @@ static inline err _attackEntity(collisionNode *attack
         damage = 1000;
     }
 
+    if (GFMRV_FALSE
+            == gfmObject_justOverlaped(attack->pObject, entity->pObject)) {
+        return ERR_OK;
+    }
+
     if (TYPE(entity->type) == T_EN_G_WALKY) {
-        gfmObject_justOverlaped(attack->pObject, entity->pObject);
         if (onGreenWalkyAttacked((entityCtx*)entity->pChild, attack->pObject)
                 == ERR_OK) {
             hitEntity((entityCtx*)entity->pChild, damage);
