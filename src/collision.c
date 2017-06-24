@@ -107,6 +107,33 @@ static inline err _defaultFloorCollision(collisionNode *floor
     }
 #endif /* JJATENGINE */
 
+#if defined(JJATENGINE)
+    if (collision.flags & CF_FIXTELEPORT) {
+        /* Entity was (possibly) just teleported into the ground.
+         * Manually check and fix it.
+         *
+         * Also, the new overlap detection correctly signals the collision
+         * direction based on the position on the last frame, which WILL break
+         * since the entity was just forced into a new position */
+        if (gfmObject_isOverlaping(floor->pObject, entity->pObject)
+                == GFMRV_TRUE) {
+            int fh, fy, ph, py;
+
+            gfmObject_getVerticalPosition(&fy, floor->pObject);
+            gfmObject_getHeight(&fh, floor->pObject);
+            gfmObject_getVerticalPosition(&py, entity->pObject);
+            gfmObject_getHeight(&ph, entity->pObject);
+
+            if (py >= fy) {
+                gfmObject_setVerticalPosition(entity->pObject, fy + fh);
+            }
+            else if (py + ph <= fy + fh) {
+                gfmObject_setVerticalPosition(entity->pObject, fy - ph);
+            }
+        }
+    }
+    else {
+#endif  /* JJATENGINE */
     rv = gfmObject_justOverlaped(floor->pObject, entity->pObject);
     if (rv == GFMRV_TRUE) {
         gfmCollision dir;
@@ -145,28 +172,9 @@ static inline err _defaultFloorCollision(collisionNode *floor
 
         }
     } /* if (rv == GFMRV_TRUE) */
-#if  defined(JJATENGINE)
-    else if (collision.flags & CF_FIXTELEPORT) {
-        /* Entity was (possibly) just teleported into the ground.
-         * Manually check and fix it */
-        if (gfmObject_isOverlaping(floor->pObject, entity->pObject)
-                == GFMRV_TRUE) {
-            int fh, fy, ph, py;
-
-            gfmObject_getVerticalPosition(&fy, floor->pObject);
-            gfmObject_getHeight(&fh, floor->pObject);
-            gfmObject_getVerticalPosition(&py, entity->pObject);
-            gfmObject_getHeight(&ph, entity->pObject);
-
-            if (py >= fy) {
-                gfmObject_setVerticalPosition(entity->pObject, fy + fh);
-            }
-            else if (py + ph <= fy + fh) {
-                gfmObject_setVerticalPosition(entity->pObject, fy - ph);
-            }
-        }
-    }
-#endif  /* JJATENGINE */
+#if defined(JJATENGINE)
+    } /* if (!(collision.flags & CF_FIXTELEPORT)) */
+#endif
 
     return ERR_OK;
 }
