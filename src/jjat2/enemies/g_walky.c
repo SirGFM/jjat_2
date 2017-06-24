@@ -72,6 +72,7 @@ err initGreenWalky(entityCtx *pEnt, gfmParser *pParser) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     rv = gfmParser_getNumProperties(&l, pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    x += 1;
 
     i = 0;
     while (i < l) {

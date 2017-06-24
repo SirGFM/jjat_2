@@ -1,8 +1,8 @@
 area invisible_wall -32 0 32 240
 obj loadzone -16 24 32 200 [ dest , here_and_there ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 2 ]
 obj walky 176 192 8 8
-obj g_walky 280 224 8 8
-obj g_walky 368 224 8 8 [ flipped , true ]
-obj walky 288 224 8 8
+obj g_walky 272 224 8 8
+obj g_walky 376 224 8 8 [ flipped , true ]
+obj walky 296 224 8 8
 area invisible_wall 480 0 32 240
 obj loadzone 464 32 32 176 [ dest , the_meeting ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 5 ]
