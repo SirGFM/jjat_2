@@ -229,6 +229,8 @@ static err _loadStaticQuadtree() {
 
     rv = gfmQuadtree_setStatic(collision.pStaticQt);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmQuadtree_enableContinuosCollision(collision.pStaticQt);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     rv = gfmQuadtree_populateTilemap(collision.pStaticQt, playstate.pMap);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
