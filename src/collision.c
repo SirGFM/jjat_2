@@ -33,6 +33,14 @@
 #  include <signal.h>
 #endif
 
+#define CHECK_OVERLAP(nodeA, nodeB) \
+    do { \
+        if (GFMRV_FALSE \
+                == gfmObject_isOverlaping(nodeA->pObject, nodeB->pObject)) { \
+            return ERR_OK; \
+        } \
+    } while (0)
+
 /** Hold all pointers (and the type) for a colliding object */
 struct stCollisionNode {
     gfmObject *pObject;
@@ -185,6 +193,8 @@ static inline err _ignoreTeleportBullet(collisionNode *bullet
     gfmGroupNode *pNode;
     gfmRV rv;
 
+    CHECK_OVERLAP(bullet, other);
+
     pNode = (gfmGroupNode*)bullet->pChild;
     /* TODO Play vanish animation */
     rv = gfmGroup_removeNode(pNode);
@@ -201,6 +211,8 @@ static inline err _setTeleportEntity(collisionNode *bullet
     entityCtx *pEntity;
     err erv;
     gfmRV rv;
+
+    CHECK_OVERLAP(bullet, other);
 
     pNode = (gfmGroupNode*)bullet->pChild;
     pEntity = (entityCtx*)other->pChild;
@@ -227,6 +239,8 @@ static inline err _setTeleportFloor(collisionNode *bullet
     gfmObject *pBullet, *pFloor;
     err erv;
     gfmRV rv;
+
+    CHECK_OVERLAP(bullet, floor);
 
 #if defined(JJATENGINE)
     /* Ignore collision if against a platform that hasn't been activated */
@@ -282,6 +296,8 @@ static inline err _setTeleportFloor(collisionNode *bullet
 /** Handle collision between a floor object and a particle */
 static inline err _floorProjectileCollision(collisionNode *floor
         , collisionNode *particle) {
+    CHECK_OVERLAP(particle, floor);
+
     if (TYPE(particle->type) == T_EN_G_WALKY_ATK) {
         _explodeStar(particle);
     }
@@ -293,6 +309,8 @@ static inline err _floorProjectileCollision(collisionNode *floor
 /** Deny a single projectile, when it collides against something else */
 static inline err _denyProjectile(collisionNode *projectile
         , collisionNode *other) {
+    CHECK_OVERLAP(projectile, other);
+
     if (TYPE(projectile->type) == T_EN_G_WALKY_ATK) {
         _explodeStar(projectile);
     }
@@ -305,6 +323,8 @@ static inline err _denyProjectile(collisionNode *projectile
 static inline err _collidePlayerDummy(collisionNode *dummy
         , collisionNode *player) {
     int playerY, dummyY;
+
+    CHECK_OVERLAP(dummy, player);
 
     gfmObject_getVerticalPosition(&playerY, player->pObject);
     gfmObject_getVerticalPosition(&dummyY, dummy->pObject);
@@ -327,6 +347,8 @@ static inline err _collidePlayerDummy(collisionNode *dummy
 /** Collide a loadzone against a player */
 static inline err _collideLoadzonePlayer(collisionNode *loadzone
         , collisionNode *player) {
+    CHECK_OVERLAP(loadzone, player);
+
     onHitLoadzone(player->type, (leveltransitionData*)loadzone->pChild);
 
     return ERR_OK;
@@ -337,6 +359,8 @@ static inline err _environmentalHarmEntity(collisionNode *harm
         , collisionNode *entity) {
     gfmCollision dir;
     int py, sy, ph;
+
+    CHECK_OVERLAP(harm, entity);
 
     gfmObject_justOverlaped(harm->pObject, entity->pObject);
     gfmObject_getCurrentCollision(&dir, entity->pObject);
@@ -366,6 +390,8 @@ static inline err _checkpointCollision(collisionNode *checkpoint
     gfmSprite *pSpr;
     int h, w, x, y;
     err erv;
+
+    CHECK_OVERLAP(checkpoint, player);
 
     gfmObject_getPosition(&x, &y, checkpoint->pObject);
     gfmObject_getDimensions(&w, &h, checkpoint->pObject);
@@ -408,6 +434,8 @@ static inline err _spikyEntityCollision(collisionNode *spiky
 
 /** Collision between two entities */
 static inline err _entityCollision(collisionNode *entA, collisionNode *entB) {
+    CHECK_OVERLAP(entA, entB);
+
     if (TYPE(entA->type) == T_EN_SPIKY && TYPE(entB->type) != T_EN_SPIKY) {
         return _spikyEntityCollision(entA, entB);
     }
@@ -432,6 +460,8 @@ static inline err _gWalkyViewEntityCollision(collisionNode *entity
         return ERR_OK;
     }
 
+    CHECK_OVERLAP(entity, view);
+
     triggerGreenWalkyAttack((entityCtx*)view->pChild);
 
     return ERR_OK;
@@ -442,6 +472,8 @@ static inline err _swordReflectProjectile(collisionNode *sword
         , collisionNode *projectile) {
     double vx;
     int dir;
+
+    CHECK_OVERLAP(sword, projectile);
 
     gfmSprite_getHorizontalVelocity(&vx, projectile->pSprite);
     gfmSprite_getDirection(&dir, projectile->pSprite);
@@ -458,15 +490,12 @@ static inline err _attackEntity(collisionNode *attack
         , collisionNode *entity) {
     int damage;
 
+    CHECK_OVERLAP(attack, entity);
+
     damage = attack->type >> T_BITS;
     if (TYPE(attack->type) == T_ATK_SWORD) {
         /* TODO Make this damage based */
         damage = 1000;
-    }
-
-    if (GFMRV_FALSE
-            == gfmObject_justOverlaped(attack->pObject, entity->pObject)) {
-        return ERR_OK;
     }
 
     if (TYPE(entity->type) == T_EN_G_WALKY) {
