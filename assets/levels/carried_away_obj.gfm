@@ -1,0 +1,4 @@
+area invisible_wall -32 0 32 240
+area invisible_wall 0 -32 320 32
+obj loadzone -16 184 32 32 [ dest , the_meeting ] [ dir , left ] [ tgt_x , 41 ] [ tgt_y , 23 ]
+obj loadzone 144 -16 32 32 [ dest , short_breather ] [ dir , up ] [ tgt_x , 52 ] [ tgt_y , 29 ]
