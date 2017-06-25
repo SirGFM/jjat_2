@@ -140,15 +140,12 @@ static inline err _defaultFloorCollision(collisionNode *floor
     }
     else {
 #endif  /* JJATENGINE */
-#if defined(FULL_CONTINUOUS_COLLISION)
-    /* This would only be required by tiny 8 pixels platforms... */
     if (GFMRV_TRUE
             == gfmObject_sweepJustOverlaped(floor->pObject, entity->pObject)) {
+        /* This should only be required by tiny 8 pixels platforms... */
         gfmObject_sweepCollision(floor->pObject, entity->pObject);
     }
-    else
-#endif /* FULL_CONTINUOUS_COLLISION */
-    if (GFMRV_TRUE
+    else if (GFMRV_TRUE
             == gfmObject_justOverlaped(floor->pObject, entity->pObject)) {
         gfmCollision dir;
 

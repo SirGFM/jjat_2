@@ -97,6 +97,7 @@ err initGunny(entityCtx *gunny) {
     gunny->shorthopVelocity = GUNNY_HOP_SPEED;
     gunny->standGravity = GUNNY_JUMP_GRAV;
     gunny->fallGravity = GUNNY_FALL_GRAV;
+    gunny->baseType = T_PLAYER;
     initEntity(gunny);
 
     return ERR_OK;
