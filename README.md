@@ -1,6 +1,10 @@
 # JJAT 2
 
-Second iteration of JJAT's engine, now based on GFraMe v2.
+Second iteration of JJAT's engine, now based on GFraMe v?.
+
+**NOTE:** This game uses GFraMe's latest version, which still hasn't been merged
+back into its master. To compile this manually, clone
+[GFraMe's devel](https://github.com/SirGFM/GFraMe/tree/devel) branch.
 
 ## Player Interaction Reasoning
 
