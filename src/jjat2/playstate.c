@@ -9,6 +9,7 @@
 #include <conf/game.h>
 
 #include <GFraMe/gfmCamera.h>
+#include <GFraMe/gfmDebug.h>
 #include <GFraMe/gfmHitbox.h>
 #include <GFraMe/gfmObject.h>
 #include <GFraMe/gfmParser.h>
@@ -227,6 +228,8 @@ static err _loadStaticQuadtree() {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     rv = gfmQuadtree_setStatic(collision.pStaticQt);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmQuadtree_enableContinuosCollision(collision.pStaticQt);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     rv = gfmQuadtree_populateTilemap(collision.pStaticQt, playstate.pMap);
@@ -714,6 +717,8 @@ err updatePlaystate() {
     rv = gfmQuadtree_initRoot(collision.pQt, -16/*x*/, -16/*y*/, playstate.width
             , playstate.height, 8/*depth*/, 16/*nodes*/);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    rv = gfmQuadtree_enableContinuosCollision(collision.pQt);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     rv = gfmTilemap_update(playstate.pMap, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
@@ -809,7 +814,7 @@ err updatePlaystate() {
 err drawPlaystate() {
     gfmRV rv;
     err erv;
-    int i;
+    int i, nodes, buckets;
 
 #if defined(JJAT_ENABLE_BACKGROUND)
     if (game.flags & FX_PRETTYRENDER) {
@@ -892,6 +897,11 @@ err drawPlaystate() {
 
     erv = drawUI();
     ASSERT(erv == ERR_OK, erv);
+
+    gfmQuadtree_getNumNodes(&nodes, &buckets, collision.pQt);
+    gfmDebug_printf(game.pCtx, 0, 128, "DYNAMIC\nNODES  : %i\nBUCKETS: %i", nodes, buckets);
+    gfmQuadtree_getNumNodes(&nodes, &buckets, collision.pStaticQt);
+    gfmDebug_printf(game.pCtx, 0, 128+8*4, "STATIC\nNODES  : %i\nBUCKETS: %i", nodes, buckets);
 
     return ERR_OK;
 }

@@ -33,6 +33,14 @@
 #  include <signal.h>
 #endif
 
+#define CHECK_OVERLAP(nodeA, nodeB) \
+    do { \
+        if (GFMRV_FALSE \
+                == gfmObject_isOverlaping(nodeA->pObject, nodeB->pObject)) { \
+            return ERR_OK; \
+        } \
+    } while (0)
+
 /** Hold all pointers (and the type) for a colliding object */
 struct stCollisionNode {
     gfmObject *pObject;
@@ -97,8 +105,6 @@ static void _explodeStar(collisionNode *bullet) {
  */
 static inline err _defaultFloorCollision(collisionNode *floor
         , collisionNode *entity) {
-    gfmRV rv;
-
 #if defined(JJATENGINE)
     /* Ignore collision if against a platform that hasn't been activated */
     if (TYPE(floor->type) == T_BLUE_PLATFORM
@@ -107,8 +113,43 @@ static inline err _defaultFloorCollision(collisionNode *floor
     }
 #endif /* JJATENGINE */
 
-    rv = gfmObject_justOverlaped(floor->pObject, entity->pObject);
-    if (rv == GFMRV_TRUE) {
+#if defined(JJATENGINE)
+    if (collision.flags & CF_FIXTELEPORT) {
+        /* Entity was (possibly) just teleported into the ground.
+         * Manually check and fix it.
+         *
+         * Also, the new overlap detection correctly signals the collision
+         * direction based on the position on the last frame, which WILL break
+         * since the entity was just forced into a new position */
+        if (gfmObject_isOverlaping(floor->pObject, entity->pObject)
+                == GFMRV_TRUE) {
+            int fh, fy, ph, py;
+
+            gfmObject_getVerticalPosition(&fy, floor->pObject);
+            gfmObject_getHeight(&fh, floor->pObject);
+            gfmObject_getVerticalPosition(&py, entity->pObject);
+            gfmObject_getHeight(&ph, entity->pObject);
+
+            if (py >= fy) {
+                gfmObject_setVerticalPosition(entity->pObject, fy + fh);
+            }
+            else if (py + ph <= fy + fh) {
+                gfmObject_setVerticalPosition(entity->pObject, fy - ph);
+            }
+        }
+    }
+    else {
+#endif  /* JJATENGINE */
+#if defined(FULL_CONTINUOUS_COLLISION)
+    /* This would only be required by tiny 8 pixels platforms... */
+    if (GFMRV_TRUE
+            == gfmObject_sweepJustOverlaped(floor->pObject, entity->pObject)) {
+        gfmObject_sweepCollision(floor->pObject, entity->pObject);
+    }
+    else
+#endif /* FULL_CONTINUOUS_COLLISION */
+    if (GFMRV_TRUE
+            == gfmObject_justOverlaped(floor->pObject, entity->pObject)) {
         gfmCollision dir;
 
         gfmObject_getCurrentCollision(&dir, entity->pObject);
@@ -144,29 +185,10 @@ static inline err _defaultFloorCollision(collisionNode *floor
             gfmObject_setVerticalPosition(entity->pObject, y + 1);
 
         }
-    } /* if (rv == GFMRV_TRUE) */
-#if  defined(JJATENGINE)
-    else if (collision.flags & CF_FIXTELEPORT) {
-        /* Entity was (possibly) just teleported into the ground.
-         * Manually check and fix it */
-        if (gfmObject_isOverlaping(floor->pObject, entity->pObject)
-                == GFMRV_TRUE) {
-            int fh, fy, ph, py;
-
-            gfmObject_getVerticalPosition(&fy, floor->pObject);
-            gfmObject_getHeight(&fh, floor->pObject);
-            gfmObject_getVerticalPosition(&py, entity->pObject);
-            gfmObject_getHeight(&ph, entity->pObject);
-
-            if (py >= fy) {
-                gfmObject_setVerticalPosition(entity->pObject, fy + fh);
-            }
-            else if (py + ph <= fy + fh) {
-                gfmObject_setVerticalPosition(entity->pObject, fy - ph);
-            }
-        }
-    }
-#endif  /* JJATENGINE */
+    } /* if (!gfmObject_sweepJustOverlaped(floor->pObject, entity->pObject)) */
+#if defined(JJATENGINE)
+    } /* if (!(collision.flags & CF_FIXTELEPORT)) */
+#endif
 
     return ERR_OK;
 }
@@ -176,6 +198,8 @@ static inline err _ignoreTeleportBullet(collisionNode *bullet
         , collisionNode *other) {
     gfmGroupNode *pNode;
     gfmRV rv;
+
+    CHECK_OVERLAP(bullet, other);
 
     pNode = (gfmGroupNode*)bullet->pChild;
     /* TODO Play vanish animation */
@@ -193,6 +217,8 @@ static inline err _setTeleportEntity(collisionNode *bullet
     entityCtx *pEntity;
     err erv;
     gfmRV rv;
+
+    CHECK_OVERLAP(bullet, other);
 
     pNode = (gfmGroupNode*)bullet->pChild;
     pEntity = (entityCtx*)other->pChild;
@@ -219,6 +245,8 @@ static inline err _setTeleportFloor(collisionNode *bullet
     gfmObject *pBullet, *pFloor;
     err erv;
     gfmRV rv;
+
+    CHECK_OVERLAP(bullet, floor);
 
 #if defined(JJATENGINE)
     /* Ignore collision if against a platform that hasn't been activated */
@@ -274,6 +302,8 @@ static inline err _setTeleportFloor(collisionNode *bullet
 /** Handle collision between a floor object and a particle */
 static inline err _floorProjectileCollision(collisionNode *floor
         , collisionNode *particle) {
+    CHECK_OVERLAP(particle, floor);
+
     if (TYPE(particle->type) == T_EN_G_WALKY_ATK) {
         _explodeStar(particle);
     }
@@ -285,6 +315,8 @@ static inline err _floorProjectileCollision(collisionNode *floor
 /** Deny a single projectile, when it collides against something else */
 static inline err _denyProjectile(collisionNode *projectile
         , collisionNode *other) {
+    CHECK_OVERLAP(projectile, other);
+
     if (TYPE(projectile->type) == T_EN_G_WALKY_ATK) {
         _explodeStar(projectile);
     }
@@ -297,6 +329,8 @@ static inline err _denyProjectile(collisionNode *projectile
 static inline err _collidePlayerDummy(collisionNode *dummy
         , collisionNode *player) {
     int playerY, dummyY;
+
+    CHECK_OVERLAP(dummy, player);
 
     gfmObject_getVerticalPosition(&playerY, player->pObject);
     gfmObject_getVerticalPosition(&dummyY, dummy->pObject);
@@ -319,6 +353,8 @@ static inline err _collidePlayerDummy(collisionNode *dummy
 /** Collide a loadzone against a player */
 static inline err _collideLoadzonePlayer(collisionNode *loadzone
         , collisionNode *player) {
+    CHECK_OVERLAP(loadzone, player);
+
     onHitLoadzone(player->type, (leveltransitionData*)loadzone->pChild);
 
     return ERR_OK;
@@ -329,6 +365,8 @@ static inline err _environmentalHarmEntity(collisionNode *harm
         , collisionNode *entity) {
     gfmCollision dir;
     int py, sy, ph;
+
+    CHECK_OVERLAP(harm, entity);
 
     gfmObject_justOverlaped(harm->pObject, entity->pObject);
     gfmObject_getCurrentCollision(&dir, entity->pObject);
@@ -358,6 +396,8 @@ static inline err _checkpointCollision(collisionNode *checkpoint
     gfmSprite *pSpr;
     int h, w, x, y;
     err erv;
+
+    CHECK_OVERLAP(checkpoint, player);
 
     gfmObject_getPosition(&x, &y, checkpoint->pObject);
     gfmObject_getDimensions(&w, &h, checkpoint->pObject);
@@ -400,6 +440,8 @@ static inline err _spikyEntityCollision(collisionNode *spiky
 
 /** Collision between two entities */
 static inline err _entityCollision(collisionNode *entA, collisionNode *entB) {
+    CHECK_OVERLAP(entA, entB);
+
     if (TYPE(entA->type) == T_EN_SPIKY && TYPE(entB->type) != T_EN_SPIKY) {
         return _spikyEntityCollision(entA, entB);
     }
@@ -424,6 +466,8 @@ static inline err _gWalkyViewEntityCollision(collisionNode *entity
         return ERR_OK;
     }
 
+    CHECK_OVERLAP(entity, view);
+
     triggerGreenWalkyAttack((entityCtx*)view->pChild);
 
     return ERR_OK;
@@ -434,6 +478,8 @@ static inline err _swordReflectProjectile(collisionNode *sword
         , collisionNode *projectile) {
     double vx;
     int dir;
+
+    CHECK_OVERLAP(sword, projectile);
 
     gfmSprite_getHorizontalVelocity(&vx, projectile->pSprite);
     gfmSprite_getDirection(&dir, projectile->pSprite);
@@ -450,6 +496,8 @@ static inline err _attackEntity(collisionNode *attack
         , collisionNode *entity) {
     int damage;
 
+    CHECK_OVERLAP(attack, entity);
+
     damage = attack->type >> T_BITS;
     if (TYPE(attack->type) == T_ATK_SWORD) {
         /* TODO Make this damage based */
@@ -457,7 +505,6 @@ static inline err _attackEntity(collisionNode *attack
     }
 
     if (TYPE(entity->type) == T_EN_G_WALKY) {
-        gfmObject_justOverlaped(attack->pObject, entity->pObject);
         if (onGreenWalkyAttacked((entityCtx*)entity->pChild, attack->pObject)
                 == ERR_OK) {
             hitEntity((entityCtx*)entity->pChild, damage);
