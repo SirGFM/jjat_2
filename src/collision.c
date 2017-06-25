@@ -105,8 +105,6 @@ static void _explodeStar(collisionNode *bullet) {
  */
 static inline err _defaultFloorCollision(collisionNode *floor
         , collisionNode *entity) {
-    gfmRV rv;
-
 #if defined(JJATENGINE)
     /* Ignore collision if against a platform that hasn't been activated */
     if (TYPE(floor->type) == T_BLUE_PLATFORM
@@ -142,8 +140,16 @@ static inline err _defaultFloorCollision(collisionNode *floor
     }
     else {
 #endif  /* JJATENGINE */
-    rv = gfmObject_justOverlaped(floor->pObject, entity->pObject);
-    if (rv == GFMRV_TRUE) {
+#if defined(FULL_CONTINUOUS_COLLISION)
+    /* This would only be required by tiny 8 pixels platforms... */
+    if (GFMRV_TRUE
+            == gfmObject_sweepJustOverlaped(floor->pObject, entity->pObject)) {
+        gfmObject_sweepCollision(floor->pObject, entity->pObject);
+    }
+    else
+#endif /* FULL_CONTINUOUS_COLLISION */
+    if (GFMRV_TRUE
+            == gfmObject_justOverlaped(floor->pObject, entity->pObject)) {
         gfmCollision dir;
 
         gfmObject_getCurrentCollision(&dir, entity->pObject);
@@ -179,7 +185,7 @@ static inline err _defaultFloorCollision(collisionNode *floor
             gfmObject_setVerticalPosition(entity->pObject, y + 1);
 
         }
-    } /* if (rv == GFMRV_TRUE) */
+    } /* if (!gfmObject_sweepJustOverlaped(floor->pObject, entity->pObject)) */
 #if defined(JJATENGINE)
     } /* if (!(collision.flags & CF_FIXTELEPORT)) */
 #endif
