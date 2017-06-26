@@ -405,7 +405,10 @@ void setEntityDirection(entityCtx *entity) {
 void collideTwoEntities(entityCtx *entA, entityCtx *entB) {
     gfmRV rv;
 
-    rv = gfmSprite_justOverlaped(entA->pSelf, entB->pSelf);
+    rv = gfmSprite_sweepJustOverlaped(entA->pSelf, entB->pSelf);
+    if (rv != GFMRV_TRUE) {
+        rv = gfmSprite_justOverlaped(entA->pSelf, entB->pSelf);
+    }
     if (rv == GFMRV_TRUE) {
         gfmCollision adir, bdir;
         gfmSprite_getCurrentCollision(&adir, entA->pSelf);
