@@ -1,3 +1,3 @@
 area invisible_wall -32 0 32 240
-obj loadzone -16 160 32 48 [ dest , the_meeting ] [ dir , left ] [ tgt_x , 59 ] [ tgt_y , 3 ]
+obj loadzone -16 160 32 48 [ dest , short_breather ] [ dir , left ] [ tgt_x , 59 ] [ tgt_y , 3 ]
 obj loadzone -16 32 32 32 [ dest , blink_wisely ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 24 ]

@@ -9,6 +9,8 @@
 #include <base/gfx.h>
 #include <base/input.h>
 
+#include <conf/type.h>
+
 #include <jjat2/entity.h>
 #include <jjat2/playstate.h>
 
@@ -155,17 +157,17 @@ err collideEntity(entityCtx *entity) {
         rv = GFMRV_QUADTREE_DONE;
     }
     ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
-#if defined(FIX_TINY_GAPS)
-    /* Colliding a second time againt the world QT solves a few corner cases...
-     * If that proves to be an issue, define that flag! */
-    rv = gfmQuadtree_collideSprite(collision.pStaticQt, entity->pSelf);
-    if (rv == GFMRV_QUADTREE_OVERLAPED) {
-        erv = doCollide(collision.pStaticQt);
-        ASSERT(erv == ERR_OK, erv);
-        rv = GFMRV_QUADTREE_DONE;
+    if (entity->baseType == T_PLAYER) {
+        /* Colliding a second time againt the world QT solves a few corner
+         * cases... */
+        rv = gfmQuadtree_collideSprite(collision.pStaticQt, entity->pSelf);
+        if (rv == GFMRV_QUADTREE_OVERLAPED) {
+            erv = doCollide(collision.pStaticQt);
+            ASSERT(erv == ERR_OK, erv);
+            rv = GFMRV_QUADTREE_DONE;
+        }
+        ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
     }
-    ASSERT(rv == GFMRV_QUADTREE_DONE, ERR_GFMERR);
-#endif /* FIX_TINY_GAPS */
 
     rv = gfmQuadtree_collideSprite(collision.pQt, entity->pSelf);
     if (rv == GFMRV_QUADTREE_OVERLAPED) {
