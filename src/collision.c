@@ -100,6 +100,47 @@ static void _explodeStar(collisionNode *bullet) {
     }
 }
 
+/** Handle collision between a floor and a object that has just (been)
+ * teleported */
+static inline err _teleportedFloorCollision(collisionNode *floor
+        , collisionNode *entity) {
+    /* Entity was (possibly) just teleported into the ground.
+     * Manually check and fix it.
+     *
+     * Also, the new overlap detection correctly signals the collision
+     * direction based on the position on the last frame, which WILL break
+     * since the entity was just forced into a new position */
+    if (gfmObject_isOverlaping(floor->pObject, entity->pObject)
+            == GFMRV_TRUE) {
+        int fh, fw, fx, fy, hDist, maxHDist, ph, pw, px, py;
+
+        gfmObject_getPosition(&fx, &fy, floor->pObject);
+        gfmObject_getDimensions(&fw, &fh, floor->pObject);
+        gfmObject_getPosition(&px, &py, entity->pObject);
+        gfmObject_getDimensions(&pw, &ph, entity->pObject);
+
+        fw /= 2;
+        pw /= 2;
+        hDist = (fx + fw) - (px + pw);
+        maxHDist = fw + pw;
+
+        /* Avoids getting pushed above or bellow some platforms, when the
+         * position this entity was teleported to was just grazing a wall */
+        if (hDist <= -maxHDist || hDist >= maxHDist) {
+            return ERR_OK;
+        }
+
+        if (py >= fy) {
+            gfmObject_setVerticalPosition(entity->pObject, fy + fh);
+        }
+        else if (py + ph <= fy + fh) {
+            gfmObject_setVerticalPosition(entity->pObject, fy - ph);
+        }
+    }
+
+    return ERR_OK;
+}
+
 /**
  * Handle collision between a floor object and an entity
  */
@@ -111,35 +152,11 @@ static inline err _defaultFloorCollision(collisionNode *floor
             && !(game.sessionFlags & SF_BLUE_ACTIVE)) {
         return ERR_OK;
     }
+    else if (collision.flags & CF_FIXTELEPORT) {
+        return _teleportedFloorCollision(floor, entity);
+    }
 #endif /* JJATENGINE */
 
-#if defined(JJATENGINE)
-    if (collision.flags & CF_FIXTELEPORT) {
-        /* Entity was (possibly) just teleported into the ground.
-         * Manually check and fix it.
-         *
-         * Also, the new overlap detection correctly signals the collision
-         * direction based on the position on the last frame, which WILL break
-         * since the entity was just forced into a new position */
-        if (gfmObject_isOverlaping(floor->pObject, entity->pObject)
-                == GFMRV_TRUE) {
-            int fh, fy, ph, py;
-
-            gfmObject_getVerticalPosition(&fy, floor->pObject);
-            gfmObject_getHeight(&fh, floor->pObject);
-            gfmObject_getVerticalPosition(&py, entity->pObject);
-            gfmObject_getHeight(&ph, entity->pObject);
-
-            if (py >= fy) {
-                gfmObject_setVerticalPosition(entity->pObject, fy + fh);
-            }
-            else if (py + ph <= fy + fh) {
-                gfmObject_setVerticalPosition(entity->pObject, fy - ph);
-            }
-        }
-    }
-    else {
-#endif  /* JJATENGINE */
     if (GFMRV_TRUE
             == gfmObject_sweepJustOverlaped(floor->pObject, entity->pObject)) {
         /* This should only be required by tiny 8 pixels platforms... */
@@ -183,9 +200,6 @@ static inline err _defaultFloorCollision(collisionNode *floor
 
         }
     } /* if (!gfmObject_sweepJustOverlaped(floor->pObject, entity->pObject)) */
-#if defined(JJATENGINE)
-    } /* if (!(collision.flags & CF_FIXTELEPORT)) */
-#endif
 
     return ERR_OK;
 }
