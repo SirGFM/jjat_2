@@ -1,0 +1,12 @@
+area invisible_wall 320 0 32 240
+area invisible_wall -32 0 32 240
+area invisible_wall 0 -24 320 24
+obj loadzone -16 184 32 32 [ dest , game_start ] [ dir , left ] [ tgt_x , 47 ] [ tgt_y , 6 ]
+obj loadzone 304 168 32 32 [ dest , harmless_baddies ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 14 ]
+obj walky 184 200 8 8
+obj walky 192 200 8 8
+obj walky 200 200 8 8
+obj walky 208 200 8 8
+obj walky 216 200 8 8
+obj pressure_pad 200 152 32 8 [ set_0 , A ]
+obj door 272 136 8 32 [ init_state , closed ] [ lock_0 , A ]
