@@ -6,5 +6,5 @@ obj walky 280 200 8 8
 obj g_walky 160 48 8 8
 obj g_walky 64 80 8 8
 obj g_walky 128 152 8 8 [ flipped , true ]
-obj loadzone 304 168 32 32 [ dest , harmless_baddies ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 14 ]
+obj loadzone 304 168 32 32 [ dest , harmful_spikes ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 13 ]
 obj loadzone -16 184 32 32 [ dest , game_start ] [ dir , left ] [ tgt_x , 47 ] [ tgt_y , 6 ]
