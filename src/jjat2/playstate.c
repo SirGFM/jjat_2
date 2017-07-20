@@ -828,41 +828,51 @@ err drawPlaystate() {
         y = (sy + gy) / 2 + 8;
 
         gfmTilemap_getDimension(&width, &height, playstate.pBackground);
-        width /= 2;
-        height /= 2;
 
-        if (x < width) {
-            x *= 8;
-            x /= width;
-            x = 8 - x;
-        }
-        else if (x > width) {
-            x -= width;
-            x *= 8;
-            x /= width;
-            x *= -1;
+        if (width > playstate.width - 32) {
+            width /= 2;
+            if (x < width) {
+                x *= 8;
+                x /= width;
+                x = 8 - x;
+            }
+            else if (x > width) {
+                x -= width;
+                x *= 8;
+                x /= width;
+                x *= -1;
+            }
+            else {
+                x = 0;
+            }
+            x -= 8;
         }
         else {
             x = 0;
         }
 
-        if (y < height) {
-            y *= 8;
-            y /= height;
-            y = 8 - y;
-        }
-        else if (y > height) {
-            y -= height;
-            y *= 8;
-            y /= height;
-            y *= -1;
+        if (height > playstate.height - 32) {
+            height /= 2;
+            if (y < height) {
+                y *= 8;
+                y /= height;
+                y = 8 - y;
+            }
+            else if (y > height) {
+                y -= height;
+                y *= 8;
+                y /= height;
+                y *= -1;
+            }
+            else {
+                y = 0;
+            }
+            y -= 8;
         }
         else {
             y = 0;
         }
 
-        x -= 8;
-        y -= 8;
         gfmTilemap_setPosition(playstate.pBackground, x, y);
 
         rv = gfmTilemap_draw(playstate.pBackground, game.pCtx);
