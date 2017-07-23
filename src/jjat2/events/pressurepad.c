@@ -14,9 +14,9 @@
 #include <string.h>
 #include <stdint.h>
 
-#define pressurepad_offx        0
+#define pressurepad_offx        -4
 #define pressurepad_offy        (-2)
-#define pressurepad_width       32
+#define pressurepad_width       24
 #define pressurepad_height      8
 #define pressurepad_objheight   (pressurepad_height + 2)
 #define pressurepad_frame       334
@@ -61,6 +61,7 @@ err initPressurePad(entityCtx *pEnt, gfmParser *pParser) {
 
     rv = gfmParser_getPos(&x, &y, pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    x -= pressurepad_offx;
     y -= pressurepad_height;
 
     rv = gfmSprite_init(pEnt->pSelf, x, y, pressurepad_width
@@ -129,7 +130,8 @@ err drawPressurePad(entityCtx *pEnt) {
     rv = gfmCamera_getPosition(&cx, &cy, game.pCamera);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    rv = gfm_drawTile(game.pCtx, gfx.pSset32x8, x - cx, y - cy, 317/*tile*/, 0/*flip*/);
+    rv = gfm_drawTile(game.pCtx, gfx.pSset32x8, x - cx + pressurepad_offx
+            , y - cy, 317/*tile*/, 0/*flip*/);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     rv = gfmSprite_draw(pEnt->pSelf, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
