@@ -31,6 +31,17 @@
 
 #include <string.h>
 
+#if defined(JJAT_ENABLE_BACKGROUND)
+static int pBgAnimData[] = {
+/*len|fps|loop|data... */
+   2 , 2 ,  0 , 926,927,
+   2 , 2 ,  0 , 990,991,
+   6 , 8 ,  0 , 927,928,929,930,931,926,
+   6 , 8 ,  0 , 991,992,993,994,995,990,
+};
+static int bgAnimDataLen = sizeof(pBgAnimData) / sizeof(int);
+#endif /* JJAT_ENABLE_BACKGROUND */
+
 /** Region where the names of maps accessible from the current one are stored */
 static char _stMapsName[MAX_AREAS * (MAX_VALID_LEN + 1)];
 
@@ -77,6 +88,10 @@ err initPlaystate() {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     rv = gfmTilemap_init(playstate.pBackground, gfx.pSset8x8, TM_MAX_WIDTH
             , TM_MAX_HEIGHT, TM_DEFAULT_TILE);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    /* Load the animations into the BG */
+    rv = gfmTilemap_addAnimations(playstate.pBackground, pBgAnimData
+            , bgAnimDataLen);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 #endif /* JJAT_ENABLE_BACKGROUND */
 
