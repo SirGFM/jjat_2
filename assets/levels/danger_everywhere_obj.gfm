@@ -1,0 +1,10 @@
+area invisible_wall 320 8 32 240
+obj loadzone 304 112 32 32 [ dest , not_so_harmless ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 23 ]
+obj loadzone 304 192 32 32 [ dest , ride_it_away ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 3 ]
+obj spiky 136 136 8 8
+obj spiky 176 136 8 8
+obj g_walky 128 216 8 8 [ flipped , true ]
+obj g_walky 160 192 8 8 [ flipped , true ]
+obj g_walky 256 176 8 8 [ flipped , true ]
+obj walky 160 80 8 8
+obj walky 24 200 8 8

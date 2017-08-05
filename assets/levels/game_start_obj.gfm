@@ -2,5 +2,5 @@ area invisible_wall 384 0 32 240
 area invisible_wall -32 0 32 240
 area invisible_wall 0 240 384 32
 area checkpoint 184 72 16 24
-obj loadzone 368 48 32 32 [ dest , not_so_harmless ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 23 ]
+obj loadzone 368 48 32 32 [ dest , ride_it_away ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 23 ]
 obj loadzone 80 224 32 32 [ dest , awakening_passage ] [ dir , down ] [ tgt_x , 22 ] [ tgt_y , 0 ]

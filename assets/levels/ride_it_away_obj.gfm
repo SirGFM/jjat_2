@@ -1,0 +1,19 @@
+area invisible_wall 320 0 32 240
+area invisible_wall -32 0 32 240
+area invisible_wall 0 -24 320 24
+obj loadzone -16 184 32 32 [ dest , game_start ] [ dir , left ] [ tgt_x , 47 ] [ tgt_y , 6 ]
+obj loadzone 304 168 32 32 [ dest , harmless_baddies ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 14 ]
+obj walky 168 200 8 8
+obj walky 176 200 8 8
+obj walky 184 200 8 8
+obj walky 192 200 8 8
+obj walky 200 200 8 8
+obj pressure_pad 184 152 32 8 [ set_0 , A ]
+obj door 264 136 8 32 [ init_state , closed ] [ lock_0 , A ]
+obj loadzone 304 16 32 32 [ dest , harmful_spikes ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 24 ]
+obj g_walky 128 56 8 8 [ flipped , true ]
+obj g_walky 32 104 8 8
+obj g_walky 112 104 8 8 [ flipped , true ]
+obj g_walky 32 160 8 8
+obj g_walky 112 160 8 8 [ flipped , true ]
+obj loadzone -16 24 32 32 [ dest , danger_everywhere ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 24 ]

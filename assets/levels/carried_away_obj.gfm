@@ -1,4 +1,5 @@
-area invisible_wall -32 0 32 240
+area invisible_wall 0 240 320 32
 area invisible_wall 0 -32 320 32
-obj loadzone -16 184 32 32 [ dest , the_meeting ] [ dir , left ] [ tgt_x , 41 ] [ tgt_y , 23 ]
+obj loadzone 24 224 32 32 [ dest , carry_it ] [ dir , down ] [ tgt_x , 23 ] [ tgt_y , 0 ]
 obj loadzone 144 -16 32 32 [ dest , short_breather ] [ dir , up ] [ tgt_x , 52 ] [ tgt_y , 29 ]
+area checkpoint 216 192 16 24
