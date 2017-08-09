@@ -14,6 +14,8 @@
 #=======================================================================
 # Define the list of subdirectories (which exist within src/)
   SUBDIRLIST := base jjat2 jjat2/enemies jjat2/events
+# Run make using bash, so syntax for conditionals works as expected
+  SHELL := /bin/bash
 
 # Define every object required by compilation
   OBJS := \
@@ -210,13 +212,20 @@ __clean:
 	@ rm -rf $(DIRLIST) bin/ obj/
 
 deploy:
+	@ echo 'Generating version file...'
+	@ git tag -l --points-at `git log -n 1 --oneline | awk ' {print $$1} '` > VERSION.new
+	@ if [ -z "`cat VERSION.new`" ]; then echo "Failed to deploy: missing version/tag"; false; fi
+	@ if [ -f VERSION ] && [ "`cat VERSION`" == "`cat VERSION.new`" ]; then \
+        echo "Failed to deploy: version/tag has already been deployed"; false; fi
 	@ echo 'Deploying Linux 64 version...'
-	@ ./rush/rush protoman linux64
+	@ ./rush/rush protoman linux64 VERSION.new
 	@ echo 'Deploying Linux 32 version...'
-	@ ./rush/rush megaman linux32
+	@ ./rush/rush megaman linux32 VERSION.new
 	@ echo 'Deploying Windows 64 version...'
-	@ ./rush/rush crashman-64 win64
+	@ ./rush/rush crashman-64 win64 VERSION.new
 	@ echo 'Deploying Windows 32 version...'
-	@ ./rush/rush crashman-32 win32
+	@ ./rush/rush crashman-32 win32 VERSION.new
+	@ rm -f VERSION
+	@ mv VERSION.new VERSION
 #=======================================================================
 
