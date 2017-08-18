@@ -6,7 +6,8 @@
 # Mega Man's dog, Rush.
 #===============================================================================
 
-VERBOSE=true
+VERBOSE=${VERBOSE:-true}
+
 function my_print() {
     if ${VERBOSE}; then
         echo $*
@@ -19,6 +20,84 @@ function check_error() {
         exit $1
     fi
 }
+
+function usage() {
+    echo "Usage: ${0} setup|build|deploy|cleanup"
+    echo "  ${0} is a all-in-one script that helps building and "
+    echo "  deploying a game (well, given a few constraints)."
+    echo ""
+    echo "  The script make extensive use of environment variable, which shall "
+    echo "  be documented here as they would be used (e.g. \${HOME})"
+    echo ""
+    echo "  Each command has a set of options/arguments, as specified bellow:"
+    echo ""
+    echo "  ${0} setup --url REPO"
+    echo "      Sets up the environment for deploying a game. It creates a "
+    echo "      ramdisk of \${REQ_RAM} bytes (defaults to 128 MB, specified as "
+    echo "      128m), where it clones only the master of REPO."
+    echo "      The ramdisk is created on \${BASE_DIR} (defaults to /run/ramdisk)"
+    echo ""
+    echo "      --url -- URL of the project's repository. Only the latest " \
+         "master will be"
+    echo "               downloaded, so make sure to push all modifications!"
+    echo ""
+    echo "  ${0} cleanup"
+    echo "      Cleans up the environment created on \${BASE_DIR}."
+    echo ""
+    echo "  ${0} build --chroot CHROOT --arch ARCH"
+    echo "      Builds the project for a given "pseudo-architecture" (for " \
+         "example, win32"
+    echo "      is a valid architecture for this command). It uses supplied " \
+         "chroot to "
+    echo "      build it, and copies the generated binary into " \
+         "./build/\${ARCH} (i.e., "
+    echo "      the argument)."
+    echo "      "
+    echo ""
+    echo "      --chroot -- Name of the chroot environment to be used"
+    echo "      --arch -- Name of the build target; Compiled binary shall be found on" \
+         "build/\${arch_name}"
+    echo ""
+    echo "  ${0} deploy --version-file VERSION_FILE"
+    echo "      --version-file -- File that store the version to be pushed"
+    echo ""
+
+    exit 0
+}
+
+# Retrieve the command
+if [ $# -lt 1 ]; then
+    echo "Missing command!"
+    usage
+    exit 0
+fi
+CMD=${1}
+shift
+
+# Parse all args
+while [ $# -gt 0 ]; do
+    case ${1} in
+    "--chroot" | "-c")
+        CHROOT=${2}
+        shift
+    ;;
+    "--arch" | "-a")
+        ARCH=${2}
+        shift
+    ;;
+    "--version-file" | "-v")
+        VERSION_FILE=${2}
+        shift
+    ;;
+    "--help" | "-h")
+        usage
+        exit 0
+    esac
+
+    shift
+done
+
+exit 0
 
 if [ $# -ne 2 ]; then
     echo "Usage: ${0} chroot_name arch_name"
