@@ -6,14 +6,34 @@
 # Mega Man's dog, Rush.
 #===============================================================================
 
+#-------------------------------------------------------------------------------
+# Set default values for variables
+#-------------------------------------------------------------------------------
 VERBOSE=${VERBOSE:-true}
+BASE_DIR=${BASE_DIR:-/run/ramdisk}
+CHROOT_BASE_DIR=${CHROOT_BASE_DIR:-/mnt/linools/env}
+CHROOT_WORK_DIR=${CHROOT_WORK_DIR:-/mnt/ramdisk/}
+BINARY_NAME=${BINARY_NAME:-game}
+REQ_RAM=${REQ_RAM:-128m}
+CHANNEL=${CHANNEL:-GFM/jjat-2}
 
+RUSH_DIR=`dirname ${0}`
+
+#-------------------------------------------------------------------------------
+# Print the supplied message if \${VERBOSE} is true.
+#-------------------------------------------------------------------------------
 function my_print() {
     if ${VERBOSE}; then
         echo $*
     fi
 }
 
+#-------------------------------------------------------------------------------
+# Check if something succeeded. On exit, script execution is halted.
+#
+# Should be called as:
+#   check_error $? reason
+#-------------------------------------------------------------------------------
 function check_error() {
     if [ $1 -ne 0 ]; then
         echo "'$2' failed with exit code $1"
@@ -21,6 +41,95 @@ function check_error() {
     fi
 }
 
+function setup() {
+    # Create the temporary environment
+    my_print "Creating ramdisk work directory (on ${BASE_DIR})..."
+    sudo mkdir -p ${BASE_DIR}
+    sudo chown gfm:gfm ${BASE_DIR}
+    sudo mount -t tmpfs -o size=${REQ_RAM} tmpfs ${BASE_DIR}
+    check_error $? "Mount ramdisk"
+    # Download the latest HEAD to the temp-env
+    git clone --depth 1 ${REPO} ${BASE_DIR}
+}
+
+function cleanup() {
+    # Since it's a ramdisk, simply unmount is enough to clean everything up
+    sudo umount ${BASE_DIR}
+}
+
+function build() {
+    # Ensure that setup was run
+    if [ ! -d ${BASE_DIR} ] || [ "`ls ${BASE_DIR}`" == "" ]; then
+        echo "${BASE_DIR} non-extant or empty! Make sure to run 'setup' before 'build'"
+        usage
+        exit 1
+    fi
+    # Ensure the output directory exists
+    mkdir -p deploy/${ARCH}/
+    # Enable access to the workdir in the chroot
+    if [ "$(mount | grep ${CHROOT%-*})" == "" ]; then
+        my_print "Binding work directory into chroot (${BASE_DIR} -> ${CHROOT_BASE_DIR}/${CHROOT}${CHROOT_WORK_DIR}"
+        if [ ! -d ${CHROOT_BASE_DIR}/${CHROOT}${CHROOT_WORK_DIR} ]; then
+            sudo mkdir ${CHROOT_BASE_DIR}/${CHROOT}${CHROOT_WORK_DIR}
+        fi
+        sudo mount --bind ${BASE_DIR} ${CHROOT_BASE_DIR}/${CHROOT}${CHROOT_WORK_DIR}
+        check_error $? "Bind work_dir into chroot"
+    fi
+    # Actually build it
+    my_print "Cleaning build (on chroot: ${CHROOT_WORK_DIR})..."
+    ${CHROOT_BASE_DIR}/run ${CHROOT} make clean -C ${CHROOT_WORK_DIR}  RELEASE=yes
+    check_error $? "Clean chroot work dir"
+    my_print "Building (on chroot: ${CHROOT_WORK_DIR})..."
+    ${CHROOT_BASE_DIR}/run ${CHROOT} make -j 7 -C ${CHROOT_WORK_DIR} RELEASE=yes
+    check_error $? "Deploy for chroot"
+    # Done with it, unbind the workdir
+    sudo umount ${CHROOT_BASE_DIR}/${CHROOT}${CHROOT_WORK_DIR}
+
+    # Copy it to the output dir
+    my_print "Copying everything to the destination"
+    find ${BASE_DIR}/bin -name ${BINARY_NAME} -exec cp {} deploy/${ARCH}/ \;
+    check_error $? "Copy built bin into destination"
+    # Update the assets (TODO: assets should be within \${BASE_DIR})
+    find assets -exec ${RUSH_DIR}/update_asset {} deploy/${ARCH} \;
+    # Check if a win 32/64 build and add the extension
+    FILE_TYPE=`file deploy/${ARCH}/${BINARY_NAME}`
+    if [ "`echo ${FILE_TYPE} | grep -o PE32+`" == "PE32+" ] || [ "`echo ${FILE_TYPE} | grep -o PE32`" == "PE32" ]; then
+        mv deploy/${ARCH}/${BINARY_NAME} deploy/${ARCH}/${BINARY_NAME}.exe
+    fi
+    # Update the files
+    my_print "Updating the manual..."
+    rm -rf deploy/${ARCH}/manual/
+    cp -r ${BASE_DIR}/manual/ deploy/${ARCH}/
+
+    # Set up the manifest and launch script
+    rm -f deploy/${ARCH}/.itch.toml
+    if [ "`echo ${FILE_TYPE} | grep -o PE32+`" == "PE32+" ] || [ "`echo ${FILE_TYPE} | grep -o PE32`" == "PE32" ]; then
+        sed s/BINARY/game.exe/g ${BASE_DIR}/misc/deploy/itch.manifest > deploy/${ARCH}/.itch.toml
+        sed -i s/BROWSER/manual.bat/g deploy/${ARCH}/.itch.toml
+        cp ${BASE_DIR}/misc/deploy/manual.bat deploy/${ARCH}/
+        cp ${BASE_DIR}/misc/deploy/Single_Player_Mode.bat deploy/${ARCH}
+        cp ${BASE_DIR}/misc/deploy/Synchronous_Single_Player_Mode.bat deploy/${ARCH}
+        cp ${BASE_DIR}/misc/deploy/Two_Players_Mode.bat deploy/${ARCH}
+    else
+        sed s/BINARY/launch.sh/g ${BASE_DIR}/misc/deploy/itch.manifest > deploy/${ARCH}/.itch.toml
+        sed -i s/BROWSER/manual.sh/g deploy/${ARCH}/.itch.toml
+        cp ${BASE_DIR}/misc/deploy/launch.sh deploy/${ARCH}/
+        cp ${BASE_DIR}/misc/deploy/manual.sh deploy/${ARCH}/
+        chmod 755 deploy/${ARCH}/launch.sh deploy/${ARCH}/game deploy/${ARCH}/manual.sh
+    fi
+}
+
+function deploy() {
+    my_print "Pushing the deploy..."
+    butler push --userversion-file=${VERSION_FILE} deploy/${ARCH}/ "${CHANNEL}:${ARCH}"
+}
+
+#-------------------------------------------------------------------------------
+# Check if the requested argument was supplied.
+#
+# The argument is verified by its name. E.g.:
+#   check_arg ARCH
+#-------------------------------------------------------------------------------
 function check_arg() {
     val=$(eval echo -n "\$$1")
     if [ -z "${val}" ]; then
@@ -30,6 +139,9 @@ function check_arg() {
     fi
 }
 
+#-------------------------------------------------------------------------------
+# Print the script's usage.
+#-------------------------------------------------------------------------------
 function usage() {
     echo "Usage: ${0} setup|build|deploy|cleanup"
     echo "  ${0} is a all-in-one script that helps building and "
@@ -110,9 +222,19 @@ while [ $# -gt 0 ]; do
         VERSION_FILE=${2}
         shift
     ;;
+    "--url" | "-u")
+        REPO=${2}
+        shift
+    ;;
     "--help" | "-h")
         usage
         exit 0
+    ;;
+    *)
+        echo "Unknown argument '${1}'"
+        usage
+        exit 0
+    ;;
     esac
 
     shift
@@ -124,20 +246,27 @@ if [ "${CMD}" == "--help" ] || [ "${CMD}" == "-h" ]; then
     exit 0
 fi
 
-# Check that all required arguments were supplied
+# Check that all required arguments were supplied and run the command
 case ${CMD} in
 "setup")
     check_arg REPO
+
+    setup
 ;;
 "build")
     check_arg CHROOT
     check_arg ARCH
+
+    build
 ;;
 "deploy")
     check_arg VERSION_FILE
     check_arg ARCH
+
+    deploy
 ;;
 "cleanup")
+    cleanup
 ;;
 *)
     echo "Invalid command '${CMD}'"
@@ -145,130 +274,6 @@ case ${CMD} in
     exit 1
 ;;
 esac
-
-exit 0
-
-if [ $# -ne 2 ]; then
-    echo "Usage: ${0} chroot_name arch_name"
-    echo "  chroot_name -- Name of the chroot environment to be used"
-    echo "  arch_name -- Name of the build target; Compiled binary shall be found on" \
-         "build/\${arch_name}"
-    exit 0
-fi
-
-CHROOT=${1}
-ARCH=${2}
-my_print "Building for ${ARCH} on ${CHROOT}"
-
-RUSH_DIR=`dirname ${0}`
-BASE_DIR=/run/ramdisk
-
-# Work directory within the temporary environment
-#
-# !!! WARNING !!! This is called as the argument for a `rm -rf`
-WORK_DIR=${BASE_DIR}/jjat_2
-
-# Work directory inside the chroot
-CHROOT_WORK_DIR=/mnt/ramdisk/jjat_2
-
-# Path to the local clone of the repo
-LOCAL_REPO=/media/data/ubuntu/github/jjat_2
-# How much RAM the temp env requires
-REQ_RAM=128m
-
-# Create a temporary environment
-if [ ! -d ${BASE_DIR} ]; then
-    my_print "Creating ramdisk work directory (on ${BASE_DIR})..."
-    sudo mkdir -p ${BASE_DIR}
-    sudo chown gfm:gfm ${BASE_DIR}
-    sudo mount -t tmpfs -o size=${REQ_RAM} tmpfs ${BASE_DIR}
-    check_error $? "Mount ramdisk"
-fi
-
-# Copy the local repo to the temp-env and clean it from all modifications
-if [ -d ${WORK_DIR} ]; then
-    # !!! DANGER !!!
-    my_print "Cleaning up work dir..."
-    rm -rf ${WORK_DIR}
-fi
-my_print "Copying local repository (${LOCAL_REPO}) into work dir..."
-cp -r ${LOCAL_REPO} ${WORK_DIR}
-cd ${WORK_DIR}
-check_error $? "Switching to work_dir"
-
-# This is hacky, but it gets the job done...
-my_print "Cleaning up local modifications..."
-git stash
-while [ "$(git stash list)" != "" ]; do
-    git stash drop
-done
-
-cd -
-
-# Ensure the output directory exists
-mkdir -p deploy/${ARCH}/
-
-# Enable access to the workdir in the chroot
-if [ "$(mount | grep ${CHROOT%-*})" == "" ]; then
-    my_print "Binding work directory into chroot (${BASE_DIR} -> /mnt/linools/env/${CHROOT}/mnt/ramdisk)"
-    if [ ! -d /mnt/linools/env/${CHROOT}/mnt/ramdisk ]; then
-        sudo mkdir /mnt/linools/env/${CHROOT}/mnt/ramdisk
-    fi
-    sudo mount --bind ${BASE_DIR} /mnt/linools/env/${CHROOT}/mnt/ramdisk
-    check_error $? "Bind work_dir into chroot"
-fi
-
-# Actually build it
-my_print "Cleaning build (on chroot: ${CHROOT_WORK_DIR})..."
-/mnt/linools/env/run ${CHROOT} make clean -C ${CHROOT_WORK_DIR}  RELEASE=yes
-check_error $? "Clean chroot work dir"
-my_print "Building (on chroot: ${CHROOT_WORK_DIR})..."
-/mnt/linools/env/run ${CHROOT} make -j 7 -C ${CHROOT_WORK_DIR} RELEASE=yes
-check_error $? "Deploy for chroot"
-
-# Copy it to the output dir
-my_print "Copying everything to the destination"
-find ${WORK_DIR}/bin -name game -exec cp {} deploy/${ARCH}/ \;
-check_error $? "Copy built bin into destination"
-# Update the assets
-find assets -exec ${RUSH_DIR}/update_asset {} deploy/${ARCH} \;
-
-# Check if a win 32/64 build and add the extension
-FILE_TYPE=`file deploy/${ARCH}/game`
-if [ "`echo ${FILE_TYPE} | grep -o PE32+`" == "PE32+" ] || [ "`echo ${FILE_TYPE} | grep -o PE32`" == "PE32" ]; then
-    mv deploy/${ARCH}/game deploy/${ARCH}/game.exe
-fi
-
-# Update the files
-my_print "Updating the manual..."
-rm -rf deploy/${ARCH}/manual/
-cp -r ${WORK_DIR}/manual/ deploy/${ARCH}/
-
-# Set up the manifest and launch script
-rm -f deploy/${ARCH}/.itch.toml
-if [ "`echo ${FILE_TYPE} | grep -o PE32+`" == "PE32+" ] || [ "`echo ${FILE_TYPE} | grep -o PE32`" == "PE32" ]; then
-    sed s/BINARY/game.exe/g ${WORK_DIR}/misc/deploy/itch.manifest > deploy/${ARCH}/.itch.toml
-    sed -i s/BROWSER/manual.bat/g deploy/${ARCH}/.itch.toml
-    cp ${WORK_DIR}/misc/deploy/manual.bat deploy/${ARCH}/
-    cp ${WORK_DIR}/misc/deploy/Single_Player_Mode.bat deploy/${ARCH}
-    cp ${WORK_DIR}/misc/deploy/Synchronous_Single_Player_Mode.bat deploy/${ARCH}
-    cp ${WORK_DIR}/misc/deploy/Two_Players_Mode.bat deploy/${ARCH}
-else
-    sed s/BINARY/launch.sh/g ${WORK_DIR}/misc/deploy/itch.manifest > deploy/${ARCH}/.itch.toml
-    sed -i s/BROWSER/manual.sh/g deploy/${ARCH}/.itch.toml
-    cp ${WORK_DIR}/misc/deploy/launch.sh deploy/${ARCH}/
-    cp ${WORK_DIR}/misc/deploy/manual.sh deploy/${ARCH}/
-    chmod 755 deploy/${ARCH}/launch.sh deploy/${ARCH}/game deploy/${ARCH}/manual.sh
-fi
-
-# Remove any ligering built file (since chroot runs as uid 0)
-my_print "Final cleaning (on chroot: ${CHROOT_WORK_DIR})..."
-/mnt/linools/env/run ${CHROOT} make __clean -C ${CHROOT_WORK_DIR}
-check_error $? "Final clean chroot work dir"
-
-# Push it to itch.io
-my_print "Pushing the deploy..."
-butler push deploy/${ARCH}/ "GFM/jjat-2:${ARCH}"
 
 exit 0
 
