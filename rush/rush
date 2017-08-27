@@ -21,13 +21,22 @@ function check_error() {
     fi
 }
 
+function check_arg() {
+    val=$(eval echo -n "\$$1")
+    if [ -z "${val}" ]; then
+        echo "'${1}' is required for command '${CMD}' but wasn't defined!"
+        usage
+        exit 1
+    fi
+}
+
 function usage() {
     echo "Usage: ${0} setup|build|deploy|cleanup"
     echo "  ${0} is a all-in-one script that helps building and "
     echo "  deploying a game (well, given a few constraints)."
     echo ""
     echo "  The script make extensive use of environment variable, which shall "
-    echo "  be documented here as they would be used (e.g. \${HOME})"
+    echo "  be documented here as they would be used (e.g. \${HOME})."
     echo ""
     echo "  Each command has a set of options/arguments, as specified bellow:"
     echo ""
@@ -37,7 +46,7 @@ function usage() {
     echo "      128m), where it clones only the master of REPO."
     echo "      The ramdisk is created on \${BASE_DIR} (defaults to /run/ramdisk)"
     echo ""
-    echo "      --url -- URL of the project's repository. Only the latest " \
+    echo "      --url -- URL of the project's repository. Only the latest" \
          "master will be"
     echo "               downloaded, so make sure to push all modifications!"
     echo ""
@@ -45,21 +54,33 @@ function usage() {
     echo "      Cleans up the environment created on \${BASE_DIR}."
     echo ""
     echo "  ${0} build --chroot CHROOT --arch ARCH"
-    echo "      Builds the project for a given "pseudo-architecture" (for " \
+    echo "      Builds the project for a given "pseudo-architecture" (for" \
          "example, win32"
-    echo "      is a valid architecture for this command). It uses supplied " \
-         "chroot to "
-    echo "      build it, and copies the generated binary into " \
-         "./build/\${ARCH} (i.e., "
+    echo "      is a valid architecture for this command). It uses the supplied" \
+         "chroot to"
+    echo "      build it, and copies the generated binary to" \
+         "./deploy/\${ARCH} (i.e., "
     echo "      the argument)."
     echo "      "
     echo ""
     echo "      --chroot -- Name of the chroot environment to be used"
-    echo "      --arch -- Name of the build target; Compiled binary shall be found on" \
-         "build/\${arch_name}"
+    echo "      --arch -- Name of the build target; Compiled binary shall be" \
+         "found on"
+    echo "      ./deploy/\${ARCH}"
     echo ""
-    echo "  ${0} deploy --version-file VERSION_FILE"
+    echo "  ${0} deploy --version-file VERSION_FILE --arch ARCH"
+    echo "      Deploys whatever is currently on ./deploy/\${ARCH}/ (i.e.," \
+         "the argument)"
+    echo "      to the remote server, using itch's butler. The directory" \
+         "will be pushed to"
+    echo "      \${CHANNEL}:\${ARCH} (e.g., GFM/jjat-2:linux64)."
+
+    echo ""
     echo "      --version-file -- File that store the version to be pushed"
+    echo ""
+    echo "      --arch -- Name of the target to be pushed; The entire" \
+         "directory"
+    echo "      ./build/\${ARCH} shall be uploaded."
     echo ""
 
     exit 0
@@ -96,6 +117,34 @@ while [ $# -gt 0 ]; do
 
     shift
 done
+
+# Corner case: no command given, but asked for help
+if [ "${CMD}" == "--help" ] || [ "${CMD}" == "-h" ]; then
+    usage
+    exit 0
+fi
+
+# Check that all required arguments were supplied
+case ${CMD} in
+"setup")
+    check_arg REPO
+;;
+"build")
+    check_arg CHROOT
+    check_arg ARCH
+;;
+"deploy")
+    check_arg VERSION_FILE
+    check_arg ARCH
+;;
+"cleanup")
+;;
+*)
+    echo "Invalid command '${CMD}'"
+    usage
+    exit 1
+;;
+esac
 
 exit 0
 
