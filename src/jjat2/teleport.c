@@ -21,6 +21,15 @@
 #include <jjat2/fx_group.h>
 #include <jjat2/teleport.h>
 
+#define TPFX_X      (-8)
+#define TPFX_Y      (-8)
+#define TPFX_OFFX_R (4)
+#define TPFX_OFFX_L (-4)
+#define TPFX_OFFX   (8)
+#define TPFX_OFFY   (0)
+#define TPFX_W      (16)
+#define TPFX_H      (16)
+
 /** Remove the previous target */
 void resetTeleporterTarget() {
     /* No need to remove the effect from the node since this will most likely be
@@ -52,17 +61,17 @@ err teleporterTargetPosition(int x, int y, teleportPosition pos) {
 
     cleanPreviousTarget();
 
-    pEffect = spawnFx(x - 4, y - 4, 8/*w*/, 8/*h*/, 0/*dir*/, 0/*ttl*/
+    pEffect = spawnFx(x + TPFX_X, y + TPFX_Y, TPFX_W, TPFX_H, 0/*dir*/, 0/*ttl*/
             , FX_TELEPORT_TARGET, T_FX);
     ASSERT(pEffect, ERR_GFMERR);
     if (pos == TP_RIGHT) {
-        gfmSprite_setOffset(pEffect, 4/*offx*/, 0/*offy*/);
+        gfmSprite_setOffset(pEffect, TPFX_OFFX_R, TPFX_OFFY);
     }
     else if (pos == TP_LEFT) {
-        gfmSprite_setOffset(pEffect, -4/*offx*/, 0/*offy*/);
+        gfmSprite_setOffset(pEffect, TPFX_OFFX_L, TPFX_OFFY);
     }
     else {
-        gfmSprite_setOffset(pEffect, 0/*offx*/, 0/*offy*/);
+        gfmSprite_setOffset(pEffect, TPFX_OFFX, TPFX_OFFY);
     }
     rv = gfmSprite_getChild((void**)&teleport.pCurEffect, &type, pEffect);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
@@ -82,7 +91,7 @@ static inline err _centerAtEntity() {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     rv = gfmSprite_getCenter(&cx, &cy, teleport.pTarget->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    gfmSprite_setPosition(pEffect, cx - 4, cy - 4);
+    gfmSprite_setPosition(pEffect, cx + TPFX_X, cy + TPFX_Y);
 
     return ERR_OK;
 
