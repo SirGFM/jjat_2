@@ -25,7 +25,7 @@
 #define TPFX_Y      (-8)
 #define TPFX_OFFX_R (4)
 #define TPFX_OFFX_L (-4)
-#define TPFX_OFFX   (8)
+#define TPFX_OFFX   (0)
 #define TPFX_OFFY   (0)
 #define TPFX_W      (16)
 #define TPFX_H      (16)
