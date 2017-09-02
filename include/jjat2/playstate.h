@@ -31,6 +31,10 @@
 #define MAX_VALID_LEN \
     (MAX_LEVEL_NAME - (sizeof("levels/") - 1) - (sizeof("_bg_tm.gfm") - 1) - 1)
 
+union unHitboxCtx {
+    leveltransitionData ltData;
+};
+
 struct stPlaystateCtx {
     /** Next level to be loaded, if any */
     leveltransitionData *pNextLevel;
@@ -62,7 +66,7 @@ struct stPlaystateCtx {
     /** Generic flags */
     uint8_t flags;
     /** Context for the hitboxes */
-    leveltransitionData data[MAX_AREAS];
+    union unHitboxCtx data[MAX_AREAS];
 };
 typedef struct stPlaystateCtx playstateCtx;
 

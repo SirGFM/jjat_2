@@ -105,11 +105,6 @@ err initPlaystate() {
     /* Alloc the areas list and prepare every data */
     rv = gfmHitbox_getNewList(&playstate.pAreas, MAX_AREAS);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    i = 0;
-    while (i < MAX_AREAS) {
-        playstate.data[i].pName = _stMapsName + (MAX_VALID_LEN + 1) * i;
-        i++;
-    }
 
     /* TODO Load session flags */
     game.sessionFlags = 0;
@@ -143,6 +138,15 @@ void freePlaystate() {
         gfmSprite_free(&playstate.entities[i].pSelf);
         i++;
     }
+}
+
+/**
+ * Setup pointers within a hitboxCtx's level transition data.
+ *
+ * @param  [ in]i Context's index
+ */
+static void _setupLevelTransitionData(int i) {
+    playstate.data[i].ltData.pName = _stMapsName + (MAX_VALID_LEN + 1) * i;
 }
 
 /**
@@ -385,7 +389,8 @@ static err _parseLoadzone(gfmParser *pParser) {
     rv = gfmParser_getDimensions(&w, &h, pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    pData = playstate.data + playstate.areasCount;
+    _setupLevelTransitionData(playstate.areasCount);
+    pData = &(playstate.data[playstate.areasCount].ltData);
     erv = _parseLevelInfo(pParser, pData
             , (LIF_NAME | LIF_TGTX | LIF_TGTY | LIF_DIR));
     ASSERT(erv == ERR_OK, erv);
@@ -414,8 +419,7 @@ static err _parseInvisibleWall(gfmParser *pParser) {
     rv = gfmParser_getDimensions(&w, &h, pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    rv = gfmHitbox_initItem(playstate.pAreas
-            , playstate.data + playstate.areasCount, x, y, w, h, T_FLOOR_NOTP
+    rv = gfmHitbox_initItem(playstate.pAreas, 0/*ctx*/, x, y, w, h, T_FLOOR_NOTP
             , playstate.areasCount);
 
     playstate.areasCount++;
@@ -440,7 +444,8 @@ static err _parseCheckpoint(gfmParser *pParser, const char *pLevelName) {
     rv = gfmParser_getDimensions(&w, &h, pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    pData = playstate.data + playstate.areasCount;
+    _setupLevelTransitionData(playstate.areasCount);
+    pData = &(playstate.data[playstate.areasCount].ltData);
     /* pLevelName should be the name of the loaded file. Therefore, it must have
      * a valid length and terminator (unless it got corrupted...) */
     strcpy(pData->pName, pLevelName);
