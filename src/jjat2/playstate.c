@@ -419,8 +419,8 @@ static err _parseInvisibleWall(gfmParser *pParser) {
     rv = gfmParser_getDimensions(&w, &h, pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    rv = gfmHitbox_initItem(playstate.pAreas, 0/*ctx*/, x, y, w, h, T_FLOOR_NOTP
-            , playstate.areasCount);
+    rv = gfmHitbox_initItem(playstate.pAreas, 0/*ctx*/, x, y, w, h
+            , T_FLOOR_SKIP_TP, playstate.areasCount);
 
     playstate.areasCount++;
     return ERR_OK;
