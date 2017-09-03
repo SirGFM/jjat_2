@@ -28,6 +28,12 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     CASE(T_FLOOR_NOTP, T_EN_G_WALKY)
     CASE(T_FLOOR_NOTP, T_GUNNY)
     CASE(T_FLOOR_NOTP, T_SWORDY)
+    CASE(T_FLOOR_SKIP_TP, T_EN_SPIKY)
+    CASE(T_FLOOR_SKIP_TP, T_EN_WALKY)
+    CASE(T_FLOOR_SKIP_TP, T_EN_TURRET)
+    CASE(T_FLOOR_SKIP_TP, T_EN_G_WALKY)
+    CASE(T_FLOOR_SKIP_TP, T_GUNNY)
+    CASE(T_FLOOR_SKIP_TP, T_SWORDY)
     CASE(T_DOOR, T_EN_SPIKY)
     CASE(T_DOOR, T_EN_WALKY)
     CASE(T_DOOR, T_EN_TURRET)
@@ -42,26 +48,32 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     CASE(T_EN_SPIKY, T_BLUE_PLATFORM)
     CASE(T_EN_SPIKY, T_FLOOR)
     CASE(T_EN_SPIKY, T_FLOOR_NOTP)
+    CASE(T_EN_SPIKY, T_FLOOR_SKIP_TP)
     CASE(T_EN_SPIKY, T_DOOR)
     CASE(T_EN_WALKY, T_BLUE_PLATFORM)
     CASE(T_EN_WALKY, T_FLOOR)
     CASE(T_EN_WALKY, T_FLOOR_NOTP)
+    CASE(T_EN_WALKY, T_FLOOR_SKIP_TP)
     CASE(T_EN_WALKY, T_DOOR)
     CASE(T_EN_TURRET, T_BLUE_PLATFORM)
     CASE(T_EN_TURRET, T_FLOOR)
     CASE(T_EN_TURRET, T_FLOOR_NOTP)
+    CASE(T_EN_TURRET, T_FLOOR_SKIP_TP)
     CASE(T_EN_TURRET, T_DOOR)
     CASE(T_EN_G_WALKY, T_BLUE_PLATFORM)
     CASE(T_EN_G_WALKY, T_FLOOR)
     CASE(T_EN_G_WALKY, T_FLOOR_NOTP)
+    CASE(T_EN_G_WALKY, T_FLOOR_SKIP_TP)
     CASE(T_EN_G_WALKY, T_DOOR)
     CASE(T_GUNNY, T_BLUE_PLATFORM)
     CASE(T_GUNNY, T_FLOOR)
     CASE(T_GUNNY, T_FLOOR_NOTP)
+    CASE(T_GUNNY, T_FLOOR_SKIP_TP)
     CASE(T_GUNNY, T_DOOR)
     CASE(T_SWORDY, T_BLUE_PLATFORM)
     CASE(T_SWORDY, T_FLOOR)
     CASE(T_SWORDY, T_FLOOR_NOTP)
+    CASE(T_SWORDY, T_FLOOR_SKIP_TP)
     CASE(T_SWORDY, T_DOOR)
         if (node1.pChild != node2.pChild) {
             /* Filter out self collision */
@@ -71,6 +83,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     CASE(T_BLUE_PLATFORM, T_EN_G_WALKY_ATK)
     CASE(T_FLOOR, T_EN_G_WALKY_ATK)
     CASE(T_FLOOR_NOTP, T_EN_G_WALKY_ATK)
+    CASE(T_FLOOR_SKIP_TP, T_EN_G_WALKY_ATK)
     CASE(T_DOOR, T_EN_G_WALKY_ATK)
         if (node1.pChild != node2.pChild) {
             /* Filter out self collision */
@@ -80,6 +93,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     CASE(T_EN_G_WALKY_ATK, T_BLUE_PLATFORM)
     CASE(T_EN_G_WALKY_ATK, T_FLOOR)
     CASE(T_EN_G_WALKY_ATK, T_FLOOR_NOTP)
+    CASE(T_EN_G_WALKY_ATK, T_FLOOR_SKIP_TP)
     CASE(T_EN_G_WALKY_ATK, T_DOOR)
         if (node1.pChild != node2.pChild) {
             /* Filter out self collision */
@@ -96,6 +110,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     SELFCASE(T_BLUE_PLATFORM)
     IGNORE(T_BLUE_PLATFORM, T_FLOOR)
     IGNORE(T_BLUE_PLATFORM, T_FLOOR_NOTP)
+    IGNORE(T_BLUE_PLATFORM, T_FLOOR_SKIP_TP)
     IGNORE(T_BLUE_PLATFORM, T_EN_G_WALKY_VIEW)
     IGNORE(T_BLUE_PLATFORM, T_PRESSURE_PAD)
     IGNORE(T_FLOOR, T_ATK_SWORD)
@@ -107,6 +122,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_FLOOR, T_BLUE_PLATFORM)
     SELFCASE(T_FLOOR)
     IGNORE(T_FLOOR, T_FLOOR_NOTP)
+    IGNORE(T_FLOOR, T_FLOOR_SKIP_TP)
     IGNORE(T_FLOOR, T_EN_G_WALKY_VIEW)
     IGNORE(T_FLOOR, T_PRESSURE_PAD)
     IGNORE(T_FLOOR_NOTP, T_ATK_SWORD)
@@ -118,8 +134,21 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_FLOOR_NOTP, T_BLUE_PLATFORM)
     IGNORE(T_FLOOR_NOTP, T_FLOOR)
     SELFCASE(T_FLOOR_NOTP)
+    IGNORE(T_FLOOR_NOTP, T_FLOOR_SKIP_TP)
     IGNORE(T_FLOOR_NOTP, T_EN_G_WALKY_VIEW)
     IGNORE(T_FLOOR_NOTP, T_PRESSURE_PAD)
+    IGNORE(T_FLOOR_SKIP_TP, T_ATK_SWORD)
+    IGNORE(T_FLOOR_SKIP_TP, T_CHECKPOINT)
+    IGNORE(T_FLOOR_SKIP_TP, T_LOADZONE)
+    IGNORE(T_FLOOR_SKIP_TP, T_DUMMY_SWORDY)
+    IGNORE(T_FLOOR_SKIP_TP, T_DUMMY_GUNNY)
+    IGNORE(T_FLOOR_SKIP_TP, T_SPIKE)
+    IGNORE(T_FLOOR_SKIP_TP, T_BLUE_PLATFORM)
+    IGNORE(T_FLOOR_SKIP_TP, T_FLOOR)
+    IGNORE(T_FLOOR_SKIP_TP, T_FLOOR_NOTP)
+    SELFCASE(T_FLOOR_SKIP_TP)
+    IGNORE(T_FLOOR_SKIP_TP, T_EN_G_WALKY_VIEW)
+    IGNORE(T_FLOOR_SKIP_TP, T_PRESSURE_PAD)
     IGNORE(T_DOOR, T_ATK_SWORD)
     IGNORE(T_DOOR, T_CHECKPOINT)
     IGNORE(T_DOOR, T_LOADZONE)
@@ -129,6 +158,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_DOOR, T_BLUE_PLATFORM)
     IGNORE(T_DOOR, T_FLOOR)
     IGNORE(T_DOOR, T_FLOOR_NOTP)
+    IGNORE(T_DOOR, T_FLOOR_SKIP_TP)
     IGNORE(T_DOOR, T_EN_G_WALKY_VIEW)
     IGNORE(T_DOOR, T_PRESSURE_PAD)
         erv = ERR_OK;
@@ -201,6 +231,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_SWORD_FX, T_CHECKPOINT)
     IGNORE(T_SWORD_FX, T_DOOR)
     IGNORE(T_SWORD_FX, T_PRESSURE_PAD)
+    IGNORE(T_SWORD_FX, T_FLOOR_SKIP_TP)
     IGNORE(T_FX, T_EN_SPIKY)
     IGNORE(T_FX, T_EN_WALKY)
     IGNORE(T_FX, T_EN_G_WALKY)
@@ -221,6 +252,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_FX, T_CHECKPOINT)
     IGNORE(T_FX, T_DOOR)
     IGNORE(T_FX, T_PRESSURE_PAD)
+    IGNORE(T_FX, T_FLOOR_SKIP_TP)
         erv = ERR_OK;
     break;
 #  endif /* defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__)) */
@@ -265,6 +297,8 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_DOOR, T_FX)
     IGNORE(T_PRESSURE_PAD, T_SWORD_FX)
     IGNORE(T_PRESSURE_PAD, T_FX)
+    IGNORE(T_FLOOR_SKIP_TP, T_SWORD_FX)
+    IGNORE(T_FLOOR_SKIP_TP, T_FX)
         erv = ERR_OK;
     break;
 #  endif /* defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__)) */
@@ -341,6 +375,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_ATK_SWORD, T_DUMMY_SWORDY)
     IGNORE(T_ATK_SWORD, T_DUMMY_GUNNY)
     IGNORE(T_ATK_SWORD, T_PRESSURE_PAD)
+    IGNORE(T_ATK_SWORD, T_FLOOR_SKIP_TP)
         erv = ERR_OK;
     break;
 #  endif /* defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__)) */
@@ -401,6 +436,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     SELFCASE(T_SPIKE)
     IGNORE(T_SPIKE, T_EN_G_WALKY_VIEW)
     IGNORE(T_SPIKE, T_PRESSURE_PAD)
+    IGNORE(T_SPIKE, T_FLOOR_SKIP_TP)
         erv = ERR_OK;
     break;
 #  endif /* defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__)) */
@@ -517,6 +553,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_DUMMY_GUNNY, T_EN_SPIKY)
     IGNORE(T_DUMMY_GUNNY, T_EN_TURRET)
     IGNORE(T_DUMMY_GUNNY, T_BLUE_PLATFORM)
+    IGNORE(T_DUMMY_GUNNY, T_FLOOR_SKIP_TP)
     SELFCASE(T_DUMMY_SWORDY)
     IGNORE(T_DUMMY_SWORDY, T_DUMMY_GUNNY)
     IGNORE(T_DUMMY_SWORDY, T_HAZARD)
@@ -535,6 +572,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_DUMMY_SWORDY, T_EN_SPIKY)
     IGNORE(T_DUMMY_SWORDY, T_EN_TURRET)
     IGNORE(T_DUMMY_SWORDY, T_BLUE_PLATFORM)
+    IGNORE(T_DUMMY_SWORDY, T_FLOOR_SKIP_TP)
         erv = ERR_OK;
     break;
 #  endif /* defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__)) */
@@ -561,6 +599,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     SELFCASE(T_EN_G_WALKY_VIEW)
     IGNORE(T_EN_G_WALKY_VIEW, T_DOOR)
     IGNORE(T_EN_G_WALKY_VIEW, T_PRESSURE_PAD)
+    IGNORE(T_EN_G_WALKY_VIEW, T_FLOOR_SKIP_TP)
         erv = ERR_OK;
     break;
 #  endif /* defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__)) */
@@ -597,6 +636,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_CHECKPOINT, T_EN_SPIKY)
     IGNORE(T_CHECKPOINT, T_EN_TURRET)
     IGNORE(T_CHECKPOINT, T_PRESSURE_PAD)
+    IGNORE(T_CHECKPOINT, T_FLOOR_SKIP_TP)
         erv = ERR_OK;
     break;
 #  endif /* defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__)) */
@@ -665,11 +705,13 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
 #  endif /* defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__)) */
 #  if defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__))
     IGNORE(T_TEL_BULLET, T_GUNNY)
+    IGNORE(T_TEL_BULLET, T_FLOOR_SKIP_TP)
         erv = ERR_OK;
     break;
 #  endif /* defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__)) */
 #  if defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__))
     IGNORE(T_GUNNY, T_TEL_BULLET)
+    IGNORE(T_FLOOR_SKIP_TP, T_TEL_BULLET)
         erv = ERR_OK;
     break;
 #  endif /* defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__)) */
@@ -708,6 +750,7 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_LOADZONE, T_EN_SPIKY)
     IGNORE(T_LOADZONE, T_EN_TURRET)
     IGNORE(T_LOADZONE, T_PRESSURE_PAD)
+    IGNORE(T_LOADZONE, T_FLOOR_SKIP_TP)
         erv = ERR_OK;
     break;
 #  endif /* defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__)) */
