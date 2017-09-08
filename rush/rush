@@ -30,6 +30,7 @@ fi
 
 CHROOT=${1}
 ARCH=${2}
+VERSION=${3}
 my_print "Building for ${ARCH} on ${CHROOT}"
 
 RUSH_DIR=`dirname ${0}`
@@ -140,7 +141,7 @@ check_error $? "Final clean chroot work dir"
 
 # Push it to itch.io
 my_print "Pushing the deploy..."
-butler push deploy/${ARCH}/ "GFM/jjat-2:${ARCH}"
+butler push --userversion-file=${VERSION} deploy/${ARCH}/ "GFM/jjat-2:${ARCH}"
 
 exit 0
 
