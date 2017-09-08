@@ -20,11 +20,12 @@ function check_error() {
     fi
 }
 
-if [ $# -ne 2 ]; then
-    echo "Usage: ${0} chroot_name arch_name"
+if [ $# -ne 3 ]; then
+    echo "Usage: ${0} chroot_name arch_name version"
     echo "  chroot_name -- Name of the chroot environment to be used"
     echo "  arch_name -- Name of the build target; Compiled binary shall be found on" \
          "build/\${arch_name}"
+    echo "  version -- File with the version to be pushed;"
     exit 0
 fi
 
