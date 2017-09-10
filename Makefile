@@ -51,7 +51,8 @@
          jjat2/events/pressurepad.o
 
 # Define the target name
-  TARGET := game
+  BASE_TARGET := game
+  TARGET := $(BASE_TARGET)
 
 # Define the generated icon
   WINICON := assets/icon.o
@@ -109,11 +110,15 @@
   endif
 
   # Define LDFLAGS
-  LDFLAGS := $(LDFLAGS) -L$(GFRAME_LIBS)
-  ifeq ($(RELEASE), yes)
-    LDFLAGS := $(LDFLAGS) -lGFraMe
-  else
-    LDFLAGS := $(LDFLAGS) -lGFraMe_dbg
+  ifneq (, $(GFRAME_LIBS))
+    LDFLAGS := $(LDFLAGS) -L$(GFRAME_LIBS)
+  endif
+  ifneq ($(OS), emcc)
+    ifeq ($(RELEASE), yes)
+      LDFLAGS := $(LDFLAGS) -lGFraMe
+    else
+      LDFLAGS := $(LDFLAGS) -lGFraMe_dbg
+    endif
   endif
 
   ifneq (, $(filter clean, $(MAKECMDGOALS)))
@@ -146,7 +151,7 @@
 .SUFFIXES:
 
 # Define all targets that doesn't match its generated file
-.PHONY: all clean mkdirs __clean deploy
+.PHONY: all clean mkdirs __clean deploy emscript
 #=======================================================================
 
 
@@ -159,16 +164,28 @@
 #  - Files %.d are generated from their %.c, by checking its includes
 #  - %.o are generated from a generic %.o: %.c rule
 #=======================================================================
-all: bin/$(OS)_$(MODE)/$(TARGET)
+all: bin/$(OS)_$(MODE)/$(BASE_TARGET)
+
+emscript: bin/emcc_release/$(BASE_TARGET).bc
+	@ echo '[WEB] Packaging target...'
+	@ mkdir -p bin/emcc_release/pkg
+	@ $(CC) -O2 $(CFLAGS) $(PKGFLAGS) $< $(LEVELS_PKG) \
+		--preload-file assets/gfx/atlas.bmp@/gfx/atlas.bmp        \
+		-o bin/emcc_release/pkg/$(BASE_TARGET).html
+	@ cp assets/gfx/icon.ico bin/emcc_release/pkg/favicon.ico
 
 # Rule for building/linking the game
-bin/$(OS)_release/$(TARGET): $(OBJLIST) $(ICON)
+bin/$(OS)_release/$(BASE_TARGET): $(OBJLIST) $(ICON)
 	@ echo '[ CC] Release target: $@'
 	@ $(CC) $(CFLAGS)    -O3 -o $@ $(OBJLIST) $(ICON) $(LDFLAGS)
 
-bin/$(OS)_debug/$(TARGET): $(OBJLIST) $(ICON) $(ASSETS_SYMLINK)
+bin/$(OS)_debug/$(BASE_TARGET): $(OBJLIST) $(ICON) $(ASSETS_SYMLINK)
 	@ echo '[ CC] Debug target: $@'
 	@ $(CC) $(CFLAGS) -g -O0 -o $@ $(OBJLIST) $(ICON) $(LDFLAGS)
+
+bin/emcc_release/$(BASE_TARGET).bc: $(OBJLIST)
+	@ echo '[WEB] Release target: $@'
+	@ $(CC) $(CFLAGS)    -O2 -o $@ $(OBJLIST) $(LDFLAGS)
 
 bin/Linux_debug/assets:
 	@ echo '[LNK] Creating symbolic link for assets...'

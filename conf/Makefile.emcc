@@ -1,0 +1,38 @@
+#=======================================================================
+# DEFINE LINUX SPECIFIC SETTINGS
+#=======================================================================
+#  Configurable environment variables:
+#    - GFRAME_LIBS: Path to libGFraMe.so & libGFraMe_dbg.so
+#    - CC: Compiler (default: gcc)
+#    - ASSETS_SYMLINK: Path were the assets should be symlink'ed
+
+DIRLIST := $(DIRLIST) bin/emcc_release
+DIRLIST := $(DIRLIST) bin/emcc_release/pkg
+DIRLIST := $(DIRLIST) obj/emcc_release
+DIRLIST := $(DIRLIST) $(SUBDIRLIST:%=obj/emcc_release/%)
+
+ifneq (,$(findstring emscript, $(MAKECMDGOALS)))
+  CC := emcc
+  OS := emcc
+  ARCH := i386
+  RELEASE := yes
+  CFLAGS := $(CFLAGS) -fPIC
+  CFLAGS := $(CFLAGS) -I"$(EMSCRIPTEN)/system/include/"
+  LDFLAGS := $(LDFLAGS) ../c_synth/bin/release/emscript/libCSynth.bc
+  LDFLAGS := $(LDFLAGS) ../GFraMe/bin/release/emscript/libGFraMe.bc
+  PKGFLAGS := -s USE_SDL=2
+  PKGFLAGS := $(PKGFLAGS) $(WASM)
+  TARGET := $(BASE_TARGET).bc
+
+  # I'm actually impressed that this worked fine on the first try using foreach,
+  # so here goes the explanation:
+  #   - $(foreach var,list,text): each whitespace separated word in the
+  #                               expansion of 'list' is put into 'var' and then
+  #                               'text' is expanded
+  #   - $(wildcard regex?): create a list of whitespace separated stuff that
+  #                         match 'regex'
+  #   - $(var:a=b): expands 'var' substituting occurrences of 'a' into 'b'. It's
+  #                 possible to match a group and later reference it by using '%'
+  LEVELS_PKG := $(foreach LVL_FILE,$(wildcard assets/levels/*.gfm),$(LVL_FILE:assets/%=--preload-file $(LVL_FILE)@%))
+endif
+
