@@ -18,6 +18,7 @@ ifneq (,$(findstring emscript, $(MAKECMDGOALS)))
   RELEASE := yes
   CFLAGS := $(CFLAGS) -fPIC
   CFLAGS := $(CFLAGS) -I"$(EMSCRIPTEN)/system/include/"
+  CFLAGS := $(CFLAGS) -DEMCC
   LDFLAGS := $(LDFLAGS) ../c_synth/bin/release/emscript/libCSynth.bc
   LDFLAGS := $(LDFLAGS) ../GFraMe/bin/release/emscript/libGFraMe.bc
   PKGFLAGS := -s USE_SDL=2
