@@ -410,7 +410,7 @@ static err _parseLoadzone(gfmParser *pParser) {
  */
 static err _parseInvisibleWall(gfmParser *pParser) {
     gfmRV rv;
-    int h, w, x, y;
+    int h, l, w, x, y;
 
     ASSERT(playstate.areasCount < MAX_AREAS, ERR_BUFFERTOOSMALL);
 
@@ -419,8 +419,48 @@ static err _parseInvisibleWall(gfmParser *pParser) {
     rv = gfmParser_getDimensions(&w, &h, pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+    l = 0;
+    rv = gfmParser_getNumProperties(&l, pParser);
+    ASSERT(rv == GFMRV_OK || rv == GFMRV_PARSER_INVALID_OBJECT, ERR_GFMERR);
+
     rv = gfmHitbox_initItem(playstate.pAreas, 0/*ctx*/, x, y, w, h
             , T_FLOOR_SKIP_TP, playstate.areasCount);
+
+    /* If requested, only collide some sides of the wall */
+    if (l > 0) {
+        gfmCollision dirs;
+        int i;
+
+        dirs = 0;
+        for (i = 0; i < l; i++) {
+            char *pKey, *pVal;
+
+            rv = gfmParser_getProperty(&pKey, &pVal, pParser, i);
+            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+            if (strcmp(pKey, "left") == 0) {
+                dirs |= gfmCollision_left;
+            }
+            else if (strcmp(pKey, "right") == 0) {
+                dirs |= gfmCollision_right;
+            }
+            else if (strcmp(pKey, "up") == 0) {
+                dirs |= gfmCollision_up;
+            }
+            else if (strcmp(pKey, "down") == 0) {
+                dirs |= gfmCollision_down;
+            }
+            else {
+                ASSERT(0, ERR_PARSINGERR);
+            }
+        }
+
+        if (dirs != 0) {
+            rv = gfmHitbox_setItemHitFlag(playstate.pAreas, dirs
+                , playstate.areasCount);
+            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        }
+    }
 
     playstate.areasCount++;
     return ERR_OK;

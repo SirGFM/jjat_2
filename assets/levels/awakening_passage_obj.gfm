@@ -5,4 +5,4 @@ obj gunny_pos 208 224 16 16
 area invisible_wall 0 -32 320 32
 obj loadzone 176 -16 32 32 [ dest , game_start ] [ dir , up ] [ tgt_x , 10 ] [ tgt_y , 29 ]
 area invisible_wall 0 240 320 32
-area invisible_wall 143 8 18 56
+obj invisible_wall 143 8 18 48 [ left , y ] [ right , y ]

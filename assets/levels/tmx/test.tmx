@@ -446,7 +446,12 @@
    </properties>
   </object>
   <object id="311" name="wall_s" type="invisible_wall" x="0" y="240" width="320" height="32"/>
-  <object id="435" name="bugfix" type="invisible_wall" x="143" y="8" width="18" height="56"/>
+  <object id="435" name="bugfix" type="invisible_wall" x="143" y="8" width="18" height="48">
+   <properties>
+    <property name="left" value="y"/>
+    <property name="right" value="y"/>
+   </properties>
+  </object>
  </objectgroup>
  <layer name="here_and_there_bg_tm" width="120" height="70" offsetx="160" offsety="0">
   <properties>
