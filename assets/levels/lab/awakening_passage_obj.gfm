@@ -1,0 +1,7 @@
+area invisible_wall 400 0 32 512
+obj loadzone 384 256 32 104 [ dest , lab/checkup_test ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 8 ]
+obj swordy_pos 184 464 16 16
+obj gunny_pos 240 464 16 16
+area invisible_wall 0 -32 432 32
+area invisible_wall 0 480 400 32
+obj invisible_wall 247 296 17 56 [ left , y ]

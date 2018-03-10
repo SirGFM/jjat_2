@@ -1,0 +1,8 @@
+area invisible_wall -32 0 32 240
+area invisible_wall 320 0 32 240
+obj loadzone -16 32 32 128 [ dest , lab/checkup_test ] [ dir , left ] [ tgt_x , 38 ] [ tgt_y , 3 ]
+obj loadzone 304 16 32 200 [ dest , getting_tricky ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 3 ]
+obj pressure_pad 80 224 32 8 [ set_0 , A ]
+obj pressure_pad 112 128 32 8 [ set_0 , B ]
+obj door 216 48 8 32 [ init_state , closed ] [ lock_0 , A ]
+obj door 208 168 8 32 [ init_state , closed ] [ lock_0 , B ]
