@@ -524,8 +524,9 @@ static err _loadLevel(char *levelName, int setPlayer) {
 
     /* Load the tilemap */
     APPEND("_fg_tm.gfm");
-    rv = gfmTilemap_loadf(playstate.pMap, game.pCtx, stLevelName
-            , pos + LEN("_fg_tm.gfm"), pDictNames, pDictTypes, dictLen);
+    rv = gfmTilemap_newLoadf(playstate.pMap, game.pCtx, stLevelName
+            , pos + LEN("_fg_tm.gfm"), pDictNames, pDictTypes, dictLen
+            , pSidedTypes, sidedLen);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     erv = _updateWorldSize();
     ASSERT(erv == ERR_OK, erv);

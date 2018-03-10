@@ -17,5 +17,11 @@ extern int pDictTypes[];
 /** Numbers of entries on the dictionary */
 extern int dictLen;
 
+/** Types that must be converted into sides of polygons. */
+extern int pSidedTypes[];
+
+/** Numbers of entries in pSidedTypes */
+extern int sidedLen;
+
 #endif /* __JJAT2_DICTIONARY_H__ */
 
