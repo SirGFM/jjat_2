@@ -1,0 +1,11 @@
+obj pressure_pad 248 192 32 8 [ set_0 , A ]
+obj door 144 48 8 32 [ init_state , closed ] [ lock_0 , A ]
+obj door 216 48 8 32 [ init_state , closed ] [ lock_0 , A ]
+obj pressure_pad 168 56 32 8 [ set_0 , B ]
+obj door 240 256 8 32 [ init_state , closed ] [ lock_0 , B ]
+obj pressure_pad 256 264 32 8 [ set_0 , C ]
+obj door 328 48 8 32 [ init_state , closed ] [ lock_0 , C ]
+area invisible_wall -32 0 32 280
+area invisible_wall 400 0 32 280
+obj loadzone -16 24 32 128 [ dest , lab/checkup_test ] [ dir , left ] [ tgt_x , 38 ] [ tgt_y , 3 ]
+obj loadzone 384 16 32 160 [ dest , lab/here_and_there ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 3 ]
