@@ -35,6 +35,16 @@ enum enDoorFrames {
   , f6 = 319
 };
 
+enum enHorDoorFrames {
+    hf0 = 207
+  , hf1 = 222
+  , hf2 = 223
+  , hf3 = 238
+  , hf4 = 239
+  , hf5 = 254
+  , hf6 = 255
+};
+
 /** List of animations */
 enum enDoorAnim {
     OPENED = 0
@@ -54,13 +64,23 @@ static int pDoorAnimData[] = {
 /* CLOSING */,10, 10,  0 , f5,f4,f2,f3,f3,f0,f1,f0,f1,f0
 };
 
+/** horizontal door animation data */
+static int pHorDoorAnimData[] = {
+/*           len|fps|loop|data... */
+/* OPENED  */  1, 0 ,  0 , hf6
+/* CLOSED  */, 1, 0 ,  0 , hf0
+/* OPENING */,10, 10,  0 , hf1,hf0,hf1,hf2,hf2,hf0,hf3,hf4,hf5,hf6
+/* CLOSING */,10, 10,  0 , hf5,hf4,hf2,hf3,hf3,hf0,hf1,hf0,hf1,hf0
+};
+
 /**
  * Parse a door into the entity
  *
- * @param  [ in]pEnt    The entity
- * @param  [ in]pParser Parser that has just parsed a door
+ * @param  [ in]pEnt       The entity
+ * @param  [ in]pParser    Parser that has just parsed a door
+ * @param  [ in]isVertical Parser that has just parsed a door
  */
-err initDoor(entityCtx *pEnt, gfmParser *pParser) {
+err initDoor(entityCtx *pEnt, gfmParser *pParser, int isVertical) {
     gfmRV rv;
     err erv;
     int i, l, x, y;
@@ -99,17 +119,32 @@ err initDoor(entityCtx *pEnt, gfmParser *pParser) {
 
     rv = gfmParser_getPos(&x, &y, pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    y -= door_height;
 
-    rv = gfmSprite_init(pEnt->pSelf, x, y, door_width, door_height
-            , gfx.pSset8x32, door_offx, door_offy, pEnt, T_DOOR);
+    if (isVertical) {
+        y -= door_height;
+
+        rv = gfmSprite_init(pEnt->pSelf, x, y, door_width, door_height
+                , gfx.pSset8x32, door_offx, door_offy, pEnt, T_DOOR);
+    }
+    else {
+        y -= door_width;
+
+        rv = gfmSprite_init(pEnt->pSelf, x, y, door_height, door_width
+                , gfx.pSset32x8, door_offy, door_offx, pEnt, T_HDOOR);
+    }
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     rv = gfmSprite_setFixed(pEnt->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    rv = gfmSprite_addAnimationsStatic(pEnt->pSelf, pDoorAnimData);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    if (isVertical) {
+        rv = gfmSprite_addAnimationsStatic(pEnt->pSelf, pDoorAnimData);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    }
+    else {
+        rv = gfmSprite_addAnimationsStatic(pEnt->pSelf, pHorDoorAnimData);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    }
 
     /* Play its default animation */
     pEnt->maxAnimation = DOOR_ANIM_COUNT;
@@ -157,7 +192,29 @@ err preUpdateDoor(entityCtx *pEnt) {
         case f5: {
             spawnTmpHitbox(pEnt, x, y, door_width, door_f5_height, T_DOOR);
         } break;
+        /* Horizontal doors are the same as regular ones, but with width and
+         * height flipped (even the collision type can be the same) */
+        case hf0:
+        case hf1:
+        case hf2: {
+            spawnTmpHitbox(pEnt, x, y, door_height, door_width, T_DOOR);
+        } break;
+        case hf3: {
+            spawnTmpHitbox(pEnt, x, y, door_f3_height1, door_width, T_DOOR);
+            spawnTmpHitbox(pEnt, x + door_height - door_f3_height0, y
+                    , door_f3_height0, door_width, T_DOOR);
+        } break;
+        case hf4: {
+            spawnTmpHitbox(pEnt, x, y, door_f4_height1, door_width, T_DOOR);
+            spawnTmpHitbox(pEnt, x + door_height - door_f4_height0, y
+                    , door_f4_height0, door_width, T_DOOR);
+        } break;
+        case hf5: {
+            spawnTmpHitbox(pEnt, x + door_height - door_f5_height, y
+                    , door_f5_height, door_width, T_DOOR);
+        } break;
         case f6:
+        case hf6:
         default: { /* No collision */ }
     }
 

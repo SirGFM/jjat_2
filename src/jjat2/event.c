@@ -45,7 +45,8 @@ err parseEvent(entityCtx *pEnt, gfmParser *pParser, type t) {
     err erv;
 
     switch (t & T_MASK) {
-        case T_DOOR: erv = initDoor(pEnt, pParser); break;
+        case T_DOOR: erv = initDoor(pEnt, pParser, 1/*vert*/); break;
+        case T_HDOOR: erv = initDoor(pEnt, pParser, 0/*hor*/); break;
         case T_PRESSURE_PAD: erv = initPressurePad(pEnt, pParser); break;
         default: {
             ASSERT(0, ERR_INVALIDTYPE);
@@ -75,7 +76,8 @@ err preUpdateEvent(entityCtx *pEnt) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     switch (type) {
-        case T_DOOR: {
+        case T_DOOR:
+        case T_HDOOR: {
             erv = preUpdateDoor(pEnt);
             ASSERT(erv == ERR_OK, erv);
         } break;
@@ -112,7 +114,8 @@ err postUpdateEvent(entityCtx *pEnt) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     switch (type) {
-        case T_DOOR: {
+        case T_DOOR:
+        case T_HDOOR: {
             erv = postUpdateDoor(pEnt);
             ASSERT(erv == ERR_OK, erv);
         } break;

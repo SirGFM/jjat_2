@@ -663,6 +663,12 @@ static err _loadLevel(char *levelName, int setPlayer) {
             ASSERT(erv == ERR_OK, erv);
             playstate.entityCount++;
         }
+        else if (strcmp(type, "hdoor") == 0) {
+            entityCtx *pEnt = &playstate.entities[playstate.entityCount];
+            erv = parseEvent(pEnt, playstate.pParser, T_HDOOR);
+            ASSERT(erv == ERR_OK, erv);
+            playstate.entityCount++;
+        }
         else if (strcmp(type, "pressure_pad") == 0) {
             entityCtx *pEnt = &playstate.entities[playstate.entityCount];
             erv = parseEvent(pEnt, playstate.pParser, T_PRESSURE_PAD);

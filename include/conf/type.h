@@ -53,8 +53,15 @@ enum enType {
     , T_SWORD_FX        = (1 << T_BASE_NBITS) | T_FX
     , T_DOOR            = (1 << T_BASE_NBITS) | T_EVENT
     , T_PRESSURE_PAD    = (2 << T_BASE_NBITS) | T_EVENT
+    , T_HDOOR           = (3 << T_BASE_NBITS) | T_EVENT
 };
 typedef enum enType type;
+
+/**
+ * NOTES:
+ *   - T_HDOOR is only used by the sprite itself! It appears as a T_DOOR within
+ *     the quadtree.
+ */
 
 #endif /* __CONF_TYPE_H__ */
 
