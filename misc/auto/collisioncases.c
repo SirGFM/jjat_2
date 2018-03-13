@@ -754,6 +754,15 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
         erv = ERR_OK;
     break;
 #  endif /* defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__)) */
+    /* Collision group 'door_corner_case' */ 
+#  if defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__))
+    SELFCASE(T_DOOR)
+    IGNORE(T_DOOR, T_HDOOR)
+    IGNORE(T_HDOOR, T_DOOR)
+    SELFCASE(T_HDOOR)
+        erv = ERR_OK;
+    break;
+#  endif /* defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__)) */
     /* Collision group 'non_player_entity_collision' */ 
 #  if defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__))
     IGNORE(T_EN_SPIKY, T_LOADZONE)

@@ -239,6 +239,16 @@
                 "auto_swap": false
             }
         ]
+    },
+    "door_corner_case": {
+        "type_a": ["T_DOOR", "T_HDOOR"],
+        "cases" : [
+            {
+                "type_b": ["T_DOOR", "T_HDOOR"],
+                "function": null,
+                "auto_swap": false
+            }
+        ]
     }
 }
 

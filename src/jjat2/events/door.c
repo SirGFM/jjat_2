@@ -47,10 +47,14 @@ enum enHorDoorFrames {
 
 /** List of animations */
 enum enDoorAnim {
-    OPENED = 0
+    OPEN = 0
   , CLOSED
   , OPENING
   , CLOSING
+  , ROPEN
+  , RCLOSED
+  , ROPENING
+  , RCLOSING
   , DOOR_ANIM_COUNT
 };
 typedef enum enDoorAnim doorAnim;
@@ -58,19 +62,27 @@ typedef enum enDoorAnim doorAnim;
 /** door animation data */
 static int pDoorAnimData[] = {
 /*           len|fps|loop|data... */
-/* OPENED  */  1, 0 ,  0 , f6
-/* CLOSED  */, 1, 0 ,  0 , f0
-/* OPENING */,10, 10,  0 , f1,f0,f1,f2,f2,f0,f3,f4,f5,f6
-/* CLOSING */,10, 10,  0 , f5,f4,f2,f3,f3,f0,f1,f0,f1,f0
+/*   OPEN   */  1, 0 ,  0 , f6
+/*  CLOSED  */, 1, 0 ,  0 , f0
+/*  OPENING */,10, 10,  0 , f1,f0,f1,f2,f2,f0,f3,f4,f5,f6
+/*  CLOSING */,10, 10,  0 , f5,f4,f2,f3,f3,f0,f1,f0,f1,f0
+/*  ROPEN   */, 1, 0 ,  0 , f6
+/* RCLOSED  */, 1, 0 ,  0 , f0
+/* ROPENING */,10, 10,  0 , f1,f0,f1,f2,f2,f0,f3,f4,f5,f6
+/* RCLOSING */,10, 10,  0 , f5,f4,f2,f3,f3,f0,f1,f0,f1,f0
 };
 
 /** horizontal door animation data */
 static int pHorDoorAnimData[] = {
 /*           len|fps|loop|data... */
-/* OPENED  */  1, 0 ,  0 , hf6
-/* CLOSED  */, 1, 0 ,  0 , hf0
-/* OPENING */,10, 10,  0 , hf1,hf0,hf1,hf2,hf2,hf0,hf3,hf4,hf5,hf6
-/* CLOSING */,10, 10,  0 , hf5,hf4,hf2,hf3,hf3,hf0,hf1,hf0,hf1,hf0
+/*   OPEN   */  1, 0 ,  0 , hf6
+/*  CLOSED  */, 1, 0 ,  0 , hf0
+/*  OPENING */,10, 10,  0 , hf1,hf0,hf1,hf2,hf2,hf0,hf3,hf4,hf5,hf6
+/*  CLOSING */,10, 10,  0 , hf5,hf4,hf2,hf3,hf3,hf0,hf1,hf0,hf1,hf0
+/*  ROPEN   */, 1, 0 ,  0 , hf6
+/* RCLOSED  */, 1, 0 ,  0 , hf0
+/* ROPENING */,10, 10,  0 , hf1,hf0,hf1,hf2,hf2,hf0,hf3,hf4,hf5,hf6
+/* RCLOSING */,10, 10,  0 , hf5,hf4,hf2,hf3,hf3,hf0,hf1,hf0,hf1,hf0
 };
 
 /**
@@ -103,9 +115,8 @@ err initDoor(entityCtx *pEnt, gfmParser *pParser, int isVertical) {
             if (memcmp(pVal, "closed", 7) == 0) {
                 anim = CLOSED;
             }
-            else if (memcmp(pVal, "opened", 7) == 0) {
-                /* TODO Implement initial state 'opened' */
-                ASSERT(0, ERR_NOTIMPLEMENTED);
+            else if (memcmp(pVal, "open", 7) == 0) {
+                anim = ROPEN;
             }
         }
         else if (memcmp(pKey, "lock_", 5) == 0) {
@@ -235,13 +246,31 @@ err postUpdateDoor(entityCtx *pEnt) {
         return ERR_OK;
     }
 
+    /* Properly update the current animation */
+    switch (pEnt->currentAnimation) {
+        case OPENING: pEnt->currentAnimation = OPEN; break;
+        case CLOSING: pEnt->currentAnimation = CLOSED; break;
+        case ROPENING: pEnt->currentAnimation = ROPEN; break;
+        case RCLOSING: pEnt->currentAnimation = RCLOSED; break;
+        default: { /* Does nothing */ }
+    }
+
     if ((pEnt->flags & _localVars) == pEnt->flags
-            && pEnt->currentAnimation != OPENED) {
+            && pEnt->currentAnimation == CLOSED) {
         return setEntityAnimation(pEnt, OPENING, 0/*force*/);
     }
     else if ((pEnt->flags & _localVars) != pEnt->flags
-            && pEnt->currentAnimation != CLOSED) {
+            && pEnt->currentAnimation == OPEN) {
         return setEntityAnimation(pEnt, CLOSING, 0/*force*/);
+    }
+    /* Reverse doors (def: open, close on set) */
+    else if ((pEnt->flags & _localVars) == pEnt->flags
+            && pEnt->currentAnimation == ROPEN) {
+        return setEntityAnimation(pEnt, RCLOSING, 0/*force*/);
+    }
+    else if ((pEnt->flags & _localVars) != pEnt->flags
+            && pEnt->currentAnimation == RCLOSED) {
+        return setEntityAnimation(pEnt, ROPENING, 0/*force*/);
     }
 
     return ERR_OK;
