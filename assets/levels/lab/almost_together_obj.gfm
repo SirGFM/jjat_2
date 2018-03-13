@@ -1,0 +1,10 @@
+obj hdoor 280 224 32 8 [ init_state , closed ] [ lock_0 , A ]
+obj door 312 216 8 32 [ init_state , open ] [ lock_0 , A ]
+obj door 400 216 8 32 [ init_state , open ] [ lock_0 , A ]
+obj hdoor 408 224 32 8 [ init_state , open ] [ lock_0 , B ]
+obj hdoor 408 184 32 8 [ init_state , closed ] [ lock_0 , B ]
+obj pressure_pad 344 224 32 8 [ set_0 , A ]
+obj pressure_pad 232 104 32 8 [ set_0 , B ]
+area invisible_wall -32 0 32 400
+area invisible_wall 0 400 480 32
+obj loadzone -16 184 32 192 [ dest , lab/here_and_there ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 3 ]
