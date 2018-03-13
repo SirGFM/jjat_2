@@ -174,6 +174,8 @@ err initDoor(entityCtx *pEnt, gfmParser *pParser, int isVertical) {
  * @param  [ in]pEnt    The entity
  */
 err preUpdateDoor(entityCtx *pEnt) {
+    gfmHitbox *pBox1, *pBox2;
+    gfmCollision side;
     gfmRV rv;
     int x, y, frame;
 
@@ -184,49 +186,85 @@ err preUpdateDoor(entityCtx *pEnt) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     rv = gfmSprite_getFrame(&frame, pEnt->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    pBox2 = 0;
     switch (frame) {
         case f0:
         case f1:
         case f2: {
-            spawnTmpHitbox(pEnt, x, y, door_width, door_height, T_DOOR);
+            pBox1 = spawnTmpHitbox(pEnt, x, y, door_width, door_height, T_DOOR);
         } break;
         case f3: {
-            spawnTmpHitbox(pEnt, x, y, door_width, door_f3_height0, T_DOOR);
-            spawnTmpHitbox(pEnt, x, y + door_height - door_f3_height1
+            pBox1 = spawnTmpHitbox(pEnt, x, y, door_width, door_f3_height0
+                    , T_DOOR);
+            pBox2 = spawnTmpHitbox(pEnt, x, y + door_height - door_f3_height1
                     , door_width, door_f3_height1, T_DOOR);
         } break;
         case f4: {
-            spawnTmpHitbox(pEnt, x, y, door_width, door_f4_height0, T_DOOR);
-            spawnTmpHitbox(pEnt, x, y + door_height - door_f4_height1
+            pBox1 = spawnTmpHitbox(pEnt, x, y, door_width, door_f4_height0
+                    , T_DOOR);
+            pBox2 = spawnTmpHitbox(pEnt, x, y + door_height - door_f4_height1
                     , door_width, door_f4_height1, T_DOOR);
         } break;
         case f5: {
-            spawnTmpHitbox(pEnt, x, y, door_width, door_f5_height, T_DOOR);
+            pBox1 = spawnTmpHitbox(pEnt, x, y, door_width, door_f5_height
+                    , T_DOOR);
         } break;
         /* Horizontal doors are the same as regular ones, but with width and
          * height flipped (even the collision type can be the same) */
         case hf0:
         case hf1:
         case hf2: {
-            spawnTmpHitbox(pEnt, x, y, door_height, door_width, T_DOOR);
+            pBox1 = spawnTmpHitbox(pEnt, x, y, door_height, door_width, T_DOOR);
         } break;
         case hf3: {
-            spawnTmpHitbox(pEnt, x, y, door_f3_height1, door_width, T_DOOR);
-            spawnTmpHitbox(pEnt, x + door_height - door_f3_height0, y
+            pBox1 = spawnTmpHitbox(pEnt, x, y, door_f3_height1, door_width
+                    , T_DOOR);
+            pBox2 = spawnTmpHitbox(pEnt, x + door_height - door_f3_height0, y
                     , door_f3_height0, door_width, T_DOOR);
         } break;
         case hf4: {
-            spawnTmpHitbox(pEnt, x, y, door_f4_height1, door_width, T_DOOR);
-            spawnTmpHitbox(pEnt, x + door_height - door_f4_height0, y
+            pBox1 = spawnTmpHitbox(pEnt, x, y, door_f4_height1, door_width
+                    , T_DOOR);
+            pBox2 = spawnTmpHitbox(pEnt, x + door_height - door_f4_height0, y
                     , door_f4_height0, door_width, T_DOOR);
         } break;
         case hf5: {
-            spawnTmpHitbox(pEnt, x + door_height - door_f5_height, y
+            pBox1 = spawnTmpHitbox(pEnt, x + door_height - door_f5_height, y
                     , door_f5_height, door_width, T_DOOR);
         } break;
         case f6:
         case hf6:
-        default: { /* No collision */ }
+        default: { pBox1 = 0; /* No collision */ }
+    }
+
+    /* Set the condition collision side */
+    switch (frame) {
+        case f0:
+        case f1:
+        case f2:
+        case f3:
+        case f4:
+        case f5:
+        case f6: {
+            side = gfmCollision_hor;
+        } break;
+        case hf0:
+        case hf1:
+        case hf2:
+        case hf3:
+        case hf4:
+        case hf5:
+        case hf6: {
+            side = gfmCollision_ver;
+        } break;
+    }
+
+    if (pBox1 != 0) {
+        gfmHitbox_setHitFlag(pBox1, side);
+    }
+    if (pBox2 != 0) {
+        gfmHitbox_setHitFlag(pBox2, side);
     }
 
     return ERR_OK;
