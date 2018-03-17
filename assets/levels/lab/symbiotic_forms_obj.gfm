@@ -1,13 +1,14 @@
 obj pressure_pad 216 88 32 8 [ set_0 , A ]
-obj pressure_pad 224 232 32 8 [ set_0 , B ]
+obj pressure_pad 208 232 32 8 [ set_0 , B ]
 obj door 120 48 8 32 [ init_state , closed ] [ lock_0 , A ]
 obj hdoor 32 168 32 8 [ init_state , open ] [ lock_0 , B ]
 obj walky 144 48 8 8
-obj walky 232 224 8 8
-obj walky 240 224 8 8
+obj walky 216 224 8 8
+obj walky 224 224 8 8
 area invisible_wall -32 0 32 240
 area invisible_wall 320 0 32 240
 obj loadzone 304 16 32 112 [ dest , lab/harmless_critters ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 5 ]
-obj loadzone -16 16 32 104 [ dest , lab/almost_together ] [ dir , up ] [ tgt_x , 35 ] [ tgt_y , 49 ]
+obj loadzone -16 24 32 96 [ dest , lab/remote_assistance ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 2 ]
 obj door 104 48 8 32 [ init_state , open ] [ lock_0 , B ]
 obj hdoor 32 192 32 8 [ init_state , open ] [ lock_0 , A ]
+obj hdoor 32 144 32 8 [ init_state , closed ] [ lock_0 , A ]
