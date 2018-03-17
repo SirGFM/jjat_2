@@ -1,0 +1,7 @@
+obj door 160 120 8 32 [ init_state , closed ] [ lock_0 , A ]
+obj door 160 216 8 32 [ init_state , closed ] [ lock_0 , B ]
+obj pressure_pad 64 224 32 8 [ set_0 , A ]
+obj pressure_pad 200 224 32 8 [ set_0 , A ] [ set_1 , B ]
+obj loadzone 104 -16 32 32 [ dest , lab/the_meeting ] [ dir , up ] [ tgt_x , 35 ] [ tgt_y , 29 ]
+obj loadzone 184 -16 32 32 [ dest , carried_away ] [ dir , up ] [ tgt_x , 3 ] [ tgt_y , 29 ]
+area invisible_wall 0 -32 320 32

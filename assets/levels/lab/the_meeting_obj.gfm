@@ -1,0 +1,8 @@
+area invisible_wall 0 240 336 32
+area invisible_wall 0 -32 336 32
+obj door 264 168 8 32 [ init_state , closed ] [ lock_0 , A ]
+obj door 120 216 8 32 [ init_state , closed ] [ lock_0 , B ]
+obj pressure_pad 152 224 32 8 [ set_0 , A ]
+obj pressure_pad 208 120 32 8 [ set_0 , B ]
+obj loadzone 280 224 32 32 [ dest , lab/carry_it ] [ dir , down ] [ tgt_x , 13 ] [ tgt_y , 0 ]
+obj loadzone 104 -16 88 32 [ dest , lab/remote_assistance ] [ dir , up ] [ tgt_x , 4 ] [ tgt_y , 29 ]

@@ -11,3 +11,4 @@ obj walky 240 72 8 8
 area invisible_wall 320 0 32 240
 area invisible_wall 0 240 320 32
 obj loadzone 304 16 32 96 [ dest , lab/symbiotic_forms ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 3 ]
+obj loadzone 32 224 88 32 [ dest , lab/the_meeting ] [ dir , down ] [ tgt_x , 13 ] [ tgt_y , 0 ]
