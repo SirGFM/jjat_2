@@ -1,0 +1,13 @@
+obj pressure_pad 184 96 32 8 [ set_0 , A ]
+obj pressure_pad 128 96 32 8 [ set_0 , B ]
+obj pressure_pad 264 232 32 8 [ set_0 , C ]
+obj pressure_pad 152 232 32 8 [ set_0 , D ]
+obj door 72 56 8 32 [ init_state , closed ] [ lock_0 , A ]
+obj door 248 224 8 32 [ init_state , closed ] [ lock_0 , A ]
+obj door 192 224 8 32 [ init_state , closed ] [ lock_0 , B ]
+obj door 128 56 8 32 [ init_state , closed ] [ lock_0 , C ]
+obj door 112 56 8 32 [ init_state , closed ] [ lock_0 , D ]
+obj walky 240 72 8 8
+area invisible_wall 320 0 32 240
+area invisible_wall 0 240 320 32
+obj loadzone 304 16 32 96 [ dest , lab/symbiotic_forms ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 3 ]
