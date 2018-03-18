@@ -1,0 +1,4 @@
+obj loadzone -16 184 32 32 [ dest , lab/old_trick ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 23 ]
+obj loadzone 304 184 32 32 [ dest , lab/spikes_warning ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 23 ]
+area invisible_wall -32 0 32 240
+area invisible_wall 320 0 32 240

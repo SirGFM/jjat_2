@@ -1,0 +1,7 @@
+obj door 152 136 8 32 [ init_state , closed ] [ lock_0 , A ]
+obj pressure_pad 32 168 32 8 [ set_0 , A ]
+obj loadzone 304 184 32 32 [ dest , lab/spikes_warning ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 23 ]
+obj loadzone 24 224 32 32 [ dest , lab/carry_it ] [ dir , down ] [ tgt_x , 23 ] [ tgt_y , 0 ]
+area invisible_wall 0 240 320 32
+area invisible_wall 320 0 32 240
+area checkpoint 272 16 16 24
