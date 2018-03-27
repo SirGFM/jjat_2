@@ -476,6 +476,10 @@ static inline err _gWalkyViewEntityCollision(collisionNode *entity
         /* Avoid triggering for the viewing entity */
         return ERR_OK;
     }
+    else if (!(((entityCtx*)entity->pChild)->flags & EF_ALIVE)) {
+        /* Avoid triggering for dead/just hit entity */
+        return ERR_OK;
+    }
 
     CHECK_OVERLAP(entity, view);
 

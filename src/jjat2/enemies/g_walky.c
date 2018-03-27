@@ -322,6 +322,8 @@ err onGreenWalkyAttacked(entityCtx *pEnt, gfmObject *pAttacker) {
  * @param  [ in]pEnt The enemy
  */
 void triggerGreenWalkyAttack(entityCtx *pEnt) {
-    pEnt->flags |= GWALKY_TRIGGERATTACK;
+    if (pEnt->currentAnimation != ATTACK) {
+        pEnt->flags |= GWALKY_TRIGGERATTACK;
+    }
 }
 
