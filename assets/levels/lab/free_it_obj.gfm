@@ -6,4 +6,4 @@ obj hdoor 232 64 32 8 [ init_state , closed ] [ lock_0 , B ]
 obj walky 264 280 8 8
 area invisible_wall 320 0 32 320
 obj loadzone 304 200 32 32 [ dest , lab/beware_the_spikes ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 4 ]
-obj loadzone 304 16 32 32 [ dest , lab/free_it ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 25 ]
+obj loadzone 304 16 32 32 [ dest , lab/spotted ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 20 ]
