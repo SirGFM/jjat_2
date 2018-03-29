@@ -1,7 +1,6 @@
 obj g_walky 112 208 8 8
 obj g_walky 272 208 8 8 [ flipped , true ]
 obj walky 192 208 8 8
-area checkpoint 64 168 16 24
 obj g_walky 208 136 8 8 [ flipped , true ]
 obj g_walky 408 200 8 8 [ flipped , true ]
 obj g_walky 408 136 8 8 [ flipped , true ]
