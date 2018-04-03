@@ -10,6 +10,6 @@ obj walky 120 88 8 8
 area checkpoint 64 168 16 24
 area checkpoint 376 32 16 24
 obj loadzone -16 160 32 32 [ dest , lab/free_it ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 2 ]
-obj loadzone 464 24 32 32 [ dest , lab/free_it ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 2 ]
+obj loadzone 464 24 32 32 [ dest , lab/hurdles ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 23 ]
 area invisible_wall -32 0 32 240
 area invisible_wall 480 0 32 240
