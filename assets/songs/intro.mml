@@ -33,7 +33,7 @@ w0 o5 l8 k18 q30 h50 ENV(48, 15, 32, 14, 4)
        r1
        r1
        r1
-       f     c+4         r2                      r     // A1
+   $   f     c+4         r2                      r     // A1
        r2                      r4        >a+<    c
        f     c+4         r2                      r     // A2
        r2                      r4         a+    <c>
@@ -41,10 +41,20 @@ w0 o5 l8 k18 q30 h50 ENV(48, 15, 32, 14, 4)
        r2                      r4        >a+<    c
        f     c+4         r2                      r     // A1'
        r2                      r4         f      g+
-      <c>    a+4         f     g+4        r4           // B
+      <c>    a+4         f     g+4        r4           // B1
        a+4         r2                     g+     r
-      <c>    a+4         f    <d+4        r4
+      <c>    a+4         f    <d+4        r4           // B2
        f4>         r2                     g+     r
+       d+    f4          r    >a+4<       r4           // C1
+       c4          r2.
+       d+    f4          r    >a+4<       r4           // C2
+       c+4               r2.
+l4     f           r           >a+<       r            // C3
+       c+8   c           r8    c+8  d+8   r
+       f           r           >a+<       r8     d+8   // C4
+       g           r           c+8  c8    r
+       f           r           >a+        r            // C5 - END
+       g+          r2                     f8     r8
 
 ; // -- melody -------------------------------------------------------
 
