@@ -6,12 +6,16 @@ t80    //===============================//
 w1 o2 l2 k7 q78 h90 ENV(0, 10, 2, 8, 0)
 
 // | --8-- --8-- --8-- --8-- --8-- --8-- --8-- --8-- |
-   $   a+                      a+
+   $ [ a+                      a+
+       f+                      f+
+       g+                      g+ ]6
+
+       a+                      a+
        f+                      f+
        g+                      g+
        a+                      a+
        f+                      f+
-       g+                      g+
+       f4.               d+4         f4          r8
 
 ; // -- bass-1 -------------------------------------------------------
 
@@ -19,12 +23,16 @@ w1 o2 l2 k7 q78 h90 ENV(0, 10, 2, 8, 0)
 w2 o3 l8 k10 q82 h94 ENV(0, 14, 8, 2, 0)
 
 // | --8-- --8-- --8-- --8-- --8-- --8-- --8-- --8-- |
-   $   r     f     r     f     r     f     r     f 
+   $ [ r     f     r     f     r     f     r     f
        r     c+    r     c+    r     c+    r     c+
-       r     d+    r     d+    r     d+    r     d+
-       r     f     r     f     r     f     r     f 
-       r     c+    r     c+    r     c+    r     c+
-       r     d+    r     d+    r     d+    r     d+
+       r     d+    r     d+    r     d+    r     d+ ]6
+
+       r     f     f4          r     f     g+    f
+       r     c+    c+4         r     c+    f     c+
+       r     d+    d+4         r     d+    f     f+
+       r     f     f4          r     f     d+    f
+       r     c+    c+4         r     c+    c     c+
+       r     c4          r    >a+<   r     c     r
 
 ; // -- bass-2 -------------------------------------------------------
 
@@ -41,20 +49,28 @@ w2 o3 l8 k10 q82 h94 ENV(0, 14, 8, 2, 0)
 w0 o5 l8 k18 q30 h50 ENV(32, 12, 28, 10, 4)
 
 // | --8-- --8-- --8-- --8-- --8-- --8-- --8-- --8-- |
-   $   f4          c4          r     d+    f     g+
+   $   f4          c4          r     d+    f     g+  // A
        a+4         f4          r4          a+   <c
        c+4         r     d+    c+    c    >a+    g+
        f4          r2                      f     g+
        d+4         r4.               c+    c    >g+
-       a+4<        r2.
+       a+4<        r4.               c     c+    d+
 
-// The snippet bellow is quite weird...
-//       f4          c4          r     d+    f     g+
-//       a+4         f4          r4          a+   <c
-//       c+4         r     d+    c+    c    >a+    g+
-//       a+4         f4          r4          c+    d+
-//       c4         >g+4         a+4<        r4
-//       r1
+       f4          c4          r     d+    f     g+  // A'
+       a+4         f4          r4          a+   <c
+       c+4         r     d+    c+    c    >a+    g+
+       f4          r2                      f     g+
+       d+4         r4.              <d+    c+   >g+
+l16    a+r  <cr    c+r   r8    fr    d+r   c+r   cr
+
+o6 l8  d+.  c+16   c+.   r.          f     d+    c
+       c+.   c16   c.    r.         >a+<   c     c+
+       d+4         r4.               d+    f     f+
+       f.   d+16   d+.   r16   c+.   c16   c.    r16
+      >a+.  g+16   g+.   r8.         d+    c+   >g+
+       a+4       f16r16  r8    r2
+
+     [ r1 ]6
 
 ; // -- melody-1 -----------------------------------------------------
 
