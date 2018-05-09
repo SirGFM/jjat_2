@@ -36,14 +36,30 @@ w2 o3 l8 k10 q82 h94 env(0, 14, 8, 2, 0)
 
 ; // -- bass-2 -------------------------------------------------------
 
-// ---- drum kick bass -----------------------------------------------
-//w4 o2 l16 k0 q20 h40 ENV(90, 95, 35, 10, 10)
+// ---- drum snare/kick bass -----------------------------------------
+#K w4 o2 l16 k0 q20 h40 env(90, 95, 35, 10, 10) b;
+#S w12 l32 o6 k0 q30 h70 env(60, 55, 25, 18, 18) b;
 
-//v0
 // | --8-- --8-- --8-- --8-- --8-- --8-- --8-- --8-- |
-//   $   r1
+       Kr    r8   Srrr   r8    Kr    Kr   Srrr   Kr  // A
+       Kr    r8   Srrr   r8    Kr    Kr   Srrr   r8
+       Kr    Kr   Srrr   r8    KK    rK   Srrr   r8
+       Kr    Kr    r8    Kr    Kr    r8   Srrr  Srrr
+       Kr    Kr    r8    KK    r8    Kr    Kr   Srrr
+      Srrr   r8    Kr    r8    Kr    r8    Kr    Kr
 
-//; // -- drum kick bass -----------------------------------------------
+       Kr    r8   Srrr   r8    Kr    Kr   Srrr   Kr
+       Kr    r8   Srrr   r8    Kr    Kr   Srrr   r8
+       Kr    Kr   Srrr   r8    KK    rK   Srrr   r8
+
+
+
+       Kr    Kr   Srrr   r4          Kr    Kr    Kr
+
+       Kr    r8   Srrr   r8    Kr    Kr   Srrr   Kr
+
+
+; // -- drum snare/kick bass -----------------------------------------
 
 // ---- melody-1 -----------------------------------------------------
 w0 o5 l8 k18 q30 h50 env(32, 12, 28, 10, 4)
