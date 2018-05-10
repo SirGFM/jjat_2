@@ -45,18 +45,21 @@ w2 o3 l8 k10 q82 h94 env(0, 14, 8, 2, 0)
        Kr    r8   Srrr   r8    Kr    Kr   Srrr   r8
        Kr    Kr   Srrr   r8    KK    rK   Srrr   r8
        Kr    Kr    r8    Kr    Kr    r8   Srrr  Srrr
-       Kr    Kr    r8    KK    r8    Kr    Kr   Srrr
-      Srrr   r8    Kr    r8    Kr    r8    Kr    Kr
+       Kr    Kr    r8    KK    r8    Kr   Srrr   Kr
+       Kr    r8    Kr    r8    Kr    r8    Kr    Kr
 
-       Kr    r8   Srrr   r8    Kr    Kr   Srrr   Kr
+       Kr    r8   Srrr   r8    Kr    Kr   Srrr   Kr  // A'
        Kr    r8   Srrr   r8    Kr    Kr   Srrr   r8
        Kr    Kr   Srrr   r8    KK    rK   Srrr   r8
+       Kr    Kr    r8    Kr    Kr    r8   Srrr  Srrr
+       Kr    Kr    r8    KK    r8    Kr   Srrr   Kr
+       KK   Srrr   KK   Srrr   KK    r8    KK    Kr
+
+       KK    rK   Srrr   r8    KK    rK   Srrr  Srrr
+       KK    rK   Srrr   r8    KK    rK   Srrr  Srrr
 
 
 
-       Kr    Kr   Srrr   r4          Kr    Kr    Kr
-
-       Kr    r8   Srrr   r8    Kr    Kr   Srrr   Kr
 
 
 ; // -- drum snare/kick bass -----------------------------------------
