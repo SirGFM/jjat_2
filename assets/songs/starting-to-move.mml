@@ -62,9 +62,12 @@ w2 o3 l8 k10 q82 h94 env(0, 14, 8, 2, 0)
        Kr    Kr    Kr    rK    KK    rK   Srrr  r16K
        KK   Srrr   KK   Srrr   KK    r8    KK    Kr
 
-
-
-
+       KK   Srrr   SrK   KK   SrK    KK   Srrr  r16K
+       KK   Srrr   Srrr  KK   Srrr   KK   Srrr   r8
+       KK   Srrr   r16K  KK    rK    KK   Srrr  Srrr
+       KK   Srrr   SrK   KK   SrK    KK   Srrr  r16K
+       KK   Srrr   Srrr  KK   Srrr   KK   Srrr   r8
+       KK   Srrr   r16K  KK    rK    KK    SrK   KK
 
 ; // -- drum snare/kick bass -----------------------------------------
 
