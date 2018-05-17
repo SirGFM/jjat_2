@@ -16,6 +16,7 @@ enum enConfigFlags {
   , CFG_SYNCCONTROL = 0x04
   , CFG_SIMPLEDRAW  = 0x08
 #endif /* JJATENGINE */
+  , CFG_LAZYLOAD    = 0x10
 };
 typedef enum enConfigFlags configFlags;
 
