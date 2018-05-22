@@ -5,6 +5,7 @@
 #include <base/error.h>
 #include <base/game.h>
 #include <base/input.h>
+#include <base/loadstate.h>
 #include <base/mainloop.h>
 
 #include <conf/state.h>
@@ -46,6 +47,7 @@ err mainloop() {
             switch (game.nextState) {
                 case ST_PLAYSTATE: erv = loadPlaystate(); break;
                 case ST_LEVELTRANSITION: erv = setupLeveltransition(); break;
+                case ST_LOADSTATE: erv = loadLoadstate(); break;
                 default: {}
             }
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
@@ -79,6 +81,7 @@ err mainloop() {
             switch (game.currentState) {
                 case ST_PLAYSTATE: erv = updatePlaystate(); break;
                 case ST_LEVELTRANSITION: erv = updateLeveltransition(); break;
+                case ST_LOADSTATE: erv = updateLoadstate(); break;
                 default: {}
             }
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
@@ -97,6 +100,7 @@ err mainloop() {
             switch (game.currentState) {
                 case ST_PLAYSTATE: erv = drawPlaystate(); break;
                 case ST_LEVELTRANSITION: erv = drawLeveltransition(); break;
+                case ST_LOADSTATE: erv = drawLoadstate(); break;
                 default: {}
             }
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
