@@ -92,6 +92,10 @@ err setupGame(int argc, char *argv[]) {
     rv = gfm_getCamera(&game.pCamera, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+    if (config.flags & CFG_LAZYLOAD) {
+        game.flags |= CMD_LAZYLOAD;
+    }
+
 #if defined(JJATENGINE)
     /** If playing on asynchronous mode, set only swordy as active */
     if (config.flags & CFG_SYNCCONTROL) {

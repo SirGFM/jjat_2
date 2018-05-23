@@ -16,6 +16,7 @@
 struct stLoadstateCtx {
     gfmSpriteset *pBitmapFont;
     int offset;
+    int progress;
 };
 typedef struct stLoadstateCtx loadstateCtx;
 
@@ -23,7 +24,7 @@ typedef struct stLoadstateCtx loadstateCtx;
 extern loadstateCtx loadstate;
 
 /**
- * Initialize the playstate so a level may be later loaded and played. The game
+ * Initialize the loadstate so it start loading the resources in BG. The game
  * is responsible for calling this with the proper parameters. Failure to do so
  * will result in a empty and (even more) boring loading screen.
  *
@@ -32,16 +33,16 @@ extern loadstateCtx loadstate;
  */
 err initLoadstate(gfmSpriteset *pBitmapFont, int offset);
 
-/** If the playstate has been initialized, properly free it up. */
+/** If the loadstate has been initialized, properly free it up. */
 void freeLoadstate();
 
-/** Setup the playstate so it may start to be executed */
+/** Setup the loadstate so it may start to be executed */
 err loadLoadstate();
 
-/** Update the playstate */
+/** Update the loadstate */
 err updateLoadstate();
 
-/** Draw the playstate */
+/** Draw the loadstate */
 err drawLoadstate();
 
 #endif /* __BASE_LOADSTATE_H__ */

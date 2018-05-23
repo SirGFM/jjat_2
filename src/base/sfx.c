@@ -36,3 +36,17 @@ err initSfx() {
     return ERR_OK;
 }
 
+/**
+ * Get how many sound effects the game has.
+ */
+int getSfxCount() {
+    return SFX_MAX;
+}
+
+/**
+ * Get how many songs the game has.
+ */
+int getSoundCount() {
+    return SNG_MAX;
+}
+

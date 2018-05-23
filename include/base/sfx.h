@@ -26,5 +26,15 @@ extern sfxCtx sfx;
  */
 err initSfx();
 
+/**
+ * Get how many sound effects the game has.
+ */
+int getSfxCount();
+
+/**
+ * Get how many songs the game has.
+ */
+int getSoundCount();
+
 #endif /* __BASE_SFX_H__ */
 

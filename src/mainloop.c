@@ -39,7 +39,7 @@ err mainloop() {
     ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
 
     /* Set initial state */
-    game.nextState = ST_PLAYSTATE;
+    game.nextState = ST_LOADSTATE;
 
     while (gfm_didGetQuitFlag(game.pCtx) != GFMRV_TRUE) {
         /* Switch state */

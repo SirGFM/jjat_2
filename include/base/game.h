@@ -25,6 +25,7 @@ enum enGameFlags {
   , AC_BOTH         = (AC_SWORDY | AC_GUNNY)
   , CMD_CUSTOMINPUT = 0x04
   , FX_PRETTYRENDER = 0x08
+  , CMD_LAZYLOAD    = 0x10
 };
 typedef enum enGameFlags gameFlags;
 
