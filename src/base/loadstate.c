@@ -11,8 +11,9 @@
 
 #include <string.h>
 
-#define LOAD_TXT "LOADING..."
+#define LOAD_TXT "  LOADING...  "
 #define LOAD_DELAY 300
+#define FILE_DELAY 100
 #define SFX_BASE_PATH "assets/sfx/"
 #define SONG_BASE_PATH "assets/songs/"
 
@@ -136,7 +137,7 @@ err loadLoadstate() {
 err updateLoadstate() {
     gfmRV rv;
 
-    if (((game.flags & CMD_LAZYLOAD) && loadstate.progress > getSfxCount()) ||
+    if (((game.flags & CMD_LAZYLOAD) && loadstate.progress >= getSfxCount()) ||
             loadstate.progress >= numAssets) {
         /* TODO Set the proper next state */
         //game.nextState = ST_MENUSTATE;
@@ -163,7 +164,7 @@ err updateLoadstate() {
         len = strlen(pText);
 
         rv = gfmText_init(loadstate.pCurFile, centerText(len)
-                , getHeightFromBottom(3), len, 1/*maxLines*/, LOAD_DELAY
+                , getHeightFromBottom(3), len, 1/*maxLines*/, FILE_DELAY
                 , 0/*bindToWorld*/, loadstate.pBitmapFont, loadstate.offset);
         ASSERT((rv == GFMRV_OK), ERR_GFMERR);
         rv = gfmText_setText(loadstate.pCurFile, pText, len, 1/*copy*/);
