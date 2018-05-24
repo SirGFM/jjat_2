@@ -155,6 +155,10 @@ err updateLoadstate() {
         int len;
 
         loadstate.lastProgress = loadstate.progress;
+        if (loadstate.lastProgress == numAssets) {
+            /* progress was updated by the other thread, bail out */
+            return ERR_OK;
+        }
         pText = getCurrentResourceName();
         len = strlen(pText);
 
@@ -191,6 +195,8 @@ err drawLoadstate() {
     if (loadstate.pBitmapFont == 0) {
         return ERR_OK;
     }
+
+    /* TODO Render a black box behind the text */
 
     /* Render the load screen */
     rv = gfmText_draw(loadstate.pLoading, game.pCtx);
