@@ -25,7 +25,6 @@
          base/collision.o \
          base/gfx.o \
          base/input.o \
-         base/loader.o \
          base/loadstate.o \
          base/main.o \
          base/sfx.o \

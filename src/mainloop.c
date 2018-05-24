@@ -4,6 +4,7 @@
 #include <base/collision.h>
 #include <base/error.h>
 #include <base/game.h>
+#include <base/gfx.h>
 #include <base/input.h>
 #include <base/loadstate.h>
 #include <base/mainloop.h>
@@ -36,6 +37,9 @@ err mainloop() {
     erv = initUI();
     ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
     erv = initHitboxes();
+    ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
+
+    erv = initLoadstate(gfx.pSset8x8, 0/*offset*/);
     ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
 
     /* Set initial state */

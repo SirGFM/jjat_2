@@ -12,11 +12,17 @@
 
 #include <base/error.h>
 #include <GFraMe/gfmSpriteset.h>
+#include <GFraMe/gfmText.h>
 
 struct stLoadstateCtx {
+    gfmText *pLoading;
+    gfmText *pCurFile;
     gfmSpriteset *pBitmapFont;
     int offset;
+    int lastProgress;
     int progress;
+    int fontWidth;
+    int fontHeight;
 };
 typedef struct stLoadstateCtx loadstateCtx;
 
