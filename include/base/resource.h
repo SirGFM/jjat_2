@@ -13,6 +13,9 @@ struct stResourceCtx {
     int *pHandles;
     /** Temporary list of resource handles, passed to the loading thread */
     int **ppTBLHandles;
+    /** Temporary list of resources getting loaded. Declared as 'void*' to
+     * avoid including 'GFraMe/gfram.h' */
+    void *pResType;
     /** Ugly buffer with every song name. Should be used for storage only, and
      * pDynSongNames should actually be used to access its elements */
     char *pNameBuf;
@@ -23,7 +26,7 @@ struct stResourceCtx {
     int numHandles;
     /** Actual length (in elements) of pHandles */
     int handlesLen;
-    /** Length (in elements) of ppTBLHandles */
+    /** Length (in elements) of ppTBLHandles and pResType */
     int tmpListLen;
     /** Actual length of pNameBuf */
     int nameBufLen;
@@ -31,6 +34,10 @@ struct stResourceCtx {
     int numDynSongs;
     /** Actual length (in elements) of pDynSongNames */
     int dynSongLen;
+    /** Progress status of the loader */
+    int progress;
+    /** How many resources are currently being loaded */
+    int numLoading;
 };
 typedef struct stResourceCtx resourceCtx;
 

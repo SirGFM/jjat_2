@@ -4,7 +4,9 @@
 #include <base/resource.h>
 #include <base/sfx.h>
 #include <conf/sfx_list.h>
+#include <GFraMe/gframe.h>
 #include <string.h>
+#include <stdlib.h>
 
 /* Help set the default resource path in a common place */
 #define SFX_BASE_PATH "assets/sfx/"
@@ -47,33 +49,26 @@ static err _checkHandleLoaded(int idx) {
  * @param  [ in]pName Name of the song getting searched. Must be '\0' terminated
  */
 err fastGetSongIndex(int *pIdx, char *pName) {
-    int idx = -1;
+    int tmp, idx = -1;
 
     ASSERT(pHnd != 0, ERR_ARGUMENTBAD);
     ASSERT(pName != 0, ERR_ARGUMENTBAD);
 
-    do {
-        int tmp = getSfxCount();
+    while (tmp = getSfxCount(); tmp < getSfxCount() + getSoundCount(); tmp++) {
+        char *pFilename = pResSrc[tmp] + sizeof(SONG_BASE_PATH) - 1;
 
-        /* This is ugly, but it somewhat works... As soon as the song is found,
-         * the break exits the outer do..while */
-#define X(name, file) \
-        if (strcmp(file, pName) == 0) { \
-            idx = tmp; \
-            break; \
-        } \
-        tmp++;
-
-    SONGS_LIST
-#undef X
-    } while (0);
+        if (strcmp(pFilename, pName) == 0) {
+            idx = tmp;
+            break;
+        }
+    }
 
     /* TODO Change this into an ASSERT */
     /* This should be an ASSERT since no "default song" should be dynamically
      * loaded. Using an ASSERT here stops the debugger, which helps detecting if
      * I missed any songs. */
     //ASSERT((idx != -1, ERR_INDEXOOB);
-    if (idx != -1) {
+    if (idx == -1) {
         return ERR_INDEXOOB;
     }
 
@@ -108,29 +103,26 @@ err getDynSongIndex(int *pIdx, char *pName) {
         }
     }
 
-    /* TODO Check if anything else is currently being loaded */
+    /* Check if anything else is currently being loaded */
+    ASSERT(res.progress == -1 || res.progress == res.numLoading
+            , ERR_ALREADYLOADING);
 
-    /* TODO Check if a new song may already be loaded and expand any buffer as
+    /* Check if a new song may already be loaded and expand any buffer as
      * necessary */
+    if (res.numHandles == res.handlesLen) {
+        res.handlesLen = res.handlesLen * 2 + 1;
+
+        res.pHandles = realloc(res.pHandles, sizeof(int) * res.handlesLen);
+    }
+    if (tmpListLen < 1) {
+        res.tmpListLen = res.tmpListLen * 2 + 1;
+
+        res.ppTBLHandles = realloc(res.ppTBLHandles, sizeof(int*) * res.tmpListLen);
+        res.pResType = realloc(res.pResType, sizeof(gfmAssetType) * res.tmpListLen);
+    }
+
+    /* TODO Set the temporary data and start loading the resource */
 }
-
-/** List of handles though which the loaded resources will be accessed */
-static int* pResHnd[] = {
-#define X(name, ...) \
-    &sfx.name,
-    SOUNDS_LIST
-    SONGS_LIST
-#undef X
-};
-
-/** List of types for the loaded resources */
-static gfmAssetType pResType[] = {
-#define X(...) \
-    ASSET_AUDIO,
-    SOUNDS_LIST
-    SONGS_LIST
-#undef X
-};
 
 /** Number of resources to be loaded */
 static const int numAssets = sizeof(pResType) / sizeof(gfmAssetType);
