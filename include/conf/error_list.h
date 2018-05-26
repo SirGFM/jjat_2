@@ -29,6 +29,7 @@
     X(ERR_NOTIMPLEMENTED) \
     X(ERR_ALREADYLOADING) \
     X(ERR_LOADINGRESOURCE) \
+    X(ERR_OOM) \
     X(ERR_MAX)
 
 #endif /* __CONF_ERROR_LIST_H__ */

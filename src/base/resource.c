@@ -1,5 +1,12 @@
 /**
  * @file src/base/resource.c
+ *
+ * This module loads *resources in BG and keeps track of their handles.
+ * Different from the rest of the engine, it may alloc some dynamic memory,
+ * to keep track of resources loaded during the game. However, since most of the
+ * resources should be loaded from a static list (and during the game's
+ * initialization), it will most likely be useful during development (so the
+ * game won't have to be recompiled to add/test new songs) and for modding.
  */
 #include <base/resource.h>
 #include <base/sfx.h>
@@ -35,6 +42,27 @@ static err _checkHandleLoaded(int idx) {
         return ERR_LOADINGRESOURCE;
     }
     return ERR_OK;
+}
+
+/**
+ * Retrieve the name of a given dynamically loaded song.
+ *
+ * Since this only deals with dynamically loaded songs, the index is offset by
+ * getSfxCount() + getSoundCount() from the handles list.
+ *
+ * @param [ in]idx Index of the song
+ */
+static char* _getDynSongName(int idx) {
+    return res.pNameBuf + res.pDynSong[idx];
+}
+
+/**
+ * Calculates the index in pHandles for a dynamically loaded song.
+ *
+ * @param [ in]idx Index of the song
+ */
+static int _convertDynSongIndex(int idx) {
+    return idx + getSfxCount() + getSoundCount();
 }
 
 /**
@@ -92,198 +120,49 @@ err fastGetSongIndex(int *pIdx, char *pName) {
  * @param  [ in]pName Name of the song getting searched. Must be '\0' terminated
  */
 err getDynSongIndex(int *pIdx, char *pName) {
-    int idx;
+    int idx, len;
+
+    ASSERT(pHnd != 0, ERR_ARGUMENTBAD);
+    ASSERT(pName != 0, ERR_ARGUMENTBAD);
 
     /* Check if the songs has already been loaded, or if it's currently being
      * loaded */
-    for (idx = 0; idx < res.numDynSongs; idx++) {
-        if (strcmp(pName, res.pDynSongNames) == 0) {
-            *pIdx = idx + getSoundCount();
-            return _checkHandleLoaded(idx);
+    for (idx = 0; idx < res.count; idx++) {
+        if (strcmp(pName, _getDynSongName(idx)) == 0) {
+            *pIdx = _convertDynSongIndex(idx);
+            return _checkHandleLoaded(*pIdx);
         }
     }
 
     /* Check if anything else is currently being loaded */
-    ASSERT(res.progress == -1 || res.progress == res.numLoading
-            , ERR_ALREADYLOADING);
+    ASSERT(res.loader.progress == -1 ||
+            res.loader.progress == res.loader.numLoading, ERR_ALREADYLOADING);
 
-    /* Check if a new song may already be loaded and expand any buffer as
-     * necessary */
-    if (res.numHandles == res.handlesLen) {
-        res.handlesLen = res.handlesLen * 2 + 1;
+    len = strlen(pName);
 
-        res.pHandles = realloc(res.pHandles, sizeof(int) * res.handlesLen);
+    /* Ensure there's enough memory for the new song */
+    if (res.count == res.len) {
+        res.count = res.count * 2 + 1;
+
+        res.pHandles = realloc(res.pHandles, sizeof(int) * res.count);
+        ASSERT(res.pHandles, ERR_OOM);
+        res.pDynSong = realloc(res.pDynSong, sizeof(int) * res.count);
+        ASSERT(res.pDynSong, ERR_OOM);
     }
-    if (tmpListLen < 1) {
-        res.tmpListLen = res.tmpListLen * 2 + 1;
+    if (res.usedNameBuf + len + 1 > res.nameBufLen) {
+        res.nameBufLen = res.nameBufLen * 2 + len + 1;
 
-        res.ppTBLHandles = realloc(res.ppTBLHandles, sizeof(int*) * res.tmpListLen);
-        res.pResType = realloc(res.pResType, sizeof(gfmAssetType) * res.tmpListLen);
-    }
-
-    /* TODO Set the temporary data and start loading the resource */
-}
-
-/** Number of resources to be loaded */
-static const int numAssets = sizeof(pResType) / sizeof(gfmAssetType);
-
-/** Retrieve the name of the current resource being loaded */
-static char *getCurrentResourceName() {
-    int idx = loadstate.lastProgress;
-
-    /* Strip the common part from the file name */
-    if (idx < getSfxCount()) {
-        return pResSrc[idx] + sizeof(SFX_BASE_PATH) - 1;
-    }
-    else {
-        return pResSrc[idx] + sizeof(SONG_BASE_PATH) - 1;
-    }
-}
-
-/** Calculate the top-left corner of a centered text */
-static int centerText(int len) {
-    return (V_WIDTH - len * loadstate.fontWidth) / 2;
-}
-
-/** Calculate the top-left corner of text */
-static int getHeightFromBottom(int y) {
-    return V_HEIGHT - y * loadstate.fontHeight;
-}
-
-/**
- * Initialize the loadstate so it start loading the resources in BG. The game
- * is responsible for calling this with the proper parameters. Failure to do so
- * will result in a empty and (even more) boring loading screen.
- *
- * @param [ in]pBitmapFont The spriteset with the desired bitmap font
- * @param [ in]offset Offset of the bitmap font within the spriteset
- */
-err initLoadstate(gfmSpriteset *pBitmapFont, int offset) {
-    gfmRV rv;
-
-    loadstate.pBitmapFont = pBitmapFont;
-    loadstate.offset = offset;
-    loadstate.lastProgress = -1;
-
-    rv = gfmText_getNew(&loadstate.pLoading);
-    ASSERT((rv == GFMRV_OK), ERR_GFMERR);
-    rv = gfmText_getNew(&loadstate.pCurFile);
-    ASSERT((rv == GFMRV_OK), ERR_GFMERR);
-
-    return ERR_OK;
-}
-
-/** If the loadstate has been initialized, properly free it up. */
-void freeLoadstate() {
-    gfmText_free(&loadstate.pLoading);
-    gfmText_free(&loadstate.pCurFile);
-
-    loadstate.pBitmapFont = 0;
-}
-
-/** Setup the loadstate so it may start to be executed */
-err loadLoadstate() {
-    gfmRV rv;
-
-    ASSERT((loadstate.progress == 0), ERR_ALREADYLOADING);
-
-    if (loadstate.pBitmapFont != 0) {
-        rv = gfmSpriteset_getDimension(&loadstate.fontWidth
-                , &loadstate.fontHeight, loadstate.pBitmapFont);
-        ASSERT((rv == GFMRV_OK), ERR_GFMERR);
-
-        rv = gfmText_init(loadstate.pLoading, centerText(sizeof(LOAD_TXT)-1)
-                , getHeightFromBottom(4), sizeof(LOAD_TXT)-1, 1/*maxLines*/
-                , LOAD_DELAY, 0/*bindToWorld*/, loadstate.pBitmapFont
-                , loadstate.offset);
-        ASSERT((rv == GFMRV_OK), ERR_GFMERR);
-        rv = gfmText_setText(loadstate.pLoading, LOAD_TXT, sizeof(LOAD_TXT)-1
-                , 1/*copy*/);
-        ASSERT((rv == GFMRV_OK), ERR_GFMERR);
+        res.pNameBuf = realloc(res.pNameBuf, sizeof(char) * res.nameBufLen);
+        ASSERT(res.pNameBuf, ERR_OOM);
     }
 
-    rv = gfm_loadAssetsAsync(&loadstate.progress, game.pCtx, pResType, pResSrc
-            , pResHnd, numAssets);
-    ASSERT((rv != GFMRV_ASYNC_LOADER_THREAD_IS_RUNNING), ERR_ALREADYLOADING);
-    ASSERT((rv == GFMRV_OK), ERR_GFMERR);
+    /* Store the new song in the dynamic list.
+     * NOTE: idx already points to the next index */
+    memcpy(res.pNameBuf + res.usedNameBuf, pName + 1, len + 1);
+    res.pDynSong[idx] = res.usedNameBuf;
+    res.usedNameBuf += len + 1;
+    res.count++;
 
-    return ERR_OK;
-}
-
-/** Update the loadstate */
-err updateLoadstate() {
-    gfmRV rv;
-
-    if (((game.flags & CMD_LAZYLOAD) && loadstate.progress >= getSfxCount()) ||
-            loadstate.progress >= numAssets) {
-        /* TODO Set the proper next state */
-        //game.nextState = ST_MENUSTATE;
-        game.nextState = ST_PLAYSTATE;
-        return ERR_OK;
-    }
-
-    /* Skip updating if not set up */
-    if (loadstate.pBitmapFont == 0) {
-        return ERR_OK;
-    }
-
-    /* Update the name of the resource getting loaded */
-    if (loadstate.lastProgress != loadstate.progress) {
-        char *pText;
-        int len;
-
-        loadstate.lastProgress = loadstate.progress;
-        if (loadstate.lastProgress == numAssets) {
-            /* progress was updated by the other thread, bail out */
-            return ERR_OK;
-        }
-        pText = getCurrentResourceName();
-        len = strlen(pText);
-
-        rv = gfmText_init(loadstate.pCurFile, centerText(len)
-                , getHeightFromBottom(3), len, 1/*maxLines*/, FILE_DELAY
-                , 0/*bindToWorld*/, loadstate.pBitmapFont, loadstate.offset);
-        ASSERT((rv == GFMRV_OK), ERR_GFMERR);
-        rv = gfmText_setText(loadstate.pCurFile, pText, len, 1/*copy*/);
-        ASSERT((rv == GFMRV_OK), ERR_GFMERR);
-    }
-
-    /* Animate the load screen */
-    rv = gfmText_update(loadstate.pLoading, game.pCtx);
-    ASSERT((rv == GFMRV_OK), ERR_GFMERR);
-    if (loadstate.lastProgress >= 0) {
-        rv = gfmText_update(loadstate.pCurFile, game.pCtx);
-        ASSERT((rv == GFMRV_OK), ERR_GFMERR);
-    }
-
-    if (gfmText_didFinish(loadstate.pLoading) == GFMRV_TRUE) {
-        rv = gfmText_setText(loadstate.pLoading, LOAD_TXT, sizeof(LOAD_TXT)-1
-                , 1/*copy*/);
-        ASSERT((rv == GFMRV_OK), ERR_GFMERR);
-    }
-
-    return ERR_OK;
-}
-
-/** Draw the loadstate */
-err drawLoadstate() {
-    gfmRV rv;
-
-    /* Skip rendering if not set up */
-    if (loadstate.pBitmapFont == 0) {
-        return ERR_OK;
-    }
-
-    /* TODO Render a black box behind the text */
-
-    /* Render the load screen */
-    rv = gfmText_draw(loadstate.pLoading, game.pCtx);
-    ASSERT((rv == GFMRV_OK), ERR_GFMERR);
-    if (loadstate.lastProgress >= 0) {
-        rv = gfmText_draw(loadstate.pCurFile, game.pCtx);
-        ASSERT((rv == GFMRV_OK), ERR_GFMERR);
-    }
-
-    return ERR_OK;
+    /* TODO Do actually load the file */
 }
 
