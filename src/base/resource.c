@@ -20,17 +20,37 @@
 #define SFX_BASE_PATH "assets/sfx/"
 #define SONG_BASE_PATH "assets/songs/"
 
-/** List of resources to be pre-loaded at the start of the game */
-static char* pResSrc[] = {
-#define X(name, file) \
-    SFX_BASE_PATH file,
+/* Helper enumerations used to count the number of sound effects and songs */
+enum enSfxCount {
+#define X(name, ...) SFX_HND_ ## name ,
     SOUNDS_LIST
 #undef X
-#define X(name, file) \
-    SONG_BASE_PATH file,
+    SFX_MAX
+};
+enum enSongCount {
+#define X(name, ...) SNG_HND_ ## name ,
+    SONGS_LIST
+#undef X
+    SNG_MAX
+};
+
+/** List of resources to be pre-loaded at the start of the game */
+static char* pResSrc[] = {
+#define X(name, file) SFX_BASE_PATH file,
+    SOUNDS_LIST
+#undef X
+#define X(name, file) SONG_BASE_PATH file,
     SONGS_LIST
 #undef X
 };
+
+/* Static list of song handles */
+static int _songHandleList[SNG_MAX];
+/** List of handles though which the loaded resources will be accessed (actually
+ * filled on initResource) */
+static int* _pResHnd[SFX_MAX + SNG_MAX];
+/** List of types for the loaded resources */
+static gfmAssetType _pResType[SFX_MAX + SNG_MAX] = { ASSET_AUDIO } ;
 
 /**
  * Check whether a handle has already been loaded. If not, ERR_LOADINGRESOURCE
@@ -155,7 +175,7 @@ err fastGetSongIndex(int *pIdx, char *pName) {
         char *pFilename = pResSrc[tmp] + sizeof(SONG_BASE_PATH) - 1;
 
         if (strcmp(pFilename, pName) == 0) {
-            idx = tmp;
+            idx = tmp - SFX_MAX;
             break;
         }
     }
@@ -197,9 +217,9 @@ err getDynSongIndex(int *pIdx, char *pName) {
 
     /* Check if the songs has already been loaded, or if it's currently being
      * loaded */
-    for (idx = 0; idx < res.count; idx++) {
+    for (idx = SNG_MAX; idx < res.count; idx++) {
         if (strcmp(pName, _getDynSongName(idx)) == 0) {
-            *pIdx = idx + SNG_MAX;
+            *pIdx = idx;
             return _checkHandleLoaded(*pIdx);
         }
     }
@@ -212,23 +232,24 @@ err getDynSongIndex(int *pIdx, char *pName) {
 
     /* Ensure there's enough memory for the new song */
     if (res.count == res.len) {
-        res.count = res.count * 2 + 1;
-
-        /* TODO Fix/Simplify this!! */
         /* Initially, only a hard-coded list is used. If still on that point,
          * malloc everything and copy it */
-        if (res.pHandles == _songHandleList) {
-            res.pHandles = malloc(sizeof(int) * (res.count + SNG_MAX));
+        if (res.len == 0) {
+            res.len = SNG_MAX + 1;
+
+            res.pHandles = malloc(sizeof(int) * SNG_MAX);
             if (res.pHandles) {
                 memcpy(res.pHandles, _songHandleList, sizeof(int) * SNG_MAX);
             }
         }
         else {
-            res.pHandles = realloc(res.pHandles, sizeof(int) * (res.count + SNG_MAX));
+            res.len = res.len * 2 + 1;
+
+            res.pHandles = realloc(res.pHandles, sizeof(int) * (res.len + SNG_MAX));
         }
         ASSERT(res.pHandles, ERR_OOM);
 
-        res.pDynSong = realloc(res.pDynSong, sizeof(int) * res.count);
+        res.pDynSong = realloc(res.pDynSong, sizeof(int) * res.len);
         ASSERT(res.pDynSong, ERR_OOM);
     }
     if (res.usedNameBuf + len + 1 > res.nameBufLen) {
@@ -257,14 +278,18 @@ err initResource() {
     gfmRV rv;
     int i = 0;
 
+    /* Setup _pResHnd from sfx.* and from _songHandleList */
 #define X(name, ...) _pResHnd[i++] = &sfx.name,
     SOUNDS_LIST
 #undef X
     for (; i < SFX_MAX + SNG_MAX; i++) {
         _pResHnd[i] = _songHandleList + i - SFX_MAX;
     }
+    /* Although res.pHandles initially point to _songHandleList, keeping
+     * res.len == 0 causes it to be expanded on the firts unloaded resource */
     res.pHandles = _songHandleList;
 
+    /* Start loading everything */
     res.loader.numLoading = SFX_MAX + SNG_MAX;
 
     rv = gfm_loadAssetsAsync(&res.loader.progress, game.pCtx, _pResType, pResSrc
@@ -278,7 +303,9 @@ err initResource() {
  * Release the context's resources.
  */
 void cleanResource() {
-    free(res.pHandles);
+    if (res.pHandles != _songHandleList) {
+        free(res.pHandles);
+    }
     free(res.pNameBuf);
     free(res.pDynSong);
     free(res.loader.ppHandles);
