@@ -10,11 +10,14 @@
 #include <conf/sfx_list.h>
 
 struct stSfxCtx {
-#define X(name, ...) \
-    int name;
+#define X(name, ...) int name;
     SOUNDS_LIST
-    SONGS_LIST
 #undef X
+    /** Index of the currently playing song. */
+    int curSong;
+    /** Whether 'curSong' still has to be started (e.g., if it were loading when
+     * playSong() was called) */
+    int pending;
 };
 typedef struct stSfxCtx sfxCtx;
 
@@ -35,6 +38,18 @@ int getSfxCount();
  * Get how many songs the game has.
  */
 int getSoundCount();
+
+/**
+ * Check if a song is currently loaded and, if not, start loading it.
+ *
+ * @param  [ in]pName The name of the song
+ */
+err playSong(char *pName);
+
+/**
+ * If any song was left pending, start playing it
+ */
+err playPendingSong();
 
 #endif /* __BASE_SFX_H__ */
 

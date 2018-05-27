@@ -347,3 +347,19 @@ int isLoading() {
     return res.loader.progress != res.loader.numLoading;
 }
 
+/**
+ * Whether every SFX has already been loaded. Return 0 if false.
+ */
+int isPastSfx() {
+    return (res.pHandles != _songHandleList) || (res.loader.progress > SFX_MAX);
+}
+
+/**
+ * Retrieve a song's handle from its index. If not loaded, -1 shall be returned.
+ *
+ * @param [ in]idx The index of the song.
+ */
+int getSongHandle(int idx) {
+    return res.pHandles[idx];
+}
+

@@ -4,6 +4,7 @@
  * Define the list of available textures and its respective spritesets.
  */
 #include <base/error.h>
+#include <base/resource.h>
 #include <base/sfx.h>
 #include <base/static.h>
 #include <conf/sfx_list.h>
@@ -28,10 +29,12 @@ enum enSongCount {
  * Set every resource in an 'unloaded' state, so lazy loading may work.
  */
 err initSfx() {
-#define X(name, ...) \
-    sfx.name = -1;
-    SONGS_LIST
+#define X(name, ...) sfx.name = -1;
+    SOUNDS_LIST
 #undef X
+
+    sfx.curSong = -1;
+    sfx.pending = 0;
 
     return ERR_OK;
 }
@@ -48,5 +51,63 @@ int getSfxCount() {
  */
 int getSoundCount() {
     return SNG_MAX;
+}
+
+/**
+ * Actually start playing a song. If the song is already playing, do nothing.
+ *
+ * @param [ in]idx Index of the song
+ */
+static err _playSong(int idx) {
+    int hnd;
+
+    if (idx == sfx.curSong) {
+        return ERR_OK;
+    }
+    sfx.curSong = idx;
+
+    hnd = getSongHandle(sfx.curSong);
+    /* TODO Do actually play the song */
+
+    return ERR_OK;
+}
+
+/**
+ * Check if a song is currently loaded and, if not, start loading it.
+ *
+ * @param  [ in]pName The name of the song
+ */
+err playSong(char *pName) {
+    err erv;
+    int idx;
+
+    erv = fastGetSongIndex(&idx, pName);
+    if (erv == ERR_INDEXOOB) {
+        erv = getDynSongIndex(&idx, pName);
+    }
+    ASSERT(erv == ERR_OK || erv == ERR_LOADINGRESOURCE, erv);
+
+    if (erv == ERR_LOADINGRESOURCE) {
+        sfx.pending = idx;
+    }
+    else {
+        return _playSong(idx);
+    }
+
+    return ERR_OK;
+}
+
+/**
+ * If any song was left pending, start playing it
+ */
+err playPendingSong() {
+    int idx = sfx.pending;
+
+    if (idx && getSongHandle(idx) != -1) {
+        sfx.pending = 0;
+        return _playSong(idx);
+    }
+
+    return ERR_OK;
 }
 

@@ -83,7 +83,7 @@ void startLoadstate() {
 err updateLoadstate() {
     gfmRV rv;
 
-    if (((game.flags & CMD_LAZYLOAD) && res.loader.progress >= getSfxCount()) ||
+    if (((game.flags & CMD_LAZYLOAD) && isPastSfx()) ||
             res.loader.progress >= res.loader.numLoading) {
         game.currentState = loadstate.lastState;
         return ERR_OK;
