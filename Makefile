@@ -27,6 +27,7 @@
          base/input.o \
          base/loadstate.o \
          base/main.o \
+         base/resource.o \
          base/sfx.o \
          base/setup.o \
          base/static.o \

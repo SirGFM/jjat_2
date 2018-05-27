@@ -36,7 +36,8 @@ struct stLoaderCtx {
 typedef struct stLoaderCtx loaderCtx;
 
 struct stResourceCtx {
-    /** List of handles with loaded (or being loaded) resources */
+    /** List of handles with loaded (or being loaded) resources. Note that this
+     * array will alway have SNG_MAX more elements than pDynSong. */
     int *pHandles;
     /** Store null-terminated songs sequentially. The starting index of any song
      * may be retrieved from pDynSong */

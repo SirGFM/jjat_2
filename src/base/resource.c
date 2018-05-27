@@ -8,6 +8,7 @@
  * initialization), it will most likely be useful during development (so the
  * game won't have to be recompiled to add/test new songs) and for modding.
  */
+#include <base/game.h>
 #include <base/resource.h>
 #include <base/sfx.h>
 #include <conf/sfx_list.h>
@@ -57,12 +58,80 @@ static char* _getDynSongName(int idx) {
 }
 
 /**
- * Calculates the index in pHandles for a dynamically loaded song.
+ * Setup everything and start the BG thread loading the resources.
  *
- * @param [ in]idx Index of the song
+ * @param [out]pHandles   List where the loaded handles shall be stored
+ * @param [ in]ppFiles    List of files to be loaded
+ * @param [ in]numHandles How many handles there are in the list
  */
-static int _convertDynSongIndex(int idx) {
-    return idx + getSfxCount() + getSoundCount();
+static err startLoadingResources(int *pHandles, char **ppFiles, int numHandles) {
+    gfmAssetType *pResType;
+    gfmRV rv;
+    int i, len;
+
+    /* Check if anything else is currently being loaded */
+    ASSERT(res.loader.progress == -1 ||
+            res.loader.progress == res.loader.numLoading, ERR_ALREADYLOADING);
+
+    /* Expand buffers as necessary */
+    if (res.loader.len < numHandles) {
+        res.loader.len = numHandles;
+
+        res.loader.ppHandles = realloc(res.loader.ppHandles
+                , sizeof(int**) * numHandles);
+        ASSERT(res.loader.ppHandles, ERR_OOM);
+        res.loader.pResType = realloc(res.loader.pResType
+                , sizeof(gfmAssetType) * numHandles);
+        ASSERT(res.loader.pResType, ERR_OOM);
+    }
+    pResType = (gfmAssetType*)res.loader.pResType;
+
+    /* Setup the handles and calculate the memory required by the paths */
+    len = 0;
+    for (i = 0; i < numHandles; i++) {
+        pHandles[i] = -1;
+        res.loader.ppHandles[i] = pHandles + i;
+        pResType[i] = ASSET_AUDIO;
+        len += sizeof(char) * (strlen(ppFiles[i]) + sizeof(SONG_BASE_PATH))
+                + sizeof(char**);
+    }
+
+    /* Setup the file paths */
+    if (len > res.loader.filesLen) {
+        res.loader.filesLen = len;
+
+        res.loader.pFiles = realloc(res.loader.pFiles, len);
+        ASSERT(res.loader.pFiles, ERR_OOM);
+    }
+
+    len = 0;
+    for (i = 0; i < numHandles; i++) {
+        char *pName;
+        int nameLen;
+
+        pName  = (char*)(res.loader.pFiles);
+        pName += sizeof(char**) * numHandles + len;
+
+        res.loader.pFiles[i] = pName;
+
+        memcpy(pName, SONG_BASE_PATH, sizeof(SONG_BASE_PATH) - 1);
+        pName += sizeof(SONG_BASE_PATH) - 1;
+
+        nameLen = strlen(ppFiles[i]);
+        memcpy(pName, ppFiles[i], nameLen);
+        pName[nameLen] = '\0';
+
+        len += sizeof(SONG_BASE_PATH) + nameLen;
+    }
+
+    res.loader.numLoading = numHandles;
+
+    rv = gfm_loadAssetsAsync(&res.loader.progress, game.pCtx
+            , pResType, res.loader.pFiles, res.loader.ppHandles
+            , res.loader.numLoading);
+    ASSERT((rv == GFMRV_OK), ERR_GFMERR);
+
+    return ERR_OK;
 }
 
 /**
@@ -79,10 +148,10 @@ static int _convertDynSongIndex(int idx) {
 err fastGetSongIndex(int *pIdx, char *pName) {
     int tmp, idx = -1;
 
-    ASSERT(pHnd != 0, ERR_ARGUMENTBAD);
+    ASSERT(pIdx != 0, ERR_ARGUMENTBAD);
     ASSERT(pName != 0, ERR_ARGUMENTBAD);
 
-    while (tmp = getSfxCount(); tmp < getSfxCount() + getSoundCount(); tmp++) {
+    for (tmp = SFX_MAX; tmp < SFX_MAX + SNG_MAX; tmp++) {
         char *pFilename = pResSrc[tmp] + sizeof(SONG_BASE_PATH) - 1;
 
         if (strcmp(pFilename, pName) == 0) {
@@ -120,16 +189,17 @@ err fastGetSongIndex(int *pIdx, char *pName) {
  * @param  [ in]pName Name of the song getting searched. Must be '\0' terminated
  */
 err getDynSongIndex(int *pIdx, char *pName) {
+    char *ppFiles[1];
     int idx, len;
 
-    ASSERT(pHnd != 0, ERR_ARGUMENTBAD);
+    ASSERT(pIdx != 0, ERR_ARGUMENTBAD);
     ASSERT(pName != 0, ERR_ARGUMENTBAD);
 
     /* Check if the songs has already been loaded, or if it's currently being
      * loaded */
     for (idx = 0; idx < res.count; idx++) {
         if (strcmp(pName, _getDynSongName(idx)) == 0) {
-            *pIdx = _convertDynSongIndex(idx);
+            *pIdx = idx + SNG_MAX;
             return _checkHandleLoaded(*pIdx);
         }
     }
@@ -144,8 +214,20 @@ err getDynSongIndex(int *pIdx, char *pName) {
     if (res.count == res.len) {
         res.count = res.count * 2 + 1;
 
-        res.pHandles = realloc(res.pHandles, sizeof(int) * res.count);
+        /* TODO Fix/Simplify this!! */
+        /* Initially, only a hard-coded list is used. If still on that point,
+         * malloc everything and copy it */
+        if (res.pHandles == _songHandleList) {
+            res.pHandles = malloc(sizeof(int) * (res.count + SNG_MAX));
+            if (res.pHandles) {
+                memcpy(res.pHandles, _songHandleList, sizeof(int) * SNG_MAX);
+            }
+        }
+        else {
+            res.pHandles = realloc(res.pHandles, sizeof(int) * (res.count + SNG_MAX));
+        }
         ASSERT(res.pHandles, ERR_OOM);
+
         res.pDynSong = realloc(res.pDynSong, sizeof(int) * res.count);
         ASSERT(res.pDynSong, ERR_OOM);
     }
@@ -158,11 +240,49 @@ err getDynSongIndex(int *pIdx, char *pName) {
 
     /* Store the new song in the dynamic list.
      * NOTE: idx already points to the next index */
-    memcpy(res.pNameBuf + res.usedNameBuf, pName + 1, len + 1);
+    memcpy(res.pNameBuf + res.usedNameBuf, pName, len + 1);
     res.pDynSong[idx] = res.usedNameBuf;
     res.usedNameBuf += len + 1;
     res.count++;
 
-    /* TODO Do actually load the file */
+    ppFiles[0] = res.pNameBuf + res.usedNameBuf;
+    return startLoadingResources(res.pHandles + idx, ppFiles, 1/*numHandles*/);
+}
+
+/**
+ * Setup the resources with the hard-coded/pre-initialized songs and start
+ * loading it.
+ */
+err initResource() {
+    gfmRV rv;
+    int i = 0;
+
+#define X(name, ...) _pResHnd[i++] = &sfx.name,
+    SOUNDS_LIST
+#undef X
+    for (; i < SFX_MAX + SNG_MAX; i++) {
+        _pResHnd[i] = _songHandleList + i - SFX_MAX;
+    }
+    res.pHandles = _songHandleList;
+
+    res.loader.numLoading = SFX_MAX + SNG_MAX;
+
+    rv = gfm_loadAssetsAsync(&res.loader.progress, game.pCtx, _pResType, pResSrc
+            , _pResHnd, res.loader.numLoading);
+    ASSERT((rv == GFMRV_OK), ERR_GFMERR);
+
+    return ERR_OK;
+}
+
+/**
+ * Release the context's resources.
+ */
+void cleanResource() {
+    free(res.pHandles);
+    free(res.pNameBuf);
+    free(res.pDynSong);
+    free(res.loader.ppHandles);
+    free(res.loader.pResType);
+    free(res.loader.pFiles);
 }
 

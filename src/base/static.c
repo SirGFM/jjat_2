@@ -8,6 +8,7 @@
 #include <base/gfx.h>
 #include <base/input.h>
 #include <base/loadstate.h>
+#include <base/resource.h>
 #include <base/sfx.h>
 
 #include <string.h>
@@ -22,6 +23,8 @@ inputCtx input;
 collisionCtx collision;
 /** The game's loadstate */
 loadstateCtx loadstate;
+/** The game's resource loader */
+resourceCtx res;
 /** Sound context */
 sfxCtx sfx;
 
@@ -32,6 +35,7 @@ void zeroizeGlobalCtx() {
     memset(&gfx, 0x0, sizeof(gfxCtx));
     memset(&input, 0x0, sizeof(inputCtx));
     memset(&loadstate, 0x0, sizeof(loadstateCtx));
+    memset(&res, 0x0, sizeof(resourceCtx));
     memset(&sfx, 0x0, sizeof(sfxCtx));
 }
 
