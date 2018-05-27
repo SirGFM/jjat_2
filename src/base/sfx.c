@@ -4,10 +4,12 @@
  * Define the list of available textures and its respective spritesets.
  */
 #include <base/error.h>
+#include <base/game.h>
 #include <base/resource.h>
 #include <base/sfx.h>
 #include <base/static.h>
 #include <conf/sfx_list.h>
+#include <GFraMe/gframe.h>
 
 enum enSfxCount {
 #define X(name, ...) \
@@ -34,7 +36,7 @@ err initSfx() {
 #undef X
 
     sfx.curSong = -1;
-    sfx.pending = 0;
+    sfx.pending = -1;
 
     return ERR_OK;
 }
@@ -59,15 +61,26 @@ int getSoundCount() {
  * @param [ in]idx Index of the song
  */
 static err _playSong(int idx) {
+    gfmRV rv;
     int hnd;
 
     if (idx == sfx.curSong) {
         return ERR_OK;
     }
     sfx.curSong = idx;
+    sfx.pending = -1;
+
+    /* Stop the previous song */
+    if (sfx.pSong != 0) {
+        rv = gfm_stopAudio(sfx.pSong, game.pCtx);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+        sfx.pSong = 0;
+    }
 
     hnd = getSongHandle(sfx.curSong);
-    /* TODO Do actually play the song */
+    rv = gfm_playAudio(&sfx.pSong, game.pCtx, hnd, 1.0);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     return ERR_OK;
 }
@@ -103,8 +116,7 @@ err playSong(char *pName) {
 err playPendingSong() {
     int idx = sfx.pending;
 
-    if (idx && getSongHandle(idx) != -1) {
-        sfx.pending = 0;
+    if (idx != -1 && getSongHandle(idx) != -1) {
         return _playSong(idx);
     }
 

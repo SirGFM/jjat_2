@@ -9,6 +9,7 @@
 #include <base/loadstate.h>
 #include <base/mainloop.h>
 #include <base/resource.h>
+#include <base/sfx.h>
 
 #include <conf/state.h>
 
@@ -76,6 +77,9 @@ err mainloop() {
 #endif
 
         while (DO_UPDATE()) {
+            erv = playPendingSong();
+            ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
+
             rv = gfm_fpsCounterUpdateBegin(game.pCtx);
             ASSERT_TO(rv == GFMRV_OK, erv = ERR_GFMERR, __ret);
 

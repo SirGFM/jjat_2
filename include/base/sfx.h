@@ -8,8 +8,11 @@
 
 #include <base/error.h>
 #include <conf/sfx_list.h>
+#include <GFraMe/core/gfmAudio_bkend.h>
 
 struct stSfxCtx {
+    /* Handle to the currently playing song (so it may be stopped) */
+    gfmAudioHandle *pSong;
 #define X(name, ...) int name;
     SOUNDS_LIST
 #undef X

@@ -17,8 +17,8 @@
 #include <stdlib.h>
 
 /* Help set the default resource path in a common place */
-#define SFX_BASE_PATH "assets/sfx/"
-#define SONG_BASE_PATH "assets/songs/"
+#define SFX_BASE_PATH "sfx/"
+#define SONG_BASE_PATH "songs/"
 
 /* Helper enumerations used to count the number of sound effects and songs */
 enum enSfxCount {
@@ -35,7 +35,7 @@ enum enSongCount {
 };
 
 /** List of resources to be pre-loaded at the start of the game */
-static char* pResSrc[] = {
+static char* _pResSrc[] = {
 #define X(name, file) SFX_BASE_PATH file,
     SOUNDS_LIST
 #undef X
@@ -49,8 +49,8 @@ static int _songHandleList[SNG_MAX];
 /** List of handles though which the loaded resources will be accessed (actually
  * filled on initResource) */
 static int* _pResHnd[SFX_MAX + SNG_MAX];
-/** List of types for the loaded resources */
-static gfmAssetType _pResType[SFX_MAX + SNG_MAX] = { ASSET_AUDIO } ;
+/** List of types for the loaded resources (initialized on initResource) */
+static gfmAssetType _pResType[SFX_MAX + SNG_MAX];
 
 /**
  * Check whether a handle has already been loaded. If not, ERR_LOADINGRESOURCE
@@ -98,10 +98,10 @@ static err startLoadingResources(int *pHandles, char **ppFiles, int numHandles) 
         res.loader.len = numHandles;
 
         res.loader.ppHandles = realloc(res.loader.ppHandles
-                , sizeof(int**) * numHandles);
+                , sizeof(int**) * res.loader.len);
         ASSERT(res.loader.ppHandles, ERR_OOM);
         res.loader.pResType = realloc(res.loader.pResType
-                , sizeof(gfmAssetType) * numHandles);
+                , sizeof(gfmAssetType) * res.loader.len);
         ASSERT(res.loader.pResType, ERR_OOM);
     }
     pResType = (gfmAssetType*)res.loader.pResType;
@@ -112,6 +112,7 @@ static err startLoadingResources(int *pHandles, char **ppFiles, int numHandles) 
         pHandles[i] = -1;
         res.loader.ppHandles[i] = pHandles + i;
         pResType[i] = ASSET_AUDIO;
+        /* The base path (in sizeof) already accounts for the '\0' at the end */
         len += sizeof(char) * (strlen(ppFiles[i]) + sizeof(SONG_BASE_PATH))
                 + sizeof(char**);
     }
@@ -146,12 +147,13 @@ static err startLoadingResources(int *pHandles, char **ppFiles, int numHandles) 
 
     res.loader.numLoading = numHandles;
 
+    res.loader.progress = 0;
     rv = gfm_loadAssetsAsync(&res.loader.progress, game.pCtx
             , pResType, res.loader.pFiles, res.loader.ppHandles
             , res.loader.numLoading);
     ASSERT((rv == GFMRV_OK), ERR_GFMERR);
 
-    return ERR_OK;
+    return ERR_LOADINGRESOURCE;
 }
 
 /**
@@ -172,7 +174,7 @@ err fastGetSongIndex(int *pIdx, char *pName) {
     ASSERT(pName != 0, ERR_ARGUMENTBAD);
 
     for (tmp = SFX_MAX; tmp < SFX_MAX + SNG_MAX; tmp++) {
-        char *pFilename = pResSrc[tmp] + sizeof(SONG_BASE_PATH) - 1;
+        char *pFilename = _pResSrc[tmp] + sizeof(SONG_BASE_PATH) - 1;
 
         if (strcmp(pFilename, pName) == 0) {
             idx = tmp - SFX_MAX;
@@ -238,7 +240,7 @@ err getDynSongIndex(int *pIdx, char *pName) {
             res.len = SNG_MAX + 1;
             res.count = SNG_MAX;
 
-            res.pHandles = malloc(sizeof(int) * SNG_MAX);
+            res.pHandles = malloc(sizeof(int) * res.len);
             if (res.pHandles) {
                 memcpy(res.pHandles, _songHandleList, sizeof(int) * SNG_MAX);
             }
@@ -246,7 +248,7 @@ err getDynSongIndex(int *pIdx, char *pName) {
         else {
             res.len = res.len * 2 + 1;
 
-            res.pHandles = realloc(res.pHandles, sizeof(int) * (res.len + SNG_MAX));
+            res.pHandles = realloc(res.pHandles, sizeof(int) * res.len);
         }
         ASSERT(res.pHandles, ERR_OOM);
 
@@ -266,8 +268,10 @@ err getDynSongIndex(int *pIdx, char *pName) {
     res.pDynSong[idx] = res.usedNameBuf;
     res.usedNameBuf += len + 1;
     res.count++;
+    /* Set the return value */
+    *pIdx = idx;
 
-    ppFiles[0] = res.pNameBuf + res.usedNameBuf;
+    ppFiles[0] = _getDynSongName(idx);
     return startLoadingResources(res.pHandles + idx, ppFiles, 1/*numHandles*/);
 }
 
@@ -283,8 +287,12 @@ err initResource() {
 #define X(name, ...) _pResHnd[i++] = &sfx.name,
     SOUNDS_LIST
 #undef X
-    for (; i < SFX_MAX + SNG_MAX; i++) {
-        _pResHnd[i] = _songHandleList + i - SFX_MAX;
+    for (i = 0; i < SNG_MAX; i++) {
+        _pResHnd[i] = _songHandleList + i;
+        _songHandleList[i] = -1;
+    }
+    for (i = 0; i < SFX_MAX + SNG_MAX; i++) {
+        _pResType[i] = ASSET_AUDIO;
     }
     /* Although res.pHandles initially point to _songHandleList, keeping
      * res.len == 0 causes it to be expanded on the firts unloaded resource */
@@ -293,8 +301,8 @@ err initResource() {
     /* Start loading everything */
     res.loader.numLoading = SFX_MAX + SNG_MAX;
 
-    rv = gfm_loadAssetsAsync(&res.loader.progress, game.pCtx, _pResType, pResSrc
-            , _pResHnd, res.loader.numLoading);
+    rv = gfm_loadAssetsAsync(&res.loader.progress, game.pCtx, _pResType
+            , _pResSrc, _pResHnd, res.loader.numLoading);
     ASSERT((rv == GFMRV_OK), ERR_GFMERR);
 
     return ERR_OK;
@@ -329,8 +337,11 @@ char *getCurrentResourceName() {
         else if (res.loader.progress < SFX_MAX + SNG_MAX) {
             idx = sizeof(SONG_BASE_PATH) - 1;
         }
+        else {
+            return "";
+        }
 
-        return pResSrc[res.loader.progress] + idx;
+        return _pResSrc[res.loader.progress] + idx;
     }
 
     idx = res.count - res.loader.numLoading + res.loader.progress;
