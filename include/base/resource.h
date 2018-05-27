@@ -11,6 +11,8 @@
 #ifndef __BASE_RESOURCE_H__
 #define __BASE_RESOURCE_H__
 
+#include <base/error.h>
+
 /** Stores structures used when loading resources asynchronously */
 struct stLoaderCtx {
     /** Temporary list of resource handles, passed to the loading thread */
@@ -59,5 +61,55 @@ typedef struct stResourceCtx resourceCtx;
 /** Global resource context (declared on src/base/static.c) */
 extern resourceCtx res;
 
-#endif /* __BASE_RESOURCE_H__ */
+/**
+ * Look through the pre-loaded list of songs and check if the desired song has
+ * already been loaded. If not, ERR_LOADINGRESOURCE shall be returned. If it
+ * does not exist in the pre-loaded list, ERR_INDEXOOB is returned instead.
+ *
+ * If either ERR_LOADINGRESOURCE or ERR_OK is returned, pIdx shall point to a
+ * valid index, which may later be queried through getResourceHandle(idx).
+ *
+ * @param  [out]pIdx  Index of the song within the handle list.
+ * @param  [ in]pName Name of the song getting searched. Must be '\0' terminated
+ */
+err fastGetSongIndex(int *pIdx, char *pName);
 
+/**
+ * Check if a song has been dynamically loaded into the game and return the
+ * index of its handle. If not found, but another resource is currently being
+ * loaded, ERR_ALREADYLOADING shall be returned. If the songs has already been
+ * added to the game but hasn't finished loading, ERR_LOADINGRESOURCE shall be
+ * returned. If it does not exist in the pre-loaded list, ERR_INDEXOOB is
+ * returned instead.
+ *
+ * If either ERR_LOADINGRESOURCE or ERR_OK is returned, pIdx shall point to a
+ * valid index, which may later be queried through getResourceHandle(idx).
+ *
+ * @param  [out]pIdx  Index of the song within the handle list.
+ * @param  [ in]pName Name of the song getting searched. Must be '\0' terminated
+ */
+err getDynSongIndex(int *pIdx, char *pName);
+
+/**
+ * Setup the resources with the hard-coded/pre-initialized songs and start
+ * loading it.
+ */
+err initResource();
+
+/**
+ * Release the context's resources.
+ */
+void cleanResource();
+
+/**
+ * Get the name of the currently loading resource, if any. If nothing is
+ * currently being loaded, "" is returned.
+ */
+char *getCurrentResourceName();
+
+/**
+ * Check if anything is currently being loaded. Return 0 if false.
+ */
+int isLoading();
+
+#endif /* __BASE_RESOURCE_H__ */

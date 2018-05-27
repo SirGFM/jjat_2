@@ -236,6 +236,7 @@ err getDynSongIndex(int *pIdx, char *pName) {
          * malloc everything and copy it */
         if (res.len == 0) {
             res.len = SNG_MAX + 1;
+            res.count = SNG_MAX;
 
             res.pHandles = malloc(sizeof(int) * SNG_MAX);
             if (res.pHandles) {
@@ -311,5 +312,38 @@ void cleanResource() {
     free(res.loader.ppHandles);
     free(res.loader.pResType);
     free(res.loader.pFiles);
+}
+
+/**
+ * Get the name of the currently loading resource, if any. If nothing is
+ * currently being loaded, "" is returned.
+ */
+char *getCurrentResourceName() {
+    int idx;
+
+    if (res.pHandles == _songHandleList) {
+        /* Still loading the first few hard-coded resources */
+        if (res.loader.progress < SFX_MAX) {
+            idx = sizeof(SFX_BASE_PATH) - 1;
+        }
+        else if (res.loader.progress < SFX_MAX + SNG_MAX) {
+            idx = sizeof(SONG_BASE_PATH) - 1;
+        }
+
+        return pResSrc[res.loader.progress] + idx;
+    }
+
+    idx = res.count - res.loader.numLoading + res.loader.progress;
+    if (idx >= res.count) {
+        return "";
+    }
+    return _getDynSongName(idx);
+}
+
+/**
+ * Check if anything is currently being loaded. Return 0 if false.
+ */
+int isLoading() {
+    return res.loader.progress != res.loader.numLoading;
 }
 

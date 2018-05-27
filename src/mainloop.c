@@ -8,6 +8,7 @@
 #include <base/input.h>
 #include <base/loadstate.h>
 #include <base/mainloop.h>
+#include <base/resource.h>
 
 #include <conf/state.h>
 
@@ -43,7 +44,7 @@ err mainloop() {
     ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
 
     /* Set initial state */
-    game.nextState = ST_LOADSTATE;
+    game.nextState = ST_PLAYSTATE;
 
     while (gfm_didGetQuitFlag(game.pCtx) != GFMRV_TRUE) {
         /* Switch state */
@@ -51,13 +52,17 @@ err mainloop() {
             switch (game.nextState) {
                 case ST_PLAYSTATE: erv = loadPlaystate(); break;
                 case ST_LEVELTRANSITION: erv = setupLeveltransition(); break;
-                case ST_LOADSTATE: erv = loadLoadstate(); break;
+                case ST_LOADSTATE: erv = ERR_NOTIMPLEMENTED; break;
                 default: {}
             }
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
 
             game.currentState = game.nextState;
             game.nextState = ST_NONE;
+
+            if (isLoading()) {
+                startLoadstate();
+            }
         }
 
         /* Wait for an event */

@@ -11,6 +11,7 @@
 #define __BASE_LOADSTATE_H__
 
 #include <base/error.h>
+#include <conf/state.h>
 #include <GFraMe/gfmSpriteset.h>
 #include <GFraMe/gfmText.h>
 
@@ -23,6 +24,7 @@ struct stLoadstateCtx {
     int progress;
     int fontWidth;
     int fontHeight;
+    state lastState;
 };
 typedef struct stLoadstateCtx loadstateCtx;
 
@@ -42,8 +44,10 @@ err initLoadstate(gfmSpriteset *pBitmapFont, int offset);
 /** If the loadstate has been initialized, properly free it up. */
 void freeLoadstate();
 
-/** Setup the loadstate so it may start to be executed */
-err loadLoadstate();
+/**
+ * Manually forces the current state into the load state.
+ */
+void startLoadstate();
 
 /** Update the loadstate */
 err updateLoadstate();
