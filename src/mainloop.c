@@ -60,10 +60,6 @@ err mainloop() {
 
             game.currentState = game.nextState;
             game.nextState = ST_NONE;
-
-            if (isLoading()) {
-                startLoadstate();
-            }
         }
 
         /* Wait for an event */
@@ -77,6 +73,13 @@ err mainloop() {
 #endif
 
         while (DO_UPDATE()) {
+            if (game.currentState != ST_LOADSTATE && isLoading()) {
+                startLoadstate();
+            }
+            /* Check if should go back to the previous state during a update, to
+             * avoid errors when drawing an invalid state */
+            checkStopLoadstate();
+
             erv = playPendingSong();
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
 

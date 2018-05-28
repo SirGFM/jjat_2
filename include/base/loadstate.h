@@ -49,6 +49,11 @@ void freeLoadstate();
  */
 void startLoadstate();
 
+/**
+ * If done loading, return to the calling state
+ */
+void checkStopLoadstate();
+
 /** Update the loadstate */
 err updateLoadstate();
 

@@ -72,25 +72,39 @@ void freeLoadstate() {
 }
 
 /**
- * Manually forces the current state into the load state.
+ * Manually forces the current state into the load state. If in lazy mode, this
+ * function does nothing.
  */
 void startLoadstate() {
-    loadstate.lastState = game.currentState;
-    game.currentState = ST_LOADSTATE;
+    if (!((game.flags & CMD_LAZYLOAD) && isPastSfx())) {
+        loadstate.lastState = game.currentState;
+        game.currentState = ST_LOADSTATE;
+    }
+}
+
+/**
+ * If done loading, return to the calling state
+ */
+void checkStopLoadstate() {
+    int lazy;
+
+    lazy = (game.flags & CMD_LAZYLOAD) && isPastSfx();
+    if (game.currentState == ST_LOADSTATE && (lazy
+            || res.loader.progress >= res.loader.numLoading)) {
+        game.currentState = loadstate.lastState;
+    }
 }
 
 /** Update the loadstate */
 err updateLoadstate() {
     gfmRV rv;
 
-    if (((game.flags & CMD_LAZYLOAD) && isPastSfx()) ||
-            res.loader.progress >= res.loader.numLoading) {
-        game.currentState = loadstate.lastState;
-        return ERR_OK;
-    }
-
     /* Skip updating if not set up */
     if (loadstate.pBitmapFont == 0) {
+        return ERR_OK;
+    }
+    else if (((game.flags & CMD_LAZYLOAD) && isPastSfx()) ||
+            res.loader.progress >= res.loader.numLoading) {
         return ERR_OK;
     }
 
@@ -138,6 +152,10 @@ err drawLoadstate() {
 
     /* Skip rendering if not set up */
     if (loadstate.pBitmapFont == 0) {
+        return ERR_OK;
+    }
+    else if (((game.flags & CMD_LAZYLOAD) && isPastSfx()) ||
+            res.loader.progress >= res.loader.numLoading) {
         return ERR_OK;
     }
 

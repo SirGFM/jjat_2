@@ -362,7 +362,7 @@ int isLoading() {
  * Whether every SFX has already been loaded. Return 0 if false.
  */
 int isPastSfx() {
-    return (res.pHandles != _songHandleList) || (res.loader.progress > SFX_MAX);
+    return (res.pHandles != _songHandleList) || (res.loader.progress >= SFX_MAX);
 }
 
 /**
