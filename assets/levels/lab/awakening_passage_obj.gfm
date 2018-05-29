@@ -5,3 +5,4 @@ obj gunny_pos 240 464 16 16
 area invisible_wall 0 -32 432 32
 area invisible_wall 0 480 400 32
 obj invisible_wall 247 296 17 56 [ left , y ]
+obj res 96 272 8 8 [ play , intro.mml ]
