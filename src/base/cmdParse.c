@@ -41,7 +41,8 @@ static void usage() {
     LOG("  -F | --FPS: Set the game's initial (and maximum) FPS\n");
     LOG("  -r | --resolution: Set which resolution is to be used on fullscreen "
             "mode\n");
-    LOG("  -a | --audio: *TODO* Set the audio quality\n");
+    LOG("  -a | --audio: Set the audio quality (off, low, med, high, "
+            "default)\n");
     LOG("  -v | --vsync: Enable VSync\n");
     LOG("  -f | --fullscreen: Init game in fullscreen mode\n");
     LOG("  -l | --list: List all available resolution\n");
@@ -156,7 +157,24 @@ err cmdParse(configCtx *pConfig, int argc, char *argv[]) {
         IS_FLAG("--audio", "-a") {
             CHECK_PARAM();
 
-            /* TODO Load audio configurations */
+            if (strcmp(GET_PARAM(), "off") == 0) {
+                pConfig->flags |= CFG_NOAUDIO;
+            }
+            else if (strcmp(GET_PARAM(), "low") == 0) {
+                pConfig->audioSettings = gfmAudio_lowQuality;
+            }
+            else if (strcmp(GET_PARAM(), "med") == 0) {
+                pConfig->audioSettings = gfmAudio_medQuality;
+            }
+            else if (strcmp(GET_PARAM(), "high") == 0) {
+                pConfig->audioSettings = gfmAudio_highQuality;
+            }
+            else if (strcmp(GET_PARAM(), "default") == 0) {
+                pConfig->audioSettings = gfmAudio_defQuality;
+            }
+            else {
+                return ERR_ARGUMENTBAD;
+            }
         }
         IS_FLAG("--vsync", "-v") {
             pConfig->flags |= CFG_VSYNC;
