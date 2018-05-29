@@ -4,21 +4,22 @@
  * Module to parse command line options.
  *
  * Supported options:
- *  --help | -h: Print usage
- *  --backend | -b: Set the video backend {OpenGL, SDL, Software}
- *  --pixel-resolution | -x: Set the initial upcaling factor
- *  --resolution | -r: Set the fullscreen resolution
- *  --FPS | -F: Set the game's initial (and maximum) FPS
- *  --audio | -a: *TODO* Set the audio quality
- *  --vsync | -v: Enable VSync
- *  --fullscreen | -f: Init game in fullscreen mode
- *  --list | -l: List all available resolution
+ *  -h | --help: Print usage
+ *  -b | --backend: Set the video backend {OpenGL, SDL, Software}
+ *  -x | --pixel-resolution: Set the initial upcaling factor
+ *  -r | --resolution: Set the fullscreen resolution
+ *  -F | --FPS: Set the game's initial (and maximum) FPS
+ *  -a | --audio: *TODO* Set the audio quality
+ *  -v | --vsync: Enable VSync
+ *  -f | --fullscreen: Init game in fullscreen mode
+ *  -l | --list: List all available resolution
 #if defined(JJATENGINE)
- *  --syncctr | -c: Set character control as synchronous (i.e., move a single character at a time)
- *  --keymap | -k : Remap all keys to the specified configuration
- *  --simpledraw | -s: Slightly speed up drawing on some parts
+ *  -c | --syncctr: Set character control as synchronous (i.e., move a single character at a time)
+ *  -k | --keymap: Remap all keys to the specified configuration
+ *  -s | --simpledraw: Slightly speed up drawing on some parts
 #endif JJATENGINE
- *  --save | -S: *TODO* Save the current configuration
+ *  -S | --save: *TODO* Save the current configuration
+ *  -z | --lazy-load: Ignore if songs hasn't finished loading
  */
 #include <base/cmdParse.h>
 #include <base/error.h>
@@ -35,23 +36,25 @@
 
 static void usage() {
     LOG("Options\n\n");
-    LOG("  --backend | -b: Set the video backend {OpenGL, SDL, Software}\n");
-    LOG("  --pixel-resolution | -x: Set the initial upcaling factor\n");
-    LOG("  --FPS | -F: Set the game's initial (and maximum) FPS\n");
-    LOG("  --resolution | -r: Set which resolution is to be used on fullscreen "
+    LOG("  -b | --backend: Set the video backend {OpenGL, SDL, Software}\n");
+    LOG("  -x | --pixel-resolution: Set the initial upcaling factor\n");
+    LOG("  -F | --FPS: Set the game's initial (and maximum) FPS\n");
+    LOG("  -r | --resolution: Set which resolution is to be used on fullscreen "
             "mode\n");
-    LOG("  --audio | -a: *TODO* Set the audio quality\n");
-    LOG("  --vsync | -v: Enable VSync\n");
-    LOG("  --fullscreen | -f: Init game in fullscreen mode\n");
-    LOG("  --list | -l: List all available resolution\n");
+    LOG("  -a | --audio: Set the audio quality (off, low, med, high, "
+            "default)\n");
+    LOG("  -v | --vsync: Enable VSync\n");
+    LOG("  -f | --fullscreen: Init game in fullscreen mode\n");
+    LOG("  -l | --list: List all available resolution\n");
 #if defined(JJATENGINE)
-    LOG("  --syncctr | -c: Set character control as synchronous\n"
+    LOG("  -c | --syncctr: Set character control as synchronous\n"
             "                  (i.e., move a single character at a time)\n");
-    LOG("  --keymap | -k: Remap all keys to the specified configuration\n");
-    LOG("  --simpledraw | -s: Slightly speed up drawing on some parts\n");
+    LOG("  -k | --keymap: Remap all keys to the specified configuration\n");
+    LOG("  -s | --simpledraw: Slightly speed up drawing on some parts\n");
 #endif /* JJATENGINE */
-    LOG("  --save | -S: *TODO* Save the current configuration\n");
-    LOG("  --help | -h: Print usage\n");
+    LOG("  -S | --save: *TODO* Save the current configuration\n");
+    LOG("  -z | --lazy-load: Ignore if songs hasn't finished loading\n");
+    LOG("  -h | --help: Print usage\n");
 }
 
 /** Initialize the parsing context */
@@ -154,7 +157,24 @@ err cmdParse(configCtx *pConfig, int argc, char *argv[]) {
         IS_FLAG("--audio", "-a") {
             CHECK_PARAM();
 
-            /* TODO Load audio configurations */
+            if (strcmp(GET_PARAM(), "off") == 0) {
+                pConfig->flags |= CFG_NOAUDIO;
+            }
+            else if (strcmp(GET_PARAM(), "low") == 0) {
+                pConfig->audioSettings = gfmAudio_lowQuality;
+            }
+            else if (strcmp(GET_PARAM(), "med") == 0) {
+                pConfig->audioSettings = gfmAudio_medQuality;
+            }
+            else if (strcmp(GET_PARAM(), "high") == 0) {
+                pConfig->audioSettings = gfmAudio_highQuality;
+            }
+            else if (strcmp(GET_PARAM(), "default") == 0) {
+                pConfig->audioSettings = gfmAudio_defQuality;
+            }
+            else {
+                return ERR_ARGUMENTBAD;
+            }
         }
         IS_FLAG("--vsync", "-v") {
             pConfig->flags |= CFG_VSYNC;
@@ -198,6 +218,9 @@ err cmdParse(configCtx *pConfig, int argc, char *argv[]) {
             }
 
             return ERR_FORCEEXIT;
+        }
+        IS_FLAG("--lazy-load", "-z") {
+            pConfig->flags |= CFG_LAZYLOAD;
         }
         IS_FLAG("--help", "-h") {
             usage();

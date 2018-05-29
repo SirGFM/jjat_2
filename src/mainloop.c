@@ -4,8 +4,12 @@
 #include <base/collision.h>
 #include <base/error.h>
 #include <base/game.h>
+#include <base/gfx.h>
 #include <base/input.h>
+#include <base/loadstate.h>
 #include <base/mainloop.h>
+#include <base/resource.h>
+#include <base/sfx.h>
 
 #include <conf/state.h>
 
@@ -37,6 +41,9 @@ err mainloop() {
     erv = initHitboxes();
     ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
 
+    erv = initLoadstate(gfx.pSset8x8, 0/*offset*/);
+    ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
+
     /* Set initial state */
     game.nextState = ST_PLAYSTATE;
 
@@ -46,6 +53,7 @@ err mainloop() {
             switch (game.nextState) {
                 case ST_PLAYSTATE: erv = loadPlaystate(); break;
                 case ST_LEVELTRANSITION: erv = setupLeveltransition(); break;
+                case ST_LOADSTATE: erv = ERR_NOTIMPLEMENTED; break;
                 default: {}
             }
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
@@ -65,6 +73,16 @@ err mainloop() {
 #endif
 
         while (DO_UPDATE()) {
+            if (game.currentState != ST_LOADSTATE && isLoading()) {
+                startLoadstate();
+            }
+            /* Check if should go back to the previous state during a update, to
+             * avoid errors when drawing an invalid state */
+            checkStopLoadstate();
+
+            erv = playPendingSong();
+            ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
+
             rv = gfm_fpsCounterUpdateBegin(game.pCtx);
             ASSERT_TO(rv == GFMRV_OK, erv = ERR_GFMERR, __ret);
 
@@ -79,6 +97,7 @@ err mainloop() {
             switch (game.currentState) {
                 case ST_PLAYSTATE: erv = updatePlaystate(); break;
                 case ST_LEVELTRANSITION: erv = updateLeveltransition(); break;
+                case ST_LOADSTATE: erv = updateLoadstate(); break;
                 default: {}
             }
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
@@ -97,6 +116,7 @@ err mainloop() {
             switch (game.currentState) {
                 case ST_PLAYSTATE: erv = drawPlaystate(); break;
                 case ST_LEVELTRANSITION: erv = drawLeveltransition(); break;
+                case ST_LOADSTATE: erv = drawLoadstate(); break;
                 default: {}
             }
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);

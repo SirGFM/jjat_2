@@ -5,6 +5,7 @@
 #include <base/error.h>
 #include <base/game.h>
 #include <base/gfx.h>
+#include <base/sfx.h>
 
 #include <conf/game.h>
 
@@ -501,6 +502,40 @@ static err _parseCheckpoint(gfmParser *pParser, const char *pLevelName) {
     return ERR_OK;
 }
 
+static err _parseResource(gfmParser *pParser) {
+    gfmRV rv;
+    int i, l;
+
+    l = 0;
+    rv = gfmParser_getNumProperties(&l, pParser);
+    ASSERT(rv == GFMRV_OK || rv == GFMRV_PARSER_INVALID_OBJECT, ERR_GFMERR);
+    ASSERT(l == 1, ERR_PARSINGERR);
+
+    for (i = 0; i < l; i++) {
+        char *pKey, *pVal;
+
+        rv = gfmParser_getProperty(&pKey, &pVal, pParser, i);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+        if (strcmp(pKey, "play") == 0) {
+            return playSong(pVal);
+        }
+#if 0
+        /* Shouldn't get implemented, really... */
+        else if (strcmp(pKey, "load") == 0) {
+            /* Something like:
+            erv = loadDynamicSong(pVal, &hnd);
+            */
+        }
+#endif
+        else {
+            ASSERT(0, ERR_PARSINGERR);
+        }
+    }
+
+    return ERR_OK;
+}
+
 /**
  * Load a level into the playstate
  *
@@ -674,6 +709,10 @@ static err _loadLevel(char *levelName, int setPlayer) {
             erv = parseEvent(pEnt, playstate.pParser, T_PRESSURE_PAD);
             ASSERT(erv == ERR_OK, erv);
             playstate.entityCount++;
+        }
+        else if (strcmp(type, "res") == 0) {
+            erv = _parseResource(playstate.pParser);
+            ASSERT(erv == ERR_OK, erv);
         }
     }
 
