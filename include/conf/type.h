@@ -53,6 +53,7 @@ enum enType {
     , T_SWORD_FX        = (1 << T_BASE_NBITS) | T_FX
     , T_DOOR            = (1 << T_BASE_NBITS) | T_EVENT
     , T_PRESSURE_PAD    = (2 << T_BASE_NBITS) | T_EVENT
+    , T_TR_LOCK         = (3 << T_BASE_NBITS) | T_EVENT
 };
 typedef enum enType type;
 
