@@ -37,8 +37,6 @@
 
 #define BULLET_SPEED TILES_TO_PX(25)
 
-#define gunny_width 6
-#define gunny_height 10
 #define gunny_offx -5
 #define gunny_offy -6
 

@@ -36,8 +36,6 @@
 
 #define SWORDY_ATK_DURATION 333
 
-#define swordy_width 6
-#define swordy_height 12
 #define swordy_offx -5
 #define swordy_offy -4
 
