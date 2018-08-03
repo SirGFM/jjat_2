@@ -10,6 +10,10 @@
 
 #include <GFraMe/gfmDebug.h>
 #include <GFraMe/gfmError.h>
+#if defined(DEBUG)
+#  include <GFraMe/gframe.h>
+#  include <GFraMe/gfmInput.h>
+#endif
 #include <GFraMe/gfmParser.h>
 #include <GFraMe/gfmQuadtree.h>
 #include <GFraMe/gfmSprite.h>
@@ -203,6 +207,21 @@ err preUpdateSwordy(entityCtx *swordy) {
 
     rv = gfmSprite_getCollision(&col, swordy->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+#if defined(DEBUG)
+    if (IS_PRESSED(dbgSetPos)) {
+        gfmInput *pInput;
+        int x, y;
+
+        rv = gfm_getInput(&pInput, game.pCtx);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        rv = gfmInput_getPointerPosition(&x, &y, pInput);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+        rv = gfmSprite_setPosition(swordy->pSelf, x, y);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    }
+#endif
 
     /* Handle attack */
     do {
