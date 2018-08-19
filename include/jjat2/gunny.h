@@ -10,6 +10,9 @@
 
 #include <stdint.h>
 
+#define gunny_width 6
+#define gunny_height 10
+
 #define BULLET_WIDTH 8
 
 /**

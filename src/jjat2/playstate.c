@@ -20,6 +20,7 @@
 #include <jjat2/checkpoint.h>
 #include <jjat2/dictionary.h>
 #include <jjat2/enemy.h>
+#include <jjat2/entity.h>
 #include <jjat2/event.h>
 #include <jjat2/fx_group.h>
 #include <jjat2/gunny.h>
@@ -58,9 +59,13 @@ typedef enum enLevelInfoFlags levelInfoFlags;
 #define gunny_icon  107
 
 enum {
-    PF_TEL_SWORDY = 0x01
-  , PF_TEL_GUNNY  = 0x02
+    PF_TEL_SWORDY  = 0x01
+  , PF_TEL_GUNNY   = 0x02
+  , PF_FIRST_FRAME = 0x04
 };
+
+/** How long level transitions should be ignored if "fixing" a bug */
+#define IGNORE_LVL_TRANSITION 7500
 
 /** Distance between the actual tile and its inactive counter-part */
 #define UNACTIVE_TILE_OFFSET 6
@@ -624,7 +629,7 @@ static err _loadLevel(char *levelName, int setPlayer) {
             , pos + LEN("_obj.gfm"));
     ASSERT(erv == ERR_OK, erv);
 
-    /* Since no other filed is opened after this, clamp the level name */
+    /* Since no other file is opened after this, clamp the level name */
     pValidName[nameLen] = '\0';
 
     playstate.entityCount = 0;
@@ -763,6 +768,11 @@ static err _loadLevel(char *levelName, int setPlayer) {
 #undef APPEND_DYN
 #undef APPEND_POS
 #undef APPEND
+
+    /* Set flags used to fix falling back though the level transition */
+    playstate.flags = PF_FIRST_FRAME;
+    playstate.lastTouch = 0;
+
     return ERR_OK;
 }
 
@@ -817,8 +827,24 @@ err updatePlaystate() {
     clearLocalVariables();
 
     playstate.flags &= ~(PF_TEL_SWORDY | PF_TEL_GUNNY);
-    playstate.pNextLevel = 0;
     resetTmpHitboxes();
+
+    if ((playstate.flags & PF_FIRST_FRAME) &&
+            playstate.lastTouch > 0 &&
+            playstate.lastTouch < IGNORE_LVL_TRANSITION) {
+        gfmHitbox *tmp;
+        int x, y, w, h;
+
+        /* Spawn a 2-tile taller hitbox to avoid the vertical-transition bug */
+        x = playstate.pNextLevel->srcX;
+        y = playstate.pNextLevel->srcY - (int)TILES_TO_PX(3.5);
+        w = TILES_TO_PX(4) - 2;
+        h = TILES_TO_PX(7);
+        tmp = spawnTmpHitbox(playstate.pNextLevel, x, y, w, h, T_LOADZONE);
+        ASSERT(tmp != 0, ERR_TMPVERTTRANSITION);
+    }
+
+    playstate.pNextLevel = 0;
 
     rv = gfmQuadtree_initRoot(collision.pQt, -16/*x*/, -16/*y*/, playstate.width
             , playstate.height, 8/*depth*/, 16/*nodes*/);
@@ -885,10 +911,24 @@ err updatePlaystate() {
     ASSERT(erv == ERR_OK, erv);
 
     /** Check if a loadzone was triggered by both players */
-    if ((playstate.flags & (PF_TEL_SWORDY | PF_TEL_GUNNY))
+    if ((playstate.flags & (PF_TEL_SWORDY | PF_TEL_GUNNY)) != 0 &&
+            playstate.pNextLevel->dir == TEL_DOWN &&
+            (playstate.flags & PF_FIRST_FRAME) &&
+            playstate.lastTouch < IGNORE_LVL_TRANSITION) {
+        /* If a player is touching a loadzone on the map's first frame (on a
+         * vertical transition), they may end up falling back into the
+         * transition, looping back into the previous map. */
+        playstate.lastTouch += game.elapsed;
+    }
+    else if ((playstate.flags & (PF_TEL_SWORDY | PF_TEL_GUNNY))
             == (PF_TEL_SWORDY | PF_TEL_GUNNY)) {
         /* Setup & trigger level transition/loading */
         switchToLevelTransition(playstate.pNextLevel);
+    }
+    else {
+        /* Vertical-transition bug shouldn't happen anymore, clear the state */
+        playstate.flags &= ~PF_FIRST_FRAME;
+        playstate.lastTouch = 0;
     }
 
     /* This may result in a few 1-frame display bugs for the target... */
