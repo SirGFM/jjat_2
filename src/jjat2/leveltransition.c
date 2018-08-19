@@ -31,6 +31,8 @@
 #define WIDTH_IN_TILES  (V_WIDTH / 8 + 4)
 #define HEIGHT_IN_TILES (V_HEIGHT / 8 + 4)
 #define TM_DEFAULT_TILE -1
+#define FIX_THRESHOLD 8
+#define FIX_BASE_MS 30
 
 /** Forward declaration of the transition tilemap */
 static int _tilemap[WIDTH_IN_TILES * HEIGHT_IN_TILES];
@@ -357,6 +359,23 @@ err updateLeveltransition() {
             int dx, dy;
 
             _getRelativePosition(&dx, &dy);
+
+            /* If it's an upward transition and either of them were put a few
+             * pixels above a transition, push them until they are touching it.
+             * This fixes activating the fix to the downward transition bug.
+             * This only happens for 30 FPS or lower. */
+            if (lvltransition.dir == TEL_UP && game.elapsed > FIX_BASE_MS) {
+                if (dy + lvltransition.swordyY + swordy_height >=
+                        lvltransition.tgtY - FIX_THRESHOLD) {
+                    dy = lvltransition.tgtY - lvltransition.swordyY
+                            - swordy_height;
+                }
+                else if (dy + lvltransition.gunnyY + gunny_height >=
+                        lvltransition.tgtY - FIX_THRESHOLD) {
+                    dy = lvltransition.tgtY - lvltransition.gunnyY
+                            - gunny_height;
+                }
+            }
 
             gfmSprite_setPosition(playstate.swordy.pSelf
                     , dx + lvltransition.swordyX, dy + lvltransition.swordyY);

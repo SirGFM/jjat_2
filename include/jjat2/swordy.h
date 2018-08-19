@@ -8,6 +8,9 @@
 
 #include <GFraMe/gfmParser.h>
 
+#define swordy_width 6
+#define swordy_height 12
+
 /**
  * Initialize the swordy character
  *

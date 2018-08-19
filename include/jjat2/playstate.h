@@ -59,6 +59,10 @@ struct stPlaystateCtx {
     uint16_t height;
     /** Map's width, in pixels */
     uint16_t width;
+    /** When a player last touched a downward level transition. Used to fix a
+     * "bug" caused by falling back into the level transition you just went
+     * through. */
+    uint16_t lastTouch;
     /** How many areas were used on the current level */
     uint8_t areasCount;
     /** How many entities there are on the current map */
