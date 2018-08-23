@@ -23,7 +23,7 @@
 #define turret_offy      -2
 
 #define TURRET_FALL_GRAV    0
-#define TURRET_COOLDOWN     1000
+#define TURRET_COOLDOWN     1500
 
 #if 0
 /** List of animations */
