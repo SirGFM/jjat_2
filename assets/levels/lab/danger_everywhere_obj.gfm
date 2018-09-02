@@ -13,4 +13,4 @@ obj spiky 96 48 8 8
 area invisible_wall -32 0 32 240
 area invisible_wall 400 0 32 240
 obj loadzone 384 192 32 32 [ dest , lab/harmful_spikes ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 13 ]
-obj loadzone -16 16 32 32 [ dest , lab/harmful_spikes ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 13 ]
+obj loadzone -16 16 32 32 [ dest , lab/two_ways ] [ dir , left ] [ tgt_x , 59 ] [ tgt_y , 22 ]
