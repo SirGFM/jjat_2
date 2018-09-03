@@ -227,6 +227,9 @@ err preUpdateGunny(entityCtx *gunny) {
     }
     ASSERT(erv == ERR_OK, erv);
 
+    erv = preUpdateEntity(gunny);
+    ASSERT(erv == ERR_OK, erv);
+
     /* Handle attack */
     do {
         if (DID_JUST_PRESS(gunnyAtk) && !(gunny->flags & gunny_attack)
@@ -263,9 +266,6 @@ err preUpdateGunny(entityCtx *gunny) {
             gunny->flags |= gunny_justAttacked;
         }
     } while (0); /* Handle attack */
-
-    erv = preUpdateEntity(gunny);
-    ASSERT(erv == ERR_OK, erv);
 
     /* End attack animation */
     do {
