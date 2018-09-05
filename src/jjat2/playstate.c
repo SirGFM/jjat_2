@@ -5,6 +5,7 @@
 #include <base/error.h>
 #include <base/game.h>
 #include <base/gfx.h>
+#include <base/input.h>
 #include <base/sfx.h>
 
 #include <conf/game.h>
@@ -945,7 +946,9 @@ err updatePlaystate() {
 
     /* Reload the checkpoint */
     if (!(playstate.swordy.flags & EF_ALIVE)
-            || !(playstate.gunny.flags & EF_ALIVE)) {
+            || !(playstate.gunny.flags & EF_ALIVE)
+            || ((game.sessionFlags & SF_ENABLE_RESET)
+                && DID_JUST_PRESS(reset))) {
         erv = loadCheckpoint();
         ASSERT(erv == ERR_OK, erv);
 

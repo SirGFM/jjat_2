@@ -30,7 +30,8 @@ enum enGameFlags {
 typedef enum enGameFlags gameFlags;
 
 enum enSessionFlags {
-    SF_BLUE_ACTIVE = 0x01
+    SF_ENABLE_RESET = 0x01
+  , SF_BLUE_ACTIVE  = 0x02
 };
 #endif /* JJATENGINE */
 

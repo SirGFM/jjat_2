@@ -423,6 +423,9 @@ static inline err _checkpointCollision(collisionNode *checkpoint
 
     gfmObject_setType(checkpoint->pObject, T_FX);
 
+    /* Enable reset, since a checkpoint has been set */
+    game.sessionFlags |= SF_ENABLE_RESET;
+
     return ERR_OK;
 }
 

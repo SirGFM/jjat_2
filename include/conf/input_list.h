@@ -18,6 +18,8 @@
 #define X_SYSTEM_BUTTON_LIST \
   X_KEY(fullscreen \
         , gfmKey_f12) \
+  X_KEY(reset \
+        , gfmKey_r) \
   X_KEY(dummy \
        , gfmKey_f1)
 
