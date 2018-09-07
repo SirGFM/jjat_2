@@ -7,3 +7,4 @@ obj pressure_pad 208 120 32 8 [ set_0 , B ]
 obj loadzone 280 224 32 32 [ dest , lab/carry_it ] [ dir , down ] [ tgt_x , 13 ] [ tgt_y , 0 ]
 obj loadzone 104 -16 88 32 [ dest , lab/remote_assistance ] [ dir , up ] [ tgt_x , 4 ] [ tgt_y , 29 ]
 obj res 32 48 8 8 [ play , starting-to-move.mml ]
+area checkpoint 72 48 16 24
