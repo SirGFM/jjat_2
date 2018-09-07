@@ -1,3 +1,4 @@
 obj loadzone -16 176 32 32 [ dest , lab/mech_reprise ] [ dir , left ] [ tgt_x , 59 ] [ tgt_y , 2 ]
 obj loadzone -16 32 32 32 [ dest , lab/free_it ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 25 ]
 area invisible_wall -32 0 32 240
+area checkpoint 40 184 16 24
