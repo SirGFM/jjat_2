@@ -217,7 +217,13 @@ static inline err _ignoreTeleportBullet(collisionNode *bullet
     rv = gfmGroup_removeNode(pNode);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+#if !defined(DEBUG)
+    if (other->type == T_TEL_BULLET) {
+        collision.flags |= CF_SKIP;
+    }
+#else /* defined(DEBUG) */
     collision.flags |= CF_SKIP;
+#endif
     return ERR_OK;
 }
 
