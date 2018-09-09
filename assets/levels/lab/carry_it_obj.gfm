@@ -1,8 +1,13 @@
 obj door 136 104 8 32 [ init_state , closed ] [ lock_0 , A ]
 obj door 160 216 8 32 [ init_state , closed ] [ lock_0 , B ]
 obj pressure_pad 64 224 32 8 [ set_0 , A ]
-obj pressure_pad 200 224 32 8 [ set_0 , A ] [ set_1 , B ]
+obj pressure_pad 200 224 32 8 [ set_0 , B ]
 obj loadzone 104 -16 32 32 [ dest , lab/the_meeting ] [ dir , up ] [ tgt_x , 35 ] [ tgt_y , 29 ]
 obj loadzone 184 -16 32 32 [ dest , lab/old_trick ] [ dir , up ] [ tgt_x , 3 ] [ tgt_y , 29 ]
 area invisible_wall 0 -32 320 32
 obj door 176 104 8 32 [ init_state , open ] [ lock_0 , A ]
+area invisible_wall 320 0 32 240
+obj loadzone 304 24 32 32 [ dest , lab/is_that_a_hat ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 3 ]
+obj loadzone 304 184 32 32 [ dest , lab/is_that_a_hat ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 23 ]
+obj invisible_wall 231 56 10 128 [ left , y ]
+obj invisible_wall 247 48 10 128 [ right , y ]
