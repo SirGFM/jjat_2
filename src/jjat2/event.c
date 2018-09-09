@@ -173,6 +173,7 @@ uint8_t _getLocalVar(char *pVal) {
     else TEST(B)
     else TEST(C)
     else TEST(D)
+    else TEST(E)
 
     return 0;
 }

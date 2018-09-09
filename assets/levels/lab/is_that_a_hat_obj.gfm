@@ -13,3 +13,5 @@ obj walky 104 128 8 8
 obj loadzone -16 184 32 32 [ dest , lab/carry_it ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 23 ]
 obj loadzone -16 24 32 32 [ dest , lab/carry_it ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 3 ]
 obj invisible_wall 207 64 10 56 [ right , y ]
+obj loadzone 304 24 32 32 [ dest , lab/blink_wisely ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 3 ]
+obj loadzone 272 224 32 32 [ dest , lab/run_together ] [ dir , down ] [ tgt_x , 34 ] [ tgt_y , 0 ]

@@ -1,0 +1,22 @@
+area invisible_wall 0 240 320 32
+area invisible_wall 0 -32 320 32
+obj loadzone 304 184 32 32 [ dest , lab/carried_away ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 23 ]
+obj loadzone 272 -16 32 32 [ dest , lab/is_that_a_hat ] [ dir , up ] [ tgt_x , 34 ] [ tgt_y , 29 ]
+area checkpoint 88 32 16 24
+obj hdoor 24 216 32 8 [ init_state , open ] [ lock_0 , A ]
+obj hdoor 96 216 32 8 [ init_state , open ] [ lock_0 , B ]
+obj hdoor 168 216 32 8 [ init_state , open ] [ lock_0 , C ]
+obj hdoor 240 216 32 8 [ init_state , open ] [ lock_0 , D ]
+obj pressure_pad 96 112 32 8 [ set_0 , A ]
+obj pressure_pad 152 112 32 8 [ set_0 , B ]
+obj pressure_pad 208 112 32 8 [ set_0 , C ]
+obj pressure_pad 264 112 32 8 [ set_0 , D ]
+obj pressure_pad 280 224 32 8 [ set_0 , E ]
+obj walky 88 104 8 8
+obj walky 96 104 8 8
+obj walky 104 104 8 8
+obj walky 112 104 8 8
+obj walky 120 104 8 8
+obj walky 128 104 8 8
+obj spiky 72 104 8 8
+obj door 80 104 8 32 [ init_state , closed ] [ lock_0 , E ]
