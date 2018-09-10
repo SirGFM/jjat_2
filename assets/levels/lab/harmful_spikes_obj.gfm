@@ -12,3 +12,4 @@ obj walky 200 224 8 8
 obj walky 208 224 8 8
 obj walky 256 224 8 8
 obj walky 288 224 8 8
+obj invisible_wall 298 208 68 32 [ up , true ]

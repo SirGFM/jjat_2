@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="120" height="70" tilewidth="8" tileheight="8" backgroundcolor="#639bff" nextobjectid="878">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="120" height="70" tilewidth="8" tileheight="8" backgroundcolor="#639bff" nextobjectid="881">
  <tileset firstgid="1" name="8x8" tilewidth="8" tileheight="8" tilecount="4096" columns="64">
   <image source="../../gfx/atlas.bmp" trans="ff00ff" width="512" height="512"/>
   <terraintypes>
@@ -919,6 +919,11 @@
    <properties>
     <property name="init_state" value="closed"/>
     <property name="lock_0" value="B"/>
+   </properties>
+  </object>
+  <object id="878" name="bugfix" type="invisible_wall" x="231" y="120" width="18" height="80">
+   <properties>
+    <property name="right" value="y"/>
    </properties>
   </object>
  </objectgroup>
@@ -2447,6 +2452,11 @@
     <property name="dir" value="down"/>
     <property name="tgt_x" value="34"/>
     <property name="tgt_y" value="0"/>
+   </properties>
+  </object>
+  <object id="880" name="bugfix" type="invisible_wall" x="82" y="112" width="132" height="8">
+   <properties>
+    <property name="up" value="true"/>
    </properties>
   </object>
  </objectgroup>
@@ -4788,6 +4798,11 @@
   <object id="704" name="w_002" type="walky" gid="1537" x="208" y="224" width="8" height="8"/>
   <object id="705" name="w_003" type="walky" gid="1537" x="256" y="224" width="8" height="8"/>
   <object id="706" name="w_004" type="walky" gid="1537" x="288" y="224" width="8" height="8"/>
+  <object id="879" name="bugfix" type="invisible_wall" x="298" y="208" width="68" height="32">
+   <properties>
+    <property name="up" value="true"/>
+   </properties>
+  </object>
  </objectgroup>
  <layer name="danger_everywhere_bg_tm" width="120" height="70" offsetx="2400" offsety="-344">
   <properties>
