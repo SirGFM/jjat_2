@@ -20,3 +20,4 @@ obj walky 120 104 8 8
 obj walky 128 104 8 8
 obj spiky 72 104 8 8
 obj door 80 104 8 32 [ init_state , closed ] [ lock_0 , E ]
+area invisible_wall 320 0 32 240

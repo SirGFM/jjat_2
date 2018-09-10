@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="120" height="70" tilewidth="8" tileheight="8" backgroundcolor="#639bff" nextobjectid="876">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="120" height="70" tilewidth="8" tileheight="8" backgroundcolor="#639bff" nextobjectid="878">
  <tileset firstgid="1" name="8x8" tilewidth="8" tileheight="8" tilecount="4096" columns="64">
   <image source="../../gfx/atlas.bmp" trans="ff00ff" width="512" height="512"/>
   <terraintypes>
@@ -2698,6 +2698,7 @@
     <property name="lock_0" value="E"/>
    </properties>
   </object>
+  <object id="876" name="wall_e" type="invisible_wall" x="320" y="0" width="32" height="240"/>
  </objectgroup>
  <layer name="carried_away_bg_tm" width="120" height="70" offsetx="1680" offsety="1176">
   <properties>
@@ -2876,6 +2877,7 @@
   </object>
   <object id="815" name="checkpoint" type="checkpoint" x="192" y="192" width="16" height="24"/>
   <object id="816" name="bugfix" type="invisible_wall" x="119" y="16" width="18" height="64"/>
+  <object id="877" name="wall_e" type="invisible_wall" x="-32" y="0" width="32" height="240"/>
  </objectgroup>
  <layer name="blink_wisely_bg_tm" width="120" height="70" offsetx="1680" offsety="936">
   <properties>
