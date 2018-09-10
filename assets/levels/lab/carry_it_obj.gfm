@@ -9,6 +9,4 @@ obj door 176 104 8 32 [ init_state , open ] [ lock_0 , A ]
 area invisible_wall 320 0 32 240
 obj loadzone 304 24 32 32 [ dest , lab/is_that_a_hat ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 3 ]
 obj loadzone 304 184 32 32 [ dest , lab/is_that_a_hat ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 23 ]
-obj invisible_wall 231 56 10 128 [ left , y ]
-obj invisible_wall 247 48 10 128 [ right , y ]
 area checkpoint 248 192 16 24
