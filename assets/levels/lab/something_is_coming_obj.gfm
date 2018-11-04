@@ -1,0 +1,5 @@
+area invisible_wall 48 8 32 216
+area invisible_wall 80 -24 160 32
+area checkpoint 136 184 16 24
+obj loadzone 192 -8 32 32 [ dest , lab/two_ways ] [ dir , up ] [ tgt_x , 54 ] [ tgt_y , 59 ]
+obj loadzone 64 176 32 32 [ dest , lab/big_fluffy_foe ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 6 ]

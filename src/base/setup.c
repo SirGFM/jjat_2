@@ -70,6 +70,11 @@ err setupGame(int argc, char *argv[]) {
     rv = gfm_setBackground(game.pCtx, BG_COLOR);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+    if (config.flags & CFG_NOAUDIO) {
+        rv = gfm_disableAudio(game.pCtx);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    }
+
     rv = gfm_initAudio(game.pCtx, config.audioSettings);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
@@ -91,6 +96,10 @@ err setupGame(int argc, char *argv[]) {
 
     rv = gfm_getCamera(&game.pCamera, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    if (config.flags & CFG_LAZYLOAD) {
+        game.flags |= CMD_LAZYLOAD;
+    }
 
 #if defined(JJATENGINE)
     /** If playing on asynchronous mode, set only swordy as active */

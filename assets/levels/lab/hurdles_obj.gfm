@@ -1,0 +1,12 @@
+area invisible_wall -32 0 32 240
+obj loadzone -16 184 32 32 [ dest , lab/spotted ] [ dir , left ] [ tgt_x , 59 ] [ tgt_y , 3 ]
+obj loadzone -16 24 32 32 [ dest , lab/take_it_easy ] [ dir , left ] [ tgt_x , 49 ] [ tgt_y , 18 ]
+obj g_walky 136 216 8 8 [ flipped , true ]
+obj g_walky 224 216 8 8 [ flipped , true ]
+obj g_walky 312 216 8 8 [ flipped , true ]
+obj g_walky 400 216 8 8 [ flipped , true ]
+obj g_walky 328 160 8 8
+obj g_walky 416 160 8 8 [ flipped , true ]
+obj g_walky 432 96 8 8 [ flipped , true ]
+obj g_walky 312 56 8 8
+obj g_walky 296 56 8 8 [ flipped , true ]

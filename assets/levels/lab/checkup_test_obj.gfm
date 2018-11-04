@@ -1,0 +1,9 @@
+obj door 144 72 8 32 [ init_state , closed ] [ lock_0 , A ]
+obj door 264 168 8 32 [ init_state , closed ] [ lock_0 , B ]
+obj pressure_pad 192 232 32 8 [ set_0 , A ]
+obj pressure_pad 232 64 32 8 [ set_0 , B ]
+area invisible_wall -32 0 32 240
+area invisible_wall 320 0 32 240
+obj loadzone 304 24 32 136 [ dest , lab/positioning_test ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 5 ]
+obj loadzone -16 64 32 136 [ dest , lab/awakening_passage ] [ dir , left ] [ tgt_x , 48 ] [ tgt_y , 32 ]
+obj res 40 32 8 8 [ play , first-steps.mml ]

@@ -23,7 +23,7 @@
 #define turret_offy      -2
 
 #define TURRET_FALL_GRAV    0
-#define TURRET_COOLDOWN     1000
+#define TURRET_COOLDOWN     1500
 
 #if 0
 /** List of animations */
@@ -125,7 +125,7 @@ err preUpdateTurret(entityCtx *pEnt) {
     }
 
     /* Retrieve the cooldown from the flags */
-    cooldown = (pEnt->flags >> EF_AVAILABLE_BIT) & 0x1ff;
+    cooldown = (pEnt->flags >> EF_AVAILABLE_BIT) & 0xfff;
     cooldown <<= 1;
 
     cooldown += game.elapsed;
@@ -161,9 +161,9 @@ err preUpdateTurret(entityCtx *pEnt) {
     }
 
     /* Store it back (as half the accumulated timed */
-    pEnt->flags &= ~(0x1ff << EF_AVAILABLE_BIT);
+    pEnt->flags &= ~(0xfff << EF_AVAILABLE_BIT);
     cooldown >>= 1;
-    pEnt->flags |= ((cooldown & 0x1ff) << EF_AVAILABLE_BIT);
+    pEnt->flags |= ((cooldown & 0xfff) << EF_AVAILABLE_BIT);
 
     /* Collide only if still alive */
     if (!(pEnt->flags & EF_ALIVE)) {

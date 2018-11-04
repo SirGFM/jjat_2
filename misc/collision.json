@@ -140,7 +140,7 @@
             {
                 "type_b": ["T_PRESSURE_PAD"],
                 "function": "_onPressurePad",
-                "auto_swap": false
+                "auto_swap": true
             },
             {
                 "type_b": ["T_EN_G_WALKY_VIEW"],
@@ -235,6 +235,16 @@
                     "T_ATK_SWORD", "T_TEL_BULLET", "T_CHECKPOINT", "T_DUMMY_SWORDY",
                     "T_DUMMY_GUNNY", "T_SPIKE", "T_EN_G_WALKY_ATK", "T_EN_G_WALKY_VIEW",
                     "T_DOOR", "T_PRESSURE_PAD", "T_FLOOR_SKIP_TP"],
+                "function": null,
+                "auto_swap": false
+            }
+        ]
+    },
+    "door_corner_case": {
+        "type_a": ["T_DOOR", "T_HDOOR"],
+        "cases" : [
+            {
+                "type_b": ["T_DOOR", "T_HDOOR"],
                 "function": null,
                 "auto_swap": false
             }

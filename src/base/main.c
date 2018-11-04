@@ -5,8 +5,11 @@
 #include <base/game.h>
 #include <base/gfx.h>
 #include <base/input.h>
+#include <base/loadstate.h>
 #include <base/mainloop.h>
+#include <base/resource.h>
 #include <base/setup.h>
+#include <base/sfx.h>
 #include <base/static.h>
 
 /**
@@ -29,6 +32,10 @@ int main(int argc, char *argv[]) {
 
     erv = initGfx();
     ASSERT_TO(erv == ERR_OK, erv = erv, __ret);
+    erv = initSfx();
+    ASSERT_TO(erv == ERR_OK, erv = erv, __ret);
+    erv = initResource();
+    ASSERT_TO(erv == ERR_OK, erv = erv, __ret);
 
 #if defined(JJATENGINE)
     if (!(game.flags & CMD_CUSTOMINPUT)) {
@@ -45,7 +52,9 @@ int main(int argc, char *argv[]) {
 
     erv = mainloop();
 __ret:
+    cleanResource();
     cleanCollision();
+    freeLoadstate();
     cleanGame();
 
     return erv;

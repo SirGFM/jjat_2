@@ -217,7 +217,13 @@ static inline err _ignoreTeleportBullet(collisionNode *bullet
     rv = gfmGroup_removeNode(pNode);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+#if !defined(DEBUG)
+    if (other->type == T_TEL_BULLET) {
+        collision.flags |= CF_SKIP;
+    }
+#else /* defined(DEBUG) */
     collision.flags |= CF_SKIP;
+#endif
     return ERR_OK;
 }
 
@@ -423,6 +429,9 @@ static inline err _checkpointCollision(collisionNode *checkpoint
 
     gfmObject_setType(checkpoint->pObject, T_FX);
 
+    /* Enable reset, since a checkpoint has been set */
+    game.sessionFlags |= SF_ENABLE_RESET;
+
     return ERR_OK;
 }
 
@@ -474,6 +483,10 @@ static inline err _gWalkyViewEntityCollision(collisionNode *entity
         , collisionNode *view) {
     if (entity->pChild == view->pChild) {
         /* Avoid triggering for the viewing entity */
+        return ERR_OK;
+    }
+    else if (!(((entityCtx*)entity->pChild)->flags & EF_ALIVE)) {
+        /* Avoid triggering for dead/just hit entity */
         return ERR_OK;
     }
 

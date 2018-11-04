@@ -5,6 +5,8 @@
 #include <base/error.h>
 #include <base/game.h>
 #include <base/gfx.h>
+#include <base/input.h>
+#include <base/sfx.h>
 
 #include <conf/game.h>
 
@@ -415,7 +417,7 @@ static err _parseLoadzone(gfmParser *pParser) {
  */
 static err _parseInvisibleWall(gfmParser *pParser) {
     gfmRV rv;
-    int h, w, x, y;
+    int h, l, w, x, y;
 
     ASSERT(playstate.areasCount < MAX_AREAS, ERR_BUFFERTOOSMALL);
 
@@ -424,8 +426,48 @@ static err _parseInvisibleWall(gfmParser *pParser) {
     rv = gfmParser_getDimensions(&w, &h, pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+    l = 0;
+    rv = gfmParser_getNumProperties(&l, pParser);
+    ASSERT(rv == GFMRV_OK || rv == GFMRV_PARSER_INVALID_OBJECT, ERR_GFMERR);
+
     rv = gfmHitbox_initItem(playstate.pAreas, 0/*ctx*/, x, y, w, h
             , T_FLOOR_SKIP_TP, playstate.areasCount);
+
+    /* If requested, only collide some sides of the wall */
+    if (l > 0) {
+        gfmCollision dirs;
+        int i;
+
+        dirs = 0;
+        for (i = 0; i < l; i++) {
+            char *pKey, *pVal;
+
+            rv = gfmParser_getProperty(&pKey, &pVal, pParser, i);
+            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+            if (strcmp(pKey, "left") == 0) {
+                dirs |= gfmCollision_left;
+            }
+            else if (strcmp(pKey, "right") == 0) {
+                dirs |= gfmCollision_right;
+            }
+            else if (strcmp(pKey, "up") == 0) {
+                dirs |= gfmCollision_up;
+            }
+            else if (strcmp(pKey, "down") == 0) {
+                dirs |= gfmCollision_down;
+            }
+            else {
+                ASSERT(0, ERR_PARSINGERR);
+            }
+        }
+
+        if (dirs != 0) {
+            rv = gfmHitbox_setItemHitFlag(playstate.pAreas, dirs
+                , playstate.areasCount);
+            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        }
+    }
 
     playstate.areasCount++;
     return ERR_OK;
@@ -463,6 +505,40 @@ static err _parseCheckpoint(gfmParser *pParser, const char *pLevelName) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     playstate.areasCount++;
+    return ERR_OK;
+}
+
+static err _parseResource(gfmParser *pParser) {
+    gfmRV rv;
+    int i, l;
+
+    l = 0;
+    rv = gfmParser_getNumProperties(&l, pParser);
+    ASSERT(rv == GFMRV_OK || rv == GFMRV_PARSER_INVALID_OBJECT, ERR_GFMERR);
+    ASSERT(l == 1, ERR_PARSINGERR);
+
+    for (i = 0; i < l; i++) {
+        char *pKey, *pVal;
+
+        rv = gfmParser_getProperty(&pKey, &pVal, pParser, i);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+        if (strcmp(pKey, "play") == 0) {
+            return playSong(pVal);
+        }
+#if 0
+        /* Shouldn't get implemented, really... */
+        else if (strcmp(pKey, "load") == 0) {
+            /* Something like:
+            erv = loadDynamicSong(pVal, &hnd);
+            */
+        }
+#endif
+        else {
+            ASSERT(0, ERR_PARSINGERR);
+        }
+    }
+
     return ERR_OK;
 }
 
@@ -529,8 +605,9 @@ static err _loadLevel(char *levelName, int setPlayer) {
 
     /* Load the tilemap */
     APPEND("_fg_tm.gfm");
-    rv = gfmTilemap_loadf(playstate.pMap, game.pCtx, stLevelName
-            , pos + LEN("_fg_tm.gfm"), pDictNames, pDictTypes, dictLen);
+    rv = gfmTilemap_newLoadf(playstate.pMap, game.pCtx, stLevelName
+            , pos + LEN("_fg_tm.gfm"), pDictNames, pDictTypes, dictLen
+            , pSidedTypes, sidedLen);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     erv = _updateWorldSize();
     ASSERT(erv == ERR_OK, erv);
@@ -627,11 +704,21 @@ static err _loadLevel(char *levelName, int setPlayer) {
             ASSERT(erv == ERR_OK, erv);
             playstate.entityCount++;
         }
+        else if (strcmp(type, "hdoor") == 0) {
+            entityCtx *pEnt = &playstate.entities[playstate.entityCount];
+            erv = parseEvent(pEnt, playstate.pParser, T_HDOOR);
+            ASSERT(erv == ERR_OK, erv);
+            playstate.entityCount++;
+        }
         else if (strcmp(type, "pressure_pad") == 0) {
             entityCtx *pEnt = &playstate.entities[playstate.entityCount];
             erv = parseEvent(pEnt, playstate.pParser, T_PRESSURE_PAD);
             ASSERT(erv == ERR_OK, erv);
             playstate.entityCount++;
+        }
+        else if (strcmp(type, "res") == 0) {
+            erv = _parseResource(playstate.pParser);
+            ASSERT(erv == ERR_OK, erv);
         }
     }
 
@@ -859,7 +946,9 @@ err updatePlaystate() {
 
     /* Reload the checkpoint */
     if (!(playstate.swordy.flags & EF_ALIVE)
-            || !(playstate.gunny.flags & EF_ALIVE)) {
+            || !(playstate.gunny.flags & EF_ALIVE)
+            || ((game.sessionFlags & SF_ENABLE_RESET)
+                && DID_JUST_PRESS(reset))) {
         erv = loadCheckpoint();
         ASSERT(erv == ERR_OK, erv);
 

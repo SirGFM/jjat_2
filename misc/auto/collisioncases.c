@@ -493,6 +493,17 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
             erv = _onPressurePad(&node1, &node2);
         }
     break;
+    CASE(T_PRESSURE_PAD, T_EN_SPIKY)
+    CASE(T_PRESSURE_PAD, T_EN_WALKY)
+    CASE(T_PRESSURE_PAD, T_EN_G_WALKY)
+    CASE(T_PRESSURE_PAD, T_EN_TURRET)
+    CASE(T_PRESSURE_PAD, T_SWORDY)
+    CASE(T_PRESSURE_PAD, T_GUNNY)
+        if (node1.pChild != node2.pChild) {
+            /* Filter out self collision */
+            erv = _onPressurePad(&node2, &node1);
+        }
+    break;
     CASE(T_EN_SPIKY, T_EN_G_WALKY_VIEW)
     CASE(T_EN_WALKY, T_EN_G_WALKY_VIEW)
     CASE(T_EN_G_WALKY, T_EN_G_WALKY_VIEW)
@@ -751,6 +762,15 @@ switch (MERGE_TYPES(node1.type, node2.type)) {
     IGNORE(T_LOADZONE, T_EN_TURRET)
     IGNORE(T_LOADZONE, T_PRESSURE_PAD)
     IGNORE(T_LOADZONE, T_FLOOR_SKIP_TP)
+        erv = ERR_OK;
+    break;
+#  endif /* defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__)) */
+    /* Collision group 'door_corner_case' */ 
+#  if defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__))
+    SELFCASE(T_DOOR)
+    IGNORE(T_DOOR, T_HDOOR)
+    IGNORE(T_HDOOR, T_DOOR)
+    SELFCASE(T_HDOOR)
         erv = ERR_OK;
     break;
 #  endif /* defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__)) */

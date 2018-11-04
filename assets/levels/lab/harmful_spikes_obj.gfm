@@ -1,0 +1,15 @@
+area invisible_wall -32 0 32 240
+obj loadzone -16 192 32 32 [ dest , lab/take_it_easy ] [ dir , left ] [ tgt_x , 49 ] [ tgt_y , 3 ]
+obj loadzone -16 104 32 32 [ dest , lab/danger_everywhere ] [ dir , left ] [ tgt_x , 49 ] [ tgt_y , 24 ]
+area checkpoint 72 200 16 24
+area checkpoint 64 112 16 24
+obj spiky 192 223 8 8
+obj spiky 272 224 8 8
+obj spiky 328 200 8 8
+obj spiky 448 200 8 8
+obj spiky 416 88 8 8
+obj walky 200 224 8 8
+obj walky 208 224 8 8
+obj walky 256 224 8 8
+obj walky 288 224 8 8
+obj invisible_wall 298 208 68 32 [ up , true ]

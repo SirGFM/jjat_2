@@ -1,0 +1,18 @@
+obj walky 152 72 8 8
+obj walky 160 72 8 8
+obj walky 96 72 8 8
+obj walky 24 72 8 8
+obj walky 224 136 8 8
+obj walky 240 136 8 8
+obj walky 256 136 8 8
+obj walky 272 136 8 8
+obj walky 288 136 8 8
+obj walky 104 224 8 8
+obj walky 112 224 8 8
+obj walky 120 224 8 8
+area invisible_wall 0 -32 320 32
+area invisible_wall -32 0 32 240
+obj loadzone 144 -16 160 32 [ dest , lab/almost_together ] [ dir , up ] [ tgt_x , 35 ] [ tgt_y , 49 ]
+obj loadzone -16 40 32 112 [ dest , lab/symbiotic_forms ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 2 ]
+obj walky 64 104 8 8
+obj walky 136 104 8 8

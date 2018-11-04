@@ -1,0 +1,7 @@
+area invisible_wall 0 240 320 32
+area invisible_wall 0 -32 320 32
+obj loadzone -16 184 32 32 [ dest , lab/run_together ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 23 ]
+obj loadzone 264 -16 32 32 [ dest , lab/blink_wisely ] [ dir , up ] [ tgt_x , 33 ] [ tgt_y , 29 ]
+area checkpoint 192 192 16 24
+area invisible_wall 119 16 18 64
+area invisible_wall -32 0 32 240

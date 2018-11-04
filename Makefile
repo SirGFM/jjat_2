@@ -25,9 +25,12 @@
          base/collision.o \
          base/gfx.o \
          base/input.o \
+         base/loadstate.o \
          base/main.o \
-         base/static.o \
+         base/resource.o \
+         base/sfx.o \
          base/setup.o \
+         base/static.o \
          jjat2/camera.o \
          jjat2/checkpoint.o \
          jjat2/dictionary.o \

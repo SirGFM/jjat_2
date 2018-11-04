@@ -74,7 +74,7 @@ struct stPlaystateCtx {
 };
 typedef struct stPlaystateCtx playstateCtx;
 
-/** The game's playstate. Declared on include/jjat2/static.c. */
+/** The game's playstate. Declared on src/jjat2/static.c. */
 extern playstateCtx playstate;
 
 /** Initialize the playstate so a level may be later loaded and played */

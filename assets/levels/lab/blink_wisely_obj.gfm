@@ -1,0 +1,5 @@
+area invisible_wall -16 240 336 32
+obj loadzone 264 224 32 32 [ dest , lab/carried_away ] [ dir , down ] [ tgt_x , 33 ] [ tgt_y , 0 ]
+area invisible_wall -32 0 32 240
+area checkpoint 48 32 16 24
+obj loadzone -16 24 32 32 [ dest , lab/is_that_a_hat ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 3 ]

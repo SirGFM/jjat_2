@@ -35,12 +35,26 @@ enum enDoorFrames {
   , f6 = 319
 };
 
+enum enHorDoorFrames {
+    hf0 = 207
+  , hf1 = 222
+  , hf2 = 223
+  , hf3 = 238
+  , hf4 = 239
+  , hf5 = 254
+  , hf6 = 255
+};
+
 /** List of animations */
 enum enDoorAnim {
-    OPENED = 0
+    OPEN = 0
   , CLOSED
   , OPENING
   , CLOSING
+  , ROPEN
+  , RCLOSED
+  , ROPENING
+  , RCLOSING
   , DOOR_ANIM_COUNT
 };
 typedef enum enDoorAnim doorAnim;
@@ -48,19 +62,37 @@ typedef enum enDoorAnim doorAnim;
 /** door animation data */
 static int pDoorAnimData[] = {
 /*           len|fps|loop|data... */
-/* OPENED  */  1, 0 ,  0 , f6
-/* CLOSED  */, 1, 0 ,  0 , f0
-/* OPENING */,10, 10,  0 , f1,f0,f1,f2,f2,f0,f3,f4,f5,f6
-/* CLOSING */,10, 10,  0 , f5,f4,f2,f3,f3,f0,f1,f0,f1,f0
+/*   OPEN   */  1, 0 ,  0 , f6
+/*  CLOSED  */, 1, 0 ,  0 , f0
+/*  OPENING */,10, 10,  0 , f1,f0,f1,f2,f2,f0,f3,f4,f5,f6
+/*  CLOSING */,10, 10,  0 , f5,f4,f2,f3,f3,f0,f1,f0,f1,f0
+/*  ROPEN   */, 1, 0 ,  0 , f6
+/* RCLOSED  */, 1, 0 ,  0 , f0
+/* ROPENING */,10, 10,  0 , f1,f0,f1,f2,f2,f0,f3,f4,f5,f6
+/* RCLOSING */,10, 10,  0 , f5,f4,f2,f3,f3,f0,f1,f0,f1,f0
+};
+
+/** horizontal door animation data */
+static int pHorDoorAnimData[] = {
+/*           len|fps|loop|data... */
+/*   OPEN   */  1, 0 ,  0 , hf6
+/*  CLOSED  */, 1, 0 ,  0 , hf0
+/*  OPENING */,10, 10,  0 , hf1,hf0,hf1,hf2,hf2,hf0,hf3,hf4,hf5,hf6
+/*  CLOSING */,10, 10,  0 , hf5,hf4,hf2,hf3,hf3,hf0,hf1,hf0,hf1,hf0
+/*  ROPEN   */, 1, 0 ,  0 , hf6
+/* RCLOSED  */, 1, 0 ,  0 , hf0
+/* ROPENING */,10, 10,  0 , hf1,hf0,hf1,hf2,hf2,hf0,hf3,hf4,hf5,hf6
+/* RCLOSING */,10, 10,  0 , hf5,hf4,hf2,hf3,hf3,hf0,hf1,hf0,hf1,hf0
 };
 
 /**
  * Parse a door into the entity
  *
- * @param  [ in]pEnt    The entity
- * @param  [ in]pParser Parser that has just parsed a door
+ * @param  [ in]pEnt       The entity
+ * @param  [ in]pParser    Parser that has just parsed a door
+ * @param  [ in]isVertical Parser that has just parsed a door
  */
-err initDoor(entityCtx *pEnt, gfmParser *pParser) {
+err initDoor(entityCtx *pEnt, gfmParser *pParser, int isVertical) {
     gfmRV rv;
     err erv;
     int i, l, x, y;
@@ -83,9 +115,8 @@ err initDoor(entityCtx *pEnt, gfmParser *pParser) {
             if (memcmp(pVal, "closed", 7) == 0) {
                 anim = CLOSED;
             }
-            else if (memcmp(pVal, "opened", 7) == 0) {
-                /* TODO Implement initial state 'opened' */
-                ASSERT(0, ERR_NOTIMPLEMENTED);
+            else if (memcmp(pVal, "open", 7) == 0) {
+                anim = ROPEN;
             }
         }
         else if (memcmp(pKey, "lock_", 5) == 0) {
@@ -99,17 +130,32 @@ err initDoor(entityCtx *pEnt, gfmParser *pParser) {
 
     rv = gfmParser_getPos(&x, &y, pParser);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    y -= door_height;
 
-    rv = gfmSprite_init(pEnt->pSelf, x, y, door_width, door_height
-            , gfx.pSset8x32, door_offx, door_offy, pEnt, T_DOOR);
+    if (isVertical) {
+        y -= door_height;
+
+        rv = gfmSprite_init(pEnt->pSelf, x, y, door_width, door_height
+                , gfx.pSset8x32, door_offx, door_offy, pEnt, T_DOOR);
+    }
+    else {
+        y -= door_width;
+
+        rv = gfmSprite_init(pEnt->pSelf, x, y, door_height, door_width
+                , gfx.pSset32x8, door_offy, door_offx, pEnt, T_HDOOR);
+    }
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     rv = gfmSprite_setFixed(pEnt->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    rv = gfmSprite_addAnimationsStatic(pEnt->pSelf, pDoorAnimData);
-    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    if (isVertical) {
+        rv = gfmSprite_addAnimationsStatic(pEnt->pSelf, pDoorAnimData);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    }
+    else {
+        rv = gfmSprite_addAnimationsStatic(pEnt->pSelf, pHorDoorAnimData);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+    }
 
     /* Play its default animation */
     pEnt->maxAnimation = DOOR_ANIM_COUNT;
@@ -128,6 +174,8 @@ err initDoor(entityCtx *pEnt, gfmParser *pParser) {
  * @param  [ in]pEnt    The entity
  */
 err preUpdateDoor(entityCtx *pEnt) {
+    gfmHitbox *pBox1, *pBox2;
+    gfmCollision side;
     gfmRV rv;
     int x, y, frame;
 
@@ -138,27 +186,85 @@ err preUpdateDoor(entityCtx *pEnt) {
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     rv = gfmSprite_getFrame(&frame, pEnt->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    pBox2 = 0;
     switch (frame) {
         case f0:
         case f1:
         case f2: {
-            spawnTmpHitbox(pEnt, x, y, door_width, door_height, T_DOOR);
+            pBox1 = spawnTmpHitbox(pEnt, x, y, door_width, door_height, T_DOOR);
         } break;
         case f3: {
-            spawnTmpHitbox(pEnt, x, y, door_width, door_f3_height0, T_DOOR);
-            spawnTmpHitbox(pEnt, x, y + door_height - door_f3_height1
+            pBox1 = spawnTmpHitbox(pEnt, x, y, door_width, door_f3_height0
+                    , T_DOOR);
+            pBox2 = spawnTmpHitbox(pEnt, x, y + door_height - door_f3_height1
                     , door_width, door_f3_height1, T_DOOR);
         } break;
         case f4: {
-            spawnTmpHitbox(pEnt, x, y, door_width, door_f4_height0, T_DOOR);
-            spawnTmpHitbox(pEnt, x, y + door_height - door_f4_height1
+            pBox1 = spawnTmpHitbox(pEnt, x, y, door_width, door_f4_height0
+                    , T_DOOR);
+            pBox2 = spawnTmpHitbox(pEnt, x, y + door_height - door_f4_height1
                     , door_width, door_f4_height1, T_DOOR);
         } break;
         case f5: {
-            spawnTmpHitbox(pEnt, x, y, door_width, door_f5_height, T_DOOR);
+            pBox1 = spawnTmpHitbox(pEnt, x, y, door_width, door_f5_height
+                    , T_DOOR);
+        } break;
+        /* Horizontal doors are the same as regular ones, but with width and
+         * height flipped (even the collision type can be the same) */
+        case hf0:
+        case hf1:
+        case hf2: {
+            pBox1 = spawnTmpHitbox(pEnt, x, y, door_height, door_width, T_DOOR);
+        } break;
+        case hf3: {
+            pBox1 = spawnTmpHitbox(pEnt, x, y, door_f3_height1, door_width
+                    , T_DOOR);
+            pBox2 = spawnTmpHitbox(pEnt, x + door_height - door_f3_height0, y
+                    , door_f3_height0, door_width, T_DOOR);
+        } break;
+        case hf4: {
+            pBox1 = spawnTmpHitbox(pEnt, x, y, door_f4_height1, door_width
+                    , T_DOOR);
+            pBox2 = spawnTmpHitbox(pEnt, x + door_height - door_f4_height0, y
+                    , door_f4_height0, door_width, T_DOOR);
+        } break;
+        case hf5: {
+            pBox1 = spawnTmpHitbox(pEnt, x + door_height - door_f5_height, y
+                    , door_f5_height, door_width, T_DOOR);
         } break;
         case f6:
-        default: { /* No collision */ }
+        case hf6:
+        default: { pBox1 = 0; /* No collision */ }
+    }
+
+    /* Set the condition collision side */
+    switch (frame) {
+        case f0:
+        case f1:
+        case f2:
+        case f3:
+        case f4:
+        case f5:
+        case f6: {
+            side = gfmCollision_hor;
+        } break;
+        case hf0:
+        case hf1:
+        case hf2:
+        case hf3:
+        case hf4:
+        case hf5:
+        case hf6: {
+            side = gfmCollision_ver;
+        } break;
+    }
+
+    if (pBox1 != 0) {
+        gfmHitbox_setHitFlag(pBox1, side);
+    }
+    if (pBox2 != 0) {
+        gfmHitbox_setHitFlag(pBox2, side);
     }
 
     return ERR_OK;
@@ -178,13 +284,31 @@ err postUpdateDoor(entityCtx *pEnt) {
         return ERR_OK;
     }
 
+    /* Properly update the current animation */
+    switch (pEnt->currentAnimation) {
+        case OPENING: pEnt->currentAnimation = OPEN; break;
+        case CLOSING: pEnt->currentAnimation = CLOSED; break;
+        case ROPENING: pEnt->currentAnimation = ROPEN; break;
+        case RCLOSING: pEnt->currentAnimation = RCLOSED; break;
+        default: { /* Does nothing */ }
+    }
+
     if ((pEnt->flags & _localVars) == pEnt->flags
-            && pEnt->currentAnimation != OPENED) {
+            && pEnt->currentAnimation == CLOSED) {
         return setEntityAnimation(pEnt, OPENING, 0/*force*/);
     }
     else if ((pEnt->flags & _localVars) != pEnt->flags
-            && pEnt->currentAnimation != CLOSED) {
+            && pEnt->currentAnimation == OPEN) {
         return setEntityAnimation(pEnt, CLOSING, 0/*force*/);
+    }
+    /* Reverse doors (def: open, close on set) */
+    else if ((pEnt->flags & _localVars) == pEnt->flags
+            && pEnt->currentAnimation == ROPEN) {
+        return setEntityAnimation(pEnt, RCLOSING, 0/*force*/);
+    }
+    else if ((pEnt->flags & _localVars) != pEnt->flags
+            && pEnt->currentAnimation == RCLOSED) {
+        return setEntityAnimation(pEnt, ROPENING, 0/*force*/);
     }
 
     return ERR_OK;

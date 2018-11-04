@@ -19,7 +19,7 @@
 /** Initial background color (only for the virtual window) */
 #define BG_COLOR    0xFF222034
 /** Name of the first map loaded */
-#define FIRST_MAP   "awakening_passage"
+#define FIRST_MAP   "lab/awakening_passage"
 
 #endif /* __CONF_GAME_H__ */
 

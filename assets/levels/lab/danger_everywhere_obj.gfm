@@ -1,0 +1,16 @@
+obj turret 80 176 8 8 [ flipped , true ]
+obj turret 40 128 8 8
+obj turret 80 88 8 8 [ flipped , true ]
+obj turret 160 88 8 8
+obj turret 144 136 8 8
+obj spiky 296 224 8 8
+obj spiky 184 224 8 8
+obj spiky 72 224 8 8
+obj spiky 200 176 8 8
+obj spiky 376 176 8 8
+obj spiky 248 48 8 8
+obj spiky 96 48 8 8
+area invisible_wall -32 0 32 240
+area invisible_wall 400 0 32 240
+obj loadzone 384 192 32 32 [ dest , lab/harmful_spikes ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 13 ]
+obj loadzone -16 16 32 32 [ dest , lab/two_ways ] [ dir , left ] [ tgt_x , 59 ] [ tgt_y , 22 ]

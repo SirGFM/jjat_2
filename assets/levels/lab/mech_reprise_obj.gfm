@@ -1,0 +1,8 @@
+obj walky 88 64 8 8
+obj pressure_pad 32 208 32 8 [ set_0 , A ]
+obj door 320 48 8 32 [ init_state , closed ] [ lock_0 , A ]
+area checkpoint 72 224 16 24
+obj loadzone -16 216 32 32 [ dest , lab/spikes_warning ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 23 ]
+obj loadzone 464 16 32 32 [ dest , lab/beware_the_spikes ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 22 ]
+area invisible_wall -32 0 32 272
+area invisible_wall 480 0 32 272
