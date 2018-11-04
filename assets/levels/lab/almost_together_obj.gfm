@@ -9,6 +9,5 @@ area invisible_wall -32 0 32 400
 area invisible_wall 0 400 480 32
 obj loadzone -16 184 32 192 [ dest , lab/here_and_there ] [ dir , left ] [ tgt_x , 39 ] [ tgt_y , 3 ]
 obj loadzone 280 384 160 32 [ dest , lab/harmless_critters ] [ dir , down ] [ tgt_x , 18 ] [ tgt_y , 0 ]
-obj invisible_wall 215 320 17 40 [ left , y ]
 obj loadzone 464 128 32 32 [ dest , lab/big_fluffy_foe ] [ dir , right ] [ tgt_x , 0 ] [ tgt_y , 7 ]
 area invisible_wall 480 0 32 400
