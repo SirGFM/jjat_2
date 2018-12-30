@@ -7,6 +7,7 @@
 #include <jjat2/fx_group.h>
 #include <jjat2/leveltransition.h>
 #include <jjat2/hitbox.h>
+#include <jjat2/menustate.h>
 #include <jjat2/playstate.h>
 #include <jjat2/teleport.h>
 #include <jjat2/ui.h>
@@ -34,6 +35,9 @@ gfmGroup *fx;
 /** The current target (if an entity) */
 teleportCtx teleport;
 
+/** The game's menustate */
+menustateCtx menustate;
+
 /** Initialize the uninitialized 'local globals' (i.e., the ones defined for the
  * game itself, and not for the template)  with all-zeros. */
 void zeroizeGameGlobalCtx() {
@@ -44,5 +48,6 @@ void zeroizeGameGlobalCtx() {
     memset(&lvltransition, 0x0, sizeof(leveltransitionCtx));
     memset(&ui, 0x0, sizeof(uiCtx));
     memset(&checkpoint, 0x0, sizeof(checkpointCtx));
+    memset(&menustate, 0x0, sizeof(menustateCtx));
 }
 

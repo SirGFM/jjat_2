@@ -20,6 +20,7 @@
 #include <jjat2/fx_group.h>
 #include <jjat2/hitbox.h>
 #include <jjat2/leveltransition.h>
+#include <jjat2/menustate.h>
 #include <jjat2/playstate.h>
 #include <jjat2/static.h>
 #include <jjat2/ui.h>
@@ -40,12 +41,14 @@ err mainloop() {
     ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
     erv = initHitboxes();
     ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
+    erv = initMenustate();
+    ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
 
     erv = initLoadstate(gfx.pSset8x8, 0/*offset*/);
     ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
 
     /* Set initial state */
-    game.nextState = ST_PLAYSTATE;
+    game.nextState = ST_MENUSTATE;
 
     while (gfm_didGetQuitFlag(game.pCtx) != GFMRV_TRUE) {
         /* Switch state */
@@ -54,6 +57,7 @@ err mainloop() {
                 case ST_PLAYSTATE: erv = loadPlaystate(); break;
                 case ST_LEVELTRANSITION: erv = setupLeveltransition(); break;
                 case ST_LOADSTATE: erv = ERR_NOTIMPLEMENTED; break;
+                case ST_MENUSTATE: erv = erv = loadMenustate(); break;
                 default: {}
             }
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
@@ -98,6 +102,7 @@ err mainloop() {
                 case ST_PLAYSTATE: erv = updatePlaystate(); break;
                 case ST_LEVELTRANSITION: erv = updateLeveltransition(); break;
                 case ST_LOADSTATE: erv = updateLoadstate(); break;
+                case ST_MENUSTATE: erv = erv = updateMenustate(); break;
                 default: {}
             }
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
@@ -117,6 +122,7 @@ err mainloop() {
                 case ST_PLAYSTATE: erv = drawPlaystate(); break;
                 case ST_LEVELTRANSITION: erv = drawLeveltransition(); break;
                 case ST_LOADSTATE: erv = drawLoadstate(); break;
+                case ST_MENUSTATE: erv = drawMenustate(); break;
                 default: {}
             }
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
@@ -147,6 +153,7 @@ __ret:
     freeLeveltransition();
     freeFxGroup();
     freePlaystate();
+    freeMenustate();
 
     return erv;
 }

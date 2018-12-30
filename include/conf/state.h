@@ -11,6 +11,7 @@ enum enState {
     ST_PLAYSTATE,
     ST_LEVELTRANSITION,
     ST_LOADSTATE,
+    ST_MENUSTATE,
     ST_MAX
 };
 typedef enum enState state;
