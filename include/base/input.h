@@ -135,6 +135,21 @@ err endInputRemapping();
 #define DID_JUST_RELEASE(bt) \
     (IS_STATE_JUSTRELEASED(input.bt.state))
 
+/** Whether a given menu button is currently released */
+#define IS_MENU_RELEASED(bt) \
+    (menuInput.bt.state & gfmInput_released)
+
+/** Whether a given menu button is currently pressed */
+#define IS_MENU_PRESSED(bt) \
+    (menuInput.bt.state & gfmInput_pressed)
+
+/** Whether a given menu button was just pressed */
+#define DID_JUST_PRESS_MENU(bt) \
+    (IS_STATE_JUSTPRESSED(menuInput.bt.state))
+
+/** Whether a given menu button was just released */
+#define DID_JUST_RELEASE_MENU(bt) \
+    (IS_STATE_JUSTRELEASED(menuInput.bt.state))
 
 #endif /* __BASE_INPUT_H__ */
 
