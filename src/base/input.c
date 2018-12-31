@@ -11,6 +11,11 @@
 
 #include <string.h>
 
+/* Current list of buttons in use */
+static button *inputList;
+/* Number of buttons in the list */
+static int listCount;
+
 enum enInputNames {
 #define X_GPAD(...)
 #define X_KEY(name, ...) enInput_##name,
@@ -28,6 +33,10 @@ typedef enum enInputNames inputNames;
  * like flags, instead of being interpreted during the game loop).
  */
 void handleInput() {
+    if (inputList != (button*)&input) {
+        return;
+    }
+
     if (DID_JUST_PRESS(pause)) {
         /* TODO Pause the game */
     }
@@ -80,6 +89,10 @@ void handleInput() {
  * loop to be paused/resumed or even stepped.
  */
 void handleDebugInput() {
+    if (inputList != (button*)&input) {
+        return;
+    }
+
     if (DID_JUST_RELEASE(dbgResetFps)) {
         gfm_resetFPS(game.pCtx);
     }
@@ -118,17 +131,15 @@ void handleDebugInput() {
 /** Retrieve the state of every button */
 err updateInput() {
     /** List of buttons, used to easily iterate through all virtual buttons */
-    button *pButtons;
     inputNames i;
 
     i = 0;
-    pButtons = (button*)(&input);
     /* Iterate through all buttons and update their state */
-    while (i < enInput_count) {
+    while (i < listCount) {
         gfmRV rv;
 
-        rv = gfm_getKeyState(&pButtons[i].state, &pButtons[i].numPressed
-                , game.pCtx, pButtons[i].handle);
+        rv = gfm_getKeyState(&inputList[i].state, &inputList[i].numPressed
+                , game.pCtx, inputList[i].handle);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
         i++;
@@ -141,6 +152,10 @@ err updateInput() {
 err updateDebugInput() {
     gfmInput *pInput;
     gfmRV rv;
+
+    if (inputList != (button*)&input) {
+        return ERR_OK;
+    }
 
     rv = gfm_getInput(&pInput, game.pCtx);
     ASSERT(rv == GFMRV_OK, rv);
@@ -191,7 +206,15 @@ err initInput() {
 #undef X_GPAD
 #undef X_KEY
 
+    setButtonList((button*)&input, enInput_count);
+
     return ERR_OK;
+}
+
+/** Set the list of buttons to be updated */
+void setButtonList(button *list, int count) {
+    inputList = list;
+    listCount = count;
 }
 
 #if defined(JJATENGINE)

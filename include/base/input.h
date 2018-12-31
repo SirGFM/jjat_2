@@ -60,6 +60,9 @@ err updateDebugInput();
 /** Initialize every button with their default mapping */
 err initInput();
 
+/** Set the list of buttons to be updated */
+void setButtonList(button *list, int count);
+
 #if defined(JJATENGINE)
 /**
  * Configure the (remappable) inputs.
