@@ -99,6 +99,88 @@
         , gfmController_b \
         , 0/*port*/) \
 
+#define X_MENU_BUTTON_LIST \
+  X_KEY(left \
+        , gfmKey_left) \
+  X_KEY(right \
+        , gfmKey_right) \
+  X_KEY(up \
+        , gfmKey_up) \
+  X_KEY(down \
+        , gfmKey_down) \
+  X_KEY(accept \
+        , gfmKey_enter) \
+  X_KEY(back \
+        , gfmKey_esc) \
+  X_GPAD(left \
+        , gfmController_left \
+        , 0/*port*/) \
+  X_GPAD(right \
+        , gfmController_right \
+        , 0/*port*/) \
+  X_GPAD(up \
+        , gfmController_up \
+        , 0/*port*/) \
+  X_GPAD(down \
+        , gfmController_down \
+        , 0/*port*/) \
+  X_GPAD(accept \
+        , gfmController_a \
+        , 0/*port*/) \
+  X_GPAD(back \
+        , gfmController_b \
+        , 0/*port*/)
+
+#define X_ALTMENU_BUTTON_LIST \
+  X_KEY(left \
+        , gfmKey_a) \
+  X_KEY(right \
+        , gfmKey_d) \
+  X_KEY(up \
+        , gfmKey_w) \
+  X_KEY(down \
+        , gfmKey_s) \
+  X_KEY(accept \
+        , gfmKey_x) \
+  X_KEY(back \
+        , gfmKey_c) \
+  X_GPAD(left \
+        , gfmController_laxis_left \
+        , 0/*port*/) \
+  X_GPAD(right \
+        , gfmController_laxis_right \
+        , 0/*port*/) \
+  X_GPAD(up \
+        , gfmController_laxis_up \
+        , 0/*port*/) \
+  X_GPAD(down \
+        , gfmController_laxis_down \
+        , 0/*port*/) \
+  X_GPAD(accept \
+        , gfmController_l1 \
+        , 0/*port*/) \
+  X_GPAD(back \
+        , gfmController_l2 \
+        , 0/*port*/) \
+  X_GPAD(left \
+        , gfmController_raxis_left \
+        , 0/*port*/) \
+  X_GPAD(right \
+        , gfmController_raxis_right \
+        , 0/*port*/) \
+  X_GPAD(up \
+        , gfmController_raxis_up \
+        , 0/*port*/) \
+  X_GPAD(down \
+        , gfmController_raxis_down \
+        , 0/*port*/) \
+  X_GPAD(accept \
+        , gfmController_r1 \
+        , 0/*port*/) \
+  X_GPAD(back \
+        , gfmController_r2 \
+        , 0/*port*/)
+
 /** Create a list of debug buttons */
 #if defined(DEBUG)
 #  define X_DEBUG_BUTTON_LIST \

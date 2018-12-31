@@ -34,8 +34,21 @@ struct stInputCtx {
 };
 typedef struct stInputCtx inputCtx;
 
+/** Encapsulate every button */
+struct stMenuInputCtx {
+#define X_GPAD(...)
+#define X_KEY(name, ...) button name;
+    X_MENU_BUTTON_LIST
+#undef X_KEY
+#undef X_GPAD
+};
+typedef struct stMenuInputCtx menuInputCtx;
+
 /** Global input (declared on src/base/static.c) */
 extern inputCtx input;
+
+/** Global menu input (declared on src/jjat2/static.c) */
+extern menuInputCtx menuInput;
 
 /**
  * Handle every input that require an immediate action (i.e, those that are more

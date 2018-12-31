@@ -3,6 +3,7 @@
  *
  * Declare all static variables/contexts.
  */
+#include <base/input.h>
 #include <jjat2/checkpoint.h>
 #include <jjat2/fx_group.h>
 #include <jjat2/leveltransition.h>
@@ -13,6 +14,9 @@
 #include <jjat2/ui.h>
 
 #include <string.h>
+
+/* The context for menu inputs */
+menuInputCtx menuInput;
 
 /** The checkpoint context */
 checkpointCtx checkpoint;
@@ -41,6 +45,7 @@ menustateCtx menustate;
 /** Initialize the uninitialized 'local globals' (i.e., the ones defined for the
  * game itself, and not for the template)  with all-zeros. */
 void zeroizeGameGlobalCtx() {
+    memset(&menuInput, 0x0, sizeof(menuInputCtx));
     memset(&playstate, 0x0, sizeof(playstateCtx));
     memset(&fx, 0x0, sizeof(gfmGroup*));
     memset(&teleport, 0x0, sizeof(teleportCtx));
