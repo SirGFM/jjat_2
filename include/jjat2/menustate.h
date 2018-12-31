@@ -16,6 +16,12 @@
 #include <GFraMe/gfmText.h>
 
 struct stMenustateCtx {
+    int dir;
+    int delay;
+    int vpos;
+    int hpos;
+    int hcount;
+    int vcount;
 };
 typedef struct stMenustateCtx menustateCtx;
 
