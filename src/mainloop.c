@@ -57,7 +57,7 @@ err mainloop() {
                 case ST_PLAYSTATE: erv = loadPlaystate(); break;
                 case ST_LEVELTRANSITION: erv = setupLeveltransition(); break;
                 case ST_LOADSTATE: erv = ERR_NOTIMPLEMENTED; break;
-                case ST_MENUSTATE: erv = erv = loadMenustate(); break;
+                case ST_MENUSTATE: erv = loadMenustate(); break;
                 default: {}
             }
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
@@ -102,7 +102,7 @@ err mainloop() {
                 case ST_PLAYSTATE: erv = updatePlaystate(); break;
                 case ST_LEVELTRANSITION: erv = updateLeveltransition(); break;
                 case ST_LOADSTATE: erv = updateLoadstate(); break;
-                case ST_MENUSTATE: erv = erv = updateMenustate(); break;
+                case ST_MENUSTATE: erv = updateMenustate(); break;
                 default: {}
             }
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
