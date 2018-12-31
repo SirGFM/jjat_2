@@ -43,6 +43,7 @@
          jjat2/leveltransition.o \
          jjat2/playstate.o \
          jjat2/menustate.o \
+         jjat2/menu_input.o \
          jjat2/static.o \
          jjat2/swordy.o \
          jjat2/teleport.o \

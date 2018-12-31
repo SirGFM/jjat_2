@@ -109,7 +109,7 @@
   X_KEY(down \
         , gfmKey_down) \
   X_KEY(accept \
-        , gfmKey_enter) \
+        , gfmKey_return) \
   X_KEY(back \
         , gfmKey_esc) \
   X_GPAD(left \

@@ -1,4 +1,5 @@
 #include <base/error.h>
+#include <jjat2/menu_input.h>
 #include <jjat2/menustate.h>
 
 /** Initialize the menustate. */
@@ -12,7 +13,12 @@ void freeMenustate() {
 
 /** Setup the loadstate so it may start to be executed */
 err loadMenustate() {
-    return ERR_OK;
+    err erv;
+
+    erv = setDefaultMenuInput();
+    ASSERT(erv == ERR_OK, erv);
+
+    return erv;
 }
 
 /** Update the menustate */
