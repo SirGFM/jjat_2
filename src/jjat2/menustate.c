@@ -25,9 +25,14 @@ enum menuDir {
 
 #define getOptsSize(__OPTS__) (sizeof(__OPTS__) / sizeof(char*))
 
+enum enOptions {
+    OPT_NEWGAME = 0
+  , OPT_EXIT
+};
+
 static const char *options[] = {
-    "NEW GAME"
-  , "EXIT"
+    [OPT_NEWGAME] "NEW GAME"
+  , [OPT_EXIT] "EXIT"
 };
 
 /** Initialize the menustate. */
@@ -128,11 +133,26 @@ static void handleCursorMovement() {
 
 /** Update the menustate */
 err updateMenustate() {
+    gfmRV rv;
+
     if (IS_MENU_RELEASED(up) && IS_MENU_RELEASED(down) &&
             IS_MENU_RELEASED(left) && IS_MENU_RELEASED(right))
         menustate.dir = md_none;
 
     handleCursorMovement();
+
+    if (DID_JUST_PRESS_MENU(accept)) {
+        // TODO Play accept SFX
+
+        switch (menustate.vpos) {
+        case OPT_NEWGAME:
+            game.nextState = ST_PLAYSTATE;
+            break;
+        case OPT_EXIT:
+            rv = gfm_setQuitFlag(game.pCtx);
+            ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        }
+    }
 
     return ERR_OK;
 }
