@@ -174,9 +174,15 @@ err updateDebugInput() {
     return ERR_OK;
 }
 
-/** Initialize every button with their default mapping */
-err initInput() {
+static err configureGameButtons() {
+    gfmInput *pInput;
     gfmRV rv;
+
+    rv = gfm_getInput(&pInput, game.pCtx);
+    ASSERT(rv == GFMRV_OK, rv);
+
+    rv = gfmInput_reset(pInput);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     /* Create virtual keys for every input */
 #define X_GPAD(...)
@@ -186,6 +192,17 @@ err initInput() {
     X_BUTTON_LIST
 #undef X_KEY
 #undef X_GPAD
+
+    setButtonList((button*)&input, enInput_count);
+
+    return ERR_OK;
+}
+
+/** Initialize every button with their default mapping */
+err initInput() {
+    gfmRV rv;
+
+    ASSERT(configureGameButtons() == ERR_OK, ERR_GFMERR);
 
     /* Bind every key */
 #define X_GPAD(...)
@@ -205,8 +222,6 @@ err initInput() {
     X_ALTERNATE_BUTTON_MAPPING
 #undef X_GPAD
 #undef X_KEY
-
-    setButtonList((button*)&input, enInput_count);
 
     return ERR_OK;
 }
