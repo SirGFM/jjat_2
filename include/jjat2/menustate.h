@@ -16,6 +16,8 @@
 #include <GFraMe/gfmText.h>
 
 struct stMenustateCtx {
+    gfmText *pText;
+    char **vopts;
     int dir;
     int delay;
     int vpos;
