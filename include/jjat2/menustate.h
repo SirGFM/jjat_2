@@ -18,11 +18,12 @@
 struct stMenustateCtx {
     gfmText *pText;
     char **vopts;
+    char ***hopts;
+    int *hoptsCount;
+    int *hpos;
     int dir;
     int delay;
     int vpos;
-    int hpos;
-    int hcount;
     int vcount;
 };
 typedef struct stMenustateCtx menustateCtx;

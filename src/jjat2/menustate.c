@@ -23,17 +23,43 @@ enum menuDir {
 #define ACTIVE_TILE    0
 #define INACTIVE_TILE    4032
 
-#define getOptsSize(__OPTS__) (sizeof(__OPTS__) / sizeof(char*))
+/* NOTE: typeof is a GCC extension... */
+#define getOptsSize(__OPTS__) (sizeof(__OPTS__) / sizeof(typeof(__OPTS__[0])))
 
 enum enOptions {
     OPT_NEWGAME = 0
   , OPT_EXIT
+  , OPT_COUNT
 };
 
 static const char *options[] = {
     [OPT_NEWGAME] "NEW GAME"
   , [OPT_EXIT] "EXIT"
 };
+
+enum enNewGameOpts {
+    NGOPT_1P2C
+  , NGOPT_2P
+  , NGOPT_1P1C
+};
+
+static const char *newGameSub[] = {
+    [NGOPT_1P2C] "1P2C"
+  , [NGOPT_2P] "2P"
+  , [NGOPT_1P1C] "1P1C"
+};
+
+static const char **subOptions[] = {
+    [OPT_NEWGAME] (const char**)newGameSub
+  , [OPT_EXIT] 0
+};
+
+static const int subOptionsCount[] = {
+    [OPT_NEWGAME] getOptsSize(newGameSub)
+  , [OPT_EXIT] 0
+};
+
+static int subOptionsPosition[OPT_COUNT];
 
 /** Initialize the menustate. */
 err initMenustate() {
@@ -63,47 +89,48 @@ err loadMenustate() {
     menustate.vopts = (char**)options;
     menustate.vcount = getOptsSize(options);
 
+    menustate.hopts = (char***)subOptions;
+    menustate.hoptsCount = (int*)subOptionsCount;
+    memset(subOptionsPosition, 0x0, sizeof(subOptionsPosition));
+    menustate.hpos = (int*)subOptionsPosition;
+
     menustate.dir = 0;
     menustate.delay = 0;
     menustate.vpos = 0;
-    menustate.hpos = 0;
-    menustate.hcount = 0;
 
     return erv;
 }
 
 static void updateCursorPosition() {
-    int setHor = 0;
+    int vpos = menustate.vpos;
 
     switch (menustate.dir) {
     case md_left:
-        menustate.hpos--;
+        menustate.hpos[vpos]--;
         break;
     case md_right:
-        menustate.hpos++;
+        menustate.hpos[vpos]++;
         break;
     case md_up:
         menustate.vpos--;
-        setHor = 1;
         break;
     case md_down:
         menustate.vpos++;
-        setHor = 1;
         break;
-    }
-
-    if (setHor) {
-        /* TODO Set the initial horizontal position based on the current item */
     }
 
     if (menustate.vpos < 0)
         menustate.vpos = menustate.vcount - 1;
-    if (menustate.vpos >= menustate.vcount)
+    else if (menustate.vpos >= menustate.vcount)
         menustate.vpos = 0;
-    if (menustate.hpos < 0)
-        menustate.hpos = menustate.hcount - 1;
-    if (menustate.hpos >= menustate.hcount)
-        menustate.hpos = 0;
+    vpos = menustate.vpos;
+
+    if (menustate.hoptsCount[vpos] == 0)
+        ; /* Do nothing */
+    else if (menustate.hpos[vpos] < 0)
+        menustate.hpos[vpos] = menustate.hoptsCount[vpos] - 1;
+    else if (menustate.hpos[vpos] >= menustate.hoptsCount[vpos])
+        menustate.hpos[vpos] = 0;
 }
 
 static void handleCursorMovement() {
@@ -157,16 +184,14 @@ err updateMenustate() {
     return ERR_OK;
 }
 
-static err drawText(char *text, int len, int y, int active) {
-    int tile, x;
+static err drawTextAt(char *text, int len, int x, int y, int active) {
+    int tile;
     gfmRV rv;
 
     if (active)
         tile = ACTIVE_TILE;
     else
         tile = INACTIVE_TILE;
-
-    x = (V_WIDTH / 8 - len) / 2;
 
     rv = gfmText_setPosition(menustate.pText, x * 8, y * 8);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
@@ -182,6 +207,14 @@ static err drawText(char *text, int len, int y, int active) {
     return ERR_OK;
 }
 
+static err drawText(char *text, int len, int y, int active) {
+    int x;
+
+    x = (V_WIDTH / 8 - len) / 2;
+
+    return drawTextAt(text, len, x, y, active);
+}
+
 /** Draw the menustate */
 err drawMenustate() {
     err erv;
@@ -193,6 +226,10 @@ err drawMenustate() {
     gfmDebug_printf(game.pCtx, 0, 152, " HPOS: %i", menustate.hpos);
 
     y = V_HEIGHT / 8 - menustate.vcount - 2;
+    /* Add another row for each horizontal option */
+    for (i = 0; i < menustate.vcount; i++)
+        if (menustate.hoptsCount[i] != 0)
+            y--;
 
     for (i = 0; i < menustate.vcount; i++) {
         int active = (i == menustate.vpos);
@@ -200,6 +237,25 @@ err drawMenustate() {
 
         erv = drawText(menustate.vopts[i], len, y + i, active);
         ASSERT(erv == ERR_OK, erv);
+        if (menustate.hoptsCount[i] != 0) {
+            int j, x;
+
+            for (j = 0, x = -1; j < menustate.hoptsCount[i]; j++)
+                x += strlen(menustate.hopts[i][j]) + 1;
+            x = (V_WIDTH / 8 - x) / 2;
+
+            y++;
+            for (j = 0; j < menustate.hoptsCount[i]; j++) {
+                char *text = menustate.hopts[i][j];
+
+                active = (j == menustate.hpos[i]);
+                len = strlen(text);
+
+                erv = drawTextAt(text, len, x, y + i, active);
+                ASSERT(erv == ERR_OK, erv);
+                x += len + 1;
+            }
+        }
     }
 
     return ERR_OK;
