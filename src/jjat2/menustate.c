@@ -5,6 +5,7 @@
 #include <conf/game.h>
 #include <jjat2/menu_input.h>
 #include <jjat2/menustate.h>
+#include <jjat2/util.h>
 #include <GFraMe/gfmDebug.h>
 #include <GFraMe/gfmText.h>
 #include <string.h>
@@ -169,11 +170,29 @@ err updateMenustate() {
     handleCursorMovement();
 
     if (DID_JUST_PRESS_MENU(accept)) {
+        err erv;
+
         // TODO Play accept SFX
 
         switch (menustate.vpos) {
         case OPT_NEWGAME:
             game.nextState = ST_PLAYSTATE;
+            switch (menustate.hpos[OPT_NEWGAME]) {
+            case NGOPT_1P2C:
+                game.flags |= AC_BOTH;
+                erv = staticSetInputStr("SL:6005200b01;SR:6105300d;SJ:5a00214;SA:5b00c;GL:64047;GR:65048;GJ:5d049;GA:5e04a;P:68042;SW:6904344;");
+                break;
+            case NGOPT_2P:
+                game.flags |= AC_BOTH;
+                erv = staticSetInputStr("SL:600520;SR:610530;SJ:560;SA:570580;GL:60152147;GR:61153148;GJ:56115;GA:57158116;P:68068142;SW:5905914344;");
+                break;
+            case NGOPT_1P1C:
+                game.flags |= AC_SWORDY;
+                game.flags &= ~AC_GUNNY;
+                erv = staticSetInputStr("SL:60052047;SR:61053048;SJ:56015;SA:57058016;P:68042;SW:5904344;");
+                break;
+            }
+            ASSERT(erv == ERR_OK, erv);
             break;
         case OPT_EXIT:
             rv = gfm_setQuitFlag(game.pCtx);

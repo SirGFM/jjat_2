@@ -41,6 +41,10 @@ struct stGameCtx {
     /** The game's default camera */
     gfmCamera *pCamera;
 #if defined(JJATENGINE)
+    /* Input to be used when starting the game (NULL-terminated) */
+    char *curInputMap;
+    /* Alloc'ed size for curInputMap (which must be NULL-terminated!) */
+    int inputMapSize;
     /** Lots of flags to control the game */
     gameFlags flags;
     /** Flags recovered/saved for a given session/save file */
