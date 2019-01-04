@@ -226,6 +226,13 @@ err initInput() {
     return ERR_OK;
 }
 
+err initInputFromStr(char *pMap, int len) {
+    ASSERT(configureGameButtons() == ERR_OK, ERR_GFMERR);
+    ASSERT(configureInput(pMap, len) == ERR_OK, ERR_GFMERR);
+
+    return ERR_OK;
+}
+
 /** Set the list of buttons to be updated */
 void setButtonList(button *list, int count) {
     inputList = list;

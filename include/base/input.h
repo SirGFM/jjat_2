@@ -73,6 +73,9 @@ err updateDebugInput();
 /** Initialize every button with their default mapping */
 err initInput();
 
+/** Initialize every button with a custom mapping */
+err initInputFromStr(char *pMap, int len);
+
 /** Set the list of buttons to be updated */
 void setButtonList(button *list, int count);
 
