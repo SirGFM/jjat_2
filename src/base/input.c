@@ -276,36 +276,35 @@ err configureInput(char *pMap, int len) {
             j++;
         }
         ASSERT(i + j < len, ERR_INVALIDINPUTMAP);
-        pMap[i + j] = '\0';
 
-        if (strcmp(pMap + i, "SL") == 0) {
+        if (memcmp(pMap + i, "SL:", 3) == 0) {
             handle = input.swordyLeft.handle;
         }
-        else if (strcmp(pMap + i, "SR") == 0) {
+        else if (memcmp(pMap + i, "SR:", 3) == 0) {
             handle = input.swordyRight.handle;
         }
-        else if (strcmp(pMap + i, "SJ") == 0) {
+        else if (memcmp(pMap + i, "SJ:", 3) == 0) {
             handle = input.swordyJump.handle;
         }
-        else if (strcmp(pMap + i, "SA") == 0) {
+        else if (memcmp(pMap + i, "SA:", 3) == 0) {
             handle = input.swordyAtk.handle;
         }
-        else if (strcmp(pMap + i, "GL") == 0) {
+        else if (memcmp(pMap + i, "GL:", 3) == 0) {
             handle = input.gunnyLeft.handle;
         }
-        else if (strcmp(pMap + i, "GR") == 0) {
+        else if (memcmp(pMap + i, "GR:", 3) == 0) {
             handle = input.gunnyRight.handle;
         }
-        else if (strcmp(pMap + i, "GJ") == 0) {
+        else if (memcmp(pMap + i, "GJ:", 3) == 0) {
             handle = input.gunnyJump.handle;
         }
-        else if (strcmp(pMap + i, "GA") == 0) {
+        else if (memcmp(pMap + i, "GA:", 3) == 0) {
             handle = input.gunnyAtk.handle;
         }
-        else if (strcmp(pMap + i, "P") == 0) {
+        else if (memcmp(pMap + i, "P:", 2) == 0) {
             handle = input.pause.handle;
         }
-        else if (strcmp(pMap + i, "SW") == 0) {
+        else if (memcmp(pMap + i, "SW:", 3) == 0) {
             handle = input.switchChar.handle;
         }
         else {
