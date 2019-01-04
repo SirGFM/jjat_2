@@ -25,6 +25,8 @@
 #include <jjat2/static.h>
 #include <jjat2/ui.h>
 
+#include <string.h>
+
 /** Run the main loop until the game is closed */
 err mainloop() {
     err erv;
@@ -61,6 +63,19 @@ err mainloop() {
                 default: {}
             }
             ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
+
+            if (game.currentState == ST_MENUSTATE && game.nextState == ST_PLAYSTATE) {
+                int len = 0;
+
+                /* When (re)entering the playstate, set the inputs again */
+                if (game.curInputMap != 0)
+                    len = strlen(game.curInputMap);
+                if (len > 0)
+                    erv = initInputFromStr(game.curInputMap, len);
+                else
+                    erv = initInput();
+                ASSERT(erv == ERR_OK, erv);
+            }
 
             game.currentState = game.nextState;
             game.nextState = ST_NONE;

@@ -779,11 +779,6 @@ static err _loadLevel(char *levelName, int setPlayer) {
 
 /** Setup the playstate so it may start to be executed */
 err loadPlaystate() {
-    err erv;
-
-    erv = initInput();
-    ASSERT(erv == ERR_OK, erv);
-
     if (playstate.pNextLevel == 0) {
         /* Load the default first level */
         return _loadLevel(FIRST_MAP, 1/*setPlayer*/);
