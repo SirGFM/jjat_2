@@ -13,7 +13,7 @@
 # CONFIGURABLE VARIABLES
 #=======================================================================
 # Define the list of subdirectories (which exist within src/)
-  SUBDIRLIST := base jjat2 jjat2/enemies jjat2/events
+  SUBDIRLIST := base jjat2 jjat2/enemies jjat2/events jjat2/menus
 # Run make using bash, so syntax for conditionals works as expected
   SHELL := /bin/bash
 
@@ -45,6 +45,7 @@
          jjat2/playstate.o \
          jjat2/menustate.o \
          jjat2/menu_input.o \
+         jjat2/menus/mainmenu.o \
          jjat2/static.o \
          jjat2/swordy.o \
          jjat2/teleport.o \
