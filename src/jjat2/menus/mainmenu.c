@@ -76,6 +76,7 @@ static err mainmenuCallback(int vpos, int hpos) {
     case OPT_EXIT:
         rv = gfm_setQuitFlag(game.pCtx);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        break;
     }
 
     return ERR_OK;
@@ -91,6 +92,7 @@ err loadMainmenu(menuCtx *ctx) {
     ctx->hpos = (int*)subOptionsPosition;
 
     ctx->acceptCb = mainmenuCallback;
+    ctx->hposCb = 0;
 
     ctx->dir = 0;
     ctx->delay = 0;

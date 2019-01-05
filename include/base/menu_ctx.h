@@ -21,7 +21,10 @@
 struct stMenuCtx {
     /* == "public" ===================== */
     /** Function called when 'accept' is pressed */
-    err (*callback)(int vpos, int hpos);
+    err (*acceptCb)(int vpos, int hpos);
+    /** Function called when either left or right is processed */
+    err (*hposCb)(int vpos, int hpos);
+    /** Text object used to render **every** text in the menu */
     gfmText *pText;
     /** List of menu options (e.g., "NEW GAME", "EXIT") */
     char **vopts;

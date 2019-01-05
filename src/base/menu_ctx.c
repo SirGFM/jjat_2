@@ -49,6 +49,17 @@ static void updateCursorPosition(menuCtx *ctx) {
         ctx->hpos[vpos] = ctx->hoptsCount[vpos] - 1;
     else if (ctx->hpos[vpos] >= ctx->hoptsCount[vpos])
         ctx->hpos[vpos] = 0;
+
+    switch (ctx->dir) {
+    case md_left:
+    case md_right:
+        if (ctx->hposCb && ctx->hoptsCount[vpos] > 0)
+            (*ctx->hposCb)(vpos, ctx->hpos[vpos]);
+        break;
+    case md_up:
+    case md_down:
+        { /* Do nothing */ }
+    }
 }
 
 static void handleCursorMovement(menuCtx *ctx) {
@@ -90,7 +101,7 @@ err updateMenuCtx(menuCtx *ctx) {
 
         if (ctx->hoptsCount && ctx->hoptsCount[ctx->vpos] > 0)
             hpos = ctx->hpos[ctx->vpos];
-        return (*ctx->callback)(ctx->vpos, hpos);
+        return (*ctx->acceptCb)(ctx->vpos, hpos);
     }
 
     return ERR_OK;
