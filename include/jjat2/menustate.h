@@ -11,25 +11,13 @@
 #define __JJAT2_MENUSTATE_H__
 
 #include <base/error.h>
+#include <base/menu_ctx.h>
 #include <conf/state.h>
 #include <GFraMe/gfmSpriteset.h>
 #include <GFraMe/gfmText.h>
 
-struct stMenustateCtx {
-    gfmText *pText;
-    char **vopts;
-    char ***hopts;
-    int *hoptsCount;
-    int *hpos;
-    int dir;
-    int delay;
-    int vpos;
-    int vcount;
-};
-typedef struct stMenustateCtx menustateCtx;
-
 /** The game's menustate. Declared on src/jjat2/static.c. */
-extern menustateCtx menustate;
+extern menuCtx menustate;
 
 /** Initialize the menustate. */
 err initMenustate();

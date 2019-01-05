@@ -27,6 +27,7 @@
          base/input.o \
          base/loadstate.o \
          base/main.o \
+         base/menu_ctx.o \
          base/resource.o \
          base/sfx.o \
          base/setup.o \

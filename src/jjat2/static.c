@@ -40,7 +40,7 @@ gfmGroup *fx;
 teleportCtx teleport;
 
 /** The game's menustate */
-menustateCtx menustate;
+menuCtx menustate;
 
 /** Initialize the uninitialized 'local globals' (i.e., the ones defined for the
  * game itself, and not for the template)  with all-zeros. */
@@ -53,6 +53,6 @@ void zeroizeGameGlobalCtx() {
     memset(&lvltransition, 0x0, sizeof(leveltransitionCtx));
     memset(&ui, 0x0, sizeof(uiCtx));
     memset(&checkpoint, 0x0, sizeof(checkpointCtx));
-    memset(&menustate, 0x0, sizeof(menustateCtx));
+    memset(&menustate, 0x0, sizeof(menuCtx));
 }
 
