@@ -5,5 +5,6 @@
 #include <base/menu_ctx.h>
 
 err loadMainmenu(menuCtx *ctx);
+err loadOptions(menuCtx *ctx);
 
 #endif /* __JJAT2_MENUS_H__ */

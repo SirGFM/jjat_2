@@ -46,6 +46,7 @@
          jjat2/menustate.o \
          jjat2/menu_input.o \
          jjat2/menus/mainmenu.o \
+         jjat2/menus/options.o \
          jjat2/static.o \
          jjat2/swordy.o \
          jjat2/teleport.o \

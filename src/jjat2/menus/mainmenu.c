@@ -3,6 +3,7 @@
 #include <base/menu_ctx.h>
 #include <jjat2/util.h>
 #include <jjat2/menus.h>
+#include <jjat2/menustate.h>
 #include <string.h>
 
 enum enOptions {
@@ -72,6 +73,9 @@ static err mainmenuCallback(int vpos, int hpos) {
             break;
         }
         ASSERT(erv == ERR_OK, erv);
+        break;
+    case OPT_OPTIONS:
+        return loadOptions(&menustate);
         break;
     case OPT_EXIT:
         rv = gfm_setQuitFlag(game.pCtx);
