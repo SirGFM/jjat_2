@@ -12,13 +12,17 @@
 #include <string.h>
 
 enum enOptions {
-    OPT_NEWGAME = 0
+    OPT_GAMEMODE = 0
+  , OPT_NEWGAME
+  , OPT_OPTIONS
   , OPT_EXIT
   , OPT_COUNT
 };
 
 static const char *options[] = {
     [OPT_NEWGAME] "NEW GAME"
+  , [OPT_GAMEMODE] = "GAME MODE"
+  , [OPT_OPTIONS] = "OPTIONS"
   , [OPT_EXIT] "EXIT"
 };
 
@@ -35,12 +39,16 @@ static const char *newGameSub[] = {
 };
 
 static const char **subOptions[] = {
-    [OPT_NEWGAME] (const char**)newGameSub
+    [OPT_GAMEMODE] (const char**)newGameSub
+  , [OPT_NEWGAME] 0
+  , [OPT_OPTIONS] 0
   , [OPT_EXIT] 0
 };
 
 static const int subOptionsCount[] = {
-    [OPT_NEWGAME] getOptsSize(newGameSub)
+    [OPT_GAMEMODE] getOptsSize(newGameSub)
+  , [OPT_NEWGAME] 0
+  , [OPT_OPTIONS] 0
   , [OPT_EXIT] 0
 };
 
@@ -70,11 +78,12 @@ void freeMenustate() {
 static err menustateCallback(int vpos, int hpos) {
     gfmRV rv;
     err erv;
+    int gamemode = subOptionsPosition[OPT_GAMEMODE];
 
     switch (vpos) {
     case OPT_NEWGAME:
         game.nextState = ST_PLAYSTATE;
-        switch (hpos) {
+        switch (gamemode) {
         case NGOPT_1P2C:
             game.flags |= AC_BOTH;
             erv = staticSetInputStr("SL:6005200b01;SR:6105300d;SJ:5a00214;SA:5b00c;GL:64047;GR:65048;GJ:5d049;GA:5e04a;P:68042;SW:6904344;");
