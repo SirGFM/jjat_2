@@ -117,7 +117,7 @@ static err drawTextAt(menuCtx *ctx, char *text, int len, int x, int y
     else
         tile = ctx->inactiveOffset;
 
-    rv = gfmText_setPosition(ctx->pText, x * 8, y * 8);
+    rv = gfmText_setPosition(ctx->pText, x, y);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     rv = gfmText_setSpriteset(ctx->pText, gfx.pSset8x8, tile);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
@@ -136,14 +136,14 @@ static err drawText(menuCtx *ctx, char *text, int len, int y, int active) {
 
     x = (V_WIDTH / 8 - len) / 2;
 
-    return drawTextAt(ctx, text, len, x, y, active);
+    return drawTextAt(ctx, text, len, x * 8, y * 12, active);
 }
 
 err drawMenuCtx(menuCtx *ctx) {
     err erv;
     int i, y;
 
-    y = V_HEIGHT / 8 - ctx->vcount - 2;
+    y = V_HEIGHT / 12 - ctx->vcount - 2;
     /* Add another row for each horizontal option */
     for (i = 0; i < ctx->vcount; i++)
         if (ctx->hoptsCount[i] != 0)
@@ -170,11 +170,14 @@ err drawMenuCtx(menuCtx *ctx) {
                 y++;
             for (j = 0; j < ctx->hoptsCount[i]; j++) {
                 char *text = ctx->hopts[i][j];
+                int pos = (y + i) * 12;
 
                 active = ((hasMainOpt || i == ctx->vpos) && j == ctx->hpos[i]);
                 len = strlen(text);
 
-                erv = drawTextAt(ctx, text, len, x, y + i, active);
+                if (hasMainOpt)
+                    pos -= 2;
+                erv = drawTextAt(ctx, text, len, x*8, pos, active);
                 ASSERT(erv == ERR_OK, erv);
                 x += len + 1;
             }
