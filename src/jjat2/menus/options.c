@@ -1,6 +1,7 @@
 #include <base/error.h>
 #include <base/menu_ctx.h>
 #include <jjat2/menus.h>
+#include <jjat2/menustate.h>
 #include <string.h>
 
 enum enOptions {
@@ -8,8 +9,7 @@ enum enOptions {
   , OPT_DRAWRATE
   , OPT_SONG
   , OPT_SFX
-  , OPT_SAVE
-  , OPT_CANCEL
+  , OPT_BACK
   , OPT_COUNT
 };
 
@@ -18,8 +18,7 @@ static const char *options[] = {
   , [OPT_DRAWRATE] "DRAW RATE (RENDER FPS)"
   , [OPT_SONG] "MUSIC"
   , [OPT_SFX] "SFX"
-  , [OPT_SAVE] "SAVE"
-  , [OPT_CANCEL] "CANCEL"
+  , [OPT_BACK] ""
 };
 
 static const char *fps[] = {
@@ -38,13 +37,22 @@ static const char *volumes[] = {
   , "100%"
 };
 
+enum enBack {
+    OPT_SAVE = 0
+  , OPT_REVERT
+};
+
+static const char *back[] = {
+    [OPT_SAVE] "SAVE & APPLY"
+  , [OPT_REVERT] "REVERT & BACK"
+};
+
 static const char **subOptions[] = {
     [OPT_FPS] fps
   , [OPT_DRAWRATE] fps
   , [OPT_SONG] volumes
   , [OPT_SFX] volumes
-  , [OPT_SAVE] 0
-  , [OPT_CANCEL] 0
+  , [OPT_BACK] back
 };
 
 static const int subOptionsCount[] = {
@@ -52,8 +60,7 @@ static const int subOptionsCount[] = {
   , [OPT_DRAWRATE] getOptsSize(fps)
   , [OPT_SONG] getOptsSize(volumes)
   , [OPT_SFX] getOptsSize(volumes)
-  , [OPT_SAVE] 0
-  , [OPT_CANCEL] 0
+  , [OPT_BACK] getOptsSize(back)
 };
 
 static int subOptionsPosition[OPT_COUNT];
@@ -63,6 +70,18 @@ static err moveCallback(int vpos, int hpos) {
 }
 
 static err optionsCallback(int vpos, int hpos) {
+    if (vpos == OPT_BACK) {
+        /* TODO Save (or revert) the options */
+        switch (hpos) {
+        case OPT_SAVE:
+            break;
+        case OPT_REVERT:
+            break;
+        }
+
+        return loadMainmenu(&menustate);
+    }
+
     return ERR_OK;
 }
 
