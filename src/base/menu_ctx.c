@@ -153,20 +153,25 @@ err drawMenuCtx(menuCtx *ctx) {
         int active = (i == ctx->vpos);
         int len = strlen(ctx->vopts[i]);
 
-        erv = drawText(ctx, ctx->vopts[i], len, y + i, active);
-        ASSERT(erv == ERR_OK, erv);
+        if (len > 0) {
+            erv = drawText(ctx, ctx->vopts[i], len, y + i, active);
+            ASSERT(erv == ERR_OK, erv);
+        }
         if (ctx->hoptsCount[i] != 0) {
-            int j, x;
+            int hasMainOpt, j, x;
 
             for (j = 0, x = -1; j < ctx->hoptsCount[i]; j++)
                 x += strlen(ctx->hopts[i][j]) + 1;
             x = (V_WIDTH / 8 - x) / 2;
 
-            y++;
+            /* Skip adding an empty line if there's no main option */
+            hasMainOpt = (len > 0);
+            if (hasMainOpt)
+                y++;
             for (j = 0; j < ctx->hoptsCount[i]; j++) {
                 char *text = ctx->hopts[i][j];
 
-                active = (j == ctx->hpos[i]);
+                active = ((hasMainOpt || i == ctx->vpos) && j == ctx->hpos[i]);
                 len = strlen(text);
 
                 erv = drawTextAt(ctx, text, len, x, y + i, active);
