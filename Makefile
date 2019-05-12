@@ -155,7 +155,7 @@
 .SUFFIXES:
 
 # Define all targets that doesn't match its generated file
-.PHONY: all clean mkdirs __clean deploy
+.PHONY: all clean mkdirs deploy
 #=======================================================================
 
 
@@ -171,15 +171,15 @@
 all: bin/$(OS)_$(MODE)/$(TARGET)
 
 # Rule for building/linking the game
-bin/$(OS)_release/$(TARGET): $(OBJLIST) $(ICON)
+bin/$(OS)_release/$(TARGET): $(OBJLIST) $(ICON) | bin/$(OS)_$(MODE)/$(TARGET).mkdir
 	@ echo '[ CC] Release target: $@'
 	@ $(CC) $(CFLAGS)    -O3 -o $@ $(OBJLIST) $(ICON) $(LDFLAGS)
 
-bin/$(OS)_debug/$(TARGET): $(OBJLIST) $(ICON) $(ASSETS_SYMLINK)
+bin/$(OS)_debug/$(TARGET): $(OBJLIST) $(ICON) $(ASSETS_SYMLINK) | bin/$(OS)_$(MODE)/$(TARGET).mkdir
 	@ echo '[ CC] Debug target: $@'
 	@ $(CC) $(CFLAGS) -g -O0 -o $@ $(OBJLIST) $(ICON) $(LDFLAGS)
 
-bin/Linux_debug/assets:
+bin/Linux_debug/assets: | bin/$(OS)_$(MODE)/$(TARGET).mkdir
 	@ echo '[LNK] Creating symbolic link for assets...'
 	@ cd bin/Linux_debug/; ln -s ../../assets/ .
 
@@ -193,6 +193,15 @@ obj/$(OS)_debug/%.o: %.c
 
 # Include every rule from a depency (properly tracks header dependency)
 -include $(OBJLIST:%.o=%.d)
+
+# Make sure every required directory exists
+ifneq ($(MAKECMDGOALS), clean)
+-include $(OBJLIST:%.o=%.mkdir)
+endif
+%.mkdir:
+	@ echo '[MKD] $(@D)'
+	@ mkdir -p $(@D)
+	@ touch $@
 
 misc/auto/collisioncases.c: misc/collision.json
 	@ echo '[OFF] Generating collision switch-case'
@@ -210,13 +219,11 @@ obj/$(OS)_$(MODE)/%.d: %.c
 $(WINICON): assets/icon.rc
 	$(WINDRES) assets/icon.rc $(WINICON)
 
-clean: __clean mkdirs
-
 mkdirs:
 	@ echo "Creating output directories..."
 	@ mkdir -p $(DIRLIST)
 
-__clean:
+clean:
 	@ echo "Cleaning..."
 	@ rm -rf $(DIRLIST) bin/ obj/
 
