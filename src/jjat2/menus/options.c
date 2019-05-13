@@ -1,4 +1,5 @@
 #include <base/error.h>
+#include <base/game.h>
 #include <base/menu_ctx.h>
 #include <jjat2/menus.h>
 #include <jjat2/menustate.h>
@@ -21,12 +22,21 @@ static const char *options[] = {
   , [OPT_BACK] ""
 };
 
+#define FPS_OPTIONS \
+    X(30) \
+    X(50) \
+    X(60) \
+    X(90) \
+    X(120)
+static int fpsValue[] = {
+#define X(x) x,
+    FPS_OPTIONS
+#undef X
+};
 static const char *fps[] = {
-    "30"
-  , "50"
-  , "60"
-  , "90"
-  , "120"
+#define X(x) #x,
+    FPS_OPTIONS
+#undef X
 };
 
 static const char *volumes[] = {
@@ -65,8 +75,67 @@ static const int subOptionsCount[] = {
 
 static int subOptionsPosition[OPT_COUNT];
 
-static err moveCallback(int vpos, int hpos) {
+static err applyFps() {
+    gfmRV rv;
+    int max;
+    int fps = fpsValue[subOptionsPosition[OPT_FPS]];
+    int dps = fpsValue[subOptionsPosition[OPT_DRAWRATE]];
+
+    max = (fps > dps) ? fps : dps;
+
+    rv = gfm_setFPS(game.pCtx, max);
+    if (rv == GFMRV_FPS_TOO_HIGH) {
+        rv = gfm_setRawFPS(game.pCtx, max);
+    }
+    ASSERT(rv == GFMRV_OK, ERR_FPSTOOHIGH);
+
+    rv = gfm_setStateFrameRate(game.pCtx, fps, dps);
+    ASSERT(rv == GFMRV_OK, ERR_SETFPS);
+
+    rv = gfm_resetFPS(game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_SETFPS);
+
     return ERR_OK;
+}
+
+/**
+ * Apply some options.
+ *
+ * @param [ in]idx The first index to be applied.
+ * @param [ in]count How many values should be applied.
+ */
+static err applyOptions(int idx, int count) {
+    err erv;
+
+    if (idx == OPT_COUNT || idx + count > OPT_COUNT)
+        return ERR_TOOMANYOPTIONS;
+
+    for (; count > 0; count--) {
+        const int i = idx + count - 1;
+        const int val = subOptionsPosition[i];
+        switch (i) {
+        case OPT_FPS:
+        case OPT_DRAWRATE:
+            erv = applyFps();
+            ASSERT(erv == ERR_OK, erv);
+            break;
+        case OPT_SONG:
+            break;
+        case OPT_SFX:
+            break;
+        case OPT_BACK:
+            /* Do nothing */
+            break;
+        default:
+            return ERR_INVALIDOPTION;
+        }
+    }
+
+    return ERR_OK;
+}
+
+static err moveCallback(int vpos, int hpos) {
+    return applyOptions(vpos, 1 /* count */);
 }
 
 static err optionsCallback(int vpos, int hpos) {
