@@ -74,6 +74,7 @@ static const int subOptionsCount[] = {
 };
 
 static int subOptionsPosition[OPT_COUNT];
+static int subOptionsBackup[OPT_COUNT];
 
 static err applyFps() {
     gfmRV rv;
@@ -140,13 +141,20 @@ static err moveCallback(int vpos, int hpos) {
 
 static err optionsCallback(int vpos, int hpos) {
     if (vpos == OPT_BACK) {
-        /* TODO Save (or revert) the options */
+        err erv;
+
         switch (hpos) {
         case OPT_SAVE:
+            /* TODO Save the options */
+            erv = ERR_OK;
             break;
         case OPT_REVERT:
+            memcpy(subOptionsPosition, subOptionsBackup,
+                    sizeof(subOptionsPosition));
+            erv = applyOptions(0 /* idx */, OPT_COUNT);
             break;
         }
+        ASSERT(erv == ERR_OK, erv);
 
         return loadMainmenu(&menustate);
     }
@@ -163,6 +171,8 @@ err loadOptions(menuCtx *ctx) {
     /* TODO Load position from file */
     memset(subOptionsPosition, 0x0, sizeof(subOptionsPosition));
     ctx->hpos = (int*)subOptionsPosition;
+    /* Make a backup of the options so we may revert it on exit */
+    memcpy(subOptionsBackup, subOptionsPosition, sizeof(subOptionsPosition));
 
     ctx->acceptCb = optionsCallback;
     ctx->hposCb = moveCallback;
