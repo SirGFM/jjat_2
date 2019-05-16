@@ -11,6 +11,9 @@
 #include <conf/sfx_list.h>
 #include <GFraMe/gframe.h>
 
+/** How loud the song is. */
+static double _songVolume = 1.0;
+
 enum enSfxCount {
 #define X(name, ...) \
     SFX_HND_ ## name ,
@@ -55,6 +58,29 @@ int getSoundCount() {
     return SNG_MAX;
 }
 
+volume getSongVolume() {
+    return (volume)(_songVolume * 4);
+}
+
+err setSongVolume(volume v) {
+    gfmRV rv = GFMRV_OK;
+    int wasPaused = (_songVolume == 0.0);
+
+    _songVolume = v * 0.25;
+
+    if (_songVolume > 0 && sfx.pSong) {
+        rv = gfm_setAudioVolume(game.pCtx, sfx.pSong, _songVolume);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        if (wasPaused)
+            rv = gfm_resumeAudioHandle(game.pCtx, sfx.pSong);
+    }
+    else if (_songVolume == 0.0 && sfx.pSong)
+        rv = gfm_pauseAudioHandle(game.pCtx, sfx.pSong);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    return ERR_OK;
+}
+
 /**
  * Actually start playing a song. If the song is already playing, do nothing.
  *
@@ -79,7 +105,13 @@ static err _playSong(int idx) {
     }
 
     hnd = getSongHandle(sfx.curSong);
-    rv = gfm_playAudio(&sfx.pSong, game.pCtx, hnd, 1.0);
+    if (_songVolume == 0.0) {
+        rv = gfm_playAudio(&sfx.pSong, game.pCtx, hnd, 0.01);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        rv = gfm_pauseAudioHandle(game.pCtx, sfx.pSong);
+    }
+    else
+        rv = gfm_playAudio(&sfx.pSong, game.pCtx, hnd, _songVolume);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     return ERR_OK;

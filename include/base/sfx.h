@@ -10,6 +10,15 @@
 #include <conf/sfx_list.h>
 #include <GFraMe/core/gfmAudio_bkend.h>
 
+enum enVolume {
+    SFX_VOL_0
+  , SFX_VOL_25
+  , SFX_VOL_50
+  , SFX_VOL_75
+  , SFX_VOL_100
+};
+typedef enum enVolume volume;
+
 struct stSfxCtx {
     /* Handle to the currently playing song (so it may be stopped) */
     gfmAudioHandle *pSong;
@@ -41,6 +50,16 @@ int getSfxCount();
  * Get how many songs the game has.
  */
 int getSoundCount();
+
+/** Get the current volume for the song. */
+volume getSongVolume();
+
+/**
+ * Set the volume for the song.
+ *
+ * @param [ in]v The volume
+ */
+err setSongVolume(volume v);
 
 /**
  * Check if a song is currently loaded and, if not, start loading it.
