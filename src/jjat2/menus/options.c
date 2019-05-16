@@ -1,6 +1,7 @@
 #include <base/error.h>
 #include <base/game.h>
 #include <base/menu_ctx.h>
+#include <base/sfx.h>
 #include <jjat2/menus.h>
 #include <jjat2/menustate.h>
 #include <string.h>
@@ -121,6 +122,8 @@ static err applyOptions(int idx, int count) {
             ASSERT(erv == ERR_OK, erv);
             break;
         case OPT_SONG:
+            erv = setSongVolume((volume)val);
+            ASSERT(erv == ERR_OK, erv);
             break;
         case OPT_SFX:
             break;
