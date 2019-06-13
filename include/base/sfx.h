@@ -61,6 +61,16 @@ volume getSongVolume();
  */
 err setSongVolume(volume v);
 
+/** Get the current volume for sound effects. */
+volume getSfxVolume();
+
+/**
+ * Set the volume for sound effects.
+ *
+ * @param [ in]v The volume
+ */
+err setSfxVolume(volume v);
+
 /**
  * Check if a song is currently loaded and, if not, start loading it.
  *

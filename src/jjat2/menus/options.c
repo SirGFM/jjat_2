@@ -126,6 +126,8 @@ static err applyOptions(int idx, int count) {
             ASSERT(erv == ERR_OK, erv);
             break;
         case OPT_SFX:
+            erv = setSfxVolume((volume)val);
+            ASSERT(erv == ERR_OK, erv);
             break;
         case OPT_BACK:
             /* Do nothing */

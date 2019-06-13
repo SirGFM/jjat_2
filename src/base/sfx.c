@@ -13,6 +13,8 @@
 
 /** How loud the song is. */
 static double _songVolume = 1.0;
+/** How loud the sound effects are. */
+static double _sfxVolume = 1.0;
 
 enum enSfxCount {
 #define X(name, ...) \
@@ -58,15 +60,23 @@ int getSoundCount() {
     return SNG_MAX;
 }
 
+static inline volume _getVolume(double _volume) {
+    return (volume)(_volume * 4);
+}
+
+static inline void _setVolume(double *_volume, volume v) {
+    *_volume = v * 0.25;
+}
+
 volume getSongVolume() {
-    return (volume)(_songVolume * 4);
+    return _getVolume(_songVolume);
 }
 
 err setSongVolume(volume v) {
     gfmRV rv = GFMRV_OK;
     int wasPaused = (_songVolume == 0.0);
 
-    _songVolume = v * 0.25;
+    _setVolume(&_songVolume, v);
 
     if (_songVolume > 0 && sfx.pSong) {
         rv = gfm_setAudioVolume(game.pCtx, sfx.pSong, _songVolume);
@@ -78,6 +88,15 @@ err setSongVolume(volume v) {
         rv = gfm_pauseAudioHandle(game.pCtx, sfx.pSong);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
+    return ERR_OK;
+}
+
+volume getSfxVolume() {
+    return _getVolume(_sfxVolume);
+}
+
+err setSfxVolume(volume v) {
+    _setVolume(&_sfxVolume, v);
     return ERR_OK;
 }
 
