@@ -281,15 +281,15 @@ err getDynSongIndex(int *pIdx, char *pName) {
  */
 err initResource() {
     gfmRV rv;
-    int i = 0;
+    int j, i = 0;
 
     /* Setup _pResHnd from sfx.* and from _songHandleList */
 #define X(name, ...) _pResHnd[i++] = &sfx.name,
     SOUNDS_LIST
 #undef X
-    for (i = 0; i < SNG_MAX; i++) {
-        _pResHnd[i] = _songHandleList + i;
-        _songHandleList[i] = -1;
+    for (j = 0; j < SNG_MAX; j++) {
+        _pResHnd[i + j] = _songHandleList + j;
+        _songHandleList[j] = -1;
     }
     for (i = 0; i < SFX_MAX + SNG_MAX; i++) {
         _pResType[i] = ASSET_AUDIO;
