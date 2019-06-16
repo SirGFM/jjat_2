@@ -107,6 +107,9 @@ err updateMenuCtx(menuCtx *ctx) {
     return ERR_OK;
 }
 
+#define drawStrAt(ctx, str, x, y, active) \
+    drawTextAt(ctx, str, sizeof(str) - 1, x, y, active)
+
 static err drawTextAt(menuCtx *ctx, char *text, int len, int x, int y
         , int active) {
     int tile;
@@ -139,6 +142,23 @@ static err drawText(menuCtx *ctx, char *text, int len, int y, int active) {
     return drawTextAt(ctx, text, len, x * 8, y * 12, active);
 }
 
+static err drawSuboptions(menuCtx *ctx, char **opts, int count, int x, int y
+        , int activeIdx, int yOffset) {
+    int i;
+    err erv;
+
+    for (i = 0; i < count; i++) {
+        int len = strlen(opts[i]);
+        int active = (i == activeIdx);
+
+        erv = drawTextAt(ctx, opts[i], len, x * 8, y * 12 + yOffset, active);
+        ASSERT(erv == ERR_OK, erv);
+        x += len + 1;
+    }
+
+    return ERR_OK;
+}
+
 err drawMenuCtx(menuCtx *ctx) {
     err erv;
     int i, y;
@@ -159,27 +179,74 @@ err drawMenuCtx(menuCtx *ctx) {
         }
         if (ctx->hoptsCount[i] != 0) {
             int hasMainOpt, j, x;
+            int activeIdx = -1;
+            int yOffset = 0;
 
             for (j = 0, x = -1; j < ctx->hoptsCount[i]; j++)
                 x += strlen(ctx->hopts[i][j]) + 1;
-            x = (V_WIDTH / 8 - x) / 2;
-
             /* Skip adding an empty line if there's no main option */
             hasMainOpt = (len > 0);
-            if (hasMainOpt)
+            if (hasMainOpt) {
                 y++;
-            for (j = 0; j < ctx->hoptsCount[i]; j++) {
-                char *text = ctx->hopts[i][j];
-                int pos = (y + i) * 12;
+                yOffset = -2;
+            }
 
-                active = ((hasMainOpt || i == ctx->vpos) && j == ctx->hpos[i]);
-                len = strlen(text);
+            if (x < V_WIDTH / 8) {
+                x = (V_WIDTH / 8 - x) / 2;
+                if (hasMainOpt || i == ctx->vpos)
+                    activeIdx = ctx->hpos[i];
 
-                if (hasMainOpt)
-                    pos -= 2;
-                erv = drawTextAt(ctx, text, len, x*8, pos, active);
+                erv =  drawSuboptions(ctx, ctx->hopts[i], ctx->hoptsCount[i], x
+                    , y + i, activeIdx, yOffset);
                 ASSERT(erv == ERR_OK, erv);
-                x += len + 1;
+            }
+            else {
+                int count;
+
+                /* If there are too many options (or if they are too long), only
+                 * draw a sub-set of the options and some '...' where needed.
+                 * This may lead to a few possibilities:
+                 *   - "cur/first next ..."
+                 *   - "first cur next ..."
+                 *   - "... prev cur next ..."
+                 *   - "... prev cur last"
+                 *   - "... prev last/cur"
+                 */
+                activeIdx = 1;
+                count = 1;
+                j = ctx->hpos[i];
+                len = strlen(ctx->hopts[i][j]);
+                if (j > 0) {
+                    len += strlen(ctx->hopts[i][j - 1]) + 1;
+                    count++;
+                }
+                else
+                    activeIdx = 0;
+                if (j < ctx->hoptsCount[i] - 1) {
+                    len += strlen(ctx->hopts[i][j + 1]) + 1;
+                    count++;
+                }
+                else if (ctx->hoptsCount[i] < 3)
+                    activeIdx = ctx->hoptsCount[i] - 1;
+
+                x = (V_WIDTH / 8 - len) / 2;
+
+                if (j > 1) {
+                    erv = drawStrAt(ctx, "...", (x - 4) * 8
+                            , (y + i) * 12 + yOffset, 0);
+                    ASSERT(erv == ERR_OK, erv);
+                }
+                if (j < ctx->hoptsCount[i] - 2) {
+                    erv = drawStrAt(ctx, "...", (x + len + 1) * 8
+                            , (y + i) * 12 + yOffset, 0);
+                    ASSERT(erv == ERR_OK, erv);
+                }
+
+                if (j > 0)
+                    j--;
+                erv =  drawSuboptions(ctx, ctx->hopts[i] + j, count, x, y + i
+                        , activeIdx, yOffset);
+                ASSERT(erv == ERR_OK, erv);
             }
         }
     }
