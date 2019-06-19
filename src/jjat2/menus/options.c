@@ -41,12 +41,12 @@
  *   + Back
  */
 
-#define GETOPTSSIZE(OPTS, ...) \
-    getOptsSize(OPTS)
+#define GETOPTSSIZE(VAL, NAME, SUBOPT) \
+    [VAL] = getOptsSize(SUBOPT),
 #define FIRST_ENUM(VAL, ...) \
-    VAL = 0
+    VAL = 0,
 #define OTHER_ENUMS(VAL, ...) \
-  , VAL
+    VAL,
 #define MACRO2DICT(VAL, NAME, ...) \
     [VAL] = NAME,
 #define OPT_NOOP(...)
@@ -55,13 +55,16 @@
 #define MACRO2VAL(VAL, NAME, ...) \
     VAL
 
-#define CREATE_OPTS(type, LIST) \
+#define CREATE_SUBOPTS(type, LIST) \
     enum type ## _enum { \
         LIST(FIRST_ENUM, FIRST_ENUM, OTHER_ENUMS, OTHER_ENUMS, OTHER_ENUMS) \
     }; \
     static const char *type[] = { \
         LIST(MACRO2DICT, MACRO2DICT, MACRO2DICT, MACRO2DICT, OPT_NOOP) \
-    }; \
+    }
+
+#define CREATE_OPTS(type, LIST) \
+    CREATE_SUBOPTS(type, LIST); \
     static const char ** type ## _subopts[] = { \
         LIST(MACRO2SUBOPT, OPT_NOOP, MACRO2SUBOPT, OPT_NOOP, OPT_NOOP) \
     }; \
@@ -78,6 +81,18 @@
     ctx->hoptsCount = (int*)type ## _count; \
     ctx->hpos = (int*)type ## _pos; \
     memcpy(type ## _bkup, type ## _pos, sizeof(type ## _bkup))
+
+#define __APPLY_OPTS(type, apply_enum, menu_enum, menu_count) \
+    do { \
+        if (type  ## _pos[apply_enum] == OPTS_APPLY) \
+            return applyOptions(menu_enum, 0, menu_count); \
+        else { \
+            memcpy(type ## _bkup, type ## _pos, sizeof(type ## _bkup)); \
+            return applyOptions(menu_enum, 0, menu_count); \
+        } \
+    } while (0)
+#define APPLY_OPTS(type, MENU) \
+    __APPLY_OPTS(type, OPT_ ## MENU ## _APPLY, MENU ## _OPTIONS, OPT_ ## MENU ## _COUNT)
 
 #define YESNO_SUBOPTS(X, Xsimple, Y, Ysimple, Z) \
     Xsimple(OPTS_YES, "YES") \
@@ -129,7 +144,7 @@
 
 #define GFX_OPTIONS(X, Xsimple, Y, Ysimple, Z) \
     X(OPT_GFX_WND_RES, "WINDOWED RESOLUTION", wndRes) \
-    Y(OPT_GFX_FULL_MODE, "FULLSCREEN MODE", 0) \
+    /* TODO Y(OPT_GFX_FULL_MODE, "FULLSCREEN MODE", 0) */ \
     Y(OPT_GFX_SET_FULLSCREEN, "", fullscreen) \
     Y(OPT_GFX_APPLY, "", apply) \
     Ysimple(OPT_GFX_ADVANCED, "ADVANCED") \
@@ -197,20 +212,20 @@ static const char *volumes[] = {
   , "100%"
 };
 
-CREATE_OPTS(yesNo, YESNO_SUBOPTS)
-CREATE_OPTS(apply, APPLY_SUBOPTS)
-CREATE_OPTS(wndRes, WNDRES_SUBOPTS)
-CREATE_OPTS(fullscreen, FULLSCREEN_SUBOPTS)
-CREATE_OPTS(gfxBackend, BACKEND_SUBOPTS)
-CREATE_OPTS(sfxQuality, SFXQUALITY_SUBOPTS)
-CREATE_OPTS(sfxLoading, SFXLOADING_SUBOPTS)
-CREATE_OPTS(options, MAIN_OPTIONS)
-CREATE_OPTS(gfx, GFX_OPTIONS)
-CREATE_OPTS(advGfx, ADVGFX_OPTIONS)
-CREATE_OPTS(sfx, SFX_OPTIONS)
-CREATE_OPTS(advSfx, ADVSFX_OPTIONS)
-CREATE_OPTS(game, GAME_OPTIONS)
-CREATE_OPTS(advGame, ADVGAME_OPTIONS)
+CREATE_SUBOPTS(yesNo, YESNO_SUBOPTS);
+CREATE_SUBOPTS(apply, APPLY_SUBOPTS);
+CREATE_SUBOPTS(wndRes, WNDRES_SUBOPTS);
+CREATE_SUBOPTS(fullscreen, FULLSCREEN_SUBOPTS);
+CREATE_SUBOPTS(gfxBackend, BACKEND_SUBOPTS);
+CREATE_SUBOPTS(sfxQuality, SFXQUALITY_SUBOPTS);
+CREATE_SUBOPTS(sfxLoading, SFXLOADING_SUBOPTS);
+CREATE_OPTS(optionsMenu, MAIN_OPTIONS);
+CREATE_OPTS(gfxMenu, GFX_OPTIONS);
+CREATE_OPTS(advGfxMenu, ADVGFX_OPTIONS);
+CREATE_OPTS(sfxMenu, SFX_OPTIONS);
+CREATE_OPTS(advSfxMenu, ADVSFX_OPTIONS);
+CREATE_OPTS(gameMenu, GAME_OPTIONS);
+CREATE_OPTS(advGameMenu, ADVGAME_OPTIONS);
 
 enum enCurMenu {
     MAIN_OPTIONS = 0
@@ -226,25 +241,25 @@ static enum enCurMenu curMenu;
 static err load(menuCtx *ctx, enum enCurMenu curMenu) {
     switch (curMenu) {
     case MAIN_OPTIONS:
-        LOAD_OPTS(options);
+        LOAD_OPTS(optionsMenu);
         break;
     case GFX_OPTIONS:
-        LOAD_OPTS(gfx);
+        LOAD_OPTS(gfxMenu);
         break;
     case ADVGFX_OPTIONS:
-        LOAD_OPTS(advGfx);
+        LOAD_OPTS(advGfxMenu);
         break;
     case SFX_OPTIONS:
-        LOAD_OPTS(sfx);
+        LOAD_OPTS(sfxMenu);
         break;
     case ADVSFX_OPTIONS:
-        LOAD_OPTS(advSfx);
+        LOAD_OPTS(advSfxMenu);
         break;
     case GAME_OPTIONS:
-        LOAD_OPTS(game);
+        LOAD_OPTS(gameMenu);
         break;
     case ADVGAME_OPTIONS:
-        LOAD_OPTS(advGame);
+        LOAD_OPTS(advGameMenu);
         break;
     default:
         return ERR_UNHANDLED_MENU;
@@ -286,8 +301,8 @@ static err back() {
 static err applyFps() {
     gfmRV rv;
     int max;
-    int fps = fpsValue[advGame_subopts[OPT_ADVGAME_FPS]];
-    int dps = fpsValue[advGame_subopts[OPT_ADVGAME_DRAWRATE]];
+    int fps = fpsValue[advGameMenu_pos[OPT_ADVGAME_FPS]];
+    int dps = fpsValue[advGameMenu_pos[OPT_ADVGAME_DRAWRATE]];
 
     max = (fps > dps) ? fps : dps;
 
@@ -351,7 +366,7 @@ static err applyOptions(enum enCurMenu menu, int idx, int count) {
         const int i = idx + count - 1;
         switch (menu) {
         case GFX_OPTIONS: {
-            const int val = gfx_pos[i];
+            const int val = gfxMenu_pos[i];
             switch (i) {
             case OPT_GFX_WND_RES:
             case OPT_GFX_FULL_MODE:
@@ -360,7 +375,7 @@ static err applyOptions(enum enCurMenu menu, int idx, int count) {
             }
         } break;
         case ADVGFX_OPTIONS: {
-            const int val = advgfx_pos[i];
+            const int val = advGfxMenu_pos[i];
             switch (i) {
             case OPT_ADVGFX_BACKEND:
             case OPT_ADVGFX_VSYNC:
@@ -369,15 +384,19 @@ static err applyOptions(enum enCurMenu menu, int idx, int count) {
             }
         } break;
         case SFX_OPTIONS: {
-            const int val = sfx_pos[i];
+            const int val = sfxMenu_pos[i];
             switch (i) {
             case OPT_SFX_MUSIC:
+                erv = setSongVolume((volume)val);
+                break;
             case OPT_SFX_SOUND_FX:
+                erv = setSfxVolume((volume)val);
+                break;
             default: {}
             }
         } break;
         case ADVSFX_OPTIONS: {
-            const int val = advsfx_pos[i];
+            const int val = advSfxMenu_pos[i];
             switch (i) {
             case OPT_ADVSFX_QUALITY:
             case OPT_ADVSFX_LOADING:
@@ -385,7 +404,7 @@ static err applyOptions(enum enCurMenu menu, int idx, int count) {
             }
         } break;
         case GAME_OPTIONS: {
-            const int val = game_pos[i];
+            const int val = gameMenu_pos[i];
             switch (i) {
             case OPT_GAME_ASYNC:
             case OPT_GAME_TIMER:
@@ -393,17 +412,21 @@ static err applyOptions(enum enCurMenu menu, int idx, int count) {
             }
         } break;
         case ADVGAME_OPTIONS: {
-            const int val = advgame_pos[i];
+            const int val = advGameMenu_pos[i];
             switch (i) {
             case OPT_ADVGAME_FPS:
             case OPT_ADVGAME_DRAWRATE:
+                erv = applyFps();
+                break;
             case OPT_ADVGAME_DEBUG:
             default: {}
             }
         } break;
         default: { /* XXX: Already handled, but ignores warnings. */ }
-        }
-    }
+        } /* switch (menu) */
+
+        ASSERT(erv == ERR_OK, erv);
+    } /* for (; count > 0; count--) */
 }
 
 static err moveCallback(int vpos, int hpos) {
@@ -447,8 +470,7 @@ static err acceptCallback(int vpos, int hpos) {
     case GFX_OPTIONS:
         switch (vpos) {
         case OPT_GFX_APPLY:
-            /* TODO check if apply or revert. */
-            return applyOptions(GFX_OPTIONS, 0, OPT_GFX_COUNT);
+            APPLY_OPTS(gfxMenu, GFX);
         case OPT_GFX_ADVANCED:
             return load(&menustate, ADVGFX_OPTIONS);
         case OPT_GFX_BACK:
@@ -458,8 +480,7 @@ static err acceptCallback(int vpos, int hpos) {
     case ADVGFX_OPTIONS:
         switch (vpos) {
         case OPT_ADVGFX_APPLY:
-            /* TODO check if apply or revert. */
-            return applyOptions(ADVGFX_OPTIONS, 0, OPT_ADVGFX_COUNT);
+            APPLY_OPTS(advGfxMenu, ADVGFX);
         case OPT_ADVGFX_BACK:
             return back();
         }
@@ -475,8 +496,7 @@ static err acceptCallback(int vpos, int hpos) {
     case ADVSFX_OPTIONS:
         switch (vpos) {
         case OPT_ADVSFX_APPLY:
-            /* TODO check if apply or revert. */
-            return applyOptions(ADVSFX_OPTIONS, 0, OPT_ADVSFX_COUNT);
+            APPLY_OPTS(advSfxMenu, ADVSFX);
         case OPT_ADVSFX_BACK:
             return back();
         }
@@ -510,189 +530,3 @@ err loadOptions(menuCtx *ctx) {
 
     return load(ctx, MAIN_OPTIONS);
 }
-
-#if 0
-
-enum enOptions {
-    OPT_FPS = 0
-  , OPT_DRAWRATE
-  , OPT_SONG
-  , OPT_SFX
-  , OPT_BACK
-  , OPT_COUNT
-};
-
-static const char *options[] = {
-    [OPT_FPS] "UPDATE RATE (PHYSICS FPS)"
-  , [OPT_DRAWRATE] "DRAW RATE (RENDER FPS)"
-  , [OPT_SONG] "MUSIC"
-  , [OPT_SFX] "SFX"
-  , [OPT_BACK] ""
-};
-
-#define FPS_OPTIONS \
-    X(30) \
-    X(50) \
-    X(60) \
-    X(90) \
-    X(120)
-static int fpsValue[] = {
-#define X(x) x,
-    FPS_OPTIONS
-#undef X
-};
-static const char *fps[] = {
-#define X(x) #x,
-    FPS_OPTIONS
-#undef X
-};
-
-static const char *volumes[] = {
-    "0%"
-  , "25%"
-  , "50%"
-  , "75%"
-  , "100%"
-};
-
-enum enBack {
-    OPT_SAVE = 0
-  , OPT_REVERT
-};
-
-static const char *back[] = {
-    [OPT_SAVE] "SAVE & APPLY"
-  , [OPT_REVERT] "REVERT & BACK"
-};
-
-static const char **subOptions[] = {
-    [OPT_FPS] fps
-  , [OPT_DRAWRATE] fps
-  , [OPT_SONG] volumes
-  , [OPT_SFX] volumes
-  , [OPT_BACK] back
-};
-
-static const int subOptionsCount[] = {
-    [OPT_FPS] getOptsSize(fps)
-  , [OPT_DRAWRATE] getOptsSize(fps)
-  , [OPT_SONG] getOptsSize(volumes)
-  , [OPT_SFX] getOptsSize(volumes)
-  , [OPT_BACK] getOptsSize(back)
-};
-
-static int subOptionsPosition[OPT_COUNT];
-static int subOptionsBackup[OPT_COUNT];
-
-static err applyFps() {
-    gfmRV rv;
-    int max;
-    int fps = fpsValue[subOptionsPosition[OPT_FPS]];
-    int dps = fpsValue[subOptionsPosition[OPT_DRAWRATE]];
-
-    max = (fps > dps) ? fps : dps;
-
-    rv = gfm_setFPS(game.pCtx, max);
-    if (rv == GFMRV_FPS_TOO_HIGH) {
-        rv = gfm_setRawFPS(game.pCtx, max);
-    }
-    ASSERT(rv == GFMRV_OK, ERR_FPSTOOHIGH);
-
-    rv = gfm_setStateFrameRate(game.pCtx, fps, dps);
-    ASSERT(rv == GFMRV_OK, ERR_SETFPS);
-
-    rv = gfm_resetFPS(game.pCtx);
-    ASSERT(rv == GFMRV_OK, ERR_SETFPS);
-
-    return ERR_OK;
-}
-
-/**
- * Apply some options.
- *
- * @param [ in]idx The first index to be applied.
- * @param [ in]count How many values should be applied.
- */
-static err applyOptions(int idx, int count) {
-    err erv;
-
-    if (idx == OPT_COUNT || idx + count > OPT_COUNT)
-        return ERR_TOOMANYOPTIONS;
-
-    for (; count > 0; count--) {
-        const int i = idx + count - 1;
-        const int val = subOptionsPosition[i];
-        switch (i) {
-        case OPT_FPS:
-        case OPT_DRAWRATE:
-            erv = applyFps();
-            ASSERT(erv == ERR_OK, erv);
-            break;
-        case OPT_SONG:
-            erv = setSongVolume((volume)val);
-            ASSERT(erv == ERR_OK, erv);
-            break;
-        case OPT_SFX:
-            erv = setSfxVolume((volume)val);
-            ASSERT(erv == ERR_OK, erv);
-            break;
-        case OPT_BACK:
-            /* Do nothing */
-            break;
-        default:
-            return ERR_INVALIDOPTION;
-        }
-    }
-
-    return ERR_OK;
-}
-
-static err moveCallback(int vpos, int hpos) {
-    return applyOptions(vpos, 1 /* count */);
-}
-
-static err optionsCallback(int vpos, int hpos) {
-    if (vpos == OPT_BACK) {
-        err erv;
-
-        switch (hpos) {
-        case OPT_SAVE:
-            /* TODO Save the options */
-            erv = ERR_OK;
-            break;
-        case OPT_REVERT:
-            memcpy(subOptionsPosition, subOptionsBackup,
-                    sizeof(subOptionsPosition));
-            erv = applyOptions(0 /* idx */, OPT_COUNT);
-            break;
-        }
-        ASSERT(erv == ERR_OK, erv);
-
-        return loadMainmenu(&menustate);
-    }
-
-    return ERR_OK;
-}
-
-err loadOptions(menuCtx *ctx) {
-    ctx->vopts = (char**)options;
-    ctx->vcount = getOptsSize(options);
-
-    ctx->hopts = (char***)subOptions;
-    ctx->hoptsCount = (int*)subOptionsCount;
-    /* TODO Load position from file */
-    memset(subOptionsPosition, 0x0, sizeof(subOptionsPosition));
-    ctx->hpos = (int*)subOptionsPosition;
-    /* Make a backup of the options so we may revert it on exit */
-    memcpy(subOptionsBackup, subOptionsPosition, sizeof(subOptionsPosition));
-
-    ctx->acceptCb = optionsCallback;
-    ctx->hposCb = moveCallback;
-
-    ctx->dir = 0;
-    ctx->delay = 0;
-    ctx->vpos = 0;
-
-    return ERR_OK;
-}
-#endif
