@@ -169,7 +169,6 @@
     X(OPT_ADVGAME_FPS, "UPDATE RATE (PHYSICS FPS)", fps) \
     Y(OPT_ADVGAME_DRAWRATE, "DRAW RATE (RENDER FPS)", fps) \
     Y(OPT_ADVGAME_DEBUG, "DEBUG MODE", yesNo) \
-    Y(OPT_ADVGAME_APPLY, "", apply) \
     Ysimple(OPT_ADVGAME_BACK, "BACK") \
     Z(OPT_ADVGAME_COUNT, "")
 
@@ -224,34 +223,6 @@ enum enCurMenu {
 };
 static enum enCurMenu curMenu;
 
-static err back(enum enCurMenu &curMenu) {
-    switch (*curMenu) {
-    case MAIN_OPTIONS:
-        return loadMainmenu(&menustate);
-    case GFX_OPTIONS:
-        *curMenu = MAIN_OPTIONS;
-        break;
-    case ADVGFX_OPTIONS:
-        *curMenu = GFX_OPTIONS;
-        break;
-    case SFX_OPTIONS:
-        *curMenu = MAIN_OPTIONS;
-        break;
-    case ADVSFX_OPTIONS:
-        *curMenu = SFX_OPTIONS;
-        break;
-    case GAME_OPTIONS:
-        *curMenu = MAIN_OPTIONS;
-        break;
-    case ADVGAME_OPTIONS:
-        *curMenu = GAME_OPTIONS;
-        break;
-    default:
-        return ERR_UNHANDLED_MENU;
-    }
-    return ERR_OK;
-}
-
 static err load(menuCtx *ctx, enum enCurMenu curMenu) {
     switch (curMenu) {
     case MAIN_OPTIONS:
@@ -284,6 +255,34 @@ static err load(menuCtx *ctx, enum enCurMenu curMenu) {
     return ERR_OK;
 }
 
+static err back() {
+    switch (curMenu) {
+    case MAIN_OPTIONS:
+        return loadMainmenu(&menustate);
+    case GFX_OPTIONS:
+        curMenu = MAIN_OPTIONS;
+        break;
+    case ADVGFX_OPTIONS:
+        curMenu = GFX_OPTIONS;
+        break;
+    case SFX_OPTIONS:
+        curMenu = MAIN_OPTIONS;
+        break;
+    case ADVSFX_OPTIONS:
+        curMenu = SFX_OPTIONS;
+        break;
+    case GAME_OPTIONS:
+        curMenu = MAIN_OPTIONS;
+        break;
+    case ADVGAME_OPTIONS:
+        curMenu = GAME_OPTIONS;
+        break;
+    default:
+        return ERR_UNHANDLED_MENU;
+    }
+    return load(&menustate, curMenu);
+}
+
 static err applyFps() {
     gfmRV rv;
     int max;
@@ -305,6 +304,211 @@ static err applyFps() {
     ASSERT(rv == GFMRV_OK, ERR_SETFPS);
 
     return ERR_OK;
+}
+
+/**
+ * Apply some options for a given sub-menu.
+ *
+ * @param [ in]menu The menu to have its options applied.
+ * @param [ in]idx The first index to be applied.
+ * @param [ in]count How many values should be applied.
+ */
+static err applyOptions(enum enCurMenu menu, int idx, int count) {
+    err erv;
+    int menuMaxCount;
+
+    switch (menu) {
+    case MAIN_OPTIONS:
+        /* Nothing to be applied. */
+        return ERR_OK;
+    case GFX_OPTIONS:
+        menuMaxCount = OPT_GFX_COUNT;
+        break;
+    case ADVGFX_OPTIONS:
+        menuMaxCount = OPT_ADVGFX_COUNT;
+        break;
+    case SFX_OPTIONS:
+        menuMaxCount = OPT_SFX_COUNT;
+        break;
+    case ADVSFX_OPTIONS:
+        menuMaxCount = OPT_ADVSFX_COUNT;
+        break;
+    case GAME_OPTIONS:
+        menuMaxCount = OPT_GAME_COUNT;
+        break;
+    case ADVGAME_OPTIONS:
+        menuMaxCount = OPT_ADVGAME_COUNT;
+        break;
+    default:
+        return ERR_UNHANDLED_MENU;
+    }
+    if (idx == menuMaxCount || idx + count > menuMaxCount)
+        return ERR_TOOMANYOPTIONS;
+
+    /* XXX: Pay extra attention here, as some of the menus have options which
+     * must be ignored (e.g., "APPLY/REVERT"). */
+    for (; count > 0; count--) {
+        const int i = idx + count - 1;
+        switch (menu) {
+        case GFX_OPTIONS: {
+            const int val = gfx_pos[i];
+            switch (i) {
+            case OPT_GFX_WND_RES:
+            case OPT_GFX_FULL_MODE:
+            case OPT_GFX_SET_FULLSCREEN:
+            default: {}
+            }
+        } break;
+        case ADVGFX_OPTIONS: {
+            const int val = advgfx_pos[i];
+            switch (i) {
+            case OPT_ADVGFX_BACKEND:
+            case OPT_ADVGFX_VSYNC:
+            case OPT_ADVGFX_SIMPLE:
+            default: {}
+            }
+        } break;
+        case SFX_OPTIONS: {
+            const int val = sfx_pos[i];
+            switch (i) {
+            case OPT_SFX_MUSIC:
+            case OPT_SFX_SOUND_FX:
+            default: {}
+            }
+        } break;
+        case ADVSFX_OPTIONS: {
+            const int val = advsfx_pos[i];
+            switch (i) {
+            case OPT_ADVSFX_QUALITY:
+            case OPT_ADVSFX_LOADING:
+            default: {}
+            }
+        } break;
+        case GAME_OPTIONS: {
+            const int val = game_pos[i];
+            switch (i) {
+            case OPT_GAME_ASYNC:
+            case OPT_GAME_TIMER:
+            default: {}
+            }
+        } break;
+        case ADVGAME_OPTIONS: {
+            const int val = advgame_pos[i];
+            switch (i) {
+            case OPT_ADVGAME_FPS:
+            case OPT_ADVGAME_DRAWRATE:
+            case OPT_ADVGAME_DEBUG:
+            default: {}
+            }
+        } break;
+        default: { /* XXX: Already handled, but ignores warnings. */ }
+        }
+    }
+}
+
+static err moveCallback(int vpos, int hpos) {
+    switch (curMenu) {
+    case MAIN_OPTIONS:
+        /* Does nothing. */
+        return ERR_OK;
+    case GFX_OPTIONS:
+    case ADVGFX_OPTIONS:
+    case ADVSFX_OPTIONS:
+        /* Does nothing, except on accept apply. */
+        return ERR_OK;
+    case SFX_OPTIONS:
+        return applyOptions(SFX_OPTIONS, vpos, 1 /* count */);
+    case GAME_OPTIONS:
+        return applyOptions(GAME_OPTIONS, vpos, 1 /* count */);
+    case ADVGAME_OPTIONS:
+        return applyOptions(ADVGAME_OPTIONS, vpos, 1 /* count */);
+    default:
+        return ERR_UNHANDLED_MENU;
+    }
+}
+
+static err acceptCallback(int vpos, int hpos) {
+    switch (curMenu) {
+    case MAIN_OPTIONS:
+        switch (vpos) {
+        case OPT_DISPLAY:
+            return load(&menustate, GFX_OPTIONS);
+        case OPT_AUDIO:
+            return load(&menustate, SFX_OPTIONS);
+        case OPT_GAME:
+            return load(&menustate, GAME_OPTIONS);
+        #if 0
+        case OPT_CONTROLS:
+        #endif
+        case OPT_BACK:
+            return back();
+        }
+        break;
+    case GFX_OPTIONS:
+        switch (vpos) {
+        case OPT_GFX_APPLY:
+            /* TODO check if apply or revert. */
+            return applyOptions(GFX_OPTIONS, 0, OPT_GFX_COUNT);
+        case OPT_GFX_ADVANCED:
+            return load(&menustate, ADVGFX_OPTIONS);
+        case OPT_GFX_BACK:
+            return back();
+        }
+        break;
+    case ADVGFX_OPTIONS:
+        switch (vpos) {
+        case OPT_ADVGFX_APPLY:
+            /* TODO check if apply or revert. */
+            return applyOptions(ADVGFX_OPTIONS, 0, OPT_ADVGFX_COUNT);
+        case OPT_ADVGFX_BACK:
+            return back();
+        }
+        break;
+    case SFX_OPTIONS:
+        switch (vpos) {
+        case OPT_SFX_ADVANCED:
+            return load(&menustate, ADVSFX_OPTIONS);
+        case OPT_SFX_BACK:
+            return back();
+        }
+        break;
+    case ADVSFX_OPTIONS:
+        switch (vpos) {
+        case OPT_ADVSFX_APPLY:
+            /* TODO check if apply or revert. */
+            return applyOptions(ADVSFX_OPTIONS, 0, OPT_ADVSFX_COUNT);
+        case OPT_ADVSFX_BACK:
+            return back();
+        }
+        break;
+    case GAME_OPTIONS:
+        switch (vpos) {
+        case OPT_GAME_ADVANCED:
+            return load(&menustate, ADVGAME_OPTIONS);
+        case OPT_GAME_BACK:
+            return back();
+        }
+        break;
+    case ADVGAME_OPTIONS:
+        switch (vpos) {
+        case OPT_ADVGAME_BACK:
+            return back();
+        }
+        break;
+    default:
+        return ERR_UNHANDLED_MENU;
+    }
+    /* TODO: Play "noop" buzz. */
+    return ERR_OK;
+}
+
+err loadOptions(menuCtx *ctx) {
+    ctx->acceptCb = acceptCallback;
+    ctx->hposCb = moveCallback;
+
+    /* TODO Load positions from file */
+
+    return load(ctx, MAIN_OPTIONS);
 }
 
 #if 0
