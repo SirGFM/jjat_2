@@ -47,6 +47,8 @@
     VAL = 0,
 #define OTHER_ENUMS(VAL, ...) \
     VAL,
+#define MACRO2ZERO(VAL, ...) \
+    [VAL] = 0,
 #define MACRO2DICT(VAL, NAME, ...) \
     [VAL] = NAME,
 #define OPT_NOOP(...)
@@ -63,13 +65,13 @@
         LIST(MACRO2DICT, MACRO2DICT, MACRO2DICT, MACRO2DICT, OPT_NOOP) \
     }
 
-#define CREATE_OPTS(type, LIST) \
+#define CREATE_OPTS(type, LIST, CONST) \
     CREATE_SUBOPTS(type, LIST); \
-    static const char ** type ## _subopts[] = { \
-        LIST(MACRO2SUBOPT, OPT_NOOP, MACRO2SUBOPT, OPT_NOOP, OPT_NOOP) \
+    static CONST char ** type ## _subopts[] = { \
+        LIST(MACRO2SUBOPT, MACRO2ZERO, MACRO2SUBOPT, MACRO2ZERO, OPT_NOOP) \
     }; \
-    static const int type ## _count[] = { \
-        LIST(GETOPTSSIZE, OPT_NOOP, GETOPTSSIZE, OPT_NOOP, OPT_NOOP) \
+    static CONST int type ## _count[] = { \
+        LIST(GETOPTSSIZE, MACRO2ZERO, GETOPTSSIZE, MACRO2ZERO, OPT_NOOP) \
     }; \
     static int type ## _pos[LIST(OPT_NOOP, OPT_NOOP, OPT_NOOP, OPT_NOOP, MACRO2VAL)]; \
     static int type ## _bkup[LIST(OPT_NOOP, OPT_NOOP, OPT_NOOP, OPT_NOOP, MACRO2VAL)]
@@ -153,7 +155,7 @@
 
 #define ADVGFX_OPTIONS(X, Xsimple, Y, Ysimple, Z) \
     X(OPT_ADVGFX_BACKEND, "BACKEND", gfxBackend) \
-    Y(OPT_ADVGFX_VSYNC, "", yesNo) \
+    Y(OPT_ADVGFX_VSYNC, "VSYNC", yesNo) \
     Y(OPT_ADVGFX_SIMPLE, "SIMPLE RENDERING", yesNo) \
     Y(OPT_ADVGFX_APPLY, "", apply) \
     Ysimple(OPT_ADVGFX_BACK, "BACK") \
@@ -175,7 +177,7 @@
 
 #define GAME_OPTIONS(X, Xsimple, Y, Ysimple, Z) \
     X(OPT_GAME_ASYNC, "2 PLAYER MODE", yesNo) \
-    X(OPT_GAME_TIMER, "TIMER", yesNo) \
+    Y(OPT_GAME_TIMER, "TIMER", yesNo) \
     Ysimple(OPT_GAME_ADVANCED, "ADVANCED") \
     Ysimple(OPT_GAME_BACK, "BACK") \
     Z(OPT_GAME_COUNT, "")
@@ -238,8 +240,8 @@ enum enCurMenu {
 };
 static enum enCurMenu curMenu;
 
-static err load(menuCtx *ctx, enum enCurMenu curMenu) {
-    switch (curMenu) {
+static err load(menuCtx *ctx, enum enCurMenu _curMenu) {
+    switch (_curMenu) {
     case MAIN_OPTIONS:
         LOAD_OPTS(optionsMenu);
         break;
@@ -267,6 +269,8 @@ static err load(menuCtx *ctx, enum enCurMenu curMenu) {
     ctx->dir = 0;
     ctx->delay = 0;
     ctx->vpos = 0;
+    curMenu = _curMenu;
+
     return ERR_OK;
 }
 
@@ -427,6 +431,8 @@ static err applyOptions(enum enCurMenu menu, int idx, int count) {
 
         ASSERT(erv == ERR_OK, erv);
     } /* for (; count > 0; count--) */
+
+    return ERR_OK;
 }
 
 static err moveCallback(int vpos, int hpos) {
