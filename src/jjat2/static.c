@@ -42,6 +42,9 @@ teleportCtx teleport;
 /** The game's menustate */
 menuCtx menustate;
 
+/** List of display mode names */
+void *displayList;
+
 /** Initialize the uninitialized 'local globals' (i.e., the ones defined for the
  * game itself, and not for the template)  with all-zeros. */
 void zeroizeGameGlobalCtx() {
@@ -54,5 +57,6 @@ void zeroizeGameGlobalCtx() {
     memset(&ui, 0x0, sizeof(uiCtx));
     memset(&checkpoint, 0x0, sizeof(checkpointCtx));
     memset(&menustate, 0x0, sizeof(menuCtx));
+    displayList = 0;
 }
 

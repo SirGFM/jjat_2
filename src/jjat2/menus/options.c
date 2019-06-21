@@ -4,7 +4,12 @@
 #include <base/sfx.h>
 #include <jjat2/menus.h>
 #include <jjat2/menustate.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
+
+extern void *displayList;
 
 /* List of every option possible:
  *
@@ -144,9 +149,10 @@
     Ysimple(OPT_BACK, "BACK") \
     Z(OPT_COUNT, "")
 
+static const char *dummy[] = {};
 #define GFX_OPTIONS(X, Xsimple, Y, Ysimple, Z) \
     X(OPT_GFX_WND_RES, "WINDOWED RESOLUTION", wndRes) \
-    /* TODO Y(OPT_GFX_FULL_MODE, "FULLSCREEN MODE", 0) */ \
+    Y(OPT_GFX_FULL_MODE, "FULLSCREEN MODE", dummy) \
     Y(OPT_GFX_SET_FULLSCREEN, "", fullscreen) \
     Y(OPT_GFX_APPLY, "", apply) \
     Ysimple(OPT_GFX_ADVANCED, "ADVANCED") \
@@ -221,13 +227,13 @@ CREATE_SUBOPTS(fullscreen, FULLSCREEN_SUBOPTS);
 CREATE_SUBOPTS(gfxBackend, BACKEND_SUBOPTS);
 CREATE_SUBOPTS(sfxQuality, SFXQUALITY_SUBOPTS);
 CREATE_SUBOPTS(sfxLoading, SFXLOADING_SUBOPTS);
-CREATE_OPTS(optionsMenu, MAIN_OPTIONS);
-CREATE_OPTS(gfxMenu, GFX_OPTIONS);
-CREATE_OPTS(advGfxMenu, ADVGFX_OPTIONS);
-CREATE_OPTS(sfxMenu, SFX_OPTIONS);
-CREATE_OPTS(advSfxMenu, ADVSFX_OPTIONS);
-CREATE_OPTS(gameMenu, GAME_OPTIONS);
-CREATE_OPTS(advGameMenu, ADVGAME_OPTIONS);
+CREATE_OPTS(optionsMenu, MAIN_OPTIONS, const);
+CREATE_OPTS(gfxMenu, GFX_OPTIONS, /* not const */);
+CREATE_OPTS(advGfxMenu, ADVGFX_OPTIONS, const);
+CREATE_OPTS(sfxMenu, SFX_OPTIONS, const);
+CREATE_OPTS(advSfxMenu, ADVSFX_OPTIONS, const);
+CREATE_OPTS(gameMenu, GAME_OPTIONS, const);
+CREATE_OPTS(advGameMenu, ADVGAME_OPTIONS, const);
 
 enum enCurMenu {
     MAIN_OPTIONS = 0
@@ -535,4 +541,48 @@ err loadOptions(menuCtx *ctx) {
     /* TODO Load positions from file */
 
     return load(ctx, MAIN_OPTIONS);
+}
+
+#define DISPLAY_BASE "WWWWWXHHHH@FFFHZ"
+#define DISPLAY_FMT "%dX%d@%dHZ"
+
+/**
+ * Initialize the list of display mode names.
+ *
+ */
+err initDisplayList() {
+    gfmRV rv;
+    int len, i;
+
+    rv = gfm_queryResolutions(&len, game.pCtx);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    displayList = malloc(len * (sizeof(char**) + sizeof(DISPLAY_BASE)));
+    ASSERT(displayList, ERR_OOM);
+    for (i = 0; i < len; i++) {
+        char *name;
+        int w, h, fps;
+
+        rv = gfm_getResolution(&w, &h, &fps, game.pCtx, i);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+        name = (char*)displayList;
+        name += i * sizeof(DISPLAY_BASE) + (len * sizeof(char**));
+        snprintf(name, sizeof(DISPLAY_BASE) - 1, DISPLAY_FMT, w, h, fps);
+
+        ((char**)displayList)[i] = name;
+    }
+
+    gfxMenu_subopts[OPT_GFX_FULL_MODE] = (char**)displayList;
+    gfxMenu_count[OPT_GFX_FULL_MODE] = len;
+
+    return ERR_OK;
+}
+
+/**
+ * Release the list of display mode names.
+ */
+void freeDisplayList() {
+    free(displayList);
+    displayList = 0;
 }

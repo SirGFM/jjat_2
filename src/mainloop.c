@@ -24,6 +24,7 @@
 #include <jjat2/playstate.h>
 #include <jjat2/static.h>
 #include <jjat2/ui.h>
+#include <jjat2/menus/options.h>
 
 #include <string.h>
 
@@ -33,6 +34,8 @@ err mainloop() {
     gfmRV rv;
 
     zeroizeGameGlobalCtx();
+    erv = initDisplayList();
+    ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
     erv = initPlaystate();
     ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
     erv = initFxGroup();
@@ -169,6 +172,7 @@ __ret:
     freeFxGroup();
     freePlaystate();
     freeMenustate();
+    freeDisplayList();
 
     return erv;
 }
