@@ -2,6 +2,7 @@
 #include <base/game.h>
 #include <base/menu_ctx.h>
 #include <base/sfx.h>
+#include <conf/config.h>
 #include <jjat2/menus.h>
 #include <jjat2/menustate.h>
 #include <stdio.h>
@@ -10,6 +11,7 @@
 #include <string.h>
 
 extern void *displayList;
+extern configCtx glConfig;
 
 /* List of every option possible:
  *
@@ -364,6 +366,10 @@ static err applyGfx() {
         }
         rv = gfm_setDimensions(game.pCtx, V_WIDTH * zoom, V_HEIGHT * zoom);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+        glConfig.wndWidth = V_WIDTH * zoom;
+        glConfig.wndHeight = V_HEIGHT * zoom;
+        glConfig.flags &= ~CFG_FULLSCREEN;
         break;
     case OPTS_FULLSCREEN_FULLSCREEN:
         rv = gfm_setDimensions(game.pCtx, V_WIDTH, V_HEIGHT);
@@ -372,11 +378,42 @@ static err applyGfx() {
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
         rv = gfm_setFullscreen(game.pCtx);
         ASSERT(rv == GFMRV_OK || rv == GFMRV_WINDOW_MODE_UNCHANGED, ERR_GFMERR);
+
+        glConfig.fullscreenResolution = gfxMenu_pos[OPT_GFX_FULL_MODE];
+        glConfig.flags |= CFG_FULLSCREEN;
         break;
     case OPTS_FULLSCREEN_COUNT: {}
     }
 
     return ERR_OK;
+}
+
+static err applyAdvGfx() {
+    if (advGfxMenu_pos[OPT_ADVGFX_VSYNC] == OPTS_YES)
+        glConfig.flags |= CFG_VSYNC;
+    else
+        glConfig.flags &= ~CFG_VSYNC;
+
+    if (advGfxMenu_pos[OPT_ADVGFX_SIMPLE] == OPTS_YES)
+        glConfig.flags |= CFG_SIMPLEDRAW;
+    else
+        glConfig.flags &= ~CFG_SIMPLEDRAW;
+
+    switch ((enum gfxBackend_enum)advGfxMenu_pos[OPT_ADVGFX_BACKEND]) {
+    case OPTS_BACKEND_SW:
+        glConfig.videoBackend = GFM_VIDEO_SWSDL2;
+        break;
+    case OPTS_BACKEND_SDL:
+        glConfig.videoBackend = GFM_VIDEO_SDL2;
+        break;
+    case OPTS_BACKEND_OPENGL:
+        glConfig.videoBackend = GFM_VIDEO_GL3;
+        break;
+    case OPTS_BACKEND_COUNT: {}
+    }
+
+    glConfig.flags |= CFG_RESTART;
+    return ERR_RESTART;
 }
 
 /**
@@ -423,24 +460,6 @@ static err applyOptions(enum enCurMenu menu, int idx, int count) {
     for (; count > 0; count--) {
         const int i = idx + count - 1;
         switch (menu) {
-        case GFX_OPTIONS: {
-            const int val = gfxMenu_pos[i];
-            switch (i) {
-            case OPT_GFX_WND_RES:
-            case OPT_GFX_FULL_MODE:
-            case OPT_GFX_SET_FULLSCREEN:
-            default: {}
-            }
-        } break;
-        case ADVGFX_OPTIONS: {
-            const int val = advGfxMenu_pos[i];
-            switch (i) {
-            case OPT_ADVGFX_BACKEND:
-            case OPT_ADVGFX_VSYNC:
-            case OPT_ADVGFX_SIMPLE:
-            default: {}
-            }
-        } break;
         case SFX_OPTIONS: {
             const int val = sfxMenu_pos[i];
             switch (i) {
@@ -542,7 +561,11 @@ static err acceptCallback(int vpos, int hpos) {
     case ADVGFX_OPTIONS:
         switch (vpos) {
         case OPT_ADVGFX_APPLY:
-            APPLY_OPTS(advGfxMenu, ADVGFX);
+            if (advGfxMenu_pos[OPT_ADVGFX_APPLY] == OPTS_REVERT) {
+                REVERT_OPTS(advGfxMenu);
+                return ERR_OK;
+            }
+            return applyAdvGfx();
         case OPT_ADVGFX_BACK:
             return back();
         }
