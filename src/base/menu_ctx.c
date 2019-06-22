@@ -161,24 +161,16 @@ static err drawSuboptions(menuCtx *ctx, char **opts, int count, int x, int y
 
 err drawMenuCtx(menuCtx *ctx) {
     err erv;
-    int i, y;
+    int _i, y;
 
-    y = V_HEIGHT / 12 - ctx->vcount - 2;
-    /* Add another row for each horizontal option */
-    for (i = 0; i < ctx->vcount; i++)
-        if (ctx->hoptsCount[i] != 0)
-            y--;
-
-    for (i = 0; i < ctx->vcount; i++) {
+    y = V_HEIGHT / 12 - 2;
+    for (_i = ctx->vcount; _i > 0; _i--) {
+        const int i = _i - 1;
         int active = (i == ctx->vpos);
         int len = strlen(ctx->vopts[i]);
 
-        if (len > 0) {
-            erv = drawText(ctx, ctx->vopts[i], len, y + i, active);
-            ASSERT(erv == ERR_OK, erv);
-        }
         if (ctx->hoptsCount[i] != 0) {
-            int hasMainOpt, j, x;
+            int hasMainOpt, j, x, sublen;
             int activeIdx = -1;
             int yOffset = 0;
 
@@ -186,10 +178,8 @@ err drawMenuCtx(menuCtx *ctx) {
                 x += strlen(ctx->hopts[i][j]) + 1;
             /* Skip adding an empty line if there's no main option */
             hasMainOpt = (len > 0);
-            if (hasMainOpt) {
-                y++;
+            if (hasMainOpt)
                 yOffset = -2;
-            }
 
             if (x < V_WIDTH / 8) {
                 x = (V_WIDTH / 8 - x) / 2;
@@ -197,7 +187,7 @@ err drawMenuCtx(menuCtx *ctx) {
                     activeIdx = ctx->hpos[i];
 
                 erv =  drawSuboptions(ctx, ctx->hopts[i], ctx->hoptsCount[i], x
-                    , y + i, activeIdx, yOffset);
+                    , y, activeIdx, yOffset);
                 ASSERT(erv == ERR_OK, erv);
             }
             else {
@@ -215,41 +205,47 @@ err drawMenuCtx(menuCtx *ctx) {
                 activeIdx = 1;
                 count = 1;
                 j = ctx->hpos[i];
-                len = strlen(ctx->hopts[i][j]);
+                sublen = strlen(ctx->hopts[i][j]);
                 if (j > 0) {
-                    len += strlen(ctx->hopts[i][j - 1]) + 1;
+                    sublen += strlen(ctx->hopts[i][j - 1]) + 1;
                     count++;
                 }
                 else
                     activeIdx = 0;
                 if (j < ctx->hoptsCount[i] - 1) {
-                    len += strlen(ctx->hopts[i][j + 1]) + 1;
+                    sublen += strlen(ctx->hopts[i][j + 1]) + 1;
                     count++;
                 }
                 else if (ctx->hoptsCount[i] < 3)
                     activeIdx = ctx->hoptsCount[i] - 1;
 
-                x = (V_WIDTH / 8 - len) / 2;
+                x = (V_WIDTH / 8 - sublen) / 2;
 
                 if (j > 1) {
                     erv = drawStrAt(ctx, "...", (x - 4) * 8
-                            , (y + i) * 12 + yOffset, 0);
+                            , y * 12 + yOffset, 0);
                     ASSERT(erv == ERR_OK, erv);
                 }
                 if (j < ctx->hoptsCount[i] - 2) {
-                    erv = drawStrAt(ctx, "...", (x + len + 1) * 8
-                            , (y + i) * 12 + yOffset, 0);
+                    erv = drawStrAt(ctx, "...", (x + sublen + 1) * 8
+                            , y * 12 + yOffset, 0);
                     ASSERT(erv == ERR_OK, erv);
                 }
 
                 if (j > 0)
                     j--;
-                erv =  drawSuboptions(ctx, ctx->hopts[i] + j, count, x, y + i
+                erv =  drawSuboptions(ctx, ctx->hopts[i] + j, count, x, y
                         , activeIdx, yOffset);
                 ASSERT(erv == ERR_OK, erv);
-            }
-        }
-    }
+            } /* else if (x >= V_WIDTH / 8) */
+            y--;
+        } /* if (ctx->hoptsCount[i] != 0) */
+        if (len > 0) {
+            erv = drawText(ctx, ctx->vopts[i], len, y, active);
+            ASSERT(erv == ERR_OK, erv);
+            y--;
+        } /* if (len > 0) */
+    } /* for (_i = ctx->vcount; _i > 0; _i--) */
 
     return ERR_OK;
 }
