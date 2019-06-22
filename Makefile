@@ -23,6 +23,7 @@
          mainloop.o \
          base/cmdParse.o \
          base/collision.o \
+         base/error.o \
          base/gfx.o \
          base/input.o \
          base/loadstate.o \

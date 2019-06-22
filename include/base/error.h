@@ -6,16 +6,11 @@
 
 #include <conf/error_list.h>
 
-/** Add signal handling so GDB freezes on failed asserts */
-#if defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__))
-#  include <stdlib.h>
-#  include <signal.h>
-#endif
-
 /** Make GDB stop (only on DEBUG mode) */
 #if defined(DEBUG) && !(defined(__WIN32) || defined(__WIN32__))
+void stop_gdb();
 #  define STOP_GDB() \
-     do { raise(SIGINT); } while(0)
+     stop_gdb()
 #else
 #  define STOP_GDB()
 #endif
