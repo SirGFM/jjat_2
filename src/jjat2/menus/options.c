@@ -32,6 +32,8 @@ extern void *displayList;
  *   + Back
  * Game:
  *   + Show timer
+ *   + Teleport on Press / Teleport on Release
+ *   + Hold to remove target
  *   + Advanced
  *       - Physics FPS
  *       - Display FPS
@@ -88,6 +90,9 @@ extern void *displayList;
     ctx->hoptsCount = (int*)type ## _count; \
     ctx->hpos = (int*)type ## _pos; \
     memcpy(type ## _bkup, type ## _pos, sizeof(type ## _bkup))
+
+#define REVERT_OPTS(type) \
+    memcpy(type ## _pos, type ## _bkup, sizeof(type ## _bkup)) \
 
 #define __APPLY_OPTS(type, apply_enum, menu_enum, menu_count) \
     do { \
@@ -331,6 +336,49 @@ static err applyFps() {
     return ERR_OK;
 }
 
+static err applyGfx() {
+    gfmRV rv;
+    err erv;
+    int zoom = 0;
+
+    switch ((enum fullscreen_enum)gfxMenu_pos[OPT_GFX_SET_FULLSCREEN]) {
+    case OPTS_FULLSCREEN_WINDOWED:
+        rv = gfm_setResolution(game.pCtx, 0);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        rv = gfm_setWindowed(game.pCtx);
+        ASSERT(rv == GFMRV_OK || rv == GFMRV_WINDOW_MODE_UNCHANGED, ERR_GFMERR);
+        switch ((enum wndRes_enum)gfxMenu_pos[OPT_GFX_WND_RES]) {
+        case OPT_WNDRES_1X:
+            zoom = 1;
+            break;
+        case OPT_WNDRES_2X:
+            zoom = 2;
+            break;
+        case OPT_WNDRES_3X:
+            zoom = 3;
+            break;
+        case OPT_WNDRES_4X:
+            zoom = 4;
+            break;
+        case OPT_WNDRES_COUNT: {}
+        }
+        rv = gfm_setDimensions(game.pCtx, V_WIDTH * zoom, V_HEIGHT * zoom);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        break;
+    case OPTS_FULLSCREEN_FULLSCREEN:
+        rv = gfm_setDimensions(game.pCtx, V_WIDTH, V_HEIGHT);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        rv = gfm_setResolution(game.pCtx, gfxMenu_pos[OPT_GFX_FULL_MODE]);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+        rv = gfm_setFullscreen(game.pCtx);
+        ASSERT(rv == GFMRV_OK || rv == GFMRV_WINDOW_MODE_UNCHANGED, ERR_GFMERR);
+        break;
+    case OPTS_FULLSCREEN_COUNT: {}
+    }
+
+    return ERR_OK;
+}
+
 /**
  * Apply some options for a given sub-menu.
  *
@@ -482,7 +530,9 @@ static err acceptCallback(int vpos, int hpos) {
     case GFX_OPTIONS:
         switch (vpos) {
         case OPT_GFX_APPLY:
-            APPLY_OPTS(gfxMenu, GFX);
+            if (gfxMenu_pos[OPT_GFX_APPLY] == OPTS_REVERT)
+                REVERT_OPTS(gfxMenu);
+            return applyGfx();
         case OPT_GFX_ADVANCED:
             return load(&menustate, ADVGFX_OPTIONS);
         case OPT_GFX_BACK:
