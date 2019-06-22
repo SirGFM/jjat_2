@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <stdio.h>
+#include <signal.h>
 
 typedef void (*sighandler)(int);
 
