@@ -10,6 +10,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <GFraMe/gframe.h>
+#include <GFraMe/core/gfmAudio_bkend.h>
+
 extern void *displayList;
 extern configCtx glConfig;
 
@@ -143,8 +146,7 @@ extern configCtx glConfig;
     Z(OPTS_SFXQUALITY_COUNT, "")
 
 #define SFXLOADING_SUBOPTS(X, Xsimple, Y, Ysimple, Z) \
-    Xsimple(OPTS_SFXLOADING_PRELOAD, "PRELOAD") \
-    Ysimple(OPTS_SFXLOADING_BACKGROUND, "BACKGROUND") \
+    Xsimple(OPTS_SFXLOADING_BACKGROUND, "BACKGROUND") \
     Ysimple(OPTS_SFXLOADING_BLOCKING, "BLOCKING") \
     Z(OPTS_SFXLOADING_COUNT, "") \
 
@@ -416,6 +418,34 @@ static err applyAdvGfx() {
     return ERR_RESTART;
 }
 
+static err applyAdvSfx() {
+    switch((enum sfxQuality_enum)advSfxMenu_pos[OPT_ADVSFX_QUALITY]) {
+    case OPTS_SFXQUALITY_MONO11KHZ:
+        glConfig.audioSettings = gfmAudio_lowQuality;
+        break;
+    case OPTS_SFXQUALITY_STEREO22KHZ:
+        glConfig.audioSettings = gfmAudio_medQuality;
+        break;
+    case OPTS_SFXQUALITY_STEREO44KHZ:
+        glConfig.audioSettings = gfmAudio_defQuality;
+        break;
+   case OPTS_SFXQUALITY_COUNT: {}
+    }
+
+    switch((enum sfxLoading_enum)advSfxMenu_pos[OPT_ADVSFX_LOADING]) {
+    case OPTS_SFXLOADING_BACKGROUND:
+        glConfig.flags |= CFG_LAZYLOAD;
+        break;
+    case OPTS_SFXLOADING_BLOCKING:
+        glConfig.flags &= ~CFG_LAZYLOAD;
+        break;
+    case OPTS_SFXLOADING_COUNT: {}
+    }
+
+    glConfig.flags |= CFG_RESTART;
+    return ERR_RESTART;
+}
+
 /**
  * Apply some options for a given sub-menu.
  *
@@ -431,17 +461,8 @@ static err applyOptions(enum enCurMenu menu, int idx, int count) {
     case MAIN_OPTIONS:
         /* Nothing to be applied. */
         return ERR_OK;
-    case GFX_OPTIONS:
-        menuMaxCount = OPT_GFX_COUNT;
-        break;
-    case ADVGFX_OPTIONS:
-        menuMaxCount = OPT_ADVGFX_COUNT;
-        break;
     case SFX_OPTIONS:
         menuMaxCount = OPT_SFX_COUNT;
-        break;
-    case ADVSFX_OPTIONS:
-        menuMaxCount = OPT_ADVSFX_COUNT;
         break;
     case GAME_OPTIONS:
         menuMaxCount = OPT_GAME_COUNT;
@@ -472,30 +493,24 @@ static err applyOptions(enum enCurMenu menu, int idx, int count) {
             default: {}
             }
         } break;
-        case ADVSFX_OPTIONS: {
-            const int val = advSfxMenu_pos[i];
-            switch (i) {
-            case OPT_ADVSFX_QUALITY:
-            case OPT_ADVSFX_LOADING:
-            default: {}
-            }
-        } break;
         case GAME_OPTIONS: {
             const int val = gameMenu_pos[i];
             switch (i) {
             case OPT_GAME_ASYNC:
+                /* TODO */
             case OPT_GAME_TIMER:
+                /* TODO */
             default: {}
             }
         } break;
         case ADVGAME_OPTIONS: {
-            const int val = advGameMenu_pos[i];
             switch (i) {
             case OPT_ADVGAME_FPS:
             case OPT_ADVGAME_DRAWRATE:
                 erv = applyFps();
                 break;
             case OPT_ADVGAME_DEBUG:
+                /* TODO */
             default: {}
             }
         } break;
@@ -581,7 +596,11 @@ static err acceptCallback(int vpos, int hpos) {
     case ADVSFX_OPTIONS:
         switch (vpos) {
         case OPT_ADVSFX_APPLY:
-            APPLY_OPTS(advSfxMenu, ADVSFX);
+            if (advSfxMenu_pos[OPT_ADVSFX_APPLY] == OPTS_REVERT) {
+                REVERT_OPTS(advSfxMenu);
+                return ERR_OK;
+            }
+            return applyAdvSfx();
         case OPT_ADVSFX_BACK:
             return back();
         }
