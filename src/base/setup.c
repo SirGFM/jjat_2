@@ -36,9 +36,7 @@
  * @param  [ in]argv    List of arguments received
  * @return
  */
-err setupGame(int argc, char *argv[]) {
-    /* Temporary config struct */
-    configCtx config;
+err setupGame(int argc, char *argv[], configCtx *config) {
     err erv;
     gfmRV rv;
 
@@ -51,41 +49,44 @@ err setupGame(int argc, char *argv[]) {
 
     /* Parse the command line and initialize most sub-systems with the retrieved
      * values */
-    erv = cmdParse(&config, argc, argv);
-    ASSERT(erv == ERR_OK, erv);
+    if (!(config->flags & CFG_RESTART)) {
+        erv = cmdParse(config, argc, argv);
+        ASSERT(erv == ERR_OK, erv);
+    }
+    config->flags &= ~CFG_RESTART;
 
-    rv = gfm_setVideoBackend(game.pCtx, config.videoBackend);
+    rv = gfm_setVideoBackend(game.pCtx, config->videoBackend);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
-    if ((config.flags & CFG_FULLSCREEN) == 0) {
-        rv = gfm_initGameWindow(game.pCtx, V_WIDTH, V_HEIGHT, config.wndWidth
-                , config.wndHeight, 1/*can resize*/, config.flags & CFG_VSYNC);
+    if ((config->flags & CFG_FULLSCREEN) == 0) {
+        rv = gfm_initGameWindow(game.pCtx, V_WIDTH, V_HEIGHT, config->wndWidth
+                , config->wndHeight, 1/*can resize*/, config->flags & CFG_VSYNC);
     }
     else {
         rv = gfm_initGameFullScreen(game.pCtx, V_WIDTH, V_HEIGHT
-                , config.fullscreenResolution, 1/*can resize*/
-                , config.flags & CFG_VSYNC);
+                , config->fullscreenResolution, 1/*can resize*/
+                , config->flags & CFG_VSYNC);
     }
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     rv = gfm_setBackground(game.pCtx, BG_COLOR);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    if (config.flags & CFG_NOAUDIO) {
+    if (config->flags & CFG_NOAUDIO) {
         rv = gfm_disableAudio(game.pCtx);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     }
 
-    rv = gfm_initAudio(game.pCtx, config.audioSettings);
+    rv = gfm_initAudio(game.pCtx, config->audioSettings);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    rv = gfm_setFPS(game.pCtx, config.fpsQuality);
+    rv = gfm_setFPS(game.pCtx, config->fpsQuality);
     if (rv == GFMRV_FPS_TOO_HIGH) {
-        rv = gfm_setRawFPS(game.pCtx, config.fpsQuality);
+        rv = gfm_setRawFPS(game.pCtx, config->fpsQuality);
     }
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    rv = gfm_setStateFrameRate(game.pCtx, config.fpsQuality,
-            config.fpsQuality);
+    rv = gfm_setStateFrameRate(game.pCtx, config->fpsQuality,
+            config->fpsQuality);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
     /* By default, render the FPS counter on debug mode */
@@ -97,25 +98,25 @@ err setupGame(int argc, char *argv[]) {
     rv = gfm_getCamera(&game.pCamera, game.pCtx);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-    if (config.flags & CFG_LAZYLOAD) {
+    if (config->flags & CFG_LAZYLOAD) {
         game.flags |= CMD_LAZYLOAD;
     }
 
 #if defined(JJATENGINE)
     /** If playing on asynchronous mode, set only swordy as active */
-    if (config.flags & CFG_SYNCCONTROL) {
+    if (config->flags & CFG_SYNCCONTROL) {
         game.flags |= AC_SWORDY;
     }
     else {
         game.flags |= AC_BOTH;
     }
 
-    if (!(config.flags & CFG_SIMPLEDRAW)) {
+    if (!(config->flags & CFG_SIMPLEDRAW)) {
         game.flags |= FX_PRETTYRENDER;
     }
 
-    if (config.pKeyMap) {
-        erv = configureInput(config.pKeyMap, strlen(config.pKeyMap));
+    if (config->pKeyMap) {
+        erv = configureInput(config->pKeyMap, strlen(config->pKeyMap));
         ASSERT(erv == ERR_OK, erv);
         game.flags |= CMD_CUSTOMINPUT;
     }

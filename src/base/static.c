@@ -10,6 +10,7 @@
 #include <base/loadstate.h>
 #include <base/resource.h>
 #include <base/sfx.h>
+#include <conf/config.h>
 
 #include <string.h>
 
@@ -21,6 +22,8 @@ gfxCtx gfx;
 inputCtx input;
 /** Collision context */
 collisionCtx collision;
+/** Global configuration file, used on restart */
+configCtx glConfig;
 /** The game's loadstate */
 loadstateCtx loadstate;
 /** The game's resource loader */
@@ -31,6 +34,7 @@ sfxCtx sfx;
 /** Initialize the uninitialized globals with all-zeros. */
 void zeroizeGlobalCtx() {
     memset(&collision, 0x0, sizeof(collisionCtx));
+    memset(&glConfig, 0x0, sizeof(glConfig));
     memset(&game, 0x0, sizeof(gameCtx));
     memset(&gfx, 0x0, sizeof(gfxCtx));
     memset(&input, 0x0, sizeof(inputCtx));

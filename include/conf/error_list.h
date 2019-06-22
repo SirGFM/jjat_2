@@ -36,6 +36,7 @@
     X(ERR_FPSTOOHIGH) \
     X(ERR_SETFPS) \
     X(ERR_UNHANDLED_MENU) \
+    X(ERR_RESTART) \
     X(ERR_MAX)
 
 #endif /* __CONF_ERROR_LIST_H__ */

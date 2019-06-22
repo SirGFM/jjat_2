@@ -7,6 +7,7 @@
 #define __SETUP_H__
 
 #include <base/error.h>
+#include <conf/config.h>
 
 /**
  * Basic setup for the game.
@@ -27,9 +28,10 @@
  *
  * @param  [ in]argc    Number of arguments received
  * @param  [ in]argv    List of arguments received
+ * @param  [ in]config  Preloaded structure with the current configuration
  * @return
  */
-err setupGame(int argc, char *argv[]);
+err setupGame(int argc, char *argv[], configCtx *config);
 
 /**
  * Release all resources alloc'ed on 'setupGame'

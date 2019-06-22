@@ -10,14 +10,15 @@
 #include <GFraMe/gframe.h>
 
 enum enConfigFlags {
-    CFG_VSYNC       = 0x01
-  , CFG_FULLSCREEN  = 0x02
+    CFG_VSYNC       = 0x0001
+  , CFG_FULLSCREEN  = 0x0002
 #if defined(JJATENGINE)
-  , CFG_SYNCCONTROL = 0x04
-  , CFG_SIMPLEDRAW  = 0x08
+  , CFG_SYNCCONTROL = 0x0004
+  , CFG_SIMPLEDRAW  = 0x0008
 #endif /* JJATENGINE */
-  , CFG_LAZYLOAD    = 0x10
-  , CFG_NOAUDIO     = 0x20
+  , CFG_LAZYLOAD    = 0x0010
+  , CFG_NOAUDIO     = 0x0020
+  , CFG_RESTART     = 0x8000
 };
 typedef enum enConfigFlags configFlags;
 
