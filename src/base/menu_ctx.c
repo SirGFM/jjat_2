@@ -16,6 +16,12 @@ enum menuDir {
     md_down  = 0x08,
 };
 
+enum textMode {
+    tm_nonselected,
+    tm_inactive,
+    tm_selected,
+};
+
 #define PRESS_DELAY_MS 500
 #define HOLD_DELAY_MS  125
 
@@ -107,18 +113,25 @@ err updateMenuCtx(menuCtx *ctx) {
     return ERR_OK;
 }
 
-#define drawStrAt(ctx, str, x, y, active) \
-    drawTextAt(ctx, str, sizeof(str) - 1, x, y, active)
+#define drawStrAt(ctx, str, x, y, mode) \
+    drawTextAt(ctx, str, sizeof(str) - 1, x, y, mode)
 
 static err drawTextAt(menuCtx *ctx, char *text, int len, int x, int y
-        , int active) {
+        , enum textMode mode) {
     int tile;
     gfmRV rv;
 
-    if (active)
+    switch (mode) {
+    case tm_selected:
         tile = ctx->activeOffset;
-    else
+        break;
+    case tm_inactive:
         tile = ctx->inactiveOffset;
+        break;
+    case tm_nonselected:
+        tile = ctx->nonSelectedOffset;
+        break;
+    }
 
     rv = gfmText_setPosition(ctx->pText, x, y);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
@@ -134,24 +147,27 @@ static err drawTextAt(menuCtx *ctx, char *text, int len, int x, int y
     return ERR_OK;
 }
 
-static err drawText(menuCtx *ctx, char *text, int len, int y, int active) {
+static err drawText(menuCtx *ctx, char *text, int len, int y
+        , enum textMode mode) {
     int x;
 
     x = (V_WIDTH / 8 - len) / 2;
 
-    return drawTextAt(ctx, text, len, x * 8, y * 12, active);
+    return drawTextAt(ctx, text, len, x * 8, y * 12, mode);
 }
 
 static err drawSuboptions(menuCtx *ctx, char **opts, int count, int x, int y
-        , int activeIdx, int yOffset) {
+        , int activeIdx, int yOffset, enum textMode basicMode) {
     int i;
     err erv;
 
     for (i = 0; i < count; i++) {
         int len = strlen(opts[i]);
-        int active = (i == activeIdx);
+        enum textMode mode = basicMode;
+        if (i == activeIdx)
+            mode++;
 
-        erv = drawTextAt(ctx, opts[i], len, x * 8, y * 12 + yOffset, active);
+        erv = drawTextAt(ctx, opts[i], len, x * 8, y * 12 + yOffset, mode);
         ASSERT(erv == ERR_OK, erv);
         x += len + 1;
     }
@@ -166,28 +182,27 @@ err drawMenuCtx(menuCtx *ctx) {
     y = V_HEIGHT / 12 - 2;
     for (_i = ctx->vcount; _i > 0; _i--) {
         const int i = _i - 1;
-        int active = (i == ctx->vpos);
-        int len = strlen(ctx->vopts[i]);
+        const int len = strlen(ctx->vopts[i]);
+        const int hasMainOpt = (len > 0);
+        const int isActive = (i == ctx->vpos);
+        const enum textMode subMode = (isActive) ?
+                                      tm_inactive :
+                                      tm_nonselected;
 
         if (ctx->hoptsCount[i] != 0) {
-            int hasMainOpt, j, x, sublen;
-            int activeIdx = -1;
-            int yOffset = 0;
+            int activeIdx, j, x, sublen;
+            /* Skip adding an empty line if there's no main option */
+            const int yOffset = (hasMainOpt) ? -2 : 0;
 
             for (j = 0, x = -1; j < ctx->hoptsCount[i]; j++)
                 x += strlen(ctx->hopts[i][j]) + 1;
-            /* Skip adding an empty line if there's no main option */
-            hasMainOpt = (len > 0);
-            if (hasMainOpt)
-                yOffset = -2;
 
             if (x < V_WIDTH / 8) {
                 x = (V_WIDTH / 8 - x) / 2;
-                if (hasMainOpt || i == ctx->vpos)
-                    activeIdx = ctx->hpos[i];
+                activeIdx = ctx->hpos[i];
 
                 erv =  drawSuboptions(ctx, ctx->hopts[i], ctx->hoptsCount[i], x
-                    , y, activeIdx, yOffset);
+                    , y, activeIdx, yOffset, subMode);
                 ASSERT(erv == ERR_OK, erv);
             }
             else {
@@ -223,25 +238,25 @@ err drawMenuCtx(menuCtx *ctx) {
 
                 if (j > 1) {
                     erv = drawStrAt(ctx, "...", (x - 4) * 8
-                            , y * 12 + yOffset, 0);
+                            , y * 12 + yOffset, subMode);
                     ASSERT(erv == ERR_OK, erv);
                 }
                 if (j < ctx->hoptsCount[i] - 2) {
                     erv = drawStrAt(ctx, "...", (x + sublen + 1) * 8
-                            , y * 12 + yOffset, 0);
+                            , y * 12 + yOffset, subMode);
                     ASSERT(erv == ERR_OK, erv);
                 }
 
                 if (j > 0)
                     j--;
                 erv =  drawSuboptions(ctx, ctx->hopts[i] + j, count, x, y
-                        , activeIdx, yOffset);
+                        , activeIdx, yOffset, subMode);
                 ASSERT(erv == ERR_OK, erv);
             } /* else if (x >= V_WIDTH / 8) */
             y--;
         } /* if (ctx->hoptsCount[i] != 0) */
         if (len > 0) {
-            erv = drawText(ctx, ctx->vopts[i], len, y, active);
+            erv = drawText(ctx, ctx->vopts[i], len, y, subMode + 1);
             ASSERT(erv == ERR_OK, erv);
             y--;
         } /* if (len > 0) */

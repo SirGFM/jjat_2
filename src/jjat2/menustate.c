@@ -22,6 +22,7 @@ err initMenustate() {
         , 0/*delay*/, 0/*bindToWorld*/, gfx.pSset8x8, DEF_ACTIVE_TILE);
     menustate.activeOffset = DEF_ACTIVE_TILE;
     menustate.inactiveOffset = DEF_INACTIVE_TILE;
+    menustate.nonSelectedOffset = DEF_NONSELECTED_TILE;
 
     return ERR_OK;
 }

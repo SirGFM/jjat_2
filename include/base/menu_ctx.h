@@ -10,8 +10,9 @@
 #include <conf/game.h>
 #include <GFraMe/gfmText.h>
 
-#define DEF_ACTIVE_TILE     0
-#define DEF_INACTIVE_TILE   4032
+#define DEF_ACTIVE_TILE      0
+#define DEF_INACTIVE_TILE    3968
+#define DEF_NONSELECTED_TILE 4032
 
 /* NOTE: typeof is a GCC extension... */
 #define getOptsSize(__OPTS__) (sizeof(__OPTS__) / sizeof(typeof(__OPTS__[0])))
@@ -40,6 +41,8 @@ struct stMenuCtx {
     int activeOffset;
     /** Offset to the first 8x8 bitmap tile for the inactive text */
     int inactiveOffset;
+    /** Offset to the first 8x8 bitmap tile for non-selected options */
+    int nonSelectedOffset;
     /* == "private" ==================== */
     /** Current direction the cursor is moving to */
     int dir;
