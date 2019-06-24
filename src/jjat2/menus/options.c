@@ -121,6 +121,10 @@ extern configCtx glConfig;
     Ysimple(OPTS_REVERT, "REVERT") \
     Z(OPTS_APPLY_COUNT, "")
 
+#define APPLYRESTART_SUBOPTS(X, Xsimple, Y, Ysimple, Z) \
+    Xsimple(OPTS_APPLYRT, "APPLY & RESTART") \
+    Ysimple(OPTS_REVERTRT, "REVERT") \
+
 #define WNDRES_SUBOPTS(X, Xsimple, Y, Ysimple, Z) \
     Xsimple(OPT_WNDRES_1X, "1X") \
     Ysimple(OPT_WNDRES_2X, "2X") \
@@ -172,7 +176,7 @@ static const char *dummy[] = {};
     X(OPT_ADVGFX_BACKEND, "BACKEND", gfxBackend) \
     Y(OPT_ADVGFX_VSYNC, "VSYNC", yesNo) \
     Y(OPT_ADVGFX_SIMPLE, "SIMPLE RENDERING", yesNo) \
-    Y(OPT_ADVGFX_APPLY, "", apply) \
+    Y(OPT_ADVGFX_APPLY, "", applyRestart) \
     Ysimple(OPT_ADVGFX_BACK, "BACK") \
     Z(OPT_ADVGFX_COUNT, "")
 
@@ -186,7 +190,7 @@ static const char *dummy[] = {};
 #define ADVSFX_OPTIONS(X, Xsimple, Y, Ysimple, Z) \
     X(OPT_ADVSFX_QUALITY, "QUALITY", sfxQuality) \
     Y(OPT_ADVSFX_LOADING, "LOADING MODE", sfxLoading) \
-    Y(OPT_ADVSFX_APPLY, "", apply) \
+    Y(OPT_ADVSFX_APPLY, "", applyRestart) \
     Ysimple(OPT_ADVSFX_BACK, "BACK") \
     Z(OPT_ADVSFX_COUNT, "")
 
@@ -231,6 +235,7 @@ static const char *volumes[] = {
 
 CREATE_SUBOPTS(yesNo, YESNO_SUBOPTS);
 CREATE_SUBOPTS(apply, APPLY_SUBOPTS);
+CREATE_SUBOPTS(applyRestart, APPLYRESTART_SUBOPTS);
 CREATE_SUBOPTS(wndRes, WNDRES_SUBOPTS);
 CREATE_SUBOPTS(fullscreen, FULLSCREEN_SUBOPTS);
 CREATE_SUBOPTS(gfxBackend, BACKEND_SUBOPTS);
