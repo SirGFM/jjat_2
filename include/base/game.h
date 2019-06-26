@@ -26,6 +26,8 @@ enum enGameFlags {
   , CMD_CUSTOMINPUT = 0x04
   , FX_PRETTYRENDER = 0x08
   , CMD_LAZYLOAD    = 0x10
+  , CMD_TIMER       = 0x20
+  , CMD_TP_RELEASE  = 0x40
 };
 typedef enum enGameFlags gameFlags;
 

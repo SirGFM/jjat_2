@@ -154,6 +154,11 @@ extern configCtx glConfig;
     Ysimple(OPTS_SFXLOADING_BLOCKING, "BLOCKING") \
     Z(OPTS_SFXLOADING_COUNT, "") \
 
+#define TPMODE_SUBOPTS(X, Xsimple, Y, Ysimple, Z) \
+    Xsimple(OPTS_TPMODE_PRESS, "TELEPORT ON PRESS") \
+    Ysimple(OPTS_TPMODE_RELEASE, "TELEPORT ON RELEASE") \
+    Z(OPTS_TPMODE_COUNT, "") \
+
 #define MAIN_OPTIONS(X, Xsimple, Y, Ysimple, Z) \
     Xsimple(OPT_DISPLAY, "DISPLAY") \
     Ysimple(OPT_AUDIO, "AUDIO") \
@@ -197,6 +202,7 @@ static const char *dummy[] = {};
 #define GAME_OPTIONS(X, Xsimple, Y, Ysimple, Z) \
     X(OPT_GAME_ASYNC, "2 PLAYER MODE", yesNo) \
     Y(OPT_GAME_TIMER, "TIMER", yesNo) \
+    Y(OPT_GAME_TP_MODE, "", teleportMode) \
     Ysimple(OPT_GAME_ADVANCED, "ADVANCED") \
     Ysimple(OPT_GAME_BACK, "BACK") \
     Z(OPT_GAME_COUNT, "")
@@ -241,6 +247,7 @@ CREATE_SUBOPTS(fullscreen, FULLSCREEN_SUBOPTS);
 CREATE_SUBOPTS(gfxBackend, BACKEND_SUBOPTS);
 CREATE_SUBOPTS(sfxQuality, SFXQUALITY_SUBOPTS);
 CREATE_SUBOPTS(sfxLoading, SFXLOADING_SUBOPTS);
+CREATE_SUBOPTS(teleportMode, TPMODE_SUBOPTS);
 CREATE_OPTS(optionsMenu, MAIN_OPTIONS, const);
 CREATE_OPTS(gfxMenu, GFX_OPTIONS, /* not const */);
 CREATE_OPTS(advGfxMenu, ADVGFX_OPTIONS, const);
@@ -347,7 +354,6 @@ static err applyFps() {
 
 static err applyGfx() {
     gfmRV rv;
-    err erv;
     int zoom = 0;
 
     switch ((enum fullscreen_enum)gfxMenu_pos[OPT_GFX_SET_FULLSCREEN]) {
@@ -502,9 +508,22 @@ static err applyOptions(enum enCurMenu menu, int idx, int count) {
             const int val = gameMenu_pos[i];
             switch (i) {
             case OPT_GAME_ASYNC:
-                /* TODO */
+                if (OPTS_YES == (enum yesNo_enum)val) {
+                    game.flags |= AC_SWORDY;
+                    game.flags &= ~AC_GUNNY;
+                }
+                else
+                    game.flags |= AC_BOTH;
             case OPT_GAME_TIMER:
-                /* TODO */
+                if (OPTS_YES == (enum yesNo_enum)val)
+                    game.flags |= CMD_TIMER;
+                else
+                    game.flags &= ~CMD_TIMER;
+            case OPT_GAME_TP_MODE:
+                if (OPTS_TPMODE_RELEASE == (enum teleportMode_enum)val)
+                    game.flags |= CMD_TP_RELEASE;
+                else
+                    game.flags &= ~CMD_TP_RELEASE;
             default: {}
             }
         } break;
