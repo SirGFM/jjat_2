@@ -7,7 +7,6 @@
 #    - GFRAME_INCLUDES
 #    - GFRAME_LIBS
 #    - CC
-#    - ASSETS_SYMLINK
 
 #=======================================================================
 # CONFIGURABLE VARIABLES
@@ -172,17 +171,17 @@
 all: bin/$(OS)_$(MODE)/$(TARGET)
 
 # Rule for building/linking the game
-bin/$(OS)_release/$(TARGET): $(OBJLIST) $(ICON) | bin/$(OS)_$(MODE)/$(TARGET).mkdir
+bin/$(OS)_release/$(TARGET): $(OBJLIST) $(ICON) | bin/$(OS)_$(MODE)/$(TARGET).mkdir bin/$(OS)_release/assets
 	@ echo '[ CC] Release target: $@'
 	@ $(CC) $(CFLAGS)    -O3 -o $@ $(OBJLIST) $(ICON) $(LDFLAGS)
 
-bin/$(OS)_debug/$(TARGET): $(OBJLIST) $(ICON) $(ASSETS_SYMLINK) | bin/$(OS)_$(MODE)/$(TARGET).mkdir
+bin/$(OS)_debug/$(TARGET): $(OBJLIST) $(ICON) | bin/$(OS)_$(MODE)/$(TARGET).mkdir bin/$(OS)_debug/assets
 	@ echo '[ CC] Debug target: $@'
 	@ $(CC) $(CFLAGS) -g -O0 -o $@ $(OBJLIST) $(ICON) $(LDFLAGS)
 
-bin/Linux_debug/assets: | bin/$(OS)_$(MODE)/$(TARGET).mkdir
+%/assets:
 	@ echo '[LNK] Creating symbolic link for assets...'
-	@ cd bin/Linux_debug/; ln -s ../../assets/ .
+	@ ln -s ../../assets/ $@
 
 # Actual rule for building a %.o from a %.c
 obj/$(OS)_release/%.o: %.c
