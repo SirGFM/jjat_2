@@ -83,19 +83,24 @@ void handleInput() {
 #endif /* JJATENGINE */
 }
 
-#if defined(DEBUG)
 /**
  * Handle the debug controls of the game's simulation. These allow the update
  * loop to be paused/resumed or even stepped.
  */
 void handleDebugInput() {
+#if !defined(DEBUG)
+    if (!(game.flags & CMD_DEBUG))
+        return ERR_OK;
+#endif /* !defined(DEBUG) */
     if (inputList != (button*)&input) {
         return;
     }
 
+#if defined(DEBUG)
     if (DID_JUST_RELEASE(dbgResetFps)) {
         gfm_resetFPS(game.pCtx);
     }
+#endif /* defined(DEBUG) */
 
     if (DID_JUST_RELEASE(dbgPause)) {
         /* Toggle pause/resume update loop */
@@ -112,6 +117,7 @@ void handleDebugInput() {
         game.debugRunState = DBG_STEP;
     }
 
+#if defined(DEBUG)
     if (DID_JUST_RELEASE(qt)) {
         /* Toggle quadtree visibility */
         collision.flags ^= CF_VISIBLE;
@@ -125,8 +131,8 @@ void handleDebugInput() {
             rv = gfm_recordGif(game.pCtx, 10000 /* ms */, "anim.gif", 8, 0);
         }
     }
+#endif /* defined(DEBUG) */
 }
-#endif
 
 /** Retrieve the state of every button */
 err updateInput() {
@@ -156,6 +162,10 @@ err updateDebugInput() {
     if (inputList != (button*)&input) {
         return ERR_OK;
     }
+#if !defined(DEBUG)
+    if (!(game.flags & CMD_DEBUG))
+        return ERR_OK;
+#endif /* !defined(DEBUG) */
 
     rv = gfm_getInput(&pInput, game.pCtx);
     ASSERT(rv == GFMRV_OK, rv);

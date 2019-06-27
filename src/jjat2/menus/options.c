@@ -528,13 +528,18 @@ static err applyOptions(enum enCurMenu menu, int idx, int count) {
             }
         } break;
         case ADVGAME_OPTIONS: {
+            const int val = advGameMenu_pos[i];
             switch (i) {
             case OPT_ADVGAME_FPS:
             case OPT_ADVGAME_DRAWRATE:
                 erv = applyFps();
                 break;
             case OPT_ADVGAME_DEBUG:
-                /* TODO */
+                if (OPTS_YES == (enum yesNo_enum)val)
+                    game.flags |= CMD_DEBUG;
+                else
+                    game.flags &= ~CMD_DEBUG;
+                break;
             default: {}
             }
         } break;

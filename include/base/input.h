@@ -56,13 +56,11 @@ extern menuInputCtx menuInput;
  */
 void handleInput();
 
-#if defined(DEBUG)
 /**
  * Handle the debug controls of the game's simulation. These allow the update
  * loop to be paused/resumed or even stepped.
  */
 void handleDebugInput();
-#endif /* DEBUG */
 
 /** Retrieve the state of every button */
 err updateInput();

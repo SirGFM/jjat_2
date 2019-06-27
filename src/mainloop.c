@@ -54,6 +54,7 @@ err mainloop() {
 
     /* Set initial state */
     game.nextState = ST_MENUSTATE;
+    game.debugRunState = DBG_RUNNING;
 
     while (gfm_didGetQuitFlag(game.pCtx) != GFMRV_TRUE) {
         /* Switch state */
@@ -88,13 +89,13 @@ err mainloop() {
         rv = gfm_handleEvents(game.pCtx);
         ASSERT_TO(rv == GFMRV_OK, erv = ERR_GFMERR, __ret);
 
-#if defined(DEBUG)
         erv = updateDebugInput();
         ASSERT_TO(erv == ERR_OK, NOOP(), __ret);
         handleDebugInput();
-#endif
 
-        while (DO_UPDATE()) {
+        while ((game.debugRunState == DBG_RUNNING
+                || game.debugRunState == DBG_STEP)
+                && gfm_isUpdating(game.pCtx) == GFMRV_TRUE) {
             if (game.currentState != ST_LOADSTATE && isLoading()) {
                 startLoadstate();
             }
@@ -128,7 +129,8 @@ err mainloop() {
             rv = gfm_fpsCounterUpdateEnd(game.pCtx);
             ASSERT_TO(rv == GFMRV_OK, erv = ERR_GFMERR, __ret);
 
-            DEBUG_STEP();
+            if (game.debugRunState == DBG_STEP)
+                game.debugRunState = DBG_PAUSED;
         }
 
         while (gfm_isDrawing(game.pCtx) == GFMRV_TRUE) {

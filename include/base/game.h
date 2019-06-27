@@ -28,6 +28,7 @@ enum enGameFlags {
   , CMD_LAZYLOAD    = 0x10
   , CMD_TIMER       = 0x20
   , CMD_TP_RELEASE  = 0x40
+  , CMD_DEBUG       = 0x80
 };
 typedef enum enGameFlags gameFlags;
 
@@ -61,41 +62,11 @@ struct stGameCtx {
     state currentState;
     /** State that will start being played on the next frame */
     state nextState;
-#if defined(DEBUG)
     /** Running state for the debug build. Allows the game to be executed
      * step-by-step. */
     debugRunState debugRunState;
-#endif
 };
 typedef struct stGameCtx gameCtx;
-
-/** DO_UPDATE wraps the conditional that decides if the update loop should run,
- * allowing for stepping frames/pause the update loop when in debug mode.
- *
- * Note that order is extremely important in this conditional. Since buttons'
- * 'just' flag is set on gfm_isUpdating call, it must only be called before an
- * actual frame. Therefore, it must come after the short-circuit conditional */
-#if defined(DEBUG)
-#  define DO_UPDATE() \
-     ((game.debugRunState == DBG_RUNNING \
-         || game.debugRunState == DBG_STEP) \
-         && gfm_isUpdating(game.pCtx) == GFMRV_TRUE)
-#else
-#  define DO_UPDATE() \
-     (gfm_isUpdating(game.pCtx) == GFMRV_TRUE)
-#endif
-
-/** On debug mode, DEBUG_STEP pauses the update loop if a step was requested */
-#if defined(DEBUG)
-#  define DEBUG_STEP() \
-     do { \
-         if (game.debugRunState == DBG_STEP) { \
-            game.debugRunState = DBG_PAUSED; \
-         } \
-     } while (0)
-#else
-#  define DEBUG_STEP()
-#endif
 
 extern gameCtx game;
 
