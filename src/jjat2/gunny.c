@@ -178,6 +178,13 @@ err drawGunny(entityCtx *gunny) {
     return ERR_OK;
 }
 
+static inline int isTargetSet() {
+    return teleport.pCurEffect != 0;
+}
+static inline int isShooting(entityCtx *gunny) {
+    return gunny->flags & gunny_attack;
+}
+
 /**
  * Update the object's physics.
  *
@@ -232,8 +239,7 @@ err preUpdateGunny(entityCtx *gunny) {
 
     /* Handle attack */
     do {
-        if (DID_JUST_PRESS(gunnyAtk) && !(gunny->flags & gunny_attack)
-                    && teleport.pCurEffect == 0) {
+        if (DID_JUST_PRESS(gunnyAtk) && !isShooting(gunny) && !isTargetSet()) {
             gfmSprite *pBullet;
             double vx;
             int dir, x, y;
@@ -328,6 +334,11 @@ err postUpdateGunny(entityCtx *gunny) {
     return ERR_OK;
 }
 
+static inline int shouldTeleport() {
+    return DID_JUST_PRESS(gunnyAtk) ||
+            ((game.flags & CMD_TP_RELEASE) && DID_JUST_RELEASE(gunnyAtk));
+}
+
 /**
  * Check if gunny should be teleported and do so.
  *
@@ -335,18 +346,16 @@ err postUpdateGunny(entityCtx *gunny) {
  */
 err updateGunnyTeleport(entityCtx *gunny) {
     err erv;
+    const int canTp = !(gunny->flags & gunny_justAttacked);
 
-    if (!(gunny->flags & gunny_justAttacked) && DID_JUST_PRESS(gunnyAtk)
-            && teleport.pCurEffect != 0) {
+    if (canTp && isTargetSet() && shouldTeleport()) {
         /* Teleport */
         erv = teleportEntity(gunny);
         ASSERT(erv == ERR_OK, erv);
     }
 
     /* Release the flag so the player may teleport */
-    if (DID_JUST_RELEASE(gunnyAtk)) {
-        gunny->flags &= ~gunny_justAttacked;
-    }
+    gunny->flags &= ~gunny_justAttacked;
 
     return ERR_OK;
 }
