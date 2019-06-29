@@ -14,4 +14,9 @@ err initDisplayList();
  */
 void freeDisplayList();
 
+/**
+ * Save the current options.
+ */
+err saveOptions();
+
 #endif /* __JJAT2_OPTIONS_H__ */

@@ -15,6 +15,10 @@
 
 #include <string.h>
 
+#if defined(JJATENGINE)
+#  include <jjat2/menus/options.h>
+#endif /* JJATENGINE */
+
 /**
  * Basic setup for the game.
  *
@@ -39,6 +43,9 @@
 err setupGame(int argc, char *argv[], configCtx *config) {
     err erv;
     gfmRV rv;
+#if defined(JJATENGINE)
+    int doSave = 0;
+#endif /* JJATENGINE */
 
     /* Alloc a new game context and set it's local directory (for logging and
      * save files) */
@@ -53,6 +60,10 @@ err setupGame(int argc, char *argv[], configCtx *config) {
         erv = cmdParse(config, argc, argv);
         ASSERT(erv == ERR_OK, erv);
     }
+#if defined(JJATENGINE)
+    else
+        doSave = 1;
+#endif /* JJATENGINE */
     config->flags &= ~CFG_RESTART;
 
     rv = gfm_setVideoBackend(game.pCtx, config->videoBackend);
@@ -125,6 +136,13 @@ err setupGame(int argc, char *argv[], configCtx *config) {
 #if defined(DEBUG)
     game.debugRunState = DBG_RUNNING;
 #endif
+
+#if defined(JJATENGINE)
+    if (doSave) {
+        erv = saveOptions();
+        ASSERT(erv == ERR_OK, erv);
+    }
+#endif /* JJATENGINE */
 
     return ERR_OK;
 }

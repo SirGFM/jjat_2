@@ -11,10 +11,13 @@
 #include <string.h>
 
 #include <GFraMe/gframe.h>
+#include <GFraMe/gfmSave.h>
 #include <GFraMe/core/gfmAudio_bkend.h>
 
 extern void *displayList;
 extern configCtx glConfig;
+
+#define CONFIG_FILE "config.sav"
 
 /* List of every option possible:
  *
@@ -260,6 +263,47 @@ enum enCurMenu {
   , ADVGAME_OPTIONS
 };
 static enum enCurMenu curMenu;
+
+static err _saveOptions(gfmSave *pSave) {
+    int *opts;
+    gfmRV rv = gfmSave_bindStatic(pSave, game.pCtx, CONFIG_FILE);
+    ASSERT(rv == GFMRV_OK, ERR_OPENW_CONFIG_2);
+
+#define SAVEF_ENUM(VAL, ...) \
+    rv = gfmSave_write(pSave, #VAL, sizeof(#VAL)-1, opts[VAL]); \
+    ASSERT(rv == GFMRV_OK, ERR_SAVE_CONFIG);
+#define SAVEF_OPTS(type, LIST) \
+    opts = (int*)type ## _pos; \
+    LIST(SAVEF_ENUM, SAVEF_ENUM, SAVEF_ENUM, SAVEF_ENUM, OPT_NOOP)
+
+    SAVEF_OPTS(gfxMenu, GFX_OPTIONS);
+    SAVEF_OPTS(advGfxMenu, ADVGFX_OPTIONS);
+    SAVEF_OPTS(sfxMenu, SFX_OPTIONS);
+    SAVEF_OPTS(advSfxMenu, ADVSFX_OPTIONS);
+    SAVEF_OPTS(gameMenu, GAME_OPTIONS);
+    SAVEF_OPTS(advGameMenu, ADVGAME_OPTIONS);
+
+    return ERR_OK;
+}
+
+err saveOptions() {
+    err erv;
+    gfmSave *pSave = 0;
+    gfmRV rv;
+
+    rv = gfmSave_getNew(&pSave);
+    ASSERT(rv == GFMRV_OK, ERR_OPENW_CONFIG_1);
+
+    erv = _saveOptions(pSave);
+    rv = gfmSave_close(pSave);
+    gfmSave_free(&pSave);
+
+    if (erv == ERR_OK && rv != GFMRV_OK)
+        erv = ERR_CLOSEW_CONFIG;
+    ASSERT(erv == ERR_OK, erv);
+
+    return ERR_OK;
+}
 
 static err load(menuCtx *ctx, enum enCurMenu _curMenu) {
     switch (_curMenu) {
@@ -547,27 +591,46 @@ static err applyOptions(enum enCurMenu menu, int idx, int count) {
 }
 
 static err moveCallback(int vpos, int hpos) {
+    err erv;
+    int doSave = 0;
+
     switch (curMenu) {
     case MAIN_OPTIONS:
         /* Does nothing. */
-        return ERR_OK;
+        erv = ERR_OK;
+        break;
     case GFX_OPTIONS:
     case ADVGFX_OPTIONS:
     case ADVSFX_OPTIONS:
         /* Does nothing, except on accept apply. */
-        return ERR_OK;
+        erv = ERR_OK;
+        break;
     case SFX_OPTIONS:
-        return applyOptions(SFX_OPTIONS, vpos, 1 /* count */);
+        erv = applyOptions(SFX_OPTIONS, vpos, 1 /* count */);
+        doSave = 1;
+        break;
     case GAME_OPTIONS:
-        return applyOptions(GAME_OPTIONS, vpos, 1 /* count */);
+        erv = applyOptions(GAME_OPTIONS, vpos, 1 /* count */);
+        doSave = 1;
+        break;
     case ADVGAME_OPTIONS:
-        return applyOptions(ADVGAME_OPTIONS, vpos, 1 /* count */);
+        erv = applyOptions(ADVGAME_OPTIONS, vpos, 1 /* count */);
+        doSave = 1;
+        break;
     default:
-        return ERR_UNHANDLED_MENU;
+        erv = ERR_UNHANDLED_MENU;
     }
+
+    if (erv == ERR_OK && doSave)
+        erv = saveOptions();
+    ASSERT(erv == ERR_OK, erv);
+
+    return erv;
 }
 
 static err acceptCallback(int vpos, int hpos) {
+    err erv;
+
     switch (curMenu) {
     case MAIN_OPTIONS:
         switch (vpos) {
@@ -589,7 +652,8 @@ static err acceptCallback(int vpos, int hpos) {
         case OPT_GFX_APPLY:
             if (gfxMenu_pos[OPT_GFX_APPLY] == OPTS_REVERT)
                 REVERT_OPTS(gfxMenu);
-            return applyGfx();
+            erv = applyGfx();
+            break;
         case OPT_GFX_ADVANCED:
             return load(&menustate, ADVGFX_OPTIONS);
         case OPT_GFX_BACK:
@@ -603,7 +667,8 @@ static err acceptCallback(int vpos, int hpos) {
                 REVERT_OPTS(advGfxMenu);
                 return ERR_OK;
             }
-            return applyAdvGfx();
+            erv = applyAdvGfx();
+            break;
         case OPT_ADVGFX_BACK:
             return back();
         }
@@ -623,7 +688,8 @@ static err acceptCallback(int vpos, int hpos) {
                 REVERT_OPTS(advSfxMenu);
                 return ERR_OK;
             }
-            return applyAdvSfx();
+            erv = applyAdvSfx();
+            break;
         case OPT_ADVSFX_BACK:
             return back();
         }
@@ -645,8 +711,13 @@ static err acceptCallback(int vpos, int hpos) {
     default:
         return ERR_UNHANDLED_MENU;
     }
-    /* TODO: Play "noop" buzz. */
-    return ERR_OK;
+
+    /* TODO: Play "noop" buzz? */
+    if (erv == ERR_OK)
+        erv = saveOptions();
+    ASSERT(erv == ERR_OK || erv == ERR_RESTART, erv);
+
+    return erv;
 }
 
 err loadOptions(menuCtx *ctx) {

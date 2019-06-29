@@ -37,6 +37,10 @@
     X(ERR_SETFPS) \
     X(ERR_UNHANDLED_MENU) \
     X(ERR_RESTART) \
+    X(ERR_OPENW_CONFIG_1) \
+    X(ERR_OPENW_CONFIG_2) \
+    X(ERR_CLOSEW_CONFIG) \
+    X(ERR_SAVE_CONFIG) \
     X(ERR_MAX)
 
 #endif /* __CONF_ERROR_LIST_H__ */
