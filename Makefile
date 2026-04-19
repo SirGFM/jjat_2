@@ -1,234 +1,240 @@
-#  Configurable environment variables:
-#    - OS: Inferred from `uname` (supported: Linux, Win)
-#    - ARCH: Inferred from `uname -m` (supported: x86_64, i386)
-#  OS specific configurable environment variables:
-#    - MINGW_INCLUDES
-#    - MINGW_LIBS
-#    - GFRAME_INCLUDES
-#    - GFRAME_LIBS
-#    - CC
-#    - ASSETS_SYMLINK
-
-#=======================================================================
-# CONFIGURABLE VARIABLES
-#=======================================================================
-# Define the list of subdirectories (which exist within src/)
-  SUBDIRLIST := base jjat2 jjat2/enemies jjat2/events
-# Run make using bash, so syntax for conditionals works as expected
-  SHELL := /bin/bash
-
-# Define every object required by compilation
-  OBJS := \
-         collision.o \
-         mainloop.o \
-         base/cmdParse.o \
-         base/collision.o \
-         base/gfx.o \
-         base/input.o \
-         base/loadstate.o \
-         base/main.o \
-         base/resource.o \
-         base/sfx.o \
-         base/setup.o \
-         base/static.o \
-         jjat2/camera.o \
-         jjat2/checkpoint.o \
-         jjat2/dictionary.o \
-         jjat2/enemy.o \
-         jjat2/entity.o \
-         jjat2/event.o \
-         jjat2/fx_group.o \
-         jjat2/gunny.o \
-         jjat2/hitbox.o \
-         jjat2/leveltransition.o \
-         jjat2/playstate.o \
-         jjat2/static.o \
-         jjat2/swordy.o \
-         jjat2/teleport.o \
-         jjat2/ui.o \
-         jjat2/enemies/g_walky.o \
-         jjat2/enemies/spiky.o \
-         jjat2/enemies/turret.o \
-         jjat2/enemies/walky.o \
-         jjat2/events/door.o \
-         jjat2/events/pressurepad.o
-
-# Define the target name
-  TARGET := game
-
-# Define the generated icon
-  WINICON := assets/icon.o
-  ifeq ($(OS), Win)
-    ICON := $(WINICON)
-  endif
-
-# List every header file
-  HEADERS := $(shell find include/ -name *.h)
-#=======================================================================
+.PHONY: linux linux-32 linux-64 linux-debug linux-debug-32 linux-debug-64 \
+	win win-32 win-64 win-debug win-debug-32 win-debug-64 \
+	web \
+	all game clean
 
 
-#=======================================================================
-# COMPILATION FLAGS/SETTINGS
-#=======================================================================
-  # Set OS
-  OS ?= $(shell uname)
-  ifneq (, $(findstring $(OS), Windows_NT))
-    OS := MINGW
-  endif
-  ifneq (, $(findstring $(OS), MINGW))
-    # Since Window's build might differ from the system's arch, set it
-    # manually here
-    ifneq (, $(findstring $(OS), 64))
-      ARCH ?= x86_64
-    else
-      ARCH ?= i386
-    endif
-    OS := Win
-  endif
+# =========================================================================
+# General output configuration.
 
-  # Set the architecture
-  ARCH ?= $(shell uname -m)
+# Base name for the output binary.
+OUTPUT_BIN := game
+# =========================================================================
 
-  # Set OS specific setting
-  DIRLIST :=
-  include conf/Makefile.*
 
-  # Define CFLAGS
-  ifneq (, $(GFRAME_INCLUDES))
-    CFLAGS := $(CFLAGS) -I$(GFRAME_INCLUDES)
-  endif
-  CFLAGS := $(CFLAGS) -I"./include/" -I"./misc" -Wall
+# =========================================================================
+# Configure the OS/arch variables
+# and ensure that only a single target was specified.
+undefine TGT
+ifneq ($(filter linux%,$(MAKECMDGOALS)),)
+  OS := linux
+  TGT := $(TGT)linux
+endif
+ifneq ($(filter win%,$(MAKECMDGOALS)),)
+  OS := win
+  EXT := .exe
+  TGT := $(TGT)win
+endif
+ifneq ($(filter web,$(MAKECMDGOALS)),)
+  OS := emscript
+  EXT := .ignore
+  TGT := $(TGT)web
+endif
 
-  # TODO Uncomment to enable the background
-  CFLAGS := $(CFLAGS) -DJJAT_ENABLE_BACKGROUND
+ifneq ($(filter-out linux win web,$(TGT)),)
+  $(error multiple targets were specified!)
+endif
 
-  # Ugly hack: I'll put everything specific to the JJAT engine within these #ifdefs
-  CFLAGS := $(CFLAGS) -DJJATENGINE
+undefine TGT
+ifneq ($(filter %-32,$(MAKECMDGOALS)),)
+  ARCH := i686
+  TGT := $(TGT)32
+endif
+ifneq ($(filter %-64,$(MAKECMDGOALS)),)
+  ARCH := x86_64
+  TGT := $(TGT)64
+endif
 
-  ifeq ($(ARCH), x86_64)
+ifneq ($(filter-out 32 64,$(TGT)),)
+  $(error multiple architectures were specified!)
+endif
+# =========================================================================
+
+
+# =========================================================================
+# Automatically configure the build environment.
+-include /gframe-dev/Makefile.env
+# =========================================================================
+
+
+# =========================================================================
+# Configure the flags for debug mode.
+MODE := release
+ifneq ($(findstring debug,$(MAKECMDGOALS)),)
+  MODE := debug
+endif
+
+ifeq ($(filter-out debug,$(MODE)),)
+  OLEVEL := -O0 -g
+  CFLAGS := $(CFLAGS) $(OLEVEL) -DDEBUG
+  LIB_SUFFIX := _dbg
+endif
+# =========================================================================
+
+# =========================================================================
+# Configure the required libs and include paths
+CFLAGS := $(CFLAGS) -Iinclude
+
+# XXX: Removed -lm
+LDLIBS := -lGFraMe$(LIB_SUFFIX) -lCSynth
+
+ifeq (win, $(OS))
+  LDFLAGS := $(LDFLAGS) -mwindows
+  LDLIBS := $(LDLIBS) -lSDL2 -lopengl32
+endif
+ifeq (emscript, $(OS))
+  CFLAGS := $(CFLAGS)
+  LDLIBS := -s USE_SDL=2 -s WASM=1 $(LIB_DIR)/libGFraMe.bc $(LIB_DIR)/libCSynth.bc
+endif
+
+ifeq ($(MODE)-$(OS), debug-linux)
+  CFLAGS := $(CFLAGS) -fsanitize=address -fno-omit-frame-pointer
+  LDFLAGS := $(LDFLAGS) -fsanitize=address -fno-omit-frame-pointer
+endif
+
+CFLAGS := $(CFLAGS) -I"./misc" -Wall
+
+ifeq ($(ARCH), x86_64)
     CFLAGS := $(CFLAGS) -m64 -DALIGN=8
-  else
+else
     CFLAGS := $(CFLAGS) -m32 -DALIGN=4
-  endif
+endif
 
-  # Define LDFLAGS
-  LDFLAGS := $(LDFLAGS) -L$(GFRAME_LIBS)
-  ifeq ($(RELEASE), yes)
-    LDFLAGS := $(LDFLAGS) -lGFraMe
-  else
-    LDFLAGS := $(LDFLAGS) -lGFraMe_dbg
-  endif
-
-  ifneq (, $(filter clean, $(MAKECMDGOALS)))
-    IGNORE_DEP := true
-  endif
-  ifneq (, $(filter mkdirs, $(MAKECMDGOALS)))
-    IGNORE_DEP := true
-  endif
-#=======================================================================
+# Ugly hack: I'll put everything specific to the JJAT engine within these #ifdefs
+CFLAGS := $(CFLAGS) -DJJAT_ENABLE_BACKGROUND -DJJATENGINE
+# =========================================================================
 
 
-#=======================================================================
-# (OTHER) VARIABLE EXPASION AND DEFITION
-#=======================================================================
-  ifeq ($(RELEASE), yes)
-    MODE := release
-  else
-    MODE := debug
-  endif
-  OBJLIST := $(OBJS:%=obj/$(OS)_$(MODE)/%)
-
-  VPATH := src
-#=======================================================================
-
-
-#=======================================================================
-# CONFIGURATION RULES
-#=======================================================================
-# Clear the suffixes' default rule, since there's an explicit one
-.SUFFIXES:
-
-# Define all targets that doesn't match its generated file
-.PHONY: all clean mkdirs __clean deploy
-#=======================================================================
-
-
-#=======================================================================
-# RULES
+# =========================================================================
+# Recursive wildcard from https://stackoverflow.com/a/18258352
 #
-# Note that basic compilation goes like:
-#  - Target depends on some %.o
-#  - Rules specifing dependencies for building %.o comes from a file %.d
-#  - Files %.d are generated from their %.c, by checking its includes
-#  - %.o are generated from a generic %.o: %.c rule
-#=======================================================================
-all: bin/$(OS)_$(MODE)/$(TARGET)
+# To find every .c file in src:
+#   FILES := $(call rwildcard, , *.c)
+# To find all the .c and .h files in src:
+#   FILES := $(call rwildcard, src/, *.c *.h)
+rwildcard=$(foreach d,$(wildcard $1*), \
+	$(call rwildcard,$d/,$2) \
+	$(filter $(subst *,%,$2),$d))
+# =========================================================================
 
-# Rule for building/linking the game
-bin/$(OS)_release/$(TARGET): $(OBJLIST) $(ICON)
-	@ echo '[ CC] Release target: $@'
-	@ $(CC) $(CFLAGS)    -O3 -o $@ $(OBJLIST) $(ICON) $(LDFLAGS)
 
-bin/$(OS)_debug/$(TARGET): $(OBJLIST) $(ICON) $(ASSETS_SYMLINK)
-	@ echo '[ CC] Debug target: $@'
-	@ $(CC) $(CFLAGS) -g -O0 -o $@ $(OBJLIST) $(ICON) $(LDFLAGS)
+# =========================================================================
+# Prepare a unique output directory based on the OS/arch
+TGT_DIR := $(OS)-$(ARCH)-$(MODE)
+# =========================================================================
 
-bin/Linux_debug/assets:
-	@ echo '[LNK] Creating symbolic link for assets...'
-	@ cd bin/Linux_debug/; ln -s ../../assets/ .
 
-# Actual rule for building a %.o from a %.c
-obj/$(OS)_release/%.o: %.c
-	@ echo '[ CC] $< -> $@ (RELEASE)'
-	@ $(CC) $(CFLAGS)            -O3 -o $@ -c $<
-obj/$(OS)_debug/%.o: %.c
-	@ echo '[ CC] $< -> $@ (DEBUG)'
-	@ $(CC) $(CFLAGS) -DDEBUG -g -O0 -o $@ -c $<
+# =========================================================================
+# Set the default rule.
+all: game
+# =========================================================================
 
-# Include every rule from a depency (properly tracks header dependency)
--include $(OBJLIST:%.o=%.d)
+
+# =========================================================================
+# Find every input file in ./src and convert it to a target object.
+# Additionally, for Windows, also add the icon to the list of objects.
+SOURCES := $(call rwildcard,src,*.c)
+
+SOURCE_OBJECTS := $(SOURCES:%.c=obj/$(TGT_DIR)/%.o)
+
+ifeq (win,$(OS))
+  ICONS := $(call rwildcard,assets,*.rc)
+  ICON_OBJECTS := $(ICONS:%.rc=obj/$(TGT_DIR)/%.o)
+endif
+
+OBJECTS := $(SOURCE_OBJECTS) $(ICON_OBJECTS)
+
+WEB_ASSETS_BMP := $(call rwildcard,assets,*bmp)
+WEB_ASSETS := $(WEB_ASSETS_BMP)
+# =========================================================================
+
+
+# =========================================================================
+# Track dependencies in source files.
+# This is only executed if any rule other than clean is specified.
+ifneq ($(filter-out clean,$(MAKECMDGOALS)),)
+-include $(SOURCE_OBJECTS:%.o=%.d)
+endif
+# =========================================================================
+
+
+# =========================================================================
+# Create directories as needed.
+%.mkdir:
+	@ echo -e '\tmkdir $(@D)'
+	@ mkdir -p $(@D)
+	@ touch $@
+# =========================================================================
+
+
+# =========================================================================
+# Build the final game.
+# Instead of manually defining paths, use $(TGT_DIR) to simplify the rules.
+linux linux-32 linux-64 linux-debug linux-debug-32 linux-debug-64 \
+	win win-32 win-64 win-debug win-debug-32 win-debug-64: game
+
+web: bin/$(TGT_DIR)/$(OUTPUT_BIN).html
+game: bin/$(TGT_DIR)/$(OUTPUT_BIN)$(EXT)
+
+bin/$(TGT_DIR)/$(OUTPUT_BIN)$(EXT): $(OBJECTS) | bin/$(TGT_DIR)/$(OUTPUT_BIN).mkdir
+	@ echo -e '\t[ CC] Release target: $@'
+	@ $(CC) $(OLEVEL) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
+bin/$(TGT_DIR)/$(OUTPUT_BIN).html: bin/$(TGT_DIR)/$(OUTPUT_BIN).bc $(WEB_ASSETS)
+	@ echo -e '\t[ CC] Release target: $@'
+	@ $(CC) -o $@ $< $(LDLIBS) $(foreach FILE,$(WEB_ASSETS),--preload-file $(FILE)@/$(FILE:assets/%=%))
+
+bin/$(TGT_DIR)/$(OUTPUT_BIN).bc: $(OBJECTS) | bin/$(TGT_DIR)/$(OUTPUT_BIN).mkdir
+	@ echo -e '\t[ CC] Release target: $@'
+	@ $(CC) $(OLEVEL) -shared -o $@ $^
+# =========================================================================
+
+
+# =========================================================================
+# Build object files from source files.
+obj/$(TGT_DIR)/%.o: %.rc | obj/$(TGT_DIR)/%.mkdir
+	@ echo -e '\t[WRC] $< -> $@'
+	@ $(WINDRES) $< $@
+
+obj/$(TGT_DIR)/%.o: %.c | obj/$(TGT_DIR)/%.mkdir
+	@ echo -e '\t[ CC] $< -> $@'
+	@ $(CC) $(CFLAGS) -o $@ -c $<
+
+obj/$(TGT_DIR)/%.d: %.c | obj/$(TGT_DIR)/%.mkdir
+	@ echo -e '\t[DEP] $< -> $@'
+	@ gcc $(CFLAGS) -MM -MG -MT "$@ $(@:%.d=%.o)" $< > $@
 
 misc/auto/collisioncases.c: misc/collision.json
 	@ echo '[OFF] Generating collision switch-case'
 	@ mkdir -p misc/auto/
 	@ python misc/collision.py $< $@
+# =========================================================================
 
-# Create the dependency files from their source
-obj/$(OS)_$(MODE)/%.d: %.c
-	@ # Hack required so this won't run when clean or mkdirs is run
-	@ if [ ! -z "$(IGNORE_DEP)" ]; then exit 1; fi
-	@ echo '[DEP] $< -> $@'
-	@ gcc $(CFLAGS) -MM -MG -MT "$@ $(@:%.d=%.o)" $< > $@
 
-# Rule for generating the icon
-$(WINICON): assets/icon.rc
-	$(WINDRES) assets/icon.rc $(WINICON)
+# =========================================================================
+# Clean up.
+clean:
+	rm -rf ./obj/ ./bin/
+# =========================================================================
 
-clean: __clean mkdirs
 
-mkdirs:
-	@ echo "Creating output directories..."
-	@ mkdir -p $(DIRLIST)
-
-__clean:
-	@ echo "Cleaning..."
-	@ rm -rf $(DIRLIST) bin/ obj/
-
-deploy:
-	@ echo 'Generating version file...'
-	@ git tag -l --points-at `git log -n 1 --oneline | awk ' {print $$1} '` > VERSION.new
-	@ if [ -z "`cat VERSION.new`" ]; then echo "Failed to deploy: missing version/tag"; false; fi
-	@ if [ -f VERSION ] && [ "`cat VERSION`" == "`cat VERSION.new`" ]; then \
-        echo "Failed to deploy: version/tag has already been deployed"; false; fi
-	@ echo 'Deploying Linux 64 version...'
-	@ ./rush/rush protoman linux64 VERSION.new
-	@ echo 'Deploying Linux 32 version...'
-	@ ./rush/rush megaman linux32 VERSION.new
-	@ echo 'Deploying Windows 64 version...'
-	@ ./rush/rush crashman-64 win64 VERSION.new
-	@ echo 'Deploying Windows 32 version...'
-	@ ./rush/rush crashman-32 win32 VERSION.new
-	@ rm -f VERSION
-	@ mv VERSION.new VERSION
-#=======================================================================
-
+# =========================================================================
+# Deploy rule
+# TODO: Review this
+#deploy:
+#	@ echo 'Generating version file...'
+#	@ git tag -l --points-at `git log -n 1 --oneline | awk ' {print $$1} '` > VERSION.new
+#	@ if [ -z "`cat VERSION.new`" ]; then echo "Failed to deploy: missing version/tag"; false; fi
+#	@ if [ -f VERSION ] && [ "`cat VERSION`" == "`cat VERSION.new`" ]; then \
+#        echo "Failed to deploy: version/tag has already been deployed"; false; fi
+#	@ echo 'Deploying Linux 64 version...'
+#	@ ./rush/rush protoman linux64 VERSION.new
+#	@ echo 'Deploying Linux 32 version...'
+#	@ ./rush/rush megaman linux32 VERSION.new
+#	@ echo 'Deploying Windows 64 version...'
+#	@ ./rush/rush crashman-64 win64 VERSION.new
+#	@ echo 'Deploying Windows 32 version...'
+#	@ ./rush/rush crashman-32 win32 VERSION.new
+#	@ rm -f VERSION
+#	@ mv VERSION.new VERSION
+# =========================================================================

@@ -113,7 +113,7 @@
      X_KEY(dbgPause \
         , gfmKey_f5) \
      X_KEY(dbgSetPos \
-        , gfmPointer_button)
+        , gfmPointer_leftButton)
 #else
 #  define X_DEBUG_BUTTON_LIST
 #endif
