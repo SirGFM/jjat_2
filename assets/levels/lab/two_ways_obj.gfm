@@ -5,7 +5,7 @@ obj loadzone 464 176 32 32 [ dest , lab/danger_everywhere ] [ dir , right ] [ tg
 obj loadzone -16 160 32 32 [ dest , lab/danger_everywhere ] [ dir , left ] [ tgt_x , 49 ] [ tgt_y , 24 ]
 obj loadzone 432 464 32 32 [ dest , lab/something_is_coming ] [ dir , down ] [ tgt_x , 24 ] [ tgt_y , 1 ]
 obj spiky 96 368 8 8
-obj spiky 199 368 8 8
+obj spiky 200 368 8 8
 obj turret 32 432 8 8
 obj spiky 72 456 8 8
 obj spiky 152 456 8 8

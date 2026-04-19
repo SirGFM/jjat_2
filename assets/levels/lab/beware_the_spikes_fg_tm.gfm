@@ -43,10 +43,6 @@ type floor 1095
 type floor 1096
 type floor 1097
 type floor 1152
-type spike 1153
-type spike 1154
-type spike 1155
-type spike 1156
 type floor 1204
 type floor 1205
 type floor 1206
@@ -55,6 +51,10 @@ type floor 1268
 type floor 1269
 type floor 1270
 type floor 1271
+type spike 1153
+type spike 1154
+type spike 1155
+type spike 1156
 type blue_platform 1344
 type blue_platform 1345
 type blue_platform 1346
