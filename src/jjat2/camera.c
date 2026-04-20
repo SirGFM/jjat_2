@@ -9,6 +9,8 @@
 #include <conf/game.h>
 #include <jjat2/camera.h>
 #include <jjat2/entity.h>
+#include <jjat2/gunny.h>
+#include <jjat2/teleport.h>
 #include <jjat2/ui.h>
 #include <GFraMe/gfmCamera.h>
 
@@ -59,6 +61,19 @@ static inline err _centerCamera(entityCtx *pSwordy, entityCtx *pGunny
     gfmSprite_getCenter(&gx, &gy, pGunny->pSelf);
     x = _tweenValue(sx, gx, tween);
     y = _tweenValue(sy, gy, tween);
+
+    getLatestBulletCenter(&gx, &gy, pGunny);
+    if (gx >= 0 && gy >= 0) {
+        x = _tweenValue(x, gx, MAX_TWEEN / 6);
+        y = _tweenValue(y, gy, MAX_TWEEN / 6);
+    }
+
+    getTeleporterCenter(&gx, &gy);
+    if (gx >= 0 && gy >= 0) {
+        x = _tweenValue(x, gx, MAX_TWEEN / 6);
+        y = _tweenValue(y, gy, MAX_TWEEN / 6);
+    }
+
     gfmCamera_centerAtPoint(game.pCamera, x, y);
 
     /* Update the UI position */

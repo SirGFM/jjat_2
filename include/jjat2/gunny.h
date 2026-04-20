@@ -74,5 +74,14 @@ err postUpdateGunny(entityCtx *gunny);
  */
 err updateGunnyTeleport(entityCtx *gunny);
 
+/**
+ * Retrieves the position of the most recently shot bullet.
+ *
+ * @param [out]y     The bullet's horizontal position (or -1)
+ * @param [out]y     The bullet's vertical position (or -1)
+ * @param [ in]gunny The player.
+ */
+void getLatestBulletCenter(int *x, int *y, entityCtx *gunny);
+
 #endif /* __JJAT2_GUNNY_H__ */
 

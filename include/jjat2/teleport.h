@@ -62,5 +62,12 @@ err updateTeleporterTarget();
  */
 err teleportEntity(entityCtx *pEnt);
 
-#endif /* __JJAT2_TELEPORT_H__ */
+/**
+ * Retrieves the position of the teleport target.
+ *
+ * @param [out]y     The bullet's horizontal position (or -1)
+ * @param [out]y     The bullet's vertical position (or -1)
+ */
+void getTeleporterCenter(int *x, int *y);
 
+#endif /* __JJAT2_TELEPORT_H__ */

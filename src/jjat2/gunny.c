@@ -14,6 +14,7 @@
 #  include <GFraMe/gframe.h>
 #  include <GFraMe/gfmInput.h>
 #endif
+#include <GFraMe/gfmGroup.h>
 #include <GFraMe/gfmParser.h>
 #include <GFraMe/gfmQuadtree.h>
 #include <GFraMe/gfmSprite.h>
@@ -21,6 +22,9 @@
 #include <jjat2/fx_group.h>
 #include <jjat2/gunny.h>
 #include <jjat2/teleport.h>
+
+#include <stdlib.h>
+#include <string.h>
 
 /** Define Gunny's physics constants. The first parameter is the time in
  * 60FPS-frames and the second is the jump height in 8px-tiles. */
@@ -39,6 +43,11 @@
 
 #define gunny_offx -5
 #define gunny_offy -6
+
+struct stGunnyData {
+    /** The most recently shot bullet. */
+    gfmSprite *lastBullet;
+};
 
 enum {
       gunny_attack       = (EF_AVAILABLEF_FLAG << 0)
@@ -79,6 +88,11 @@ err initGunny(entityCtx *gunny) {
     err erv;
     gfmRV rv;
 
+    /* Alloc gunny's extra data. */
+    gunny->data = malloc(sizeof(struct stGunnyData));
+    ASSERT(gunny->data, ERR_GFMERR);
+    memset(gunny->data, 0, sizeof(struct stGunnyData));
+
     /* Initialize the sprite */
     rv = gfmSprite_getNew(&gunny->pSelf);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
@@ -113,6 +127,10 @@ err initGunny(entityCtx *gunny) {
 void freeGunny(entityCtx *gunny) {
     if (gunny->pSelf) {
         gfmSprite_free(&gunny->pSelf);
+    }
+    if (gunny->data) {
+        free(gunny->data);
+        gunny->data = 0;
     }
 }
 
@@ -234,7 +252,7 @@ err preUpdateGunny(entityCtx *gunny) {
     do {
         if (DID_JUST_PRESS(gunnyAtk) && !(gunny->flags & gunny_attack)
                     && teleport.pCurEffect == 0) {
-            gfmSprite *pBullet;
+            struct stGunnyData *data;
             double vx;
             int dir, x, y;
 
@@ -256,11 +274,12 @@ err preUpdateGunny(entityCtx *gunny) {
                 ASSERT(0, ERR_UNEXPECTEDBEHAVIOUR);
             }
 
-            pBullet = spawnFx(x, y, BULLET_WIDTH, 2/*h*/, dir, 6000/*ttl*/
+            data = (struct stGunnyData*)gunny->data;
+            data->lastBullet = spawnFx(x, y, BULLET_WIDTH, 2/*h*/, dir, 6000/*ttl*/
                     , FX_GUNNY_BULLET, T_TEL_BULLET);
-            ASSERT(pBullet != 0, ERR_GFMERR);
-            gfmSprite_setHorizontalVelocity(pBullet, vx);
-            gfmSprite_setOffset(pBullet, -6/*offx*/, -2/*offy*/);
+            ASSERT(data->lastBullet != 0, ERR_GFMERR);
+            gfmSprite_setHorizontalVelocity(data->lastBullet, vx);
+            gfmSprite_setOffset(data->lastBullet, -6/*offx*/, -2/*offy*/);
 
             gunny->flags |= gunny_attack;
             gunny->flags |= gunny_justAttacked;
@@ -286,6 +305,7 @@ err preUpdateGunny(entityCtx *gunny) {
  * @param  [ in]gunny The player to be updated
  */
 err postUpdateGunny(entityCtx *gunny) {
+    struct stGunnyData *data;
     double vx, vy;
     err erv;
     gfmCollision dir;
@@ -325,6 +345,22 @@ err postUpdateGunny(entityCtx *gunny) {
         setEntityAnimation(gunny, STAND, 0/*force*/);
     }
 
+    /* Check whether the last bullet should be cleared. */
+    data = (struct stGunnyData*)gunny->data;
+    if (data->lastBullet) {
+        gfmGroupNode *pNode;
+        int type;
+        gfmRV rv;
+
+        rv = gfmSprite_getChild((void**)&pNode, &type, data->lastBullet);
+        ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+        rv = gfmGroup_isNodeAlive(pNode);
+        if (rv != GFMRV_TRUE) {
+            data->lastBullet = 0;
+        }
+    } while (0);
+
     return ERR_OK;
 }
 
@@ -351,3 +387,15 @@ err updateGunnyTeleport(entityCtx *gunny) {
     return ERR_OK;
 }
 
+void getLatestBulletCenter(int *x, int *y, entityCtx *gunny) {
+    struct stGunnyData *data;
+
+    data = (struct stGunnyData*)gunny->data;
+    if (data->lastBullet) {
+        gfmSprite_getCenter(x, y, data->lastBullet);
+    }
+    else {
+        *x = -1;
+        *y = -1;
+    }
+}

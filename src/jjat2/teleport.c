@@ -238,3 +238,15 @@ err teleportEntity(entityCtx *pEnt) {
     return ERR_OK;
 }
 
+void getTeleporterCenter(int *x, int *y) {
+    if (teleport.pCurEffect && gfmGroup_isNodeAlive(teleport.pCurEffect) == GFMRV_TRUE) {
+        gfmSprite *pEffect;
+
+        gfmGroup_getNodeSprite(&pEffect, teleport.pCurEffect);
+        gfmSprite_getCenter(x, y, pEffect);
+    }
+    else {
+        *x = -1;
+        *y = -1;
+    }
+}

@@ -75,6 +75,8 @@ struct stEntityCtx {
     struct stEntityCtx *pCarrying;
     /** Entity's sight, if any */
     gfmHitbox *pSight;
+    /** Optional, extra generic data, specialized on each entity type. */
+    void *data;
     /** Generic entity flags */
     entityFlag flags;
     /** Time, in milliseconds, while jump may be pressed after leaving the
