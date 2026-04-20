@@ -9,6 +9,7 @@
 #include <base/sfx.h>
 
 #include <conf/game.h>
+#include <conf/type.h>
 
 #include <GFraMe/gfmCamera.h>
 #include <GFraMe/gfmDebug.h>
@@ -70,6 +71,66 @@ enum {
 
 /** Distance between the actual tile and its inactive counter-part */
 #define UNACTIVE_TILE_OFFSET 6
+
+/**
+ * Create a sided wall on the given position.
+ *
+ * @param  [ in]x     The wall's horizontal position.
+ * @param  [ in]y     The wall's vertical position.
+ * @param  [ in]w     The wall's horizontal dimension.
+ * @param  [ in]h     The wall's vertical dimension.
+ * @param  [ in]sides The wall's collideable sides.
+ */
+static err _addSidedWall(int x, int y, int w, int h, gfmCollision sides) {
+    gfmObject *obj;
+    gfmRV rv;
+    int last;
+
+    rv = gfmTilemap_addArea(playstate.pMap, x, y, w, h, T_FLOOR);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    gfmTilemap_getAreasLength(&last, playstate.pMap);
+    gfmTilemap_getArea(&obj, playstate.pMap, last-1);
+
+    rv = gfmHitbox_setItemHitFlag((gfmHitbox*)obj, sides, 0);
+    ASSERT(rv == GFMRV_OK, ERR_GFMERR);
+
+    return ERR_OK;
+}
+
+/**
+ * Fixes the hitbox in spikes to avoid getting hit on its side.
+ */
+static err _fixSpikes() {
+    int len;
+
+    gfmTilemap_getAreasLength(&len, playstate.pMap);
+    for (int i = 0; i < len; i++) {
+        gfmObject *obj;
+        void *tmp;
+        int h, type, w, x, y;
+        err erv;
+
+        gfmTilemap_getArea(&obj, playstate.pMap, i);
+        gfmObject_getChild(&tmp, &type, obj);
+        if (TYPE(type) != T_SPIKE) {
+            continue;
+        }
+
+        gfmObject_getPosition(&x, &y, obj);
+        gfmObject_setHorizontalPosition(obj, x+1);
+
+        gfmObject_getDimensions(&w, &h, obj);
+        gfmObject_setHorizontalDimension(obj, w-2);
+
+        erv = _addSidedWall(x, y, 8, h, gfmCollision_left);
+        ASSERT(erv == ERR_OK, erv);
+        erv = _addSidedWall(x+w-8, y, 8, h, gfmCollision_right);
+        ASSERT(erv == ERR_OK, erv);
+    }
+
+    return ERR_OK;
+}
 
 /** Initialize the playstate so a level may be later loaded and played */
 err initPlaystate() {
@@ -610,6 +671,9 @@ static err _loadLevel(char *levelName, int setPlayer) {
             , pSidedTypes, sidedLen);
     ASSERT(rv == GFMRV_OK, ERR_GFMERR);
     erv = _updateWorldSize();
+    ASSERT(erv == ERR_OK, erv);
+
+    erv = _fixSpikes();
     ASSERT(erv == ERR_OK, erv);
 
     erv = _updateActivableTiles();
