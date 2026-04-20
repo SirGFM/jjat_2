@@ -264,7 +264,7 @@ err preUpdateGunny(entityCtx *gunny) {
                 vx = BULLET_SPEED;
             }
             else if (dir == DIR_LEFT) {
-                x -= 4;
+                x -= 3;
                 vx = -BULLET_SPEED;
             }
             else {
