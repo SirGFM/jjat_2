@@ -165,7 +165,7 @@ err drawEvent(entityCtx *pEnt) {
  */
 uint8_t _getLocalVar(char *pVal) {
 #define TEST(val) \
-    if (memcmp(pVal, #val , 2) == 0) { \
+    if (strncmp(pVal, #val , 2) == 0) { \
         return EV_LOCAL_ ## val; \
     } \
 

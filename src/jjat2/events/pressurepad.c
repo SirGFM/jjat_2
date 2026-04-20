@@ -51,7 +51,7 @@ err initPressurePad(entityCtx *pEnt, gfmParser *pParser) {
         rv = gfmParser_getProperty(&pKey, &pVal, pParser, i);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-        if (memcmp(pKey, "set_", 4) == 0) {
+        if (strncmp(pKey, "set_", 4) == 0) {
             lock |= _getLocalVar(pVal);
         }
 

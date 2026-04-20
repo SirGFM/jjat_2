@@ -111,15 +111,15 @@ err initDoor(entityCtx *pEnt, gfmParser *pParser, int isVertical) {
         rv = gfmParser_getProperty(&pKey, &pVal, pParser, i);
         ASSERT(rv == GFMRV_OK, ERR_GFMERR);
 
-        if (memcmp(pKey, "init_state", 11) == 0) {
-            if (memcmp(pVal, "closed", 7) == 0) {
+        if (strncmp(pKey, "init_state", 11) == 0) {
+            if (strncmp(pVal, "closed", 7) == 0) {
                 anim = CLOSED;
             }
-            else if (memcmp(pVal, "open", 7) == 0) {
+            else if (strncmp(pVal, "open", 7) == 0) {
                 anim = ROPEN;
             }
         }
-        else if (memcmp(pKey, "lock_", 5) == 0) {
+        else if (strncmp(pKey, "lock_", 5) == 0) {
             lock |= _getLocalVar(pVal);
         }
 
